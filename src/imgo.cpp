@@ -4,15 +4,16 @@
 imgo_method::imgo_method(double (*_f)(double, int), int _m, double _a, double _b, double _eps, double _r) 
     : f(_f), m(_m), a(_a), b(_b), eps(_eps), r(_r) {
     I.resize(m + 1);
+    mu.resize(m + 1);
 }
 
 void imgo_method::addInSort(vector<trial> &vec, trial tr) {
-    // Переделать
-    vector<trial>::iterator iter = a_inf.begin();
+    vector<trial>::iterator iter = vec.begin();
+    vector<trial>::iterator iterEnd = vec.end();
     while(iter->x < tr.x) {
-        iter++;
+        if (iter != iterEnd) iter++;
     }
-    a_inf.insert(iter, tr);
+    vec.insert(iter, tr);
 }
 
 double imgo_method::searchMinX() {
@@ -45,19 +46,32 @@ trial imgo_method::trial_func(double x) {
 }
 
 double imgo_method::selectNewPoint(int &t) {
-    // Шаг 2
-    for (int i = 0; i < a_inf.size(); i++) {
-        I[a_inf[i].v - 1].push_back(a_inf[i]);
+    // Шаг 3
+    double mu_tmp;
+    for (int i = 0; i < m + 1; i++) {
+        mu[i] = 0.0;
     }
-    static double x_k_1 = b;
-    static double M = -1.0;
-    double tmpM = 0.0;
-    if (a_inf[t].x == b) {
-        cout << x_k_1 << endl;
-        M = max({M, abs((f(x_k_1) - a_inf[t - 1].z) / (x_k_1 - a_inf[t - 1].x))});
-    } else {
-        M = max({M, abs((f(x_k_1) - a_inf[t - 1].z) / (x_k_1 - a_inf[t - 1].x)), abs((a_inf[t + 1].z - f(x_k_1)) / (a_inf[t + 1].x - x_k_1))});
+    for (int i = 0; i < m + 1; i++) {
+        if (I[i].size() < 2) {
+            mu[i] = 1.0;
+        } else {
+            for (int j = 1; i < I[i].size(); j++) {
+                mu_tmp = abs(I[i][j].z - I[i][j - 1].z) / (I[i][j].x - I[i][j - 1].x);
+                if (mu_tmp > mu[i]) {
+                    mu[i] = mu_tmp;
+                }
+            }
+        }
     }
+    for (int i = 0; i < m + 1; i++) {
+        if (mu[i] == 0.0) {
+            mu[i] = 1.0;
+        };
+    }
+
+    // Шаг 4
+    vector<double> z_v;
+
     double m = (M == 0.0) ? 1.0 : r * M;
 
     double tmp1 = a_inf[1].x - a_inf[0].x;
@@ -118,10 +132,11 @@ double imgo_method::solve(int &n) {
     int t = 1;
     trial tr = {0.0, 0.0, 0};
     while(true) {
-        tr = trial_func(selectNewPoint(t))
+        tr = trial_func(selectNewPoint(t));
         // Шаг 1
-        addInSort();
-        addInSort();
+        addInSort(a_inf, tr);
+        // Шаг 2
+        addInSort(I[tr.v], tr);
         n++;
         if (a_inf[t].x - a_inf[t - 1].x <= eps) {
             break;

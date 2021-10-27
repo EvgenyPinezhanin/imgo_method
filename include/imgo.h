@@ -24,6 +24,7 @@ private:
 
     vector<trial> a_inf;
     vector<vector<trial>> I;
+    vector<double> mu;
 
     void addInSort(vector<trial> &vec, trial tr);
     double searchMinX();
