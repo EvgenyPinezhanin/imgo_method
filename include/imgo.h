@@ -7,6 +7,8 @@
 
 using namespace std;
 
+const double eps = 1;
+
 struct trial {
     double x, z;
     int v;
@@ -24,6 +26,7 @@ private:
 
     vector<trial> a_inf;
     vector<vector<trial>> I;
+    vector<double> z_v;
     vector<double> mu;
 
     void addInSort(vector<trial> &vec, trial tr);
@@ -40,7 +43,6 @@ public:
     void setM(int _m);
     
     double solve(int &n);
-
 };
 
 #endif
