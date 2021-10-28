@@ -197,9 +197,6 @@ double imgo_method::solve(int &n) {
         }
         n++;
         if (a_inf[t].x - a_inf[t - 1].x <= eps) {
-            //for (int i = 0; i < n; i++) {
-                //cout << a_inf[i].x << "  " << a_inf[i].v << endl;
-            //}
             break;
         }
     }

@@ -9,13 +9,50 @@ struct task {
     double (*f)(double, int);
     double a, b;
     double x_min;
+    double m;
 
-    task(double (*_f)(double, int), double _a, double _b, double _x_min)
-        : f(_f), a(_a), b(_b), x_min(_x_min) {}
+    task(double (*_f)(double, int), double _a, double _b, double _x_min, double _m)
+        : f(_f), a(_a), b(_b), x_min(_x_min), m(_m) {}
 };
 
-double f1(double x) {
-    return ;
+double f1(double x, int j) {
+    switch (j) {
+        case 1: return exp(-sin(3.0 * x)) - 1.0 / 10.0 * pow(x - 1.0 / 2.0, 2.0) - 1.0;
+        case 2: return -13.0 / 6.0 * x + sin(13.0 / 4.0 * (2.0 * x + 5.0)) - 53.0 / 12.0;
+    }
+    return -1.0;
+}
+
+double f4(double x, int j) {
+    double sum = 0.0;
+    switch (j) {
+        case 1:
+            for (int i = 1; i <= 5; i++) {
+                sum += cos(5.0 / 4.0 * (i + 1) * x + i);
+            }
+            return 6.0 / 25.0 - sum;
+        case 2: return 9.0 / 50.0 - 9.0 / 2.0 * exp(-(x - 1.0 / 10.0)) * 
+                sin(2.0 * M_PI * (x - 1.0 / 10.0));
+        case 3: return 4.0 * sin(M_PI / 4.0 * x + 1.0 / 20.0) * 
+                pow(pow(sin(M_PI / 2.0 * x + 1.0 / 10.0), 3.0) + pow(cos(M_PI / 2.0 * x + 1.0 / 10.0), 3.0), 2.0);
+    }
+    return -1.0;
+}
+
+double f8(double x, int j) {
+    double sum = 0.0;
+    switch (j) {
+        case 1:
+            return exp(-sin(4.0 * x)) - 1.0 / 10.0 * pow(x - 1.0 / 2.0, 2) - 1.0;
+        case 2: 
+            for (int i = 1; i <= 5; i++) {
+                sum += cos(5.0 * (i + 1) * (x + 1.0 / 2.0));
+            }
+            return 3.0 / 10.0 - sum;
+        case 3: return (-21.0 / 20.0 * x - 13.0 / 8.0) * sin(63.0 / 10.0 * x + 63.0 / 4.0) + 1.0 / 5.0;
+        case 4: return cos(7.0 / 4.0 * x + 241.0 / 40.0) - sin(35.0 / 4.0 * x + 241.0 / 8.0) - 5.0;
+    }
+    return -1.0;
 }
 
 int main() {
@@ -25,29 +62,26 @@ int main() {
     double x_min;
     int n;
 
-    int numFunc = 20;
-    double (*f_arr[])(double) = {f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14,
-                                 f15, f16, f17, f18, f19, f20};
-    double intervals[numFunc][2] = {{-1.5, 11}, {2.7, 7.5}, {-10, 10}, {1.9, 3.9}, {0, 1.2}, 
-                                    {-10.0, 10.0}, {2.7, 7.5}, {-10.0, 10.0}, {3.1, 20.4},
-                                    {0, 10}, {-1.57, 6.28}, {0, 6.28}, {0.001, 0.99}, {0, 4.0}, {-5.0, 5.0},
-                                    {-3.0, 3.0}, {-4.0, 4.0}, {0, 6.0}, {0, 6.5}, {-10.0, 10.0}};
-    double optimum[] = {10, 5.145735, -6.775, 2.868, 0.96609, 0.67956, 5.19978, -7.084, 17.039,
-                        7.9787, 2.094, 3.142, 0.7071, 0.224885, 2.4142, 1.5907, -3.0, 2.0, 5.87287, 1.195137};
+    vector<task> task_arr = {{f1, -2.5, 1.5, 1.05738, 1},
+                             {f4, 0.0, 4.0, 2.45956, 2},
+                             {f8, -2.5, 1.5, -1.12724, 3}};
 
-    imgo_method gsa(&f1, 0.0, 0.0, eps, r);
+    imgo_method imgo(&f1, 0.0, 0.0, 0.0, eps, r);
 
-    for (int i = 0; i < numFunc; i++) {
-        gsa.setFunc(*f_arr[i]);
-        gsa.setA(intervals[i][0]);
-        gsa.setB(intervals[i][1]);
-        x_min = gsa.solve(n);
+    for (int i = 0; i < task_arr.size(); i++) {
+        imgo.setFunc(task_arr[i].f);
+        imgo.setA(task_arr[i].a);
+        imgo.setB(task_arr[i].b);
+        imgo.setM(task_arr[i].m);
+
+        x_min = imgo.solve(n);
 
         cout << "f" << i + 1 << "(x)\n";
-        cout << "[a; b] = [" << intervals[i][0] << "; " << intervals[i][1] << "]"<< endl;
+        cout << "[a; b] = [" << task_arr[i].a << "; " << task_arr[i].b << "]"<< endl;
         cout << "X_min = " << x_min << endl;
+        cout << "X_min_true = " << task_arr[i].x_min << endl;
         cout << "Number of trials = " << n << endl;
-        cout << "|Error rate| = " << abs(x_min - optimum[i]) << endl;
+        cout << "|Error rate| = " << abs(x_min - task_arr[i].x_min) << endl;
         cout << endl;
     }
     return 0;
