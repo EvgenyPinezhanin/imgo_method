@@ -66,7 +66,7 @@ int main() {
                              {f4, 0.0, 4.0, 2.45956, 2},
                              {f8, -2.5, 1.5, -1.12724, 3}};
 
-    imgo_method imgo(&f1, 0.0, 0.0, 0.0, eps, r);
+    imgo_method imgo(&f1, 0.0, 0.0, 0.0, eps, r, 0.05);
 
     for (int i = 0; i < task_arr.size(); i++) {
         imgo.setFunc(task_arr[i].f);

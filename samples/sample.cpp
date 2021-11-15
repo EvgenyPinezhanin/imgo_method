@@ -43,6 +43,7 @@ int main() {
     double x_min_true;
     int n;
 
+    cout << "fixed_method" << endl;
     m = 1;
     imgo_method imgo(&f1, m, a, b, eps, r);
     x_min = imgo.solve(n);
@@ -74,6 +75,42 @@ int main() {
     cout << "Number of trials = " << n << endl;
     cout << "|Error rate| = " << abs(x_min - x_min_true) << endl;
     cout << endl;
+
+    cout << endl << "adaptive_method" << endl;
+    m = 1;
+    imgo_method_adaptive imgo_a(&f1, m, a, b, eps, r);
+    x_min = imgo_a.solve(n);
+    x_min_true = 2.0 * M_PI;
+
+    cout << "f1(x) = -2.0 * x + 3.0\n";
+    cout << "g1(x) = sin(x)\n";
+    cout << "[a; b] = [" << a << "; " << b << "]"<< endl;
+    cout << "X_min_true = " << x_min_true << endl;
+    cout << "X_min = " << x_min << endl;
+    cout << "Number of trials = " << n << endl;
+    cout << "|Error rate| = " << abs(x_min - x_min_true) << endl;
+    cout << endl;
+
+    m = 2;
+    a = -2.0; b = 2.0;
+    imgo_a.setFunc(&f2);
+    imgo_a.setA(a);
+    imgo_a.setB(b);
+    imgo_a.setM(m);
+    x_min = imgo_a.solve(n);
+    x_min_true = 0.1;
+
+    cout << "f2(x) = 5.0 * x * x + 3.0 * x - 1.0\n";
+    cout << "g1(x) = x * x - 0.05\n";
+    cout << "g2(x) = -x + 0.1\n";
+    cout << "[a; b] = [" << a << "; " << b << "]"<< endl;
+    cout << "X_min_true = " << x_min_true << endl;
+    cout << "X_min = " << x_min << endl;
+    cout << "Number of trials = " << n << endl;
+    cout << "|Error rate| = " << abs(x_min - x_min_true) << endl;
+    cout << endl;
+
+    
 /*
     // 1 функция с sin
     a = 0.0; b = 20.0;
