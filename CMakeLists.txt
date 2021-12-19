@@ -14,12 +14,17 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE})
 
 set(PROJECT_LIBRARY "${PROJECT_NAME}")
+set(PROJECT_LIBRARY_PROBLEMS "${PROJECT_NAME}_problems")
 set(PROJECT_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(PROJECT_PROBLEMS "${CMAKE_CURRENT_SOURCE_DIR}/GCGen")
 set(PROJECT_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 include_directories("${PROJECT_INCLUDE}")
+include_directories("${PROJECT_PROBLEMS}/sample_src")
+include_directories("${PROJECT_PROBLEMS}/src")
 
 # BUILD
+add_subdirectory(GCGen)
 add_subdirectory(src)
 add_subdirectory(samples)
 
