@@ -35,13 +35,13 @@ int main() {
     vector<double> a, b;
 
     auto f_null = [](double x, int j)->double {return 0.0; };
-    imgo_method imgo(f_null, 0, 0, 0, 0, 3.0);
+    imgo_method imgo(f_null, 0, 0, 0, 0, 3.3);
 
     int K0 = 0;
-    int Kmax = 1000;
+    int Kmax = 500;
     int Kstep = 10;
     int count_successful = 0;
-    double eps = 0.01;
+    double eps = 0.0001;
 
     vector<bool> bool_Hill(hillFam.GetFamilySize());
     for (int i = 0; i < hillFam.GetFamilySize(); i++) {
@@ -68,7 +68,6 @@ int main() {
                     bool_Hill[j] = true;
                 }
             }
-            //cout << current_func << " " << count_successful << endl;
             current_func++;
         }
 
@@ -88,12 +87,6 @@ int main() {
         }
         cout << "K = " << i << " success rate = " << (double)count_successful / count_func << endl;
         ofstr << i << " " << (double)count_successful / count_func << endl;
-        if (i >= 100) {
-            i += Kstep;
-        }
-        if (i >= 200) {
-            i += Kstep * 2;
-        }
     }
 
     ofstr.close();
