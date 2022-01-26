@@ -35,7 +35,7 @@ int main() {
     vector<double> a, b;
 
     auto f_null = [](double x, int j)->double {return 0.0; };
-    imgo_method imgo(f_null, 0, 0, 0, 0, 3.3);
+    imgo_method imgo(f_null, 0, 0, 0, 0, 3.0);
 
     int K0 = 0;
     int Kmax = 500;
