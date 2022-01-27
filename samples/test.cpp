@@ -112,7 +112,7 @@ int main() {
     vector<trial> trial_vec;
 
     double eps = 0.000001;
-    double r = 2.0; // > 1
+    double r = 3.0; // > 1
 
     double x_min;
     int n;
@@ -155,6 +155,8 @@ int main() {
     }
 
     ofstr.close();
-    cin.get();
+    #if defined( _MSC_VER )
+        cin.get();
+    #endif
     return 0;
 }

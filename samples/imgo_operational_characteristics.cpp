@@ -90,7 +90,8 @@ int main() {
     }
 
     ofstr.close();
-    cin.get();
-
+    #if defined( _MSC_VER )
+        cin.get();
+    #endif
 	return 0;
 }
