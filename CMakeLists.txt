@@ -23,6 +23,15 @@ include_directories("${PROJECT_INCLUDE}")
 include_directories("${PROJECT_PROBLEMS}/sample_src")
 include_directories("${PROJECT_PROBLEMS}/src")
 
+# COPY
+set(COPY_RESOURCE copy_resource)
+add_custom_target(${COPY_RESOURCE} ALL)
+add_custom_command(
+        TARGET ${COPY_RESOURCE} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_SOURCE_DIR}/scripts/chart.gp
+                ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/chart.gp)
+
 # BUILD
 add_subdirectory(GCGen)
 add_subdirectory(src)
