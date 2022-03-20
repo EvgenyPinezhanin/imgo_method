@@ -28,18 +28,6 @@ double f(vector<double> x, int j) {
 #elif defined(FUNC_3)
 double f(vector<double> x, int j) {
     switch (j) {
-        case 1: return 0.01 * (pow((x[0] - 2.2), 2.0) + pow((x[1] - 1.2), 2.0) - 2.25);
-        case 2: return 100.0 * (1.0 - pow((x[0] - 2.0), 2.0) / 1.44 - pow(0.5 * x[1], 2.0));
-        case 3: return 10.0 * (x[1] - 1.5 - 1.5 * sin(6.283 * (x[0] - 1.75)));
-        case 4: return -1.5 * x[0] * x[0] * exp(1.0 - x[0] * x[0] - 20.25 * pow((x[0] - x[1]), 2.0)) - 
-                       pow(0.5 * (x[0] - 1.0) * (x[1] - 1.0), 4.0) * exp(2.0 - pow(0.5 * (x[0] - 1.0), 4.0) - 
-                       pow(x[1] - 1.0, 4.0));
-    }
-    return -1;
-}
-#elif defined(FUNC_4)
-double f(vector<double> x, int j) {
-    switch (j) {
         case 1: return 1.0 - x[0] - x[1];
     }
     return -1;
@@ -61,11 +49,6 @@ int main() {
     double x1_opt = k / 2.0, x2_opt = k / 2.0;
     int m = 1;
 #elif defined(FUNC_3)
-    double a1 = 0, b1 = 4.0;
-    double a2 = -1.0, b2 = 3.0;
-    double x1_opt = 0.942, x2_opt = 0.944;
-    int m = 3;
-#elif defined(FUNC_4)
     double a1 = -0.5, b1 = 0.5;
     double a2 = -0.5, b2 = 0.5;
     double x1_opt = 4.0, x2_opt = 4.0;
@@ -84,7 +67,7 @@ int main() {
     std::cout << "Parameters for constructing the Peano curve:" << std::endl;
     std::cout << "n = " << n << " m = " << den << " key = " << key << std::endl;
     std::cout << "Trials result:" << std::endl;
-    std::cout << "Number od trials = " << number_trials << std::endl;
+    std::cout << "Number of trials = " << number_trials << std::endl;
     std::cout << "x*_min = " << x1_opt << " y*_min = " << x2_opt << std::endl;
     std::cout << "x_min = " << X[0] << " y_min = " << X[1] << std::endl;
 
@@ -99,6 +82,7 @@ int main() {
     }
     ofstr.close();
 
+#if defined(__linux__)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);
     error = system("chmod +x chart.gp");
@@ -114,8 +98,7 @@ int main() {
     error = system(str);
 #elif defined(FUNC_3)
     error = system("gnuplot -p -c chart.gp func_3");
-#elif defined(FUNC_4)
-    error = system("gnuplot -p -c chart.gp func_4");
+#endif
 #endif
 
     if (error != 0) {

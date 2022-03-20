@@ -1,7 +1,7 @@
 #include<imgo.h>
 #include<iostream>
 
-#define DEBUG
+//#define DEBUG
 
 template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
@@ -297,12 +297,24 @@ void imgo_method::setFunc(double (*_f)(double, int)) {
     f = _f;
 }
 
+void imgo_method::setFunc(double (*_f_md)(vector<double>, int)) {
+    f_md = _f_md;
+}
+
 void imgo_method::setA(double _a) {
     a = _a;
 }
 
+void imgo_method::setA(vector<double> _A) {
+    A = _A;
+}
+
 void imgo_method::setB(double _b) {
     b = _b;
+}
+
+void imgo_method::setB(vector<double> _B) {
+    B = _B;
 }
 
 void imgo_method::setM(size_t _m) {
@@ -314,6 +326,26 @@ void imgo_method::setM(size_t _m) {
 
 void imgo_method::setEps(double _eps) {
     eps = _eps;
+}
+
+void imgo_method::setR(double _r) {
+    r = _r;
+}
+
+void imgo_method::setD(double _d) {
+    d = _d;
+}
+
+void imgo_method::setN(int _n) {
+    n = _n;
+}
+
+void imgo_method::setDen(int _den) {
+    den = _den;
+}
+
+void imgo_method::setKey(int _key) {
+    key = _key;
 }
 
 void imgo_method::getTrialPoints(vector<trial>& trial_vec) {

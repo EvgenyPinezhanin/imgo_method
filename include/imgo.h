@@ -46,10 +46,19 @@ public:
                 vector<double> _B = vector<double>(), double _eps = 0.0001, double _r = 2.0, double _d = 0.01, int _den = 10, int _key = 1);
     
     void setFunc(double (*_f)(double, int));
+    void setFunc(double (*_f_md)(vector<double>, int));
     void setA(double _a);
+    void setA(vector<double> _A);
     void setB(double _b);
+    void setB(vector<double> _B);
     void setM(size_t _m);
     void setEps(double _eps);
+    void setR(double _r);
+    void setD(double _d);
+    void setN(int _n);
+    void setDen(int _den);
+    void setKey(int _key);
+
 
     void getTrialPoints(vector<trial> &trial_vec);
     void getPoints(vector<vector<double>> &points_vec);
