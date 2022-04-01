@@ -73,7 +73,7 @@ int main() {
     std::cout << "x*_min = " << x1_opt << " y*_min = " << x2_opt << std::endl;
     std::cout << "x_min = " << X[0] << " y_min = " << X[1] << std::endl;
 
-    // Построение графика
+    // Подготовка данных для построения графика
     ofstr << X[0] << " " << X[1] << " " << f(X, m + 1) << endl;
     ofstr << endl << endl;
     ofstr << x1_opt << " " << x2_opt << " " << f(vector<double>{x1_opt, x2_opt}, m + 1) << endl;
@@ -84,6 +84,7 @@ int main() {
     }
     ofstr.close();
 
+    // Построение графика(работает только под Lunux с помощью gnuplot)
 #if defined(__linux__)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);

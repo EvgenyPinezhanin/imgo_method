@@ -8,6 +8,8 @@
 
 using namespace std;
 
+enum Stop {ACCURACY, NUMBER};
+
 struct trial {
     double x, z;
     size_t nu;
@@ -25,6 +27,7 @@ protected:
     double a, b;
     vector<double> A, B;
     double eps, r, d;
+    int Nmax;
 
     int M;
 
@@ -66,8 +69,8 @@ public:
 
     void y(double x, vector<double> &X);
     
-    double solve(int &n);
-    void solve(int &n, vector<double> &X);
+    double solve(int &n, Stop stop = ACCURACY);
+    void solve(int &n, vector<double> &X, Stop stop = ACCURACY);
     bool solve_test(double x_opt, int k);
 };
 

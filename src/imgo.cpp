@@ -8,7 +8,7 @@ template <typename T> int sgn(T val) {
 }
 
 imgo_method::imgo_method(double (*_f)(double, int), size_t _m, double _a, double _b, double _eps, double _r, double _d) 
-    : f(_f), m(_m), a(_a), b(_b), eps(_eps), r(_r), d(_d), n(1) {
+    : f(_f), m(_m), a(_a), b(_b), eps(_eps), r(_r), d(_d), n(1), Nmax(0) {
     I.resize(m + 1);
     mu.resize(m + 1);
     z_star.resize(m + 1);
@@ -16,7 +16,7 @@ imgo_method::imgo_method(double (*_f)(double, int), size_t _m, double _a, double
 
 imgo_method::imgo_method(double (*_f)(vector<double>, int), int _n, size_t _m, vector<double> _A, 
                          vector<double> _B, double _eps, double _r, double _d, int _den, int _key)
-    : f_md(_f), n(_n), m(_m), A(_A), B(_B), eps(_eps), r(_r), d(_d), den(_den), key(_key), M(0) {
+    : f_md(_f), n(_n), m(_m), A(_A), B(_B), eps(_eps), r(_r), d(_d), den(_den), key(_key), M(0), Nmax(0) {
     I.resize(m + 1);
     mu.resize(m + 1);
     z_star.resize(m + 1);
@@ -312,12 +312,13 @@ void imgo_method::y(double x, vector<double> &X) {
     }
 }
 
-double imgo_method::solve(int &n) {
+double imgo_method::solve(int &n, Stop stop) {
     for (int i = 0; i < I.size(); i++) {
         I[i].clear();
     }
     trial_points.clear();
     M = 0;
+    if (stop == NUMBER) Nmax = n;
 
     trial tr = newTrial(a);
     trial_points.push_back(tr);
@@ -338,9 +339,14 @@ double imgo_method::solve(int &n) {
         // Шаг 2
         addInSort(I[tr.nu - 1], tr);
         n++;
-        if (trial_points[t].x - trial_points[t - 1].x <= eps) {
-            break;
+        if (stop == ACCURACY) {
+            if (trial_points[t].x - trial_points[t - 1].x <= eps) {
+                break;
+            }
+        } else {
+            if (n >= Nmax) break;
         }
+
     }
     return searchMinX();
 }
@@ -379,12 +385,13 @@ bool imgo_method::solve_test(double x_opt, int k) {
     }
 }
 
-void imgo_method::solve(int &count, vector<double> &X) {
+void imgo_method::solve(int &count, vector<double> &X, Stop stop) {
     for (int i = 0; i < I.size(); i++) {
         I[i].clear();
     }
     trial_points.clear();
     M = 0;
+    if (stop == NUMBER) Nmax = count;
 
     trial tr{0.0, -1.0, 0};
     trial_points.push_back(tr);
@@ -413,8 +420,14 @@ void imgo_method::solve(int &count, vector<double> &X) {
         }
 
         count++;
-        if (pow(abs(trial_points[t].x - trial_points[t - 1].x), 1.0 / n) <= eps) {
-            break;
+        if (stop == ACCURACY) {
+            if (pow(abs(trial_points[t].x - trial_points[t - 1].x), 1.0 / n) <= eps) {
+                break;
+            }
+        } else {
+            if (count >= Nmax) {
+                break;
+            }
         }
     }
     y(searchMinX(), X);
