@@ -111,7 +111,7 @@ int main() {
     if (!ofstr.is_open()) cerr << "File opening error\n";
     vector<trial> trial_vec;
 
-    double eps = 0.000001;
+    double eps = 0.001;
     double r = 3.0; // > 1
 
     double x_min;

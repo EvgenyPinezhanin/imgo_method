@@ -37,8 +37,9 @@ protected:
     double searchMinX();
     trial newTrial(double x);
     trial newTrial_md(double x);
+    double deltaX(double x1, double x2);
+    double newPoint(size_t t);
     double selectNewPoint(size_t &t);
-    double selectNewPoint_md(size_t &t);
 
 public:
     imgo_method(double (*_f)(double, int), size_t _m = 0, double _a = 0.0, double _b = 10.0, double _eps = 0.0001, double _r = 2.0, double _d = 0.01);

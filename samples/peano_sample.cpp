@@ -22,6 +22,8 @@ double f(vector<double> x, int j) {
     switch (j) {
         case 1: return k - x[0] - x[1];
         case 2: return x[0] * x[0] / 5.0 + x[1] * x[1] / 5.0;
+        //case 1: return -x[0] * x[0] / 5.0 - x[1] * x[1] / 5.0;
+        //case 2: return k - x[0] - x[1];
     }
     return -1;
 }
@@ -58,8 +60,8 @@ int main() {
     vector<double> X(2);
     std::vector<vector<double>> trial_vec;
     int number_trials;
-    int n = 2, den = 8, key = 2;
-    double eps = 0.0001, r = 2.5, d = 0.01;
+    int n = 2, den = 10, key = 3;
+    double eps = 0.0001, r = 2.0, d = 0.0;
 
     imgo_method imgo(f, n, m, vector<double>{a1, a2}, vector<double>{b1, b2}, eps, r, d, den, key);
     imgo.solve(number_trials, X);

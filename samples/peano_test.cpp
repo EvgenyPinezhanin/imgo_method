@@ -19,8 +19,8 @@ int main() {
     int m, number_trials;
     vector<double> X(2);
 
-    int n = 2, den = 14, key = 2;
-    double eps = 0.001, r = 2.5, d = 0.01;
+    int n = 2, den = 10, key = 1;
+    double eps = 0.0001, r = 2.0, d = 0.0;
 
     a1 = 0, b1 = 4.0;
     a2 = -1.0, b2 = 3.0;

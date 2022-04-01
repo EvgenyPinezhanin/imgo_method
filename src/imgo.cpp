@@ -8,7 +8,7 @@ template <typename T> int sgn(T val) {
 }
 
 imgo_method::imgo_method(double (*_f)(double, int), size_t _m, double _a, double _b, double _eps, double _r, double _d) 
-    : f(_f), m(_m), a(_a), b(_b), eps(_eps), r(_r), d(_d) {
+    : f(_f), m(_m), a(_a), b(_b), eps(_eps), r(_r), d(_d), n(1) {
     I.resize(m + 1);
     mu.resize(m + 1);
     z_star.resize(m + 1);
@@ -80,11 +80,37 @@ trial imgo_method::newTrial_md(double x) {
             break;
         }
     }
+
 #if defined(DEBUG)
     std::cout << x << " " << X[0] << " " << X[1] << " " << f_md(X, m + 1) << " " << nu << std::endl;
 #endif
+
     trial tr{x, z, nu};
     return tr;
+}
+
+double imgo_method::deltaX(double x1, double x2) {
+    if (n == 1) {
+        return x2 - x1;
+    } else {
+        return pow(x2 - x1, 1.0 / n);
+    }
+}
+
+double imgo_method::newPoint(size_t t) {
+    if (trial_points[t].nu != trial_points[t - 1].nu) {
+        return (trial_points[t].x + trial_points[t - 1].x) / 2.0;
+    } else {
+        if (n == 1) {
+            return (trial_points[t].x + trial_points[t - 1].x) / 2.0 
+                   - (trial_points[t].z - trial_points[t - 1].z) / (2.0 * r * mu[trial_points[t].nu - 1]);
+        } else {
+            return (trial_points[t].x + trial_points[t - 1].x) / 2.0 
+                   - sgn(trial_points[t].z - trial_points[t - 1].z) / (2.0 * r) 
+                   * pow(abs(trial_points[t].z - trial_points[t - 1].z) / mu[trial_points[t].nu - 1], n);
+        }
+
+    }
 }
 
 double imgo_method::selectNewPoint(size_t &t) {
@@ -98,98 +124,7 @@ double imgo_method::selectNewPoint(size_t &t) {
         size_I = I[nu].size();
         for (int i = 1; i < size_I; i++) { // при i = 0 - нет j
             for (int j = 0; j < i; j++){
-                mu_tmp = abs(I[nu][i].z - I[nu][j].z) / (I[nu][i].x - I[nu][j].x);
-                if (mu_tmp > mu[nu]) {
-                    mu[nu] = mu_tmp;
-                }
-            }
-        }
-        if (abs(mu[nu]) < 6e-13) {
-            mu[nu] = 1.0;
-        };
-    }
-
-    // Шаг 4
-    for (int nu = 0; nu < m + 1; nu++) {
-        if (I[nu].size() != 0) {
-            z_star[nu] = I[nu][0].z;
-            size_I = I[nu].size();
-            for (int i = 1; i < size_I; i++) {
-                if (I[nu][i].z < z_star[nu]) {
-                    z_star[nu] = I[nu][i].z;
-                }
-            }
-            if (z_star[nu] <= 0 && nu != m) {
-                z_star[nu] = -mu[nu] * d;
-            }
-        }
-    }
-
-    // Шаг 5, 6
-    t = 1;
-    double d_x = trial_points[1].x - trial_points[0].x; 
-    double R, Rtmp = 0.0;
-    double mu_v, z_star_v;
-    if (trial_points[1].nu == trial_points[0].nu) {
-        mu_v = mu[trial_points[1].nu - 1];
-        z_star_v = z_star[trial_points[1].nu - 1];
-        R = d_x + pow(trial_points[1].z - trial_points[0].z, 2) / (r * r * mu_v * mu_v * d_x) -
-            2.0 * (trial_points[1].z + trial_points[0].z - 2.0 * z_star_v) / (r * mu_v);
-    } else if (trial_points[0].nu < trial_points[1].nu) {
-        mu_v = mu[trial_points[1].nu - 1];
-        z_star_v = z_star[trial_points[1].nu - 1];
-        R = 2.0 * d_x  - 4.0 * (trial_points[1].z - z_star_v) / (r * mu_v);
-    } else {
-        mu_v = mu[trial_points[0].nu - 1];
-        z_star_v = z_star[trial_points[0].nu - 1];
-        R = 2.0 * d_x  - 4.0 * (trial_points[0].z - z_star_v) / (r * mu_v);
-    }
-    size_t size_tr_pt = trial_points.size();
-    for (size_t i = 2; i < size_tr_pt; i++) {
-        d_x = trial_points[i].x - trial_points[i - 1].x;
-        if (trial_points[i].nu == trial_points[i - 1].nu) {
-            mu_v = mu[trial_points[i].nu - 1];
-            z_star_v = z_star[trial_points[i].nu - 1];
-            Rtmp = d_x + pow(trial_points[i].z - trial_points[i - 1].z, 2) / (r * r * mu_v * mu_v * d_x) -
-                   2.0 * (trial_points[i].z + trial_points[i - 1].z - 2.0 * z_star_v) / (r * mu_v);
-        } else if (trial_points[i - 1].nu < trial_points[i].nu) {
-            mu_v = mu[trial_points[i].nu - 1];
-            z_star_v = z_star[trial_points[i].nu - 1];
-            Rtmp = 2.0 * d_x  - 4.0 * (trial_points[i].z - z_star_v) / (r * mu_v);
-        } else  {
-            mu_v = mu[trial_points[i - 1].nu - 1];
-            z_star_v = z_star[trial_points[i - 1].nu - 1];
-            Rtmp = 2.0 * d_x  - 4.0 * (trial_points[i - 1].z - z_star_v) / (r * mu_v);
-        }
-        if (Rtmp > R) {
-            R = Rtmp;
-            t = i;
-        }
-    }
-
-    // Шаг 7
-    double x_k_1;
-    if (trial_points[t].nu != trial_points[t - 1].nu) {
-        x_k_1 = (trial_points[t].x + trial_points[t - 1].x) / 2.0;
-    } else {
-        x_k_1 = (trial_points[t].x + trial_points[t - 1].x) / 2.0 
-                - (trial_points[t].z - trial_points[t - 1].z) / (2.0 * r * mu[trial_points[t].nu - 1]);
-    }
-    return x_k_1;
-}
-
-double imgo_method::selectNewPoint_md(size_t &t) {
-    // Шаг 3
-    for (int nu = 0; nu < m + 1; nu++) {
-        mu[nu] = 0.0;
-    }
-    double mu_tmp;
-    size_t size_I;
-    for (int nu = 0; nu < m + 1; nu++) {
-        size_I = I[nu].size();
-        for (int i = 1; i < size_I; i++) { // при i = 0 - нет j
-            for (int j = 0; j < i; j++){
-                mu_tmp = abs(I[nu][i].z - I[nu][j].z) / pow(I[nu][i].x - I[nu][j].x, 1.0 / n);
+                mu_tmp = abs(I[nu][i].z - I[nu][j].z) / deltaX(I[nu][j].x, I[nu][i].x);
                 if (mu_tmp > mu[nu]) {
                     mu[nu] = mu_tmp;
                 }
@@ -209,17 +144,34 @@ double imgo_method::selectNewPoint_md(size_t &t) {
 #endif
 
     // Шаг 4
-    for (int nu = 0; nu < m + 1; nu++) {
-        if (I[nu].size() != 0) {
-            if (nu + 1 != M) {
-                z_star[nu] = -mu[nu] * d;
-            } else {
+    if (n >= 2) {
+        for (int nu = 0; nu < m + 1; nu++) {
+            if (I[nu].size() != 0) {
+                if (nu + 1 != M) {
+                    z_star[nu] = -mu[nu] * d;
+                } else {
+                    z_star[nu] = I[nu][0].z;
+                    size_I = I[nu].size();
+                    for (int i = 1; i < size_I; i++) {
+                        if (I[nu][i].z < z_star[nu]) {
+                            z_star[nu] = I[nu][i].z;
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        for (int nu = 0; nu < m + 1; nu++) {
+            if (I[nu].size() != 0) {
                 z_star[nu] = I[nu][0].z;
                 size_I = I[nu].size();
                 for (int i = 1; i < size_I; i++) {
                     if (I[nu][i].z < z_star[nu]) {
                         z_star[nu] = I[nu][i].z;
                     }
+                }
+                if (z_star[nu] <= 0 && nu != m) {
+                    z_star[nu] = -mu[nu] * d;
                 }
             }
         }
@@ -235,7 +187,7 @@ double imgo_method::selectNewPoint_md(size_t &t) {
 
     // Шаг 5, 6
     t = 1;
-    double d_x = pow(trial_points[1].x - trial_points[0].x, 1.0 / n); 
+    double d_x = deltaX(trial_points[0].x, trial_points[1].x); 
     double R, Rtmp = 0.0;
     double mu_v, z_star_v;
     if (trial_points[1].nu == trial_points[0].nu) {
@@ -257,7 +209,7 @@ double imgo_method::selectNewPoint_md(size_t &t) {
 #endif
     size_t size_tr_pt = trial_points.size();
     for (size_t i = 2; i < size_tr_pt; i++) {
-        d_x = pow(trial_points[i].x - trial_points[i - 1].x, 1.0 / n);
+        d_x = deltaX(trial_points[i - 1].x, trial_points[i].x);
         if (trial_points[i].nu == trial_points[i - 1].nu) {
             mu_v = mu[trial_points[i].nu - 1];
             z_star_v = z_star[trial_points[i].nu - 1];
@@ -282,15 +234,7 @@ double imgo_method::selectNewPoint_md(size_t &t) {
     }
 
     // Шаг 7
-    double x_k_1;
-    if (trial_points[t].nu != trial_points[t - 1].nu) {
-        x_k_1 = (trial_points[t].x + trial_points[t - 1].x) / 2.0;
-    } else {
-        x_k_1 = (trial_points[t].x + trial_points[t - 1].x) / 2.0 
-                - sgn(trial_points[t].z - trial_points[t - 1].z) / (2.0 * r) 
-                * pow(abs(trial_points[t].z - trial_points[t - 1].z) / mu[trial_points[t].nu - 1], n);
-    }
-    return x_k_1;
+    return newPoint(t);
 }
 
 void imgo_method::setFunc(double (*_f)(double, int)) {
@@ -373,6 +317,7 @@ double imgo_method::solve(int &n) {
         I[i].clear();
     }
     trial_points.clear();
+    M = 0;
 
     trial tr = newTrial(a);
     trial_points.push_back(tr);
@@ -439,12 +384,13 @@ void imgo_method::solve(int &count, vector<double> &X) {
         I[i].clear();
     }
     trial_points.clear();
+    M = 0;
 
     trial tr{0.0, -1.0, 0};
     trial_points.push_back(tr);
     tr.x = 1.0;
     trial_points.push_back(tr);
-    tr = newTrial_md(0.9);
+    tr = newTrial_md(0.5);
     addInSort(trial_points, tr);
     addInSort(I[tr.nu - 1], tr);
     if (tr.nu > M) {
@@ -455,7 +401,7 @@ void imgo_method::solve(int &count, vector<double> &X) {
     double x_k_1;
     size_t t = 1;
     while(true) {
-        x_k_1 = selectNewPoint_md(t);
+        x_k_1 = selectNewPoint(t);
         tr = newTrial_md(x_k_1);
         // Шаг 1
         addInSort(trial_points, tr);
