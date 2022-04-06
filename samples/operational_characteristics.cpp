@@ -1,8 +1,6 @@
 #include<iostream>
 #include<fstream>
-#include<Hill/HillProblem.hpp>
 #include<Hill/HillProblemFamily.hpp>
-#include<Shekel/ShekelProblem.hpp>
 #include<Shekel/ShekelProblemFamily.hpp>
 #include<imgo.h>
 

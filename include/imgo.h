@@ -8,7 +8,7 @@
 
 using namespace std;
 
-enum Stop {ACCURACY, NUMBER};
+enum Stop {ACCURACY, NUMBER, ACCURNUMBER}; // сделать ACCURNUMBER
 
 struct trial {
     double x, z;
@@ -72,6 +72,7 @@ public:
     double solve(int &n, Stop stop = ACCURACY);
     void solve(int &n, vector<double> &X, Stop stop = ACCURACY);
     bool solve_test(double x_opt, int k);
+    bool solve_test(vector<double> x_opt, int k);
 };
 
 #endif // IMGO_H

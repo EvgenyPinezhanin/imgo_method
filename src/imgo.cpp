@@ -351,40 +351,6 @@ double imgo_method::solve(int &n, Stop stop) {
     return searchMinX();
 }
 
-bool imgo_method::solve_test(double x_opt, int k) {
-    for (int i = 0; i < I.size(); i++) {
-        I[i].clear();
-    }
-    trial_points.clear();
-
-    trial tr = newTrial(a);
-    trial_points.push_back(tr);
-    addInSort(I[tr.nu - 1], tr);
-    tr = newTrial(b);
-    trial_points.push_back(tr);
-    addInSort(I[tr.nu - 1], tr);
-    int n = 2;
-
-    double x_k_1;
-    size_t t = 1;
-    while (true) {
-        x_k_1 = selectNewPoint(t);
-        tr = newTrial(x_k_1);
-        // Шаг 1
-        addInSort(trial_points, tr);
-
-        // Шаг 2
-        addInSort(I[tr.nu - 1], tr);
-        n++;
-        if (abs(x_k_1 - x_opt) <= eps) {
-            return true;
-        }
-        if (n >= k) {
-            return false;
-        }
-    }
-}
-
 void imgo_method::solve(int &count, vector<double> &X, Stop stop) {
     for (int i = 0; i < I.size(); i++) {
         I[i].clear();
@@ -431,4 +397,72 @@ void imgo_method::solve(int &count, vector<double> &X, Stop stop) {
         }
     }
     y(searchMinX(), X);
+}
+
+bool imgo_method::solve_test(double x_opt, int k) {
+    for (int i = 0; i < I.size(); i++) {
+        I[i].clear();
+    }
+    trial_points.clear();
+
+    trial tr = newTrial(a);
+    trial_points.push_back(tr);
+    addInSort(I[tr.nu - 1], tr);
+    tr = newTrial(b);
+    trial_points.push_back(tr);
+    addInSort(I[tr.nu - 1], tr);
+    int n = 2;
+
+    double x_k_1;
+    size_t t = 1;
+    while (true) {
+        x_k_1 = selectNewPoint(t);
+        tr = newTrial(x_k_1);
+        // Шаг 1
+        addInSort(trial_points, tr);
+
+        // Шаг 2
+        addInSort(I[tr.nu - 1], tr);
+        n++;
+        if (abs(x_k_1 - x_opt) <= eps) {
+            return true;
+        }
+        if (n >= k) {
+            return false;
+        }
+    }
+}
+
+bool imgo_method::solve_test(vector<double> x_opt, int k) {
+    for (int i = 0; i < I.size(); i++) {
+        I[i].clear();
+    }
+    trial_points.clear();
+
+    trial tr = newTrial(a);
+    trial_points.push_back(tr);
+    addInSort(I[tr.nu - 1], tr);
+    tr = newTrial(b);
+    trial_points.push_back(tr);
+    addInSort(I[tr.nu - 1], tr);
+    int n = 2;
+
+    double x_k_1;
+    size_t t = 1;
+    while (true) {
+        x_k_1 = selectNewPoint(t);
+        tr = newTrial(x_k_1);
+        // Шаг 1
+        addInSort(trial_points, tr);
+
+        // Шаг 2
+        addInSort(I[tr.nu - 1], tr);
+        n++;
+        if (abs(x_k_1 - x_opt) <= eps) {
+            return true;
+        }
+        if (n >= k) {
+            return false;
+        }
+    }
 }
