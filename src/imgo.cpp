@@ -3,6 +3,16 @@
 
 //#define DEBUG
 
+double dist_vec(vector<double> val1, vector<double> val2) {
+    double res = 0.0;
+    size_t size = val1.size();
+    for (int i = 0; i < size; i++) {
+        res += (val1[i] - val2[i]) * (val1[i] - val2[i]);
+    }
+    res = sqrt(res);
+    return res;
+}
+
 template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
@@ -438,30 +448,41 @@ bool imgo_method::solve_test(vector<double> x_opt, int k) {
         I[i].clear();
     }
     trial_points.clear();
+    M = 0;
 
-    trial tr = newTrial(a);
+    trial tr{0.0, -1.0, 0};
     trial_points.push_back(tr);
-    addInSort(I[tr.nu - 1], tr);
-    tr = newTrial(b);
+    tr.x = 1.0;
     trial_points.push_back(tr);
+    tr = newTrial_md(0.5);
+    addInSort(trial_points, tr);
     addInSort(I[tr.nu - 1], tr);
-    int n = 2;
+    if (tr.nu > M) {
+        M = tr.nu;
+    }
+    int count = 1;
 
     double x_k_1;
     size_t t = 1;
+    vector<double> X(n);
     while (true) {
         x_k_1 = selectNewPoint(t);
-        tr = newTrial(x_k_1);
+        tr = newTrial_md(x_k_1);
         // Шаг 1
         addInSort(trial_points, tr);
 
         // Шаг 2
         addInSort(I[tr.nu - 1], tr);
-        n++;
-        if (abs(x_k_1 - x_opt) <= eps) {
+        if (tr.nu > M) {
+            M = tr.nu;
+        }
+        count++;
+        y(x_k_1, X);
+        //cout << "x_new = " << x_k_1 << ", dist_vec = " << dist_vec(X, x_opt) << endl;
+        if (dist_vec(X, x_opt) <= eps) {
             return true;
         }
-        if (n >= k) {
+        if (count >= k) {
             return false;
         }
     }

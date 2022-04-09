@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cmath>
+#include <Grishagin/GrishaginProblemFamily.hpp>
+#include <Grishagin/GrishaginConstrainedProblemFamily.hpp>
 #include <imgo.h>
 
 double f(vector<double> x, int j) {
@@ -14,29 +16,93 @@ double f(vector<double> x, int j) {
     return -1;
 }
 
+TGrishaginProblemFamily grishaginProblem;
+int current_func;
+double f_grishagin(vector<double> x, int j) {
+    return grishaginProblem[current_func]->ComputeFunction(x);
+}
+
+GrishaginConstrainedProblem grishaginConstrainedProblem(cptInFeasibleDomain, 0.3, 0, 1);
+double f_grishaginConstrained(vector<double> x, int j) {
+    if (j > grishaginConstrainedProblem.GetConstraintsNumber()) {
+        return grishaginConstrainedProblem.ComputeFunction(x);
+    } else {
+        return grishaginConstrainedProblem.ComputeConstraint(j, x);
+    }
+}
+
 int main() {
-    double a1, b1, a2, b2, x_opt, y_opt;
+    vector<double> A(2), B(2), X_opt(2), X(2);
     int m, number_trials;
-    vector<double> X(2);
 
     int n = 2, den = 10, key = 1;
-    double eps = 0.0001, r = 2.0, d = 0.0;
+    double eps = 0.001, r = 2.0, d = 0.0;
 
-    a1 = 0, b1 = 4.0;
-    a2 = -1.0, b2 = 3.0;
-    x_opt = 0.942, y_opt = 0.944;
+    A[0] = 0, B[0] = 4.0;
+    A[1] = -1.0, B[1] = 3.0;
+    X_opt[0] = 0.942, X_opt[1] = 0.944;
     m = 3;
 
-    imgo_method imgo(f, n, m, vector<double>{a1, a2}, vector<double>{b1, b2}, eps, r, d, den, key);
+    imgo_method imgo(f, n, m, A, B, eps, r, d, den, key);
     imgo.solve(number_trials, X);
 
+    std::cout << "Test_function" << std::endl;
     std::cout << "Parameters for constructing the Peano curve:" << std::endl;
     std::cout << "n = " << n << " m = " << den << " key = " << key << std::endl;
     std::cout << "Trials result:" << std::endl;
     std::cout << "Number of trials = " << number_trials << std::endl;
-    std::cout << "x*_min = " << x_opt << " y*_min = " << y_opt << std::endl;
+    std::cout << "x*_min = " << X_opt[0] << " y*_min = " << X_opt[1] << std::endl;
     std::cout << "x_min = " << X[0] << " y_min = " << X[1] << std::endl;
-    std::cout << "||X* - X|| = " << sqrt((x_opt - X[0]) * (x_opt - X[0]) + (y_opt - X[1]) * (y_opt - X[1])) << std::endl;
+    std::cout << "||X* - X|| = " << sqrt((X_opt[0] - X[0]) * (X_opt[0] - X[0]) + (X_opt[1] - X[1]) * (X_opt[1] - X[1])) << std::endl;
+    std::cout << std::endl;
+
+    imgo.setFunc(f_grishagin);
+    n = grishaginProblem[current_func]->GetDimension();
+    imgo.setN(n);
+    grishaginProblem[current_func]->GetBounds(A, B);
+    imgo.setA(A);
+    imgo.setB(B);
+    n = grishaginProblem[current_func]->GetDimension();
+    imgo.setN(n);
+    m = 0;
+    imgo.setM(m);
+    r = 2.9;
+    imgo.setR(r);
+    for (current_func = 0; current_func < 100; current_func++) {
+        imgo.solve(number_trials, X);
+        X_opt = grishaginProblem[current_func]->GetOptimumPoint();
+
+        std::cout << "grishagin_function " << current_func + 1 << std::endl;
+        std::cout << "Parameters for constructing the Peano curve:" << std::endl;
+        std::cout << "n = " << n << " m = " << den << " key = " << key << std::endl;
+        std::cout << "Trials result:" << std::endl;
+        std::cout << "Number of trials = " << number_trials << std::endl;
+        std::cout << "x*_min = " << X_opt[0] << " y*_min = " << X_opt[1] << std::endl;
+        std::cout << "x_min = " << X[0] << " y_min = " << X[1] << std::endl;
+        std::cout << "||X* - X|| = " << sqrt((X_opt[0] - X[0]) * (X_opt[0] - X[0]) + (X_opt[1] - X[1]) * (X_opt[1] - X[1])) << std::endl;
+        std::cout << std::endl;
+    }
+
+   //grishaginConstrainedProblem.GetBounds(A, B);
+   //imgo.setA(A);
+   //imgo.setB(B);
+   //X_opt = grishaginConstrainedProblem.GetOptimumPoint();
+   //n = grishaginConstrainedProblem.GetDimension();
+   //imgo.setN(n);
+   //m = grishaginConstrainedProblem.GetConstraintsNumber();
+   //imgo.setM(m);
+   //imgo.setFunc(f_grishaginConstrained);
+
+   //imgo.solve(number_trials, X);
+
+   //std::cout << "grishagin_constrained_function" << std::endl;
+   //std::cout << "Parameters for constructing the Peano curve:" << std::endl;
+   //std::cout << "n = " << n << " m = " << den << " key = " << key << std::endl;
+   //std::cout << "Trials result:" << std::endl;
+   //std::cout << "Number of trials = " << number_trials << std::endl;
+   //std::cout << "x*_min = " << X_opt[0] << " y*_min = " << X_opt[1] << std::endl;
+   //std::cout << "x_min = " << X[0] << " y_min = " << X[1] << std::endl;
+   //std::cout << "||X* - X|| = " << sqrt((X_opt[0] - X[0]) * (X_opt[0] - X[0]) + (X_opt[1] - X[1]) * (X_opt[1] - X[1])) << std::endl;
 
     return 0;
 }
