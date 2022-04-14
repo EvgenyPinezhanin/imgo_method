@@ -3,11 +3,6 @@ cmake_minimum_required(VERSION 3.0)
 set(PROJECT_NAME imgo_method)
 project(${PROJECT_NAME})
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configs" FORCE)
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
-
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/release)
@@ -25,17 +20,20 @@ include_directories("${PROJECT_PROBLEMS}/src")
 
 # COPY
 set(COPY_RESOURCE copy_resource)
-if(CMAKE_BUILD_TYPE)
-  set(OUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG})
-else()
+message( STATUS ${CMAKE_BUILD_TYPE})
+if(CMAKE_BUILD_TYPE STREQUAL Release)
+  message( STATUS ${CMAKE_BUILD_TYPE}_release)
   set(OUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE})
+else()
+  message( STATUS ${CMAKE_BUILD_TYPE}_debug)
+  set(OUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG})
 endif()
 add_custom_target(${COPY_RESOURCE} ALL)
 add_custom_command(
   TARGET ${COPY_RESOURCE} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
-          ${CMAKE_SOURCE_DIR}/scripts/chart.gp
-          ${OUT_DIR}/chart.gp)
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_SOURCE_DIR}/scripts/
+          ${OUT_DIR}/)
 
 # BUILD
 add_subdirectory(GCGen)

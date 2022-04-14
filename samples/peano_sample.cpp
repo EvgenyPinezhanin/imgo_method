@@ -13,8 +13,8 @@
 double f(vector<double> x, int j) {
     switch (j) {
         case 1: return (x[0] - 1.0) * (x[0] - 1.0) / 5.0 + (x[1] - 1.0) * (x[1] - 1.0) / 5.0;
+        default: return numeric_limits<double>::quiet_NaN();
     }
-    return -1;
 }
 #elif defined(FUNC_2)
 const double k = 0.3;
@@ -22,17 +22,15 @@ double f(vector<double> x, int j) {
     switch (j) {
         case 1: return k - x[0] - x[1];
         case 2: return x[0] * x[0] / 5.0 + x[1] * x[1] / 5.0;
-        //case 1: return -x[0] * x[0] / 5.0 - x[1] * x[1] / 5.0;
-        //case 2: return k - x[0] - x[1];
+        default: return numeric_limits<double>::quiet_NaN();
     }
-    return -1;
 }
 #elif defined(FUNC_3)
 double f(vector<double> x, int j) {
     switch (j) {
         case 1: return 1.0 - x[0] - x[1];
+        default: return numeric_limits<double>::quiet_NaN();
     }
-    return -1;
 }
 #endif
 
@@ -60,10 +58,10 @@ int main() {
     vector<double> X(2);
     std::vector<vector<double>> trial_vec;
     int number_trials;
-    int n = 2, den = 10, key = 3;
-    double eps = 0.0001, r = 2.0, d = 0.0;
+    int n = 2, den = 10, key = 1;
+    double eps = 0.001, r = 2.0, d = 0.0;
 
-    imgo_method imgo(f, n, m, vector<double>{a1, a2}, vector<double>{b1, b2}, eps, r, d, den, key);
+    imgo_method imgo(f, n, m, vector<double>{a1, a2}, vector<double>{b1, b2}, r, d, eps, 0, den, key);
     imgo.solve(number_trials, X);
 
     std::cout << "Parameters for constructing the Peano curve:" << std::endl;

@@ -1,8 +1,9 @@
-#include<iostream>
-#include<fstream>
-#include<Hill/HillProblemFamily.hpp>
-#include<Shekel/ShekelProblemFamily.hpp>
-#include<imgo.h>
+#include <iostream>
+#include <fstream>
+#include <limits>
+#include <Hill/HillProblemFamily.hpp>
+#include <Shekel/ShekelProblemFamily.hpp>
+#include <imgo.h>
 
 using namespace std;
 
@@ -15,16 +16,16 @@ double f_Hill(double x, int j) {
     double res = hillFam[current_func]->ComputeFunction({ x });
     switch (j) {
         case 1: return res;
+        default: return numeric_limits<double>::quiet_NaN();
     }
-    return -1.0;
 }
 
 double f_Shekel(double x, int j) {
     double res = shekelFam[current_func]->ComputeFunction({ x });
     switch (j) {
         case 1: return res;
+        default: return numeric_limits<double>::quiet_NaN();
     }
-    return -1.0;
 }
 
 int main() {
@@ -33,7 +34,7 @@ int main() {
     vector<double> a, b;
 
     auto f_null = [](double x, int j)->double {return 0.0; };
-    imgo_method imgo(f_null, 0, 0, 0, 0, 3.0);
+    imgo_method imgo(f_null, 0, 0.0, 0.0, 3.3, 0.0, 0);
 
     int K0 = 0;
     int Kmax = 500;

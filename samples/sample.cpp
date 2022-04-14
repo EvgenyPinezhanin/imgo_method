@@ -1,5 +1,6 @@
 #include<iostream>
 #include<fstream>
+#include<limits>
 #if defined( _MSC_VER )
     #define _USE_MATH_DEFINES
     #include<math.h>
@@ -14,8 +15,8 @@ double f1(double x, int j) {
     switch(j) {
         case 1: return sin(x);
         case 2: return -2.0 * x + 3.0;
+        default: return numeric_limits<double>::quiet_NaN();
     }
-    return -1.0;
 }
 
 double f2(double x, int j) {
@@ -23,15 +24,15 @@ double f2(double x, int j) {
         case 1: return x * x - 0.05;
         case 2: return -x + 0.1;
         case 3: return 5.0 * x * x + 3.0 * x - 1.0;
+        default: return numeric_limits<double>::quiet_NaN();
     }
-    return -1.0;
 }
 
 double f3(double x, int j) {
     switch (j) {
         case 1: return sin(x);
+        default: return numeric_limits<double>::quiet_NaN();
     }
-    return -1.0;
 }
 
 int main() {
@@ -48,9 +49,8 @@ int main() {
     double x_min_true;
     int n;
 
-    cout << "fixed_method" << endl;
     m = 1;
-    imgo_method imgo(&f1, m, a, b, eps, r, 0.1);
+    imgo_method imgo(f1, m, a, b, r, 0.0,  eps);
     x_min = imgo.solve(n);
     x_min_true = 2.0 * M_PI;
 

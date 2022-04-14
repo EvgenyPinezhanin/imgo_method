@@ -1,14 +1,15 @@
-#include<iostream>
-#include<iomanip>
-#include<fstream>
-#include<vector>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <vector>
+#include <limits>
 #if defined( _MSC_VER )
     #define _USE_MATH_DEFINES
-    #include<math.h>
+    #include <math.h>
 #else
-    #include<cmath>
+    #include <cmath>
 #endif
-#include<imgo.h>
+#include <imgo.h>
 
 using namespace std;
 
@@ -26,16 +27,16 @@ double f1(double x, int j) {
     switch (j) {
         case 1: return exp(-sin(3.0 * x)) - 1.0 / 10.0 * pow(x - 1.0 / 2.0, 2.0) - 1.0;
         case 2: return -13.0 / 6.0 * x + sin(13.0 / 4.0 * (2.0 * x + 5.0)) - 53.0 / 12.0;
+        default: return numeric_limits<double>::quiet_NaN();
     }
-    return -1.0;
 }
 
 double f2(double x, int j) {
     switch (j) {
         case 1: return 1.0 / 20.0 - exp(-2.0 / 5.0 * (x + 5.0)) * sin(4.0 / 5.0 * M_PI * (x + 5.0));
         case 2: return (11.0 * x * x - 10.0 * x + 21.0) / (2.0 * (x * x + 1));
+        default: return numeric_limits<double>::quiet_NaN();
     }
-    return -1.0;
 }
 
 double f4(double x, int j) {
@@ -50,8 +51,8 @@ double f4(double x, int j) {
                 sin(2.0 * M_PI * (x - 1.0 / 10.0));
         case 3: return 4.0 * sin(M_PI / 4.0 * x + 1.0 / 20.0) * 
                 pow(pow(sin(M_PI / 2.0 * x + 1.0 / 10.0), 3.0) + pow(cos(M_PI / 2.0 * x + 1.0 / 10.0), 3.0), 2.0);
+        default: return numeric_limits<double>::quiet_NaN();
     }
-    return -1.0;
 }
 
 // Error???
@@ -61,8 +62,8 @@ double f5(double x, int j) {
             71.0 / 10.0 * x * x * x + 79.0 / 20.0 * x * x + x - 1.0 / 10.0);
         case 2: return -14.0 / 125.0 * (3.0 * x - 8.0) * sin(252.0 / 125.0 * (x + 3.0 / 2.0)) - 1.0 / 2.0;
         case 3: return sin(0.423531 * x + 3.13531) + sin(10.0 / 3.0 * (0.423531 * x + 3.13531)) + log(0.423531 * x + 3.13531) + 0.36634 - 0.355766 * x;
+        default: return numeric_limits<double>::quiet_NaN();
     }
-    return -1.0;
 }
 
 double f6(double x, int j) {
@@ -70,8 +71,8 @@ double f6(double x, int j) {
         case 1: return 40.0 * (cos(4.0 * x) * (x - sin(x)) * exp( -(x * x) / 2.0));
         case 2: return 2.0 / 25.0 * (x + 4.0) - sin(12.0 / 5.0 * (x + 4.0));
         case 3: return -7.0 / 40.0 * (3.0 * x + 4.0) * sin(63.0 / 20.0 * (x + 4.0));
+        default: return numeric_limits<double>::quiet_NaN();
     }
-    return -1.0;
 }
 
 double f8(double x, int j) {
@@ -86,8 +87,8 @@ double f8(double x, int j) {
             return 3.0 / 10.0 - sum;
         case 3: return (-21.0 / 20.0 * x - 13.0 / 8.0) * sin(63.0 / 10.0 * x + 63.0 / 4.0) + 1.0 / 5.0;
         case 4: return cos(7.0 / 4.0 * x + 241.0 / 40.0) - sin(35.0 / 4.0 * x + 241.0 / 8.0) - 5.0;
+        default: return numeric_limits<double>::quiet_NaN();
     }
-    return -1.0;
 }
 
 double f9(double x, int j) {
@@ -102,8 +103,8 @@ double f9(double x, int j) {
                 sum += 1.0 / 5.0 * sin((i + 1.0) * x - 1.0) + 2.0;
             }
             return sum;
+        default: return numeric_limits<double>::quiet_NaN();
     }
-    return -1.0;
 }
 
 int main() {
@@ -126,7 +127,7 @@ int main() {
                              {f9, 0.0, 14.0, 4.0, 3}};
 
 
-    imgo_method imgo(&f1, 0, 0.0, 0.0, eps, r, 0.05);
+    imgo_method imgo(&f1, 0, 0.0, 0.0, r, 0.0, eps);
 
     for (int i = 0; i < task_arr.size(); i++) {
         imgo.setFunc(task_arr[i].f);
