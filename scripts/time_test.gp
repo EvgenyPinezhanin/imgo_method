@@ -16,7 +16,5 @@ plot datafile using 1:2 ls 5 lc rgb "red" title "calc mu", \
      datafile using 1:6 ls 5 lc rgb "black" title "add point in trials", \
      datafile using 1:7 ls 5 lc rgb "violet" title "add point in I", \
 
-#<< time_add_trial[i] << " " << time_add_I[i] << endl;
-
 bind all "alt-End" "exit gnuplot"
 pause mouse close

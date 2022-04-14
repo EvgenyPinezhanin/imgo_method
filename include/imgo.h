@@ -8,7 +8,7 @@
 
 using namespace std;
 
-enum Stop {ACCURACY, NUMBER, ACCURNUMBER}; // сделать ACCURNUMBER
+enum Stop {ACCURACY, NUMBER, ACCURNUMBER};
 
 struct trial {
     double x, z;
@@ -91,14 +91,13 @@ public:
     void setDen(int _den) { den = _den; };
     void setKey(int _key) { key = _key; };
 
-    // работает только для n >= 2, исправить !!!
     void getPoints(vector<vector<double>> &points_vec);
 
     void y(double x, vector<double> &X);
     
-    double solve(int &n, Stop stop = ACCURACY);
-    void solve(int &n, vector<double> &X, Stop stop = ACCURACY);
-    bool solve_test(double x_opt, int k);
+    double solve(int &count, Stop stop = ACCURACY);
+    void solve(int &count, vector<double> &X, Stop stop = ACCURACY);
+    bool solve_test(double x_opt, int k); // переделать функцию для n = 1
     void solve_test(vector<double> x_opt, int &count);
 };
 

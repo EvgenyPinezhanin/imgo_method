@@ -114,11 +114,11 @@ double imgo_method::newPoint(size_t t) {
 }
 
 double imgo_method::selectNewPoint(size_t &t, trial last_trial) {
+#if defined(TIME_TEST)
+    start_time = clock();
+#endif
+        
     // Шаг 3
-    #if defined(TIME_TEST)
-        start_time = clock();
-    #endif
-
     double mu_tmp;
     size_t size_I = I[last_trial.nu - 1].size();
     for (int nu = 0; nu < m + 1; nu++) {
@@ -137,21 +137,7 @@ double imgo_method::selectNewPoint(size_t &t, trial last_trial) {
         if (!calc_I[nu] && abs(mu[nu]) < 6e-13) mu[nu] = 1.0;
     }
 
-    // double mu_tmp;
-    // size_t size_I = I[last_trial.nu - 1].size();
-    // mu[last_trial.nu - 1] = 0.0;
-    // for (int i = 1; i < size_I; i++) { // при i = 0 - нет j
-    //     for (int j = 0; j < i; j++){
-    //         mu_tmp = abs(I[last_trial.nu - 1][i].z - I[last_trial.nu - 1][j].z) / deltaX(I[last_trial.nu - 1][j].x, I[last_trial.nu - 1][i].x);
-    //         if (mu_tmp > mu[last_trial.nu - 1]) {
-    //             mu[last_trial.nu - 1] = mu_tmp;
-    //         }
-    //     }
-    // }
-    // if (abs(mu[last_trial.nu - 1]) < 6e-13) {
-    //     mu[last_trial.nu - 1] = 1.0;
-    // }
-
+    // без оптимизации
     //for (int nu = 0; nu < m + 1; nu++) {
     //    mu[nu] = 0.0;
     //}
@@ -172,16 +158,34 @@ double imgo_method::selectNewPoint(size_t &t, trial last_trial) {
     //    };
     //}
 
+    // расчеты только в I, к котром появилась новая точка
+    // double mu_tmp;
+    // size_t size_I = I[last_trial.nu - 1].size();
+    // mu[last_trial.nu - 1] = 0.0;
+    // for (int i = 1; i < size_I; i++) { // при i = 0 - нет j
+    //     for (int j = 0; j < i; j++){
+    //         mu_tmp = abs(I[last_trial.nu - 1][i].z - I[last_trial.nu - 1][j].z) / deltaX(I[last_trial.nu - 1][j].x, I[last_trial.nu - 1][i].x);
+    //         if (mu_tmp > mu[last_trial.nu - 1]) {
+    //             mu[last_trial.nu - 1] = mu_tmp;
+    //         }
+    //     }
+    // }
+    // if (abs(mu[last_trial.nu - 1]) < 6e-13) {
+    //     mu[last_trial.nu - 1] = 1.0;
+    // }
+
+    // не работает, спросить
     //for (int i = 1; i < size_I; i++) {
     //    mu_tmp = abs(I[last_I - 1][i].z - I[last_I - 1][i - 1].z) / deltaX(I[last_I - 1][i - 1].x, I[last_I - 1][i].x);
     //    if (mu_tmp > mu[last_I - 1]) {
     //        mu[last_I - 1] = mu_tmp;
     //    }
     //}
-    #if defined(TIME_TEST)
-        end_time = clock();
-        time_mu.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
-    #endif
+
+#if defined(TIME_TEST)
+    end_time = clock();
+    time_mu.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
+#endif
 
 #if defined(DEBUG)
     cout << "mu: ";
@@ -191,9 +195,10 @@ double imgo_method::selectNewPoint(size_t &t, trial last_trial) {
     cout << endl;
 #endif
 
-    #if defined(TIME_TEST)
-        start_time = clock();
-    #endif
+#if defined(TIME_TEST)
+    start_time = clock();
+#endif
+
     // Шаг 4
     if (n >= 2) {
         for (int nu = 0; nu < m + 1; nu++) {
@@ -227,10 +232,11 @@ double imgo_method::selectNewPoint(size_t &t, trial last_trial) {
             }
         }
     }
-    #if defined(TIME_TEST)
-        end_time = clock();
-        time_z_star.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
-    #endif
+
+#if defined(TIME_TEST)
+    end_time = clock();
+    time_z_star.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
+#endif
 
 #if defined(DEBUG)
     cout << "z_star: ";
@@ -240,9 +246,10 @@ double imgo_method::selectNewPoint(size_t &t, trial last_trial) {
     cout << endl;
 #endif
 
-    #if defined(TIME_TEST)
-        start_time = clock();
-    #endif
+#if defined(TIME_TEST)
+    start_time = clock();
+#endif
+
     // Шаг 5, 6
     t = 1;
     double d_x = deltaX(trial_points[0].x, trial_points[1].x); 
@@ -262,9 +269,11 @@ double imgo_method::selectNewPoint(size_t &t, trial last_trial) {
         z_star_v = z_star[trial_points[0].nu - 1];
         R = 2.0 * d_x  - 4.0 * (trial_points[0].z - z_star_v) / (r * mu_v);
     }
+
 #if defined(DEBUG)
     cout << "R[" << trial_points[0].x << ", " << trial_points[1].x << "] = " << R << endl;
 #endif
+
     size_t size_tr_pt = trial_points.size();
     for (size_t i = 2; i < size_tr_pt; i++) {
         d_x = deltaX(trial_points[i - 1].x, trial_points[i].x);
@@ -286,14 +295,17 @@ double imgo_method::selectNewPoint(size_t &t, trial last_trial) {
             R = Rtmp;
             t = i;
         }
-    #if defined(DEBUG)
-        cout << "R[" << trial_points[i - 1].x << ", " << trial_points[i].x << "] = " << Rtmp << endl;
-    #endif
+
+#if defined(DEBUG)
+    cout << "R[" << trial_points[i - 1].x << ", " << trial_points[i].x << "] = " << Rtmp << endl;
+#endif
+
     }
-    #if defined(TIME_TEST)
-        end_time = clock();
-        time_R.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
-    #endif
+
+#if defined(TIME_TEST)
+    end_time = clock();
+    time_R.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
+#endif
 
     // Шаг 7
     return newPoint(t);
@@ -310,9 +322,16 @@ void imgo_method::setM(int _m) {
 void imgo_method::getPoints(vector<vector<double>> &points_vec) {
     points_vec.clear();
     vector<double> point(n);
-    for (int i = 0; i < trial_points.size(); i++) {
-        y(trial_points[i].x, point);
-        points_vec.push_back(point);
+    if (n == 1) {
+        for (int i = 0; i < trial_points.size(); i++) {
+            point[0] = trial_points[i].x;
+            points_vec.push_back(point);
+        }
+    } else {
+        for (int i = 0; i < trial_points.size(); i++) {
+            y(trial_points[i].x, point);
+            points_vec.push_back(point);
+        }
     }
 }
 
@@ -323,7 +342,7 @@ void imgo_method::y(double x, vector<double> &X) {
     }
 }
 
-double imgo_method::solve(int &n, Stop stop) {
+double imgo_method::solve(int &count, Stop stop) {
     for (int i = 0; i < I.size(); i++) {
         I[i].clear();
     }
@@ -335,7 +354,7 @@ double imgo_method::solve(int &n, Stop stop) {
     tr = newTrial_single(B[0]);
     trial_points.push_back(tr);
     addInSort(I[tr.nu - 1], tr);
-    n = 2;
+    count = 2;
 
     double x_k_1;
     size_t t = 1;
@@ -347,12 +366,12 @@ double imgo_method::solve(int &n, Stop stop) {
 
         // Шаг 2
         addInSort(I[tr.nu - 1], tr);
-        n++;
+        count++;
         if (stop == ACCURACY) {
             if (trial_points[t].x - trial_points[t - 1].x <= eps) {
                 break;
             }
-        } else if (stop == NUMBER){
+        } else if (stop == NUMBER) {
             if (n >= Nmax) {
                 break;
             }
@@ -367,21 +386,19 @@ double imgo_method::solve(int &n, Stop stop) {
 }
 
 void imgo_method::solve(int &count, vector<double> &X, Stop stop) {
-    #if defined(TIME_TEST)
-        ofstr_test.open("imgo_time_test.txt");
-        time_count.clear();
-        time_mu.clear();
-        time_z_star.clear();
-        time_R.clear();
-        time_trial.clear();
-        time_add_trial.clear();
-        time_add_I.clear();
-    #endif
+#if defined(TIME_TEST)
+    ofstr_test.open("imgo_time_test.txt");
+    time_count.clear();
+    time_mu.clear();
+    time_z_star.clear();
+    time_R.clear();
+    time_trial.clear();
+    time_add_trial.clear();
+    time_add_I.clear();
+#endif
 
     for (int nu = 0; nu < m + 1; nu++) {
         I[nu].clear();
-        // mu[nu] = 0.0;
-        // mu[nu] = 1.0;
         calc_I[nu] = false;
     }
     trial_points.clear();
@@ -392,39 +409,45 @@ void imgo_method::solve(int &count, vector<double> &X, Stop stop) {
     tr.x = peano_b;
     trial_points.push_back(tr);
 
-    #if defined(TIME_TEST)
-        start_time = clock();
-    #endif
+#if defined(TIME_TEST)
+    start_time = clock();
+#endif
+
     tr = newTrial(peano_random);
-    #if defined(TIME_TEST)
-        end_time = clock();
-    #endif
 
-    #if defined(TIME_TEST)
-        time_count.push_back(0);
-        time_mu.push_back(0.0);
-        time_z_star.push_back(0.0);
-        time_R.push_back(0.0);
-        time_trial.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
-    #endif
+#if defined(TIME_TEST)
+    end_time = clock();
+#endif
 
-    #if defined(TIME_TEST)
-        start_time = clock();
-    #endif
+#if defined(TIME_TEST)
+    time_count.push_back(0);
+    time_mu.push_back(0.0);
+    time_z_star.push_back(0.0);
+    time_R.push_back(0.0);
+    time_trial.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
+#endif
+
+#if defined(TIME_TEST)
+    start_time = clock();
+#endif
+
     addInSort(trial_points, tr);
-    #if defined(TIME_TEST)
-        end_time = clock();
-        time_add_trial.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
-    #endif
 
-    #if defined(TIME_TEST)
-        start_time = clock();
-    #endif
+#if defined(TIME_TEST)
+    end_time = clock();
+    time_add_trial.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
+#endif
+
+#if defined(TIME_TEST)
+    start_time = clock();
+#endif
+
     addInSort(I[tr.nu - 1], tr);
-    #if defined(TIME_TEST)
-        end_time = clock();
-        time_add_I.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
-    #endif
+
+#if defined(TIME_TEST)
+    end_time = clock();
+    time_add_I.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
+#endif
 
     if (tr.nu > M) {
         M = tr.nu;
@@ -434,40 +457,46 @@ void imgo_method::solve(int &count, vector<double> &X, Stop stop) {
     double x_k_1;
     size_t t = 1;
     while(true) {
-        #if defined(TIME_TEST)
-            time_count.push_back(count);
-        #endif
+    #if defined(TIME_TEST)
+        time_count.push_back(count);
+    #endif
 
         x_k_1 = selectNewPoint(t, tr);
 
-        #if defined(TIME_TEST)
-            start_time = clock();
-        #endif
+    #if defined(TIME_TEST)
+        start_time = clock();
+    #endif
+
         tr = newTrial(x_k_1);
-        #if defined(TIME_TEST)
-            end_time = clock();
-            time_trial.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
-        #endif
+
+    #if defined(TIME_TEST)
+        end_time = clock();
+        time_trial.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
+    #endif
         
-        #if defined(TIME_TEST)
-            start_time = clock();
-        #endif
+    #if defined(TIME_TEST)
+        start_time = clock();
+    #endif
+
         // Шаг 1
         addInSort(trial_points, tr);
-        #if defined(TIME_TEST)
-            end_time = clock();
-            time_add_trial.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
-        #endif
 
-        #if defined(TIME_TEST)
-            start_time = clock();
-        #endif
+    #if defined(TIME_TEST)
+        end_time = clock();
+        time_add_trial.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
+    #endif
+
+    #if defined(TIME_TEST)
+        start_time = clock();
+    #endif
+
         // Шаг 2
         addInSort(I[tr.nu - 1], tr);
-        #if defined(TIME_TEST)
-            end_time = clock();
-            time_add_I.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
-        #endif
+
+    #if defined(TIME_TEST)
+        end_time = clock();
+        time_add_I.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
+    #endif
 
         if (tr.nu > M) {
             M = tr.nu;
@@ -489,32 +518,34 @@ void imgo_method::solve(int &count, vector<double> &X, Stop stop) {
         }
     }
     y(searchMinXTrial(trial_points, m), X);
-    #if defined(TIME_TEST)
-        for (int i = 0; i < count - 1; i++) {
-            ofstr_test << time_count[i] << " " << time_mu[i] << " " << time_z_star[i] << " "
-                       << time_R[i] << " " << time_trial[i] << " "  << time_add_trial[i] << " " << time_add_I[i] << endl;
-        }
-        ofstr_test.close();
 
-        #if defined(__linux__)
-            int error;
-            setenv("QT_QPA_PLATFORM", "xcb", false);
-            error = system("chmod +x chart.gp");
-            if (error != 0) {
-                cerr << "Error chmod" << std::endl;
-            }
-            error = system("gnuplot -p -c time_test.gp");
+#if defined(TIME_TEST)
+    for (int i = 0; i < count - 1; i++) {
+        ofstr_test << time_count[i] << " " << time_mu[i] << " " << time_z_star[i] << " "
+                   << time_R[i] << " " << time_trial[i] << " "  << time_add_trial[i] << " " << time_add_I[i] << endl;
+    }
+    ofstr_test.close();
 
-            if (error != 0) {
-                cerr << "Error gnuplot" << std::endl;
-            }
-        #endif
-    #endif
+#if defined(__linux__)
+    int error;
+    setenv("QT_QPA_PLATFORM", "xcb", false);
+    error = system("chmod +x chart.gp");
+    if (error != 0) {
+        cerr << "Error chmod" << std::endl;
+    }
+    error = system("gnuplot -p -c time_test.gp");
+    if (error != 0) {
+        cerr << "Error gnuplot" << std::endl;
+    }
+#endif
+
+#endif
 }
 
 bool imgo_method::solve_test(double x_opt, int k) {
-    for (int i = 0; i < I.size(); i++) {
-        I[i].clear();
+    for (int nu = 0; nu < m + 1; nu++) {
+        I[nu].clear();
+        calc_I[nu] = false;
     }
     trial_points.clear();
 
@@ -582,7 +613,6 @@ void imgo_method::solve_test(vector<double> x_opt, int &count) {
         }
         count++;
         y(x_k_1, X);
-        //cout << "x_new = " << x_k_1 << ", dist_vec = " << dist_vec(X, x_opt) << endl;
         if (dist_vec(X, x_opt) <= eps) {
             return ;
         }

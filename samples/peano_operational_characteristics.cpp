@@ -61,6 +61,21 @@ int main() {
     cout << "time: " << work_time << endl;
 
     ofstr.close();
+
+    // Рисование графика операционной характеристики
+#if defined(__linux__)
+    int error;
+    setenv("QT_QPA_PLATFORM", "xcb", false);
+    error = system("chmod +x chart.gp");
+    if (error != 0) {
+        cerr << "Error chmod" << std::endl;
+    }
+    error = system("gnuplot -p -c peano_oper_char.gp");
+    if (error != 0) {
+        cerr << "Error gnuplot" << std::endl;
+    }
+#endif
+
     #if defined( _MSC_VER )
         cin.get();
     #endif
