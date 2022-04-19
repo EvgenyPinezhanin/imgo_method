@@ -1,7 +1,11 @@
 #include <iostream>
 #include <cmath>
-#include <Grishagin/GrishaginProblemFamily.hpp>
+#include <Grishagin/grishagin_function.hpp>
+#include <GKLS/GKLSProblem.hpp>
 #include <imgo.h>
+#include <task.h>
+
+using namespace std;
 
 double f_test(vector<double> x, int j) {
     switch (j) {
@@ -31,83 +35,92 @@ double f_SPPR2(vector<double> x, int j) {
     }
 }
 
-TGrishaginProblemFamily grishaginProblem;
-int current_func;
+double f_SPPR3(vector<double> x, int j) {
+    switch (j) {
+        case 1: return sin(x[0]) - x[1];
+        case 2: return x[1] * cos(x[0]);
+        default: return numeric_limits<double>::quiet_NaN();
+    }
+}
+
+double f_SPPR4(vector<double> x, int j) {
+    switch (j) {
+        case 1: return 2 * sqrt(x[0]) - x[1];
+        case 2: return -2 * x[0] * x[0] + x[1] * x[1];
+        default: return numeric_limits<double>::quiet_NaN();
+    }
+}
+
+TGrishaginProblem grishaginProblem;
 double f_grishagin(vector<double> x, int j) {
     switch (j) {
-        case 1: return grishaginProblem[current_func]->ComputeFunction(x);
+        case 1: return grishaginProblem.ComputeFunction(x);
+        default: return numeric_limits<double>::quiet_NaN();
+    }
+}
+
+TGKLSProblem gklsProblem;
+double f_gkls(vector<double> x, int j) {
+    switch (j) {
+        case 1: return gklsProblem.ComputeFunction(x);
         default: return numeric_limits<double>::quiet_NaN();
     }
 }
 
 int main() {
-    vector<double> A(2), B(2), X_opt(2), X(2);
-    int m, number_trials;
-
-    int n = 2, den = 10, key = 1;
+    int n = 2, m = 0, den = 12, key = 1, Nmax = 1000;
     double eps = 0.001, r = 2.0, d = 0.0;
+    vector<double> X(2);
+    int number_trials;
 
-    A[0] = 0, B[0] = 4.0;
-    A[1] = -1.0, B[1] = 3.0;
-    X_opt[0] = 0.942, X_opt[1] = 0.944;
-    m = 3;
+    vector<double> A, B, A1, B1;
+    grishaginProblem.GetBounds(A, B);
+    gklsProblem.GetBounds(A1, B1);
+    vector<Task_peano> task{ Task_peano(f_test, "Test-1", n, 3, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
+                                        vector<double>{0.942, 0.944}, eps, Nmax, r, d, den, key, true),
+                             Task_peano(f_SPPR1, "SPPR-1", n, 1, vector<double>{0.5, -2.0}, vector<double>{3.0, 2.0},
+                                        vector<double>{0.629960524947, -0.412598948032}, eps, Nmax, r, d, den, key, 0),
+                             Task_peano(f_SPPR2, "SPPR-2", n, 1, vector<double>{0.0, 0.0}, vector<double>{M_PI, 2.0},
+                                        vector<double>{M_PI, 0.0}, eps, Nmax, 3.0, d, den, key, 0),
+                             Task_peano(f_SPPR3, "SPPR-3", n, 1, vector<double>{0.0, 0.0}, vector<double>{M_PI, 2.0},
+                                        vector<double>{M_PI, 2.0}, eps, Nmax, r, d, den, key, 0),
+                             Task_peano(f_SPPR4, "SPPR-4", n, 1, vector<double>{0.0, 0.0}, vector<double>{4.0, 3.0},
+                                        vector<double>{2.25, 3.0}, eps, Nmax, 2.5, d, den, key, 0),
+                             Task_peano(f_grishagin, "Grishagin_func", n, 0, A, B, 
+                                        grishaginProblem.GetOptimumPoint(), eps, Nmax, r, d, den, key, true),
+                             Task_peano(f_gkls, "GKLS_func", n, 0, A1, B1, 
+                                        gklsProblem.GetOptimumPoint(), eps, Nmax, 3.0, d, den, key, true) };
 
-    imgo_method imgo(f_test, n, m, A, B, r, d, eps, 0, den, key);
-    imgo.solve(number_trials, X);
+    imgo_method imgo(nullptr, 2, 0, A, B);
 
-    std::cout << "Test_function" << std::endl;
-    std::cout << "Parameters for constructing the Peano curve:" << std::endl;
-    std::cout << "n = " << n << " m = " << den << " key = " << key << std::endl;
-    std::cout << "Trials result:" << std::endl;
-    std::cout << "Number of trials = " << number_trials << std::endl;
-    std::cout << "x*_min = " << X_opt[0] << " y*_min = " << X_opt[1] << std::endl;
-    std::cout << "x_min = " << X[0] << " y_min = " << X[1] << std::endl;
-    std::cout << "||X* - X|| = " << sqrt((X_opt[0] - X[0]) * (X_opt[0] - X[0]) + (X_opt[1] - X[1]) * (X_opt[1] - X[1])) << std::endl;
-    std::cout << std::endl;
+    for (int i = 0; i < task.size(); i++) {
+        if (task[i].used) {
+            imgo.setFunc(task[i].f);
+            imgo.setN(task[i].n);
+            imgo.setM(task[i].m);
+            imgo.setAB(task[i].A, task[i].B);
+            imgo.setEps(task[i].eps);
+            imgo.setNmax(task[i].Nmax);
+            imgo.setR(task[i].r);
+            imgo.setD(task[i].d);
+            imgo.setDen(task[i].den);
+            imgo.setKey(task[i].key);
 
-/*     A[0] = 0.5, B[0] = 3.0;
-    A[1] = -2.0, B[1] = 2.0;
-    X_opt[0] = 0.629960524947, X_opt[1] = -0.412598948032;
-    m = 1;
+            imgo.solve(number_trials, X);
 
-    imgo.setA(A);
-    imgo.setB(B);
-    imgo.setM(m);
-    imgo.setFunc(f_SPPR1);
-
-    imgo.solve(number_trials, X);
-
-    std::cout << "Test_function(SPPR-1)" << std::endl;
-    std::cout << "Parameters for constructing the Peano curve:" << std::endl;
-    std::cout << "n = " << n << " m = " << den << " key = " << key << std::endl;
-    std::cout << "Trials result:" << std::endl;
-    std::cout << "Number of trials = " << number_trials << std::endl;
-    std::cout << "x*_min = " << X_opt[0] << " y*_min = " << X_opt[1] << std::endl;
-    std::cout << "x_min = " << X[0] << " y_min = " << X[1] << std::endl;
-    std::cout << "||X* - X|| = " << sqrt((X_opt[0] - X[0]) * (X_opt[0] - X[0]) + (X_opt[1] - X[1]) * (X_opt[1] - X[1])) << std::endl;
-    std::cout << std::endl;
-
-    A[0] = 0.0, B[0] = M_PI;
-    A[1] = 0.0, B[1] = 2.0;
-    X_opt[0] = M_PI, X_opt[1] = 0.0;
-    m = 1;
-
-    imgo.setA(A);
-    imgo.setB(B);
-    imgo.setM(m);
-    imgo.setFunc(f_SPPR2);
-
-    imgo.solve(number_trials, X);
-
-    std::cout << "Test_function(SPPR-2)" << std::endl;
-    std::cout << "Parameters for constructing the Peano curve:" << std::endl;
-    std::cout << "n = " << n << " m = " << den << " key = " << key << std::endl;
-    std::cout << "Trials result:" << std::endl;
-    std::cout << "Number of trials = " << number_trials << std::endl;
-    std::cout << "x*_min = " << X_opt[0] << " y*_min = " << X_opt[1] << std::endl;
-    std::cout << "x_min = " << X[0] << " y_min = " << X[1] << std::endl;
-    std::cout << "||X* - X|| = " << sqrt((X_opt[0] - X[0]) * (X_opt[0] - X[0]) + (X_opt[1] - X[1]) * (X_opt[1] - X[1])) << std::endl;
-    std::cout << std::endl; */
-
+            cout << "Function: " << task[i].name << endl;
+            cout << "Dimension = " << task[i].n << endl;
+            cout << "Number of restrictions = " << task[i].m << endl;
+            cout << "Parameters for constructing the Peano curve:" << endl;
+            cout << "n = " << n << " m = " << den << " key = " << key << std::endl;
+            cout << "Trials result:" << std::endl;
+            cout << "Number of trials = " << number_trials << std::endl;
+            cout << "x*_min = " << task[i].X_opt[0] << " y*_min = " << task[i].X_opt[1] << std::endl;
+            cout << "x_min = " << X[0] << " y_min = " << X[1] << std::endl;
+            cout << "||X* - X|| = " << sqrt((task[i].X_opt[0] - X[0]) * (task[i].X_opt[0] - X[0]) + 
+                                            (task[i].X_opt[1] - X[1]) * (task[i].X_opt[1] - X[1])) << std::endl;
+            cout << std::endl;
+        }
+    }
     return 0;
 }
