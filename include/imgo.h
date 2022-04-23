@@ -81,10 +81,12 @@ public:
     
     void setFunc(double (*_f)(double, int)) { f_single = _f; };
     void setFunc(double (*_f)(vector<double>, int)) { optimization_method::setF(_f); };
-    void setA(double _a) { A = vector<double>{_a}; };
-    void setB(double _b) { B = vector<double>{_b}; };
+    void setA(double _a) { optimization_method::setA(vector<double>{_a}); };
+    void setB(double _b) { optimization_method::setB(vector<double>{_b}); };
     void setA(const vector<double> &_A) { optimization_method::setA(_A); };
     void setB(const vector<double> &_B) { optimization_method::setB(_B); };
+    void setAB(double _a, double _b) { optimization_method::setAB(vector<double>{_a}, vector<double>{_b}); };
+    void setAB(const vector<double> &_A, const vector<double> &_B) { optimization_method::setAB(_A, _B); };
     void setM(int _m);
     void setR(double _r) { r = _r; };
     void setD(double _d) { d = _d; };
@@ -97,8 +99,8 @@ public:
     
     double solve(int &count, Stop stop = ACCURACY);
     void solve(int &count, vector<double> &X, Stop stop = ACCURACY);
-    bool solve_test(double x_opt, int k); // переделать функцию для n = 1
-    void solve_test(vector<double> x_opt, int &count);
+    bool solve_test(double x_opt, int &count, Stop stop = ACCURACY);
+    bool solve_test(vector<double> x_opt, int &count, Stop stop = ACCURACY);
 };
 
 #endif // IMGO_H

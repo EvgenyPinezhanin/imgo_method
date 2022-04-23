@@ -11,6 +11,16 @@
 
 using namespace std;
 
+void print_result(double (*f)(double, int), double m, double a, double b, double x_star, double x, int count) {
+    cout << "[a; b] = [" << a << "; " << b << "]"<< endl;
+    cout << "X* = " << x_star << endl;
+    cout << "X = " << x << endl;
+    cout << "|X* - X| = " << abs(x_star - x) << endl;
+    cout << "|f(X*) - f(X)| = " << abs(f(x_star, m + 1) - f(x, m + 1)) << endl;
+    cout << "Number of trials = " << count << endl;
+    cout << endl;
+}
+
 double f1(double x, int j) {
     switch(j) {
         case 1: return sin(x);
@@ -40,28 +50,19 @@ int main() {
     if (!ofstr.is_open()) cerr << "File opening error\n";
     vector<trial> trial_vec;
 
-    double a = 2.0, b = 8.0;
-    double eps = 0.001;
-    double r = 3;
-    int m;
+    double x_min, x_min_true;
+    double a = 2.0, b = 8.0, eps = 0.001, r = 3.0;
+    int m = 1, count;
 
-    double x_min;
-    double x_min_true;
-    int n;
+    imgo_method imgo(f1, m, a, b, r, 0.0, eps);
 
-    m = 1;
-    imgo_method imgo(f1, m, a, b, r, 0.0,  eps);
-    x_min = imgo.solve(n);
     x_min_true = 2.0 * M_PI;
+
+    x_min = imgo.solve(count);
 
     cout << "f1(x) = -2.0 * x + 3.0\n";
     cout << "g1(x) = sin(x)\n";
-    cout << "[a; b] = [" << a << "; " << b << "]"<< endl;
-    cout << "X_min_true = " << x_min_true << endl;
-    cout << "X_min = " << x_min << endl;
-    cout << "Number of trials = " << n << endl;
-    cout << "|Error rate| = " << abs(x_min - x_min_true) << endl;
-    cout << endl;
+    print_result(f1, m, a, b, x_min_true, x_min, count);
 
     imgo.getTrialPoints(trial_vec);
     ofstr << a << " " << b << " " << m << " " << x_min << " " << x_min_true << endl;
@@ -72,21 +73,17 @@ int main() {
 
     m = 2;
     a = -2.0; b = 2.0;
-    imgo.setFunc(&f2);
-    imgo.setA(a);
-    imgo.setB(b);
+    imgo.setFunc(f2);
+    imgo.setAB(a, b);
     imgo.setM(m);
-    x_min = imgo.solve(n);
     x_min_true = 0.1;
+
+    x_min = imgo.solve(count);
 
     cout << "f2(x) = 5.0 * x * x + 3.0 * x - 1.0\n";
     cout << "g1(x) = x * x - 0.05\n";
     cout << "g2(x) = -x + 0.1\n";
-    cout << "[a; b] = [" << a << "; " << b << "]"<< endl;
-    cout << "X_min = " << x_min << endl;
-    cout << "Number of trials = " << n << endl;
-    cout << "|Error rate| = " << abs(x_min - x_min_true) << endl;
-    cout << endl;
+    print_result(f2, m, a, b, x_min_true, x_min, count);
 
     imgo.getTrialPoints(trial_vec);
     ofstr << a << " " << b << " " << m << " " << x_min << " " << x_min_true << endl;
@@ -97,19 +94,15 @@ int main() {
 
     m = 0;
     a = -4.0; b = 4.0;
-    imgo.setFunc(&f3);
-    imgo.setA(a);
-    imgo.setB(b);
+    imgo.setFunc(f3);
+    imgo.setAB(a, b);
     imgo.setM(m);
-    x_min = imgo.solve(n);
     x_min_true = -M_PI / 2.0;
 
+    x_min = imgo.solve(count);
+
     cout << "f3(x) = sin(x)\n";
-    cout << "[a; b] = [" << a << "; " << b << "]" << endl;
-    cout << "X_min = " << x_min << endl;
-    cout << "Number of trials = " << n << endl;
-    cout << "|Error rate| = " << abs(x_min - x_min_true) << endl;
-    cout << endl;
+    print_result(f3, m, a, b, x_min_true, x_min, count);
 
     imgo.getTrialPoints(trial_vec);
     ofstr << a << " " << b << " " << m << " " << x_min << " " << x_min_true << endl;

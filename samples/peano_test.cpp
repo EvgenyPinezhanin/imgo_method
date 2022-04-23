@@ -51,6 +51,22 @@ double f_SPPR4(vector<double> x, int j) {
     }
 }
 
+double f_SPPR5(vector<double> x, int j) {
+    switch (j) {
+        case 1: return 0.5 * exp(x[0]) - x[1];
+        case 2: return (x[0] - 2.0) * (x[0] - 2.0) + (log(x[1]) - 1) * (log(x[1]) - 1);
+        default: return numeric_limits<double>::quiet_NaN();
+    }
+}
+
+double f_SPPR6(vector<double> x, int j) {
+    switch (j) {
+        case 1: return 2.0 - sqrt(x[0]) - x[1];
+        case 2: return exp(sqrt(x[0] * x[0] + (x[1] + 1.0) * (x[1] + 1.0)));
+        default: return numeric_limits<double>::quiet_NaN();
+    }
+}
+
 TGrishaginProblem grishaginProblem;
 double f_grishagin(vector<double> x, int j) {
     switch (j) {
@@ -59,37 +75,54 @@ double f_grishagin(vector<double> x, int j) {
     }
 }
 
-TGKLSProblem gklsProblem;
-double f_gkls(vector<double> x, int j) {
+TGKLSProblem gklsProblem1;
+double f_gkls_1(vector<double> x, int j) {
     switch (j) {
-        case 1: return gklsProblem.ComputeFunction(x);
+        case 1: return gklsProblem1.ComputeFunction(x);
+        default: return numeric_limits<double>::quiet_NaN();
+    }
+}
+
+TGKLSProblem gklsProblem18(18);
+double f_gkls_18(vector<double> x, int j) {
+    switch (j) {
+        case 1: return gklsProblem18.ComputeFunction(x);
         default: return numeric_limits<double>::quiet_NaN();
     }
 }
 
 int main() {
-    int n = 2, m = 0, den = 12, key = 1, Nmax = 1000;
+    int n = 2, m = 0, den = 10, key = 1, Nmax = 5000;
     double eps = 0.001, r = 2.0, d = 0.0;
+    Stop stop = ACCURACY;
     vector<double> X(2);
     int number_trials;
 
-    vector<double> A, B, A1, B1;
+    vector<double> A, B, A1, B1, A2, B2;
     grishaginProblem.GetBounds(A, B);
-    gklsProblem.GetBounds(A1, B1);
+    gklsProblem1.GetBounds(A1, B1);
+    gklsProblem18.GetBounds(A2, B2);
     vector<Task_peano> task{ Task_peano(f_test, "Test-1", n, 3, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
-                                        vector<double>{0.942, 0.944}, eps, Nmax, r, d, den, key, true),
+                                        vector<double>{0.942, 0.944}, eps, Nmax, r, d, den, key, stop, 0),
                              Task_peano(f_SPPR1, "SPPR-1", n, 1, vector<double>{0.5, -2.0}, vector<double>{3.0, 2.0},
-                                        vector<double>{0.629960524947, -0.412598948032}, eps, Nmax, r, d, den, key, 0),
+                                        vector<double>{0.629960524947, -0.412598948032}, eps, Nmax, r, d, den, key, stop, 0),
                              Task_peano(f_SPPR2, "SPPR-2", n, 1, vector<double>{0.0, 0.0}, vector<double>{M_PI, 2.0},
-                                        vector<double>{M_PI, 0.0}, eps, Nmax, 3.0, d, den, key, 0),
+                                        vector<double>{M_PI, 0.0}, eps, Nmax, 3.0, d, den, key, stop, 0),
                              Task_peano(f_SPPR3, "SPPR-3", n, 1, vector<double>{0.0, 0.0}, vector<double>{M_PI, 2.0},
-                                        vector<double>{M_PI, 2.0}, eps, Nmax, r, d, den, key, 0),
+                                        vector<double>{M_PI, 2.0}, eps, Nmax, r, d, den, key, stop, 0),
                              Task_peano(f_SPPR4, "SPPR-4", n, 1, vector<double>{0.0, 0.0}, vector<double>{4.0, 3.0},
-                                        vector<double>{2.25, 3.0}, eps, Nmax, 2.5, d, den, key, 0),
-                             Task_peano(f_grishagin, "Grishagin_func", n, 0, A, B, 
-                                        grishaginProblem.GetOptimumPoint(), eps, Nmax, r, d, den, key, true),
-                             Task_peano(f_gkls, "GKLS_func", n, 0, A1, B1, 
-                                        gklsProblem.GetOptimumPoint(), eps, Nmax, 3.0, d, den, key, true) };
+                                        vector<double>{2.25, 3.0}, eps, Nmax, 2.5, d, den, key, stop, 0),
+                             Task_peano(f_SPPR5, "SPPR-5", n, 1, vector<double>{0.0, 0.0}, vector<double>{10.0, 10.0},
+                                        vector<double>{(3.0 + log(2.0)) / 2.0, 0.5 * exp((3.0 + log(2.0)) / 2.0)}, 
+                                        eps, Nmax, 3.3, d, 12, key, ACCURNUMBER, 1),
+                             Task_peano(f_SPPR6, "SPPR-6", n, 1, vector<double>{0.0, 0.0}, vector<double>{4.0, 2.0},
+                                        vector<double>{1.0, 1.0}, eps, Nmax, 3.3, d, 12, key, stop, 1),
+                             Task_peano(f_grishagin, "Grishagin_func", n, 0, A, B,
+                                        grishaginProblem.GetOptimumPoint(), eps, Nmax, r, d, den, key, stop, 0),
+                             Task_peano(f_gkls_1, "GKLS_func_1", n, 0, A1, B1,
+                                        gklsProblem1.GetOptimumPoint(), eps, Nmax, 3.0, d, 12, key, stop, 0),
+                             Task_peano(f_gkls_18, "GKLS_func_18", n, 0, A2, B2,
+                                        gklsProblem18.GetOptimumPoint(), eps, Nmax, 4.0, d, den, key, stop, 0) };
 
     imgo_method imgo(nullptr, 2, 0, A, B);
 
@@ -106,19 +139,21 @@ int main() {
             imgo.setDen(task[i].den);
             imgo.setKey(task[i].key);
 
-            imgo.solve(number_trials, X);
+            number_trials = task[i].Nmax;
+            imgo.solve(number_trials, X, task[i].stop);
 
             cout << "Function: " << task[i].name << endl;
             cout << "Dimension = " << task[i].n << endl;
             cout << "Number of restrictions = " << task[i].m << endl;
             cout << "Parameters for constructing the Peano curve:" << endl;
-            cout << "n = " << n << " m = " << den << " key = " << key << std::endl;
+            cout << "n = " << task[i].n << " m = " << task[i].den << " key = " << task[i].key << std::endl;
             cout << "Trials result:" << std::endl;
             cout << "Number of trials = " << number_trials << std::endl;
             cout << "x*_min = " << task[i].X_opt[0] << " y*_min = " << task[i].X_opt[1] << std::endl;
             cout << "x_min = " << X[0] << " y_min = " << X[1] << std::endl;
             cout << "||X* - X|| = " << sqrt((task[i].X_opt[0] - X[0]) * (task[i].X_opt[0] - X[0]) + 
                                             (task[i].X_opt[1] - X[1]) * (task[i].X_opt[1] - X[1])) << std::endl;
+            cout << "|f(X*) - f(X)| = " << abs(task[i].f(task[i].X_opt, task[i].m + 1) - task[i].f(X, task[i].m + 1)) << std::endl;
             cout << std::endl;
         }
     }

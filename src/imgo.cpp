@@ -4,6 +4,7 @@
 #include <ctime>
 
 // #define DEBUG
+// #define EPS
 // #define TIME_TEST
 
 #if defined(TIME_TEST)
@@ -138,25 +139,25 @@ double imgo_method::selectNewPoint(size_t &t, trial last_trial) {
     }
 
     // без оптимизации
-    //for (int nu = 0; nu < m + 1; nu++) {
-    //    mu[nu] = 0.0;
-    //}
-    //double mu_tmp;
-    //size_t size_I;
-    //for (int nu = 0; nu < m + 1; nu++) {
-    //    size_I = I[nu].size();
-    //    for (int i = 1; i < size_I; i++) { // при i = 0 - нет j
-    //        for (int j = 0; j < i; j++) {
-    //            mu_tmp = abs(I[nu][i].z - I[nu][j].z) / deltaX(I[nu][j].x, I[nu][i].x);
-    //            if (mu_tmp > mu[nu]) {
-    //                mu[nu] = mu_tmp;
-    //            }
-    //        }
-    //    }
-    //    if (abs(mu[nu]) < 6e-13) {
-    //        mu[nu] = 1.0;
-    //    };
-    //}
+    // for (int nu = 0; nu < m + 1; nu++) {
+    //     mu[nu] = 0.0;
+    // }
+    // double mu_tmp;
+    // size_t size_I;
+    // for (int nu = 0; nu < m + 1; nu++) {
+    //     size_I = I[nu].size();
+    //     for (int i = 1; i < size_I; i++) { // при i = 0 - нет j
+    //         for (int j = 0; j < i; j++) {
+    //             mu_tmp = abs(I[nu][i].z - I[nu][j].z) / deltaX(I[nu][j].x, I[nu][i].x);
+    //             if (mu_tmp > mu[nu]) {
+    //                 mu[nu] = mu_tmp;
+    //             }
+    //         }
+    //     }
+    //     if (abs(mu[nu]) < 6e-13) {
+    //         mu[nu] = 1.0;
+    //     };
+    // }
 
     // расчеты только в I, к котром появилась новая точка
     // double mu_tmp;
@@ -175,12 +176,16 @@ double imgo_method::selectNewPoint(size_t &t, trial last_trial) {
     // }
 
     // не работает, спросить
-    //for (int i = 1; i < size_I; i++) {
-    //    mu_tmp = abs(I[last_I - 1][i].z - I[last_I - 1][i - 1].z) / deltaX(I[last_I - 1][i - 1].x, I[last_I - 1][i].x);
-    //    if (mu_tmp > mu[last_I - 1]) {
-    //        mu[last_I - 1] = mu_tmp;
-    //    }
-    //}
+    // mu[last_trial.nu - 1] = 0.0;
+    // for (int i = 1; i < size_I; i++) {
+    //     mu_tmp = abs(I[last_trial.nu - 1][i].z - I[last_trial.nu - 1][i - 1].z) / deltaX(I[last_trial.nu - 1][i - 1].x, I[last_trial.nu - 1][i].x);
+    //     if (mu_tmp > mu[last_trial.nu - 1]) {
+    //         mu[last_trial.nu - 1] = mu_tmp;
+    //     }
+    // }
+    // if (abs(mu[last_trial.nu - 1]) < 6e-13) {
+    //     mu[last_trial.nu - 1] = 1.0;
+    // }
 
 #if defined(TIME_TEST)
     end_time = clock();
@@ -504,6 +509,9 @@ void imgo_method::solve(int &count, vector<double> &X, Stop stop) {
 
         count++;
         if (stop == ACCURACY) {
+        #if defined(EPS)
+            cout << pow(abs(trial_points[t].x - trial_points[t - 1].x), 1.0 / n) << endl;
+        #endif
             if (pow(abs(trial_points[t].x - trial_points[t - 1].x), 1.0 / n) <= eps) {
                 break;
             }
@@ -542,12 +550,14 @@ void imgo_method::solve(int &count, vector<double> &X, Stop stop) {
 #endif
 }
 
-bool imgo_method::solve_test(double x_opt, int k) {
+bool imgo_method::solve_test(double x_opt, int &count, Stop stop) {
     for (int nu = 0; nu < m + 1; nu++) {
         I[nu].clear();
         calc_I[nu] = false;
+        mu[nu] = 1.0;
     }
     trial_points.clear();
+    Nmax = count;
 
     trial tr = newTrial_single(A[0]);
     trial_points.push_back(tr);
@@ -555,7 +565,7 @@ bool imgo_method::solve_test(double x_opt, int k) {
     tr = newTrial_single(B[0]);
     trial_points.push_back(tr);
     addInSort(I[tr.nu - 1], tr);
-    int n = 2;
+    count = 2;
 
     double x_k_1;
     size_t t = 1;
@@ -567,22 +577,23 @@ bool imgo_method::solve_test(double x_opt, int k) {
 
         // Шаг 2
         addInSort(I[tr.nu - 1], tr);
-        n++;
+        count++;
         if (abs(x_k_1 - x_opt) <= eps) {
             return true;
         }
-        if (n >= k) {
+        if (stop == ACCURNUMBER && count >= Nmax) {
             return false;
         }
     }
 }
 
-void imgo_method::solve_test(vector<double> x_opt, int &count) {
+bool imgo_method::solve_test(vector<double> x_opt, int &count, Stop stop) {
     for (int nu = 0; nu < m + 1; nu++) {
         I[nu].clear();
         calc_I[nu] = false;
     }
     trial_points.clear();
+    Nmax = count;
     M = 0;
 
     trial tr{peano_a, -1.0, 0};
@@ -614,7 +625,10 @@ void imgo_method::solve_test(vector<double> x_opt, int &count) {
         count++;
         y(x_k_1, X);
         if (dist_vec(X, x_opt) <= eps) {
-            return ;
+            return true;
+        }
+        if (stop == ACCURNUMBER && count >= Nmax) {
+            return false;
         }
     }
 }
