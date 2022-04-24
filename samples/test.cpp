@@ -10,18 +10,9 @@
     #include <cmath>
 #endif
 #include <imgo.h>
+#include <task.h>
 
 using namespace std;
-
-struct task {
-    double (*f)(double, int);
-    double a, b;
-    double x_min;
-    int m;
-
-    task(double (*_f)(double, int), double _a, double _b, double _x_min, int _m)
-        : f(_f), a(_a), b(_b), x_min(_x_min), m(_m) {}
-};
 
 double f1(double x, int j) {
     switch (j) {
@@ -112,43 +103,45 @@ int main() {
     if (!ofstr.is_open()) cerr << "File opening error\n";
     vector<trial> trial_vec;
 
-    double eps = 0.001;
-    double r = 3.0; // > 1
+    double eps = 0.001, r = 3.0, d = 0.0, x_min;
+    int count, Nmax = 1000;
+    Stop stop = ACCURACY;
 
-    double x_min;
-    int n;
+    vector<Task> task_array = { Task(f1, "f1(x)", 1, -2.5, 1.5, 1.05738, eps, Nmax, r, d, stop, 1),
+                                Task(f2, "f2(x)", 1, -5.0, 5.0, 1.016, eps, Nmax, r, d, stop, 1),
+                                Task(f4, "f4(x)", 2, 0.0, 4.0, 2.45956, eps ,Nmax, r, d, stop,  1),
+                                Task(f5, "f5(x)", 2, -1.5, 11.0, 8.85725, eps, Nmax, r, d, stop, 1),
+                                Task(f6, "f6(x)", 2, -4.0, 4.0, 2.32396, eps, Nmax, r, d, stop, 1),
+                                Task(f8, "f8(x)", 3, -2.5, 1.5, -1.12724, eps, Nmax, r, d, stop, 1),
+                                Task(f9, "f9(x)", 3, 0.0, 14.0, 4.0, eps, Nmax, r, d, stop, 1) };
 
-    vector<task> task_arr = {{f1, -2.5, 1.5, 1.05738, 1},
-                             {f2, -5.0, 5.0, 1.016, 1},
-                             {f4, 0.0, 4.0, 2.45956, 2},
-                             {f5, -1.5, 11.0, 8.85725, 2},
-                             {f6, -4.0, 4.0, 2.32396, 2},
-                             {f8, -2.5, 1.5, -1.12724, 3},
-                             {f9, 0.0, 14.0, 4.0, 3}};
+    imgo_method imgo(nullptr, 0, 0.0, 0.0, r, d, eps);
 
+    for (int i = 0; i < task_array.size(); i++) {
+        imgo.setFunc(task_array[i].f);
+        imgo.setM(task_array[i].m);
+        imgo.setAB(task_array[i].A, task_array[i].B);
+        imgo.setEps(task_array[i].eps);
+        imgo.setNmax(task_array[i].Nmax);
+        imgo.setR(task_array[i].r);
+        imgo.setD(task_array[i].d);
+        imgo.setNmax(task_array[i].Nmax);
 
-    imgo_method imgo(&f1, 0, 0.0, 0.0, r, 0.0, eps);
+        x_min = imgo.solve(count, task_array[i].stop);
 
-    for (int i = 0; i < task_arr.size(); i++) {
-        imgo.setFunc(task_arr[i].f);
-        imgo.setA(task_arr[i].a);
-        imgo.setB(task_arr[i].b);
-        imgo.setM(task_arr[i].m);
-
-        x_min = imgo.solve(n);
-
-        cout << "f" << i + 1 << "(x)\n";
-        cout << "[a; b] = [" << task_arr[i].a << "; " << task_arr[i].b << "]"<< endl;
-        cout << "x_min = " << setprecision(12) << x_min << endl;
-        cout << "Number of trials = " << n << endl;
-        cout << "|Error rate| = " << abs(x_min - task_arr[i].x_min) << endl;
-        cout << "|f" << i + 1 << "(x_min) - f" << i + 1 << "(x_opt)| = " <<
-            abs(task_arr[i].f(x_min, task_arr[i].m + 1) - task_arr[i].f(task_arr[i].x_min, task_arr[i].m + 1)) << endl;
+        cout << "Function: " << task_array[i].name << endl;
+        cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
+        cout << "X* = " << setprecision(12) << task_array[i].X_opt[0] << endl;
+        cout << "X = " << setprecision(12) << x_min << endl;
+        cout << "|X* - X| = " << abs(task_array[i].X_opt[0] - x_min) << endl;
+        cout << "|f(X*) - f(X)| = " << abs(task_array[i].f(task_array[i].X_opt[0], task_array[i].m + 1) - 
+                                           task_array[i].f(x_min, task_array[i].m + 1)) << endl;
+        cout << "Number of trials = " << count << endl;
         cout << endl;
 
         imgo.getTrialPoints(trial_vec);
-        ofstr << task_arr[i].a << " " << task_arr[i].b << " " << task_arr[i].m 
-              << " " << x_min << " " << task_arr[i].x_min << endl;
+        ofstr << task_array[i].A[0] << " " << task_array[i].B[0] << " " << task_array[i].m 
+              << " " << x_min << " " << task_array[i].X_opt[0] << endl;
         for (int j = 0; j < trial_vec.size(); j++) {
             ofstr << trial_vec[j].x << " " << trial_vec[j].z << endl;
         }

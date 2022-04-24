@@ -25,9 +25,9 @@ struct ITask {
 struct Task : public ITask {
     double (*f)(double, int);
 
-    Task(double (*_f)(double, int), string _name, int _m, double _a, double _b, double _x, 
+    Task(double (*_f)(double, int), string _name, int _m, double _a, double _b, double _x_opt, 
     double _eps, int _Nmax, double _r, double _d, Stop _stop, bool _used = true)
-        : ITask(_name, 1, _m, vector<double>{_a}, vector<double>{_b}, vector<double>{_x}, _eps, _Nmax, _r, _d, _stop, _used), f(_f) {};
+        : ITask(_name, 1, _m, vector<double>{_a}, vector<double>{_b}, vector<double>{_x_opt}, _eps, _Nmax, _r, _d, _stop, _used), f(_f) {};
 };
 
 struct Task_peano : public ITask {
