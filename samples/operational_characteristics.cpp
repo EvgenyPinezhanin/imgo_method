@@ -70,7 +70,6 @@ int main() {
             } else {
                 count_Hill[i] = count_trials + 1;
             }
-            // cout << i << endl;
         }
         for (int i = K0; i <= Kmax; i += Kstep) {
             count_successful = count_if(count_Hill.begin(), count_Hill.end(), [i](double elem){ return elem <= i; });
@@ -79,8 +78,6 @@ int main() {
         }
         ofstr << endl << endl;
     }
-
-    // Kmax = 4200;
 
     for (int i = 0; i < shekel_r_array.size(); i++) {
         ofstr_opt << "r" << i + 1 << "_shekel = \"" << shekel_r_array[i] << "\"" << endl; 
@@ -105,7 +102,6 @@ int main() {
             } else {
                 count_Shekel[i] = count_trials + 1;
             }
-            // cout << i << endl;
         }
         for (int i = K0; i <= Kmax; i += Kstep) {
             count_successful = count_if(count_Shekel.begin(), count_Shekel.end(), [i](double elem){ return elem <= i; });
@@ -132,8 +128,8 @@ int main() {
     }
 #endif
 
-    #if defined( _MSC_VER )
-        cin.get();
-    #endif
+#if defined( _MSC_VER )
+    cin.get();
+#endif
 	return 0;
 }

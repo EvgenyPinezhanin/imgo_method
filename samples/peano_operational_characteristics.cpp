@@ -3,19 +3,37 @@
 #include <ctime>
 #include <algorithm>
 #include <Grishagin/GrishaginProblemFamily.hpp>
+#include <Grishagin/GrishaginConstrainedProblemFamily.hpp>
 #include <GKLS/GKLSProblemFamily.hpp>
+#include <GKLS/GKLSConstrainedProblemFamily.hpp>
 #include <imgo.h>
 #include <omp.h>
 
 using namespace std;
 
+#define CALC
+const int family_number = 3; // 0, 1, 2, 3
+
+const int number_family = 4;
 int current_func;
 
 TGrishaginProblemFamily grishaginProblems;
 double f_grishagin(vector<double> x, int j) {
     switch (j) {
-        case 1: return grishaginProblems[current_func]->ComputeFunction({ x });
+        case 1: return grishaginProblems[current_func]->ComputeFunction(x);
         default: return numeric_limits<double>::quiet_NaN();
+    }
+};
+
+TGrishaginConstrainedProblemFamily grishaginConstrainedProblems;
+double f_constr_grishagin(vector<double> x, int j) {
+    int constr = grishaginConstrainedProblems[current_func]->GetConstraintsNumber();
+    if (j >= 1 && j <= constr) {
+        return grishaginConstrainedProblems[current_func]->ComputeConstraint(j - 1, x);
+    } else if (j - 1 == constr) {
+        return grishaginConstrainedProblems[current_func]->ComputeFunction(x);
+    } else {
+        return numeric_limits<double>::quiet_NaN();
     }
 };
 
@@ -27,7 +45,20 @@ double f_gkls(vector<double> x, int j) {
     }
 };
 
+TGKLSConstrainedProblemFamily GKLSConstrainedProblems;
+double f_constr_gkls(vector<double> x, int j) {
+    int constr = GKLSConstrainedProblems[current_func]->GetConstraintsNumber();
+    if (j >= 1 && j <= constr) {
+        return GKLSConstrainedProblems[current_func]->ComputeConstraint(j - 1, x);
+    } else if (j - 1 == constr) {
+        return GKLSConstrainedProblems[current_func]->ComputeFunction(x);
+    } else {
+        return numeric_limits<double>::quiet_NaN();
+    }
+};
+
 int main() {
+#if defined(CALC)
     ofstream ofstr("peano_operational_characteristics.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
     ofstream ofstr_opt("peano_operational_characteristics_opt.txt");
@@ -38,33 +69,41 @@ int main() {
     int start_time, end_time;
     double work_time;
 
-    int K0 = 0, Kmax = 2200, Kstep = 25;
+    int K0 = 0, Kmax = 700, Kstep = 25;
     int count_successful = 0;
     int count_trials;
 
-    vector<double> A, B;
-    vector<double> grish_r_array{2.8, 2.9, 3.0};
-    vector<double> gkls_r_array{4.2, 4.3, 4.7};
     int n = 2, den = 10, key = 1, m = 0;
-    double eps = 0.001, r = 2.9, d = 0.0;
+    double eps = 0.01, r = 0.0, d = 0.0;
 
-    vector<int> count_Grishagin(grishaginProblems.GetFamilySize(), 0);
-    vector<int> count_GKLS(GKLSProblems.GetFamilySize(), 0);
+    vector<double> A, B;
+    vector<vector<double>> r_array{ {2.5, 3.0, 3.5},
+                                    {3.5, 4.3, 5.0},
+                                    {2.5, 3.0, 3.5},
+                                    {3.9, 4.3, 4.9} };
+
+    vector<vector<int>> number_trials(number_family);
+    number_trials[0].resize(grishaginProblems.GetFamilySize(), 0);
+    number_trials[1].resize(GKLSProblems.GetFamilySize(), 0);
+    number_trials[2].resize(grishaginConstrainedProblems.GetFamilySize(), 0);
+    number_trials[3].resize(GKLSConstrainedProblems.GetFamilySize(), 0);
 
     imgo_method imgo(nullptr, n, m, A, B, r, d, eps, 0, den, key);
 
-    for (int i = 0; i < grish_r_array.size(); i++) {
-        ofstr_opt << "r" << i + 1 << "_grish = \"" << grish_r_array[i] << "\"" << endl; 
+    ofstr_opt << "Name[1]=\"Grishagin\"" << endl;
+    for (int i = 0; i < r_array[0].size(); i++) {
+        ofstr_opt << "R[" << (0 * 3) + i + 1 << "]=\"" << r_array[0][i] << "\"" << endl; 
     }
 
     imgo.setFunc(f_grishagin);
     count_func = grishaginProblems.GetFamilySize();
     imgo.setN(grishaginProblems[0]->GetDimension());
+
     cout << "GrishaginProblemFamily" << endl;
     ofstr << "# GrishaginProblemFamily" << endl;
-    for (int i = 0; i < grish_r_array.size(); i++) {
-        cout << "r = " << grish_r_array[i] << endl;
-        imgo.setR(grish_r_array[i]);
+    for (int i = 0; i < r_array[0].size(); i++) {
+        cout << "r = " << r_array[0][i] << endl;
+        imgo.setR(r_array[0][i]);
         start_time = clock();
         for (int i = 0; i < count_func; i++) {
             current_func = i;
@@ -72,14 +111,13 @@ int main() {
             grishaginProblems[current_func]->GetBounds(A, B);
             imgo.setAB(A, B);
             if (imgo.solve_test(grishaginProblems[i]->GetOptimumPoint(), count_trials, ACCURNUMBER)) {
-                count_Grishagin[i] = count_trials;
+                number_trials[0][i] = count_trials;
             } else {
-                count_Grishagin[i] = count_trials + 1;
+                number_trials[0][i] = count_trials + 1;
             }
-            // cout << i << endl;
         }
         for (int i = K0; i <= Kmax; i += Kstep) {
-            count_successful = count_if(count_Grishagin.begin(), count_Grishagin.end(), [i](double elem){ return elem <= i; });
+            count_successful = count_if(number_trials[0].begin(), number_trials[0].end(), [i](double elem){ return elem <= i; });
             cout << "K = " << i << " success rate = " << (double)count_successful / count_func << endl;
             ofstr << i << " " << (double)count_successful / count_func << endl;
         }
@@ -89,25 +127,23 @@ int main() {
         cout << "time: " << work_time << endl;
     }
 
-    n = 2; den = 20; key = 1; m = 0;
-    eps = 0.001; r = 4.3; d = 0.0;
-    Kmax = 4200;
+    // Параметры
+    Kmax = 1500;
 
-    for (int i = 0; i < gkls_r_array.size(); i++) {
-        ofstr_opt << "r" << i + 1 << "_gkls = \"" << gkls_r_array[i] << "\"" << endl; 
+    ofstr_opt << "Name[2]=\"GKLS\"" << endl;
+    for (int i = 0; i < r_array[1].size(); i++) {
+        ofstr_opt << "R[" << (1 * 3) + i + 1 << "]=\"" << r_array[1][i] << "\"" << endl; 
     }
 
     imgo.setFunc(f_gkls);
-    imgo.setDen(den);
     count_func = GKLSProblems.GetFamilySize();
     imgo.setN(GKLSProblems[0]->GetDimension());
+
     cout << "GKLSProblemFamily" << endl;
     ofstr << "# GKLSProblemFamily" << endl;
-
-    start_time = clock();
-    for (int i = 0; i < gkls_r_array.size(); i++) {
-        cout << "r = " << gkls_r_array[i] << endl;
-        imgo.setR(gkls_r_array[i]);
+    for (int i = 0; i < r_array[1].size(); i++) {
+        cout << "r = " << r_array[1][i] << endl;
+        imgo.setR(r_array[1][i]);
         start_time = clock();
         for (int i = 0; i < count_func; i++) {
             current_func = i;
@@ -115,14 +151,93 @@ int main() {
             GKLSProblems[current_func]->GetBounds(A, B);
             imgo.setAB(A, B);
             if (imgo.solve_test(GKLSProblems[i]->GetOptimumPoint(), count_trials, ACCURNUMBER)) {
-                count_GKLS[i] = count_trials;
+                number_trials[1][i] = count_trials;
             } else {
-                count_GKLS[i] = count_trials + 1;
+                number_trials[1][i] = count_trials + 1;
             }
-            // cout << i << endl;
         }
         for (int i = K0; i <= Kmax; i += Kstep) {
-            count_successful = count_if(count_GKLS.begin(), count_GKLS.end(), [i](double elem){ return elem <= i; });
+            count_successful = count_if(number_trials[1].begin(), number_trials[1].end(), [i](double elem){ return elem <= i; });
+            cout << "K = " << i << " success rate = " << (double)count_successful / count_func << endl;
+            ofstr << i << " " << (double)count_successful / count_func << endl;
+        }
+        ofstr << endl << endl;
+        end_time = clock();
+        work_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+        cout << "time: " << work_time << endl;
+    }
+
+    // Параметры
+    Kmax = 600;
+
+    ofstr_opt << "Name[3]=\"GrishaginConstrained\"" << endl;
+    for (int i = 0; i < r_array[2].size(); i++) {
+        ofstr_opt << "R[" << (2 * 3) + i + 1 << "]=\"" << r_array[2][i] << "\"" << endl; 
+    }
+
+    imgo.setFunc(f_constr_grishagin);
+    count_func = grishaginConstrainedProblems.GetFamilySize();
+    imgo.setN(grishaginConstrainedProblems[0]->GetDimension());
+
+    cout << "GrishaginProblemConstrainedFamily" << endl;
+    ofstr << "# GrishaginProblemConstrainedFamily" << endl;
+    for (int i = 0; i < r_array[2].size(); i++) {
+        cout << "r = " << r_array[2][i] << endl;
+        imgo.setR(r_array[2][i]);
+        start_time = clock();
+        for (int i = 0; i < count_func; i++) {
+            current_func = i;
+            count_trials = Kmax;
+            grishaginConstrainedProblems[current_func]->GetBounds(A, B);
+            imgo.setAB(A, B);
+            if (imgo.solve_test(grishaginConstrainedProblems[i]->GetOptimumPoint(), count_trials, ACCURNUMBER)) {
+                number_trials[2][i] = count_trials;
+            } else {
+                number_trials[2][i] = count_trials + 1;
+            }
+        }
+        for (int i = K0; i <= Kmax; i += Kstep) {
+            count_successful = count_if(number_trials[2].begin(), number_trials[2].end(), [i](double elem){ return elem <= i; });
+            cout << "K = " << i << " success rate = " << (double)count_successful / count_func << endl;
+            ofstr << i << " " << (double)count_successful / count_func << endl;
+        }
+        ofstr << endl << endl;
+        end_time = clock();
+        work_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+        cout << "time: " << work_time << endl;
+    }
+
+    // Праметры
+    Kmax = 800;
+
+    ofstr_opt << "Name[4]=\"GKLSConstrained\"" << endl;
+    for (int i = 0; i < r_array[3].size(); i++) {
+        ofstr_opt << "R[" << (3 * 3) + i + 1 << "]=\"" << r_array[3][i] << "\"" << endl; 
+    }
+
+    imgo.setFunc(f_constr_gkls);
+    count_func = GKLSProblems.GetFamilySize();
+    imgo.setN(GKLSProblems[0]->GetDimension());
+
+    cout << "GKLSProblemConstrainedFamily" << endl;
+    ofstr << "# GKLSProblemConstrainedFamily" << endl;
+    for (int i = 0; i < r_array[3].size(); i++) {
+        cout << "r = " << r_array[3][i] << endl;
+        imgo.setR(r_array[3][i]);
+        start_time = clock();
+        for (int i = 0; i < count_func; i++) {
+            current_func = i;
+            count_trials = Kmax;
+            GKLSProblems[current_func]->GetBounds(A, B);
+            imgo.setAB(A, B);
+            if (imgo.solve_test(GKLSProblems[i]->GetOptimumPoint(), count_trials, ACCURNUMBER)) {
+                number_trials[3][i] = count_trials;
+            } else {
+                number_trials[3][i] = count_trials + 1;
+            }
+        }
+        for (int i = K0; i <= Kmax; i += Kstep) {
+            count_successful = count_if(number_trials[3].begin(), number_trials[3].end(), [i](double elem){ return elem <= i; });
             cout << "K = " << i << " success rate = " << (double)count_successful / count_func << endl;
             ofstr << i << " " << (double)count_successful / count_func << endl;
         }
@@ -134,18 +249,22 @@ int main() {
 
     ofstr.close();
     ofstr_opt.close();
+#endif
 
     // Рисование графиков операционной характеристики
 #if defined(__linux__)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x peano_oper_characteristics.gp");
+    error = system("chmod +x scripts/peano_oper_characteristics.gp");
     if (error != 0) {
-        cerr << "Error chmod" << std::endl;
+        cerr << "Error chmod" << endl;
     }
-    error = system("gnuplot -p -c peano_oper_characteristics.gp");
+
+    char str[100];
+    sprintf(str, "gnuplot -p -c scripts/peano_oper_characteristics.gp %d", family_number);
+    error = system(str);
     if (error != 0) {
-        cerr << "Error gnuplot" << std::endl;
+        cerr << "Error gnuplot" << endl;
     }
 #endif
 

@@ -18,22 +18,29 @@ include_directories("${PROJECT_INCLUDE}")
 include_directories("${PROJECT_PROBLEMS}/sample_src")
 include_directories("${PROJECT_PROBLEMS}/src")
 
-# COPY
-set(COPY_RESOURCE copy_resource)
-# message( STATUS ${CMAKE_BUILD_TYPE})
+# OUTPUT DIR
 if(CMAKE_BUILD_TYPE STREQUAL Release)
-  # message( STATUS ${CMAKE_BUILD_TYPE}_release)
   set(OUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE})
 else()
-  # message( STATUS ${CMAKE_BUILD_TYPE}_debug)
   set(OUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG})
 endif()
+
+# COPY SCRIPT
+set(COPY_RESOURCE copy_resource)
 add_custom_target(${COPY_RESOURCE} ALL)
 add_custom_command(
   TARGET ${COPY_RESOURCE} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${CMAKE_SOURCE_DIR}/scripts/
-          ${OUT_DIR}/)
+          ${OUT_DIR}/scripts)
+
+# MAKE DIR
+set(MAKE_DIR make_directory)
+add_custom_target(${MAKE_DIR} ALL)
+add_custom_command(
+  TARGET ${MAKE_DIR} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory
+          ${OUT_DIR}/peano_sample_res)
 
 # BUILD
 add_subdirectory(GCGen)

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream> 
 #include <cmath>
 #include <Grishagin/grishagin_function.hpp>
 #include <GKLS/GKLSProblem.hpp>
@@ -7,7 +8,9 @@
 
 using namespace std;
 
-double f_test(vector<double> x, int j) {
+const int test_func_number = 0; // 0, 1 
+
+double f_test_1(vector<double> x, int j) {
     switch (j) {
         case 1: return 0.01 * (pow((x[0] - 2.2), 2.0) + pow((x[1] - 1.2), 2.0) - 2.25);
         case 2: return 100.0 * (1.0 - pow((x[0] - 2.0), 2.0) / 1.44 - pow(0.5 * x[1], 2.0));
@@ -19,112 +22,43 @@ double f_test(vector<double> x, int j) {
     }
 }
 
-double f_SPPR1(vector<double> x, int j) {
-    switch (j) {
-        case 1: return 1.0 - 2.0 * x[0] - x[0] * x[1];
-        case 2: return 2.0 * x[0] * x[0] + x[1];
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-}
+const double C[20] = {75.1963666677,-3.8112755343,0.1269366345,-0.0020567665,0.000010345,
+                      -6.8306567631,0.0302344793,-0.0012813448,0.0000352559,-0.0000002266,
+                      0.2564581253,-0.0034604030,0.0000135139,-28.1064434908,-0.0000052375,
+                      -0.0000000063,0.0000000007,0.0003405462,-0.0000016638,-2.8673112392 };
 
-double f_SPPR2(vector<double> x, int j) {
+double f_test_2(vector<double> x, int j) {
     switch (j) {
-        case 1: return sin(x[0]) - x[1];
-        case 2: return cos(x[0]) + x[1];
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-}
-
-double f_SPPR3(vector<double> x, int j) {
-    switch (j) {
-        case 1: return sin(x[0]) - x[1];
-        case 2: return x[1] * cos(x[0]);
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-}
-
-double f_SPPR4(vector<double> x, int j) {
-    switch (j) {
-        case 1: return 2 * sqrt(x[0]) - x[1];
-        case 2: return -2 * x[0] * x[0] + x[1] * x[1];
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-}
-
-double f_SPPR5(vector<double> x, int j) {
-    switch (j) {
-        case 1: return 0.5 * exp(x[0]) - x[1];
-        case 2: return (x[0] - 2.0) * (x[0] - 2.0) + (log(x[1]) - 1) * (log(x[1]) - 1);
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-}
-
-double f_SPPR6(vector<double> x, int j) {
-    switch (j) {
-        case 1: return 2.0 - sqrt(x[0]) - x[1];
-        case 2: return exp(sqrt(x[0] * x[0] + (x[1] + 1.0) * (x[1] + 1.0)));
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-}
-
-TGrishaginProblem grishaginProblem;
-double f_grishagin(vector<double> x, int j) {
-    switch (j) {
-        case 1: return grishaginProblem.ComputeFunction(x);
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-}
-
-TGKLSProblem gklsProblem1;
-double f_gkls_1(vector<double> x, int j) {
-    switch (j) {
-        case 1: return gklsProblem1.ComputeFunction(x);
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-}
-
-TGKLSProblem gklsProblem18(18);
-double f_gkls_18(vector<double> x, int j) {
-    switch (j) {
-        case 1: return gklsProblem18.ComputeFunction(x);
+        case 1: return 450.0 - x[0] * x[1];
+        case 2: return (0.1 * x[0] - 1.0) * (0.1 * x[0] - 1.0) - x[1];
+        case 3: return 8.0 * (x[0] - 40.0) - (x[1] - 30.0) * (x[1] - 55.0);
+        case 4: return x[1] + (x[0] - 35.0) * (x[0] - 30.0) / 125.0 - 80.0;
+        case 5: return -(C[0] + C[1] * x[0] + C[2] * x[0] * x[0] + C[3] * pow(x[0], 3) + C[4] * pow(x[0], 4) + C[5] * x[1] +
+                         C[6] * x[0] * x[1] + C[7] * x[0] * x[0] * x[1] + C[8] * pow(x[0], 3) * x[1] + C[9] * pow(x[0], 4) * x[1] +
+                         C[10] * x[1] * x[1] + C[11] * pow(x[1], 3) + C[12] * pow(x[1], 4) + C[13] / (x[1] + 1) + C[14] * x[0] * x[0] * x[1] * x[1] +
+                         C[15] * pow(x[0], 3) * x[1] * x[1] + C[16] * pow(x[0], 3) * pow(x[1], 3) + C[17] * x[0] * x[1] * x[1] +
+                         C[18] * x[0] * pow(x[1], 3) + C[19] * exp(0.0005 * x[0] * x[1]));
         default: return numeric_limits<double>::quiet_NaN();
     }
 }
 
 int main() {
-    int n = 2, m = 0, den = 10, key = 1, Nmax = 5000;
-    double eps = 0.001, r = 2.0, d = 0.0;
+    ofstream ofstr("peano_test_trial_points.txt");
+    if (!ofstr.is_open()) cerr << "File opening error\n";
+
+    int n = 2, m = 0, den = 12, key = 1, Nmax = 5000;
+    double eps = 0.001, r = 2.0, d = 0.00;
     Stop stop = ACCURACY;
     vector<double> X(2);
+    vector<vector<double>> trial_vec;
     int number_trials;
 
-    vector<double> A, B, A1, B1, A2, B2;
-    grishaginProblem.GetBounds(A, B);
-    gklsProblem1.GetBounds(A1, B1);
-    gklsProblem18.GetBounds(A2, B2);
-    vector<Task_peano> task{ Task_peano(f_test, "Test-1", n, 3, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
-                                        vector<double>{0.942, 0.944}, eps, Nmax, r, d, den, key, stop, 0),
-                             Task_peano(f_SPPR1, "SPPR-1", n, 1, vector<double>{0.5, -2.0}, vector<double>{3.0, 2.0},
-                                        vector<double>{0.629960524947, -0.412598948032}, eps, Nmax, r, d, den, key, stop, 0),
-                             Task_peano(f_SPPR2, "SPPR-2", n, 1, vector<double>{0.0, 0.0}, vector<double>{M_PI, 2.0},
-                                        vector<double>{M_PI, 0.0}, eps, Nmax, 3.0, d, den, key, stop, 0),
-                             Task_peano(f_SPPR3, "SPPR-3", n, 1, vector<double>{0.0, 0.0}, vector<double>{M_PI, 2.0},
-                                        vector<double>{M_PI, 2.0}, eps, Nmax, r, d, den, key, stop, 0),
-                             Task_peano(f_SPPR4, "SPPR-4", n, 1, vector<double>{0.0, 0.0}, vector<double>{4.0, 3.0},
-                                        vector<double>{2.25, 3.0}, eps, Nmax, 2.5, d, den, key, stop, 0),
-                             Task_peano(f_SPPR5, "SPPR-5", n, 1, vector<double>{0.0, 0.0}, vector<double>{10.0, 10.0},
-                                        vector<double>{(3.0 + log(2.0)) / 2.0, 0.5 * exp((3.0 + log(2.0)) / 2.0)}, 
-                                        eps, Nmax, 3.3, d, 12, key, ACCURNUMBER, 1),
-                             Task_peano(f_SPPR6, "SPPR-6", n, 1, vector<double>{0.0, 0.0}, vector<double>{4.0, 2.0},
-                                        vector<double>{1.0, 1.0}, eps, Nmax, 3.3, d, 12, key, stop, 1),
-                             Task_peano(f_grishagin, "Grishagin_func", n, 0, A, B,
-                                        grishaginProblem.GetOptimumPoint(), eps, Nmax, r, d, den, key, stop, 0),
-                             Task_peano(f_gkls_1, "GKLS_func_1", n, 0, A1, B1,
-                                        gklsProblem1.GetOptimumPoint(), eps, Nmax, 3.0, d, 12, key, stop, 0),
-                             Task_peano(f_gkls_18, "GKLS_func_18", n, 0, A2, B2,
-                                        gklsProblem18.GetOptimumPoint(), eps, Nmax, 4.0, d, den, key, stop, 0) };
+    vector<Task_peano> task{ Task_peano(f_test_1, "Test-1", n, 3, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
+                                        vector<double>{0.942, 0.944}, eps, Nmax, r, d, den, key, stop, 1),
+                             Task_peano(f_test_2, "Test-2", n, 4, vector<double>{0.0, 0.0}, vector<double>{80.0, 80.0},
+                                        vector<double>{75.0, 65.5}, 0.002, Nmax, 2.5, 0.002, den, key, stop, 1) };
 
-    imgo_method imgo(nullptr, 2, 0, A, B);
+    imgo_method imgo(nullptr, 2, 0, vector<double>{0.0, 0.0}, vector<double>{1.0, 1.0});
 
     for (int i = 0; i < task.size(); i++) {
         if (task[i].used) {
@@ -155,7 +89,37 @@ int main() {
                                             (task[i].X_opt[1] - X[1]) * (task[i].X_opt[1] - X[1])) << std::endl;
             cout << "|f(X*) - f(X)| = " << abs(task[i].f(task[i].X_opt, task[i].m + 1) - task[i].f(X, task[i].m + 1)) << std::endl;
             cout << std::endl;
+
+            // Подготовка данных для построения графика
+            ofstr << X[0] << " " << X[1] << " " << task[i].f(X, task[i].m + 1) << endl;
+            ofstr << endl << endl;
+            ofstr << task[i].X_opt[0] << " " << task[i].X_opt[1] << " " << task[i].f(task[i].X_opt, task[i].m + 1) << endl;
+            ofstr << endl << endl;
+            imgo.getPoints(trial_vec);
+            for (int j = 0; j < trial_vec.size(); j++) {
+                ofstr << trial_vec[j][0] << " " << trial_vec[j][1] << " " << task[i].f(trial_vec[j], task[i].m + 1) << endl;
+            }
+            ofstr << endl << endl;
         }
     }
+    ofstr.close();
+
+    // Построение графика(работает только под Lunux с помощью gnuplot)
+#if defined(__linux__)
+    int error;
+    setenv("QT_QPA_PLATFORM", "xcb", false);
+    error = system("chmod +x scripts/peano_test.gp");
+    if (error != 0) {
+        cerr << "Error chmod" << std::endl;
+    }
+
+    char str[100];
+    sprintf(str, "gnuplot -p -c scripts/peano_test.gp %d", test_func_number);
+    error = system(str);
+    if (error != 0) {
+        cerr << "Error gnuplot" << std::endl;
+    }
+#endif
+
     return 0;
 }

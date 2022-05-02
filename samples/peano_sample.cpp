@@ -3,107 +3,147 @@
 #include <cstdlib>
 #include <cmath>
 #include <imgo.h>
+#include <task.h>
 
-//#define FUNC_1
-#define FUNC_2
-//#define FUNC_3
-//#define FUNC_4
+using namespace std;
 
-#if defined(FUNC_1)
-double f(vector<double> x, int j) {
+double f1_sample(vector<double> x, int j) {
+    switch (j) {
+        case 1: return 1.0 - x[0] - x[1];
+        default: return numeric_limits<double>::quiet_NaN();
+    }
+}
+
+double f2_sample(vector<double> x, int j) {
     switch (j) {
         case 1: return (x[0] - 1.0) * (x[0] - 1.0) / 5.0 + (x[1] - 1.0) * (x[1] - 1.0) / 5.0;
         default: return numeric_limits<double>::quiet_NaN();
     }
 }
-#elif defined(FUNC_2)
+
 const double k = 0.3;
-double f(vector<double> x, int j) {
+double f3_sample(vector<double> x, int j) {
     switch (j) {
         case 1: return k - x[0] - x[1];
         case 2: return x[0] * x[0] / 5.0 + x[1] * x[1] / 5.0;
         default: return numeric_limits<double>::quiet_NaN();
     }
 }
-#elif defined(FUNC_3)
-double f(vector<double> x, int j) {
-    switch (j) {
-        case 1: return 1.0 - x[0] - x[1];
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-}
-#endif
 
 int main() {
-    std::ofstream ofstr("trial_points.txt");
+    ofstream ofstr("peano_sample_trial_points.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
-
-#if defined(FUNC_1)
-    double a1 = -4.0, b1 = 4.0;
-    double a2 = -4.0, b2 = 4.0;
-    double x1_opt = 1.0, x2_opt = 1.0;
-    int m = 0;
-#elif defined(FUNC_2)
-    double a1 = -0.5, b1 = 0.5;
-    double a2 = -0.5, b2 = 0.5;
-    double x1_opt = k / 2.0, x2_opt = k / 2.0;
-    int m = 1;
-#elif defined(FUNC_3)
-    double a1 = -0.5, b1 = 0.5;
-    double a2 = -0.5, b2 = 0.5;
-    double x1_opt = 4.0, x2_opt = 4.0;
-    int m = 0;
-#endif
+    ofstream ofstr_func("peano_sample_function.txt");
+    if (!ofstr_func.is_open()) cerr << "File opening error\n";
 
     vector<double> X(2);
     std::vector<vector<double>> trial_vec;
     int number_trials;
-    int n = 2, den = 10, key = 1;
+    int n = 2, den = 10, key = 1, Nmax = 1000;
     double eps = 0.001, r = 2.0, d = 0.0;
+    Stop stop = ACCURACY;
 
-    imgo_method imgo(f, n, m, vector<double>{a1, a2}, vector<double>{b1, b2}, r, d, eps, 0, den, key);
-    imgo.solve(number_trials, X);
+    vector<Task_peano> task = { Task_peano(f1_sample, "f1_sample", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
+                                           vector<double>{4.0, 4.0}, eps, Nmax, r, d, den, key, stop, 1),
+                                Task_peano(f2_sample, "f2_sample", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
+                                           vector<double>{1.0, 1.0}, eps, Nmax, r, d, den, key, stop, 1),
+                                Task_peano(f3_sample, "f3_sample", n, 1, vector<double>{-0.5, -0.5}, vector<double>{0.5, 0.5},
+                                           vector<double>{k / 2.0, k / 2.0}, eps, Nmax, r, d, den, key, stop, 1) };
 
-    std::cout << "Parameters for constructing the Peano curve:" << std::endl;
-    std::cout << "n = " << n << " m = " << den << " key = " << key << std::endl;
-    std::cout << "Trials result:" << std::endl;
-    std::cout << "Number of trials = " << number_trials << std::endl;
-    std::cout << "x*_min = " << x1_opt << " y*_min = " << x2_opt << std::endl;
-    std::cout << "x_min = " << X[0] << " y_min = " << X[1] << std::endl;
+    imgo_method imgo(nullptr, n, 0, vector<double>{0.0, 0.0}, vector<double>{0.0, 0.0}, r, d, eps, Nmax, den, key);
 
-    // Подготовка данных для построения графика
-    ofstr << X[0] << " " << X[1] << " " << f(X, m + 1) << endl;
-    ofstr << endl << endl;
-    ofstr << x1_opt << " " << x2_opt << " " << f(vector<double>{x1_opt, x2_opt}, m + 1) << endl;
-    ofstr << endl << endl;
-    imgo.getPoints(trial_vec);
-    for (int i = 0; i < trial_vec.size(); i++) {
-        ofstr << trial_vec[i][0] << " " << trial_vec[i][1] << " " << f(trial_vec[i], m + 1) << std::endl;
+    for (int i = 0; i < task.size(); i++) {
+        if (task[i].used) {
+            imgo.setFunc(task[i].f);
+            imgo.setN(task[i].n);
+            imgo.setM(task[i].m);
+            imgo.setAB(task[i].A, task[i].B);
+            imgo.setEps(task[i].eps);
+            imgo.setNmax(task[i].Nmax);
+            imgo.setR(task[i].r);
+            imgo.setD(task[i].d);
+            imgo.setDen(task[i].den);
+            imgo.setKey(task[i].key);
+
+            number_trials = task[i].Nmax;
+            imgo.solve(number_trials, X, task[i].stop);
+
+            cout << "Function: " << task[i].name << endl;
+            cout << "Dimension = " << task[i].n << endl;
+            cout << "Number of restrictions = " << task[i].m << endl;
+            cout << "Parameters for constructing the Peano curve:" << endl;
+            cout << "n = " << task[i].n << " m = " << task[i].den << " key = " << task[i].key << endl;
+            cout << "Trials result:" << endl;
+            cout << "Number of trials = " << number_trials << endl;
+            cout << "x*_min = " << task[i].X_opt[0] << " y*_min = " << task[i].X_opt[1] << endl;
+            cout << "x_min = " << X[0] << " y_min = " << X[1] << endl;
+            cout << "||X* - X|| = " << sqrt((task[i].X_opt[0] - X[0]) * (task[i].X_opt[0] - X[0]) + 
+                                            (task[i].X_opt[1] - X[1]) * (task[i].X_opt[1] - X[1])) << endl;
+            cout << "|f(X*) - f(X)| = " << abs(task[i].f(task[i].X_opt, task[i].m + 1) - task[i].f(X, task[i].m + 1)) << endl;
+            cout << endl;
+
+            // Подготовка данных для построения графика
+            ofstr << X[0] << " " << X[1] << " " << task[i].f(X, task[i].m + 1) << endl;
+            ofstr << endl << endl;
+            ofstr << task[i].X_opt[0] << " " << task[i].X_opt[1] << " " << task[i].f(task[i].X_opt, task[i].m + 1) << endl;
+            ofstr << endl << endl;
+            imgo.getPoints(trial_vec);
+            for (int i = 0; i < trial_vec.size(); i++) {
+                ofstr << trial_vec[i][0] << " " << trial_vec[i][1] << " " << task[i].f(trial_vec[i], task[i].m + 1) << endl;
+            }
+            ofstr.close();
+        }
     }
-    ofstr.close();
+
+    // Передача функций в gnuplot
+    ofstr_func << "func_size=" << task.size() << endl;
+    ofstr_func << "array M[" << task.size() << "]" << endl;
+    ofstr_func << "array Name[" << task.size() << "]" << endl;
+    ofstr_func << "array Used[" << task.size() << "]" << endl;
+    ofstr_func << "array A[" << 2 * task.size() << "]" << endl;
+    ofstr_func << "array B[" << 2 * task.size() << "]" << endl;
+    for (int i = 0; i < task.size(); i++) {
+        if (task[i].used) {
+            ofstr_func << "Used[" << i + 1 << "]=" << 1 << endl;
+            ofstr_func << "M[" << i + 1 << "]=" << task[i].m << endl;
+            ofstr_func << "Name[" << i + 1 << "]=" << "\"f" << i + 1 << "_sample\"" << endl;
+            ofstr_func << "A[" << 2 * (i + 1) - 1 << "]=" << task[i].A[0] << endl;
+            ofstr_func << "A[" << 2 * (i + 1) << "]=" << task[i].A[1] << endl;
+            ofstr_func << "B[" << 2 * (i + 1) - 1 << "]=" << task[i].B[0] << endl;
+            ofstr_func << "B[" << 2 * (i + 1) << "]=" << task[i].B[1] << endl;
+        } else {
+            ofstr_func << "Used[" << i + 1 << "]=" << 0 << endl;
+        }
+    }
+    if (task[0].used) {
+        ofstr_func << "f_1(x, y)=" << "1.0-x-y" << endl;
+    }
+    if (task[1].used) {
+        ofstr_func << "f_2(x, y)=" << "(x-1.0)**2/5.0+(y-1.0)**2/5.0" << endl;
+    }
+    if (task[2].used) {
+        ofstr_func << "f_3(x, y)=" << "x**2/5.0+y**2/5.0" << endl;
+        ofstr_func << "g1_3(x, y)=" << k << "-x-y" << endl;
+    }
+    ofstr_func.close();
 
     // Построение графика(работает только под Lunux с помощью gnuplot)
 #if defined(__linux__)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x chart.gp");
+    error = system("chmod +x scripts/peano_sample.gp");
     if (error != 0) {
         std::cerr << "Error chmod" << std::endl;
     }
-
-#if defined(FUNC_1)
-    error = system("gnuplot -p -c chart.gp func_1");
-#elif defined(FUNC_2)
-    char str[100];
-    sprintf(str, "gnuplot -p -c chart.gp func_2 %g", k);
-    error = system(str);
-#elif defined(FUNC_3)
-    error = system("gnuplot -p -c chart.gp func_3");
-#endif
-#endif
-
+    error = system("gnuplot -p -c scripts/peano_sample.gp peano_sample");
     if (error != 0) {
         std::cerr << "Error gnuplot" << std::endl;
     }
+#endif
+
     return 0;
 }
+
+    // char str[100];
+    // sprintf(str, "gnuplot -p -c peano_sample.gp func_2 %g", k);
+    // error = system(str);
