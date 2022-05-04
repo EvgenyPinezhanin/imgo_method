@@ -149,8 +149,8 @@ int main() {
     }
 
     ofstr.close();
-    #if defined( _MSC_VER )
-        cin.get();
-    #endif
+#if defined( _MSC_VER )
+    cin.get();
+#endif
     return 0;
 }

@@ -61,7 +61,7 @@ if (ARG1 == 0) {
       set xrange [0.0:4.0]
       set yrange [-1.0:3.0]
       splot f_1(x, y) title "φ(x, y)" nosurface, \
-            g_1(x, y) lc rgb "green" notitle nocontours, \
+            g_1(x, y) lc rgb "orange" notitle nocontours, \
             trialfile index 2 ls 5 lc rgb "green" title "trial points" nocontours, \
             trialfile index 0 ls 5 lc rgb "blue" title "X" nocontours, \
             trialfile index 1 ls 5 lc rgb "red" title "X*" nocontours, \
@@ -71,7 +71,7 @@ if (ARG1 == 0) {
       set xrange [0.0:80.0]
       set yrange [0.0:80.0]
       splot f_2(x, y) title "φ(x, y)" nosurface, \
-            g_2(x, y) lc rgb "cyan" notitle nocontours, \
+            g_2(x, y) lc rgb "orange" notitle nocontours, \
             trialfile index 5 ls 5 lc rgb "green" title "trial points" nocontours, \
             trialfile index 3 ls 5 lc rgb "blue" title "X" nocontours, \
             trialfile index 4 ls 5 lc rgb "red" title "X*" nocontours, \

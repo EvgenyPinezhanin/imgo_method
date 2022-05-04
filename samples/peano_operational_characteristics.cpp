@@ -7,7 +7,6 @@
 #include <GKLS/GKLSProblemFamily.hpp>
 #include <GKLS/GKLSConstrainedProblemFamily.hpp>
 #include <imgo.h>
-#include <omp.h>
 
 using namespace std;
 
@@ -251,7 +250,7 @@ int main() {
     ofstr_opt.close();
 #endif
 
-    // Рисование графиков операционной характеристики
+    // Рисование графиков операционной характеристики(работает только под Lunux с помощью gnuplot)
 #if defined(__linux__)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);
@@ -273,7 +272,3 @@ int main() {
 #endif
 	return 0;
 }
-
-// #pragma omp parallel for schedule(dynamic) num_threads(NUM_THREADS) shared(count_func) private(current_func)
-// cout << omp_get_thread_num() << endl;
-// const int NUM_THREADS = 8;

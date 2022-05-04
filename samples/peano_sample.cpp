@@ -7,6 +7,8 @@
 
 using namespace std;
 
+const int sample_func_number = 3; // 0, 1, 2, 3
+
 double f1_sample(vector<double> x, int j) {
     switch (j) {
         case 1: return 1.0 - x[0] - x[1];
@@ -21,10 +23,17 @@ double f2_sample(vector<double> x, int j) {
     }
 }
 
-const double k = 0.3;
 double f3_sample(vector<double> x, int j) {
     switch (j) {
-        case 1: return k - x[0] - x[1];
+        case 1: return 1.0 - x[0] - x[1];
+        case 2: return x[0] * x[0] / 5.0 + x[1] * x[1] / 5.0;
+        default: return numeric_limits<double>::quiet_NaN();
+    }
+}
+
+double f4_sample(vector<double> x, int j) {
+    switch (j) {
+        case 1: return pow(x[0] - 2.0, 2) + pow(x[1] - 2.0, 2) - 2.0;
         case 2: return x[0] * x[0] / 5.0 + x[1] * x[1] / 5.0;
         default: return numeric_limits<double>::quiet_NaN();
     }
@@ -33,8 +42,6 @@ double f3_sample(vector<double> x, int j) {
 int main() {
     ofstream ofstr("peano_sample_trial_points.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
-    ofstream ofstr_func("peano_sample_function.txt");
-    if (!ofstr_func.is_open()) cerr << "File opening error\n";
 
     vector<double> X(2);
     std::vector<vector<double>> trial_vec;
@@ -47,8 +54,10 @@ int main() {
                                            vector<double>{4.0, 4.0}, eps, Nmax, r, d, den, key, stop, 1),
                                 Task_peano(f2_sample, "f2_sample", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
                                            vector<double>{1.0, 1.0}, eps, Nmax, r, d, den, key, stop, 1),
-                                Task_peano(f3_sample, "f3_sample", n, 1, vector<double>{-0.5, -0.5}, vector<double>{0.5, 0.5},
-                                           vector<double>{k / 2.0, k / 2.0}, eps, Nmax, r, d, den, key, stop, 1) };
+                                Task_peano(f3_sample, "f3_sample", n, 1, vector<double>{-1.0, -1.0}, vector<double>{1.0, 1.0},
+                                           vector<double>{0.5, 0.5}, eps, Nmax, r, d, den, key, stop, 1),
+                                Task_peano(f4_sample, "f4_sample", n, 1, vector<double>{0.0, 0.0}, vector<double>{3.0, 3.0},
+                                           vector<double>{1.0, 1.0}, eps, Nmax, r, d, den, key, stop, 1) };
 
     imgo_method imgo(nullptr, n, 0, vector<double>{0.0, 0.0}, vector<double>{0.0, 0.0}, r, d, eps, Nmax, den, key);
 
@@ -88,44 +97,13 @@ int main() {
             ofstr << task[i].X_opt[0] << " " << task[i].X_opt[1] << " " << task[i].f(task[i].X_opt, task[i].m + 1) << endl;
             ofstr << endl << endl;
             imgo.getPoints(trial_vec);
-            for (int i = 0; i < trial_vec.size(); i++) {
-                ofstr << trial_vec[i][0] << " " << trial_vec[i][1] << " " << task[i].f(trial_vec[i], task[i].m + 1) << endl;
+            for (int j = 0; j < trial_vec.size(); j++) {
+                ofstr << trial_vec[j][0] << " " << trial_vec[j][1] << " " << task[i].f(trial_vec[j], task[i].m + 1) << endl;
             }
-            ofstr.close();
+            ofstr << endl << endl;
         }
     }
-
-    // Передача функций в gnuplot
-    ofstr_func << "func_size=" << task.size() << endl;
-    ofstr_func << "array M[" << task.size() << "]" << endl;
-    ofstr_func << "array Name[" << task.size() << "]" << endl;
-    ofstr_func << "array Used[" << task.size() << "]" << endl;
-    ofstr_func << "array A[" << 2 * task.size() << "]" << endl;
-    ofstr_func << "array B[" << 2 * task.size() << "]" << endl;
-    for (int i = 0; i < task.size(); i++) {
-        if (task[i].used) {
-            ofstr_func << "Used[" << i + 1 << "]=" << 1 << endl;
-            ofstr_func << "M[" << i + 1 << "]=" << task[i].m << endl;
-            ofstr_func << "Name[" << i + 1 << "]=" << "\"f" << i + 1 << "_sample\"" << endl;
-            ofstr_func << "A[" << 2 * (i + 1) - 1 << "]=" << task[i].A[0] << endl;
-            ofstr_func << "A[" << 2 * (i + 1) << "]=" << task[i].A[1] << endl;
-            ofstr_func << "B[" << 2 * (i + 1) - 1 << "]=" << task[i].B[0] << endl;
-            ofstr_func << "B[" << 2 * (i + 1) << "]=" << task[i].B[1] << endl;
-        } else {
-            ofstr_func << "Used[" << i + 1 << "]=" << 0 << endl;
-        }
-    }
-    if (task[0].used) {
-        ofstr_func << "f_1(x, y)=" << "1.0-x-y" << endl;
-    }
-    if (task[1].used) {
-        ofstr_func << "f_2(x, y)=" << "(x-1.0)**2/5.0+(y-1.0)**2/5.0" << endl;
-    }
-    if (task[2].used) {
-        ofstr_func << "f_3(x, y)=" << "x**2/5.0+y**2/5.0" << endl;
-        ofstr_func << "g1_3(x, y)=" << k << "-x-y" << endl;
-    }
-    ofstr_func.close();
+    ofstr.close();
 
     // Построение графика(работает только под Lunux с помощью gnuplot)
 #if defined(__linux__)
@@ -135,7 +113,10 @@ int main() {
     if (error != 0) {
         std::cerr << "Error chmod" << std::endl;
     }
-    error = system("gnuplot -p -c scripts/peano_sample.gp peano_sample");
+
+    char str[100];
+    sprintf(str, "gnuplot -p -c scripts/peano_sample.gp %d", sample_func_number);
+    error = system(str);
     if (error != 0) {
         std::cerr << "Error gnuplot" << std::endl;
     }
@@ -143,7 +124,3 @@ int main() {
 
     return 0;
 }
-
-    // char str[100];
-    // sprintf(str, "gnuplot -p -c peano_sample.gp func_2 %g", k);
-    // error = system(str);

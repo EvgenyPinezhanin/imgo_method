@@ -2,102 +2,75 @@
 
 reset
 
-trialfile=ARG1."_trial_points.txt"
-funcfile=ARG1."_function.txt"
-imagedir=ARG1."_res"
+trialfile="peano_sample_trial_points.txt"
 
-# plot_f(i) = sprintf("splot f_%d(x, y)", i)
-# plot_g(i, j) = sprintf("replot g%d_%d(x, y)", j, i)  
+f_1(x, y) = 1.0-x-y
 
-plot_f(i, j) = (j > 0) ? gprintf("g%d_%d(x, y)", j, i) : gprintf("f_%d(x, y)", i) 
+f_2(x, y) = (x-1.0)**2 / 5.0 + (y - 1.0)**2 / 5.0
 
-load funcfile
+f_3(x, y) = x**2 / 5.0 + y**2 / 5.0
+g1_3(x, y) = 1.0-x-y
+g_3(x, y) = (g1_3(x, y) <= 0.0) ? g1_3(x, y) : 1/0
 
-set terminal png size 1200,720
+f_4(x, y) = x**2 / 5.0 + y**2 / 5.0
+g1_4(x, y) = (x - 2.0)**2 + (y - 2.0)**2 - 2.0
+g_4(x, y) = (g1_4(x, y) <= 0.0) ? g1_4(x, y) : 1/0
 
-unset surface
+set grid
 set contour
 set view map
-set cntrparam levels auto 10
+set cntrparam bspline levels auto 10
+set cntrlabel onecolor
+set cntrlabel start 5 interval 150
+set cntrlabel font ",10"ssssssss
+set contour base
+set isosamples 60
 
 set xlabel "X"
 set ylabel "Y"
 
-do for [i=1:func_size] {
-    if (Used[i] == 1) {
-        name = Name[i]
-        print name
-        set xrange [A[2*i-1]:B[2*i-1]]
-        set yrange [A[2*i]:B[2*i]]
-        # eval plot_f(i)
-        # do for [j=1:M[i]] {
-        #     eval plot_g(i, j)
-        # }
-        splot for [j=0:0] plot_f(i, j)
-        set output
-        unset output
-    }
+if (ARG1 == 0) {
+      set title "Chart of sample function 1" font "Helvetica Bold, 20"
+      set xrange [-4.0:4.0]
+      set yrange [-4.0:4.0]
+      splot f_1(x, y) title "φ(x, y)" nosurface, \
+            trialfile index 2 ls 5 lc rgb "green" title "trial points" nocontours, \
+            trialfile index 1 ls 5 lc rgb "red" title "X*" nocontours, \
+            trialfile index 0 ls 5 lc rgb "blue" title "X" nocontours, \
+            f_1(x, y) with labels notitle nosurface
+}
+if (ARG1 == 1) {
+      set title "Chart of sample function 2" font "Helvetica Bold, 20"
+      set xrange [-4.0:4.0]
+      set yrange [-4.0:4.0]
+      splot f_2(x, y) title "φ(x, y)" nosurface, \
+            trialfile index 5 ls 5 lc rgb "green" title "trial points" nocontours, \
+            trialfile index 4 ls 5 lc rgb "red" title "X*" nocontours, \
+            trialfile index 3 ls 5 lc rgb "blue" title "X" nocontours, \
+            f_2(x, y) with labels notitle nosurface
+}
+if (ARG1 == 2) {
+      set title "Chart of sample function 3" font "Helvetica Bold, 20"
+      set xrange [-1.0:1.0]
+      set yrange [-1.0:1.0]
+      splot f_3(x, y) title "φ(x, y)" nosurface, \
+            g_3(x, y) lc rgb "orange" notitle nocontours, \
+            trialfile index 8 ls 5 lc rgb "green" title "trial points" nocontours, \
+            trialfile index 7 ls 5 lc rgb "red" title "X*" nocontours, \
+            trialfile index 6 ls 5 lc rgb "blue" title "X" nocontours, \
+            f_3(x, y) with labels notitle nosurface
+}
+if (ARG1 == 3) {
+      set title "Chart of sample function 4" font "Helvetica Bold, 20"
+      set xrange [0.0:3.0]
+      set yrange [0.0:3.0]
+      splot f_4(x, y) title "φ(x, y)" nosurface, \
+            g_4(x, y) lc rgb "orange" notitle nocontours, \
+            trialfile index 11 ls 5 lc rgb "green" title "trial points" nocontours, \
+            trialfile index 10 ls 5 lc rgb "red" title "X*" nocontours, \
+            trialfile index 9 ls 5 lc rgb "blue" title "X" nocontours, \
+            f_4(x, y) with labels notitle nosurface
 }
 
-name = Name[2]
-print name
-set output imagedir."/".name.".png"
-set output
-unset output
-
-# set hidden3d front
-# set xlabel "X"
-# set ylabel "Y"
-# set zlabel "Z"
-# set grid
-# 
-# if (ARG1 eq "func_1") {
-#       set xrange [-4.0:4.0]
-#       set yrange [-4.0:4.0]
-#       set zrange [-5.0:10.0]
-#       set title "FUNC 1" font "Helvetica Bold, 20"
-#       splot (x-1)**2/5+(y-1)**2/5, \
-#             datafile index 1 ls 5 lc rgb "red" title "opt point", \
-#             datafile index 2 ls 5 lc rgb "green" title "trial points", \
-#             datafile index 0 ls 5 lc rgb "blue" title "min point"
-# } else {
-#       if (ARG1 eq "func_2") {
-#             set xrange [-4.0:4.0]
-#             set yrange [-4.0:4.0]
-#             set zrange [-5.0:15.0]
-#             set title "FUNC 2" font "Helvetica Bold, 20"
-#             splot x**2/5+y**2/5, \
-#                   @ARG2 - x - y, \
-#                   datafile index 1 ls 5 lc rgb "red" title "opt point", \
-#                   datafile index 2 ls 5 lc rgb "green" title "trial points", \
-#                   datafile index 0 ls 5 lc rgb "blue" title "min point"
-#       } else {
-#             set xrange [-4.0:4.0]
-#             set yrange [-4.0:4.0]
-#             set zrange [-10.0:10.0]
-#             set title "FUNC 4" font "Helvetica Bold, 20"
-#             splot 1-x-y, \
-#                   datafile index 1 ls 5 lc rgb "red" title "opt point", \
-#                   datafile index 2 ls 5 lc rgb "green" title "trial points", \
-#                   datafile index 0 ls 5 lc rgb "blue" title "min point"
-#       }
-# }
-
-#                  set xrange [0.0:4.0]
-#                  set yrange [-1.0:3.0]
-#                  set zrange [-50.0:15.0]
-#                  set title "FUNC 3" font "Helvetica Bold, 20"
-#                  splot -1.5*x**2*exp(1-x**2-20.25*(x-y)**2)-(0.5*(x-1)*(y-1))**4*exp(2-(0.5*(x-1))**4-(x-1)**4), \
-#                        0.01*((x-2.2)**2+(y-1.2)**2.0-2.25), \
-#                        100*(1-((x-2)**2)/1.44-(0.5*y)**2), \
-#                        10*(y-1.5-1.5*sin(6.283*(x-1.75))), \
-#                        datafile index 1 ls 5 lc rgb "red" title "opt point", \
-#                        datafile index 2 ls 5 lc rgb "green" title "trial points", \
-#                        datafile index 0 ls 5 lc rgb "blue" title "min point"
-
-# do for [FILETYPE in "png eps"] {
-#  set output "plot.".FILETYPE
-#  set term FILETYPE
-#  plot x**2
-#  set output
-# }
+bind all "alt-End" "exit gnuplot"
+pause mouse close

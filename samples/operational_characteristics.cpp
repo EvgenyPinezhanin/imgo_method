@@ -118,11 +118,11 @@ int main() {
 #if defined(__linux__)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x oper_characteristics.gp");
+    error = system("chmod +x scripts/oper_characteristics.gp");
     if (error != 0) {
         cerr << "Error chmod" << std::endl;
     }
-    error = system("gnuplot -p -c oper_characteristics.gp");
+    error = system("gnuplot -p -c scripts/oper_characteristics.gp");
     if (error != 0) {
         cerr << "Error gnuplot" << std::endl;
     }
