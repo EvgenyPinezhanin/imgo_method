@@ -7,6 +7,8 @@
 #include <cmath>
 #include <cassert>
 
+// #include <fstream>
+
 // ------------------------------------------------------------------------------------------------
 GrishaginConstrainedProblem::GrishaginConstrainedProblem(EConstrainedProblemType problemType, double fraction,
   int activeConstrNum, int problemIndex)
@@ -122,6 +124,37 @@ double GrishaginConstrainedProblem::Compute(int index, const vector<double>& y) 
       d1 = d1 + options[index].af[i][j] * snx[i] * sny[j] + options[index].bf[i][j] * csx[i] * csy[j];
       d2 = d2 + options[index].cf[i][j] * snx[i] * sny[j] - options[index].df[i][j] * csx[i] * csy[j];
     }
+
+  // std::ofstream ofstr("data.txt");
+  // for (int k = 0; k < 3; k++) {
+  // for (int i = 0; i < 7; i++) {
+  //   for (int j = 0; j < 7; j++) {
+  //     ofstr << "A" << k << "[" << 7 * i + (j + 1) << "] = " << options[k].af[i][j] << std::endl;
+  //   }
+  // }
+  // ofstr << std::endl;
+  // for (int i = 0; i < 7; i++) {
+  //   for (int j = 0; j < 7; j++) {
+  //     ofstr << "B" << k << "[" << 7 * i + (j + 1) << "] = " << options[k].bf[i][j] << std::endl;
+  //   }
+  // }
+  // ofstr << std::endl;
+  // for (int i = 0; i < 7; i++) {
+  //   for (int j = 0; j < 7; j++) {
+  //     ofstr << "C" << k << "[" << 7 * i + (j + 1) << "] = " << options[k].cf[i][j] << std::endl;
+  //   }
+  // }
+  // ofstr << std::endl;
+  // for (int i = 0; i < 7; i++) {
+  //   for (int j = 0; j < 7; j++) {
+  //     ofstr << "D" << k << "[" << 7 * i + (j + 1) << "] = " << options[k].df[i][j] << std::endl;
+  //   }
+  // }
+  // ofstr << std::endl;
+  // }
+  // ofstr << std::endl;
+  // ofstr.close();
+
   return(-sqrt(d1*d1 + d2*d2));
 }
 

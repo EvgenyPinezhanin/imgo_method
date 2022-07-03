@@ -4,4 +4,4 @@
 void mapd(double x, int m, double* y, int n, int key);
 void node(int is);
 
-#endif
+#endif // PEANO_H

@@ -7,12 +7,14 @@
 
 using namespace std;
 
+#define CALC
+const int family_number = 2; // 0, 1, 2(сравнение графиков двух семейств)
 int current_func;
 
 THillProblemFamily hillProblems;
 double f_hill(double x, int j) {
     switch (j) {
-        case 1: return hillProblems[current_func]->ComputeFunction({ x });
+        case 1: return hillProblems[current_func]->ComputeFunction({x});
         default: return numeric_limits<double>::quiet_NaN();
     }
 }
@@ -20,12 +22,16 @@ double f_hill(double x, int j) {
 TShekelProblemFamily shekelProblems;
 double f_shekel(double x, int j) {
     switch (j) {
-        case 1: return shekelProblems[current_func]->ComputeFunction({ x });
+        case 1: return shekelProblems[current_func]->ComputeFunction({x});
         default: return numeric_limits<double>::quiet_NaN();
     }
 }
 
 int main() {
+    // double k = f_hill(0.6, 1);
+    // double h1 = hillProblems[0]->GetOptimumPoint()[0];
+    // double h2 = hillProblems[0]->GetOptimumValue();
+#if defined(CALC)
     ofstream ofstr("operational_characteristics.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
     ofstream ofstr_opt("operational_characteristics_opt.txt");
@@ -33,13 +39,13 @@ int main() {
 
     int count_func;
 
-    int K0 = 0, Kmax = 300, Kstep = 10;
+    int K0 = 0, Kmax = 500, Kstep = 10;
     int count_successful;
     int count_trials;
 
     vector<double> A, B;
-    vector<double> hill_r_array{3.0, 3.3, 3.5};
-    vector<double> shekel_r_array{3.0, 3.3, 3.5};
+    vector<double> hill_r_array{2.4, 3.2, 3.7};
+    vector<double> shekel_r_array{2.5, 3.4, 4.0};
     double eps = 0.0001, r = 3.3, d = 0.0;
     int m = 0;
 
@@ -113,6 +119,7 @@ int main() {
 
     ofstr.close();
     ofstr_opt.close();
+#endif
 
     // Рисование графиков операционной характеристики
 #if defined(__linux__)
@@ -122,13 +129,16 @@ int main() {
     if (error != 0) {
         cerr << "Error chmod" << std::endl;
     }
-    error = system("gnuplot -p -c scripts/oper_characteristics.gp");
+
+    char str[100];
+    sprintf(str, "gnuplot -p -c scripts/oper_characteristics.gp %d", family_number);
+    error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << std::endl;
     }
 #endif
 
-#if defined( _MSC_VER )
+#if defined(_MSC_VER)
     cin.get();
 #endif
 	return 0;

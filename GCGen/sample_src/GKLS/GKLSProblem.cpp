@@ -6,6 +6,8 @@
 
 #include "GKLSProblem.hpp"
 
+// #include <fstream>
+
 // ------------------------------------------------------------------------------------------------
 TGKLSProblem::TGKLSProblem(int problemIndex, int dim, GKLSClass type, GKLSFuncionType functionType) : IOptProblem()
 {
@@ -173,6 +175,22 @@ double TGKLSProblem::CalculateDFunction(const double* x) const
       return GKLS_MAX_VALUE;
   /* Check wether x belongs to some basin of local minima, M(index) <> T */
   /* Attention: number of local minima must be >= 2 */
+
+  // std::ofstream ofstr("data_point.txt");
+  // for (i = 0; i < option.GKLS_num_minima; i++) {
+  //   ofstr << "LOC_MIN[" << 2 * i + 1 << "] = " << option.GKLS_minima.local_min[i][0] << std::endl;
+  //   ofstr << "LOC_MIN[" << 2 * i + 2 << "] = " << option.GKLS_minima.local_min[i][1] << std::endl;
+  // }
+  // ofstr << std::endl;
+  // for (i = 0; i < option.GKLS_num_minima; i++) {
+  //   ofstr << "RHO[" << i + 1 << "] = " << option.GKLS_minima.rho[i] << std::endl;
+  // }
+  // ofstr << std::endl;
+  // for (i = 0; i < option.GKLS_num_minima; i++) {
+  //   ofstr << "F[" << i + 1 << "] = " << option.GKLS_minima.f[i] << std::endl;
+  // }
+  // ofstr.close();
+
   index = 1;
   while ((index < option.GKLS_num_minima) &&
     (option.GKLS_norm(option.GKLS_minima.local_min[index], x, mDimension) > option.GKLS_minima.rho[index]))

@@ -6,6 +6,7 @@
 
 #include "grishagin_function.hpp"
 
+// #include <fstream>
 
 // ------------------------------------------------------------------------------------------------
 TGrishaginProblem::TGrishaginProblem(int problemIndex) : IOptProblem()
@@ -92,6 +93,34 @@ double TGrishaginProblem::Compute(int index, const vector<double>& y) const
       d1 = d1 + option.af[i][j] * snx[i] * sny[j] + option.bf[i][j] * csx[i] * csy[j];
       d2 = d2 + option.cf[i][j] * snx[i] * sny[j] - option.df[i][j] * csx[i] * csy[j];
     }
+
+  // std::ofstream ofstr("data.txt");
+  // for (int i = 0; i < 7; i++) {
+  //   for (int j = 0; j < 7; j++) {
+  //     ofstr << "A" << "[" << 7 * i + (j + 1) << "] = " << options.af[i][j] << std::endl;
+  //   }
+  // }
+  // ofstr << std::endl;
+  // for (int i = 0; i < 7; i++) {
+  //   for (int j = 0; j < 7; j++) {
+  //     ofstr << "B" << "[" << 7 * i + (j + 1) << "] = " << options.bf[i][j] << std::endl;
+  //   }
+  // }
+  // ofstr << std::endl;
+  // for (int i = 0; i < 7; i++) {
+  //   for (int j = 0; j < 7; j++) {
+  //     ofstr << "C" << "[" << 7 * i + (j + 1) << "] = " << options.cf[i][j] << std::endl;
+  //   }
+  // }
+  // ofstr << std::endl;
+  // for (int i = 0; i < 7; i++) {
+  //   for (int j = 0; j < 7; j++) {
+  //     ofstr << "D" << "[" << 7 * i + (j + 1) << "] = " << options.df[i][j] << std::endl;
+  //   }
+  // }
+  // ofstr << std::endl;
+  // ofstr.close();
+
   return(-sqrt(d1*d1 + d2*d2));
 }
 

@@ -4,14 +4,16 @@
 #include <algorithm>
 #include <Grishagin/GrishaginProblemFamily.hpp>
 #include <Grishagin/GrishaginConstrainedProblemFamily.hpp>
+#include <Grishagin/GrishaginConstrainedProblem.hpp>
+#include <GKLS/GKLSConstrainedProblem.hpp>
 #include <GKLS/GKLSProblemFamily.hpp>
 #include <GKLS/GKLSConstrainedProblemFamily.hpp>
 #include <imgo.h>
 
 using namespace std;
 
-#define CALC
-const int family_number = 3; // 0, 1, 2, 3
+// #define CALC
+const int family_number = 3; // 0, 1, 2, 3, 4(сравнение Гришагина и GKLS), 5(сравнение Гришагина и GKLS(с ограничениями))
 
 const int number_family = 4;
 int current_func;
@@ -56,7 +58,42 @@ double f_constr_gkls(vector<double> x, int j) {
     }
 };
 
+// GrishaginConstrainedProblem grishaginConstrainedProblem(cptInFeasibleDomain, 0.5, 0, 1);
+// double f_constr_grishagin(vector<double> x, int j) {
+//     int constr = grishaginConstrainedProblem.GetConstraintsNumber();
+//     if (j >= 1 && j <= constr) {
+//         return grishaginConstrainedProblem.ComputeConstraint(j - 1, x);
+//     } else if (j - 1 == constr) {
+//         return grishaginConstrainedProblem.ComputeFunction(x);
+//     } else {
+//         return numeric_limits<double>::quiet_NaN();
+//     }
+// };
+
+// TGKLSConstrainedProblem GKLSConstrainedProblem; 
+// double f_constr_gkls(vector<double> x, int j) {
+//     int constr = GKLSConstrainedProblem.GetConstraintsNumber();
+//     if (j >= 1 && j <= constr) {
+//         return GKLSConstrainedProblem.ComputeConstraint(j - 1, x);
+//     } else if (j - 1 == constr) {
+//         return GKLSConstrainedProblem.ComputeFunction(x);
+//     } else {
+//         return numeric_limits<double>::quiet_NaN();
+//     }
+// };
+
 int main() {
+// f_constr_grishagin(std::vector<double>{0.5, 0.5}, 1);
+// f_constr_grishagin(std::vector<double>{0.5, 0.5}, 2);
+// f_constr_grishagin(std::vector<double>{0.5, 0.5}, 3);
+
+f_constr_gkls(std::vector<double>{0.5, 0.5}, 1);
+// f_constr_gkls(std::vector<double>{0.5, 0.5}, 2);
+// f_constr_gkls(std::vector<double>{0.5, 0.5}, 3);
+
+vector<double> h1 = GKLSConstrainedProblems[0]->GetOptimumPoint();
+double h2 = GKLSConstrainedProblems[0]->GetOptimumValue();
+
 #if defined(CALC)
     ofstream ofstr("peano_operational_characteristics.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
@@ -167,7 +204,7 @@ int main() {
     }
 
     // Параметры
-    Kmax = 600;
+    Kmax = 800;
 
     ofstr_opt << "Name[3]=\"GrishaginConstrained\"" << endl;
     for (int i = 0; i < r_array[2].size(); i++) {
@@ -250,7 +287,7 @@ int main() {
     ofstr_opt.close();
 #endif
 
-    // Рисование графиков операционной характеристики(работает только под Lunux с помощью gnuplot)
+    // Рисование графиков операционной характеристики(работает с помощью gnuplot)
 #if defined(__linux__)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);
@@ -267,7 +304,7 @@ int main() {
     }
 #endif
 
-#if defined( _MSC_VER )
+#if defined(_MSC_VER)
     cin.get();
 #endif
 	return 0;

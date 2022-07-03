@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <cassert>
 
+// #include <fstream>
+
 // ------------------------------------------------------------------------------------------------
 TGKLSConstrainedProblem::TGKLSConstrainedProblem(EConstrainedProblemType problemType, double fraction,
   int activeConstrNum, int problemIndex, int dim, GKLSClass type, GKLSFuncionType functionType)
@@ -239,6 +241,23 @@ double TGKLSConstrainedProblem::CalculateDFunction(int problemIndex, const doubl
   /* Check wether x coincides with the local minimizer M(index) */
   if (options[problemIndex].GKLS_norm(x, options[problemIndex].GKLS_minima.local_min[index], mDimension) < GKLS_PRECISION)
     return options[problemIndex].GKLS_minima.f[index];
+
+  // std::ofstream ofstr("data_point.txt");
+  // for (int k = 0; k < 3; k++) {
+  // for (i = 0; i < options[k].GKLS_num_minima; i++) {
+  //   ofstr << "LOC_MIN" << k << "[" << 2 * i + 1 << "] = " << options[k].GKLS_minima.local_min[i][0] << std::endl;
+  //   ofstr << "LOC_MIN" << k << "[" << 2 * i + 2 << "] = " << options[k].GKLS_minima.local_min[i][1] << std::endl;
+  // }
+  // ofstr << std::endl;
+  // for (i = 0; i < options[k].GKLS_num_minima; i++) {
+  //   ofstr << "RHO" << k << "[" << i + 1 << "] = " << options[k].GKLS_minima.rho[i] << std::endl;
+  // }
+  // ofstr << std::endl;
+  // for (i = 0; i < options[k].GKLS_num_minima; i++) {
+  //   ofstr << "F" << k << "[" << i + 1 << "] = " << options[k].GKLS_minima.f[i] << std::endl;
+  // }
+  // }
+  // ofstr.close();
 
   norm = options[problemIndex].GKLS_norm(options[problemIndex].GKLS_minima.local_min[0], options[problemIndex].GKLS_minima.local_min[index], mDimension);
   a = norm * norm + options[problemIndex].GKLS_minima.f[0] - options[problemIndex].GKLS_minima.f[index];

@@ -8,7 +8,7 @@
 
 using namespace std;
 
-const int test_func_number = 0; // 0, 1 
+const int test_func_number = 1; // 0, 1 
 
 double f_test_1(vector<double> x, int j) {
     switch (j) {
@@ -46,8 +46,8 @@ int main() {
     ofstream ofstr("peano_test_trial_points.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
-    int n = 2, m = 0, den = 12, key = 1, Nmax = 5000;
-    double eps = 0.001, r = 2.0, d = 0.00;
+    int n = 2, m = 0, den = 10, key = 1, Nmax = 5000;
+    double eps = 0.001, r = 2.0, d = 0.001;
     Stop stop = ACCURACY;
     vector<double> X(2);
     vector<vector<double>> trial_vec;
@@ -56,7 +56,7 @@ int main() {
     vector<Task_peano> task{ Task_peano(f_test_1, "Test-1", n, 3, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
                                         vector<double>{0.942, 0.944}, eps, Nmax, r, d, den, key, stop, 1),
                              Task_peano(f_test_2, "Test-2", n, 4, vector<double>{0.0, 0.0}, vector<double>{80.0, 80.0},
-                                        vector<double>{75.0, 65.5}, 0.002, Nmax, 2.5, 0.002, den, key, stop, 1) };
+                                        vector<double>{77.489, 63.858}, 0.001, Nmax, 3.3, 0.01, den, key, stop, 1) };
 
     imgo_method imgo(nullptr, 2, 0, vector<double>{0.0, 0.0}, vector<double>{1.0, 1.0});
 
@@ -104,7 +104,7 @@ int main() {
     }
     ofstr.close();
 
-    // Построение графика(работает только под Lunux с помощью gnuplot)
+    // Построение графика(работает с помощью gnuplot)
 #if defined(__linux__)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);

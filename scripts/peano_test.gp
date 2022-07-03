@@ -46,15 +46,17 @@ g_2(x, y) = (g1_2(x, y) <= 0.0) ? (g2_2(x, y) <= 0 ? (g3_2(x, y) <= 0 ? (g4_2(x,
 set grid
 set contour
 set view map
-set cntrparam bspline levels auto 10
+set cntrparam bspline levels auto 14
 set cntrlabel onecolor
 set cntrlabel start 5 interval 150
 set cntrlabel font ",10"
 set contour base
-set isosamples 60
+set isosamples 120
 
 set xlabel "X"
 set ylabel "Y"
+
+set terminal wxt size 950, 950
 
 if (ARG1 == 0) {
       set title "Chart of test function 1" font "Helvetica Bold, 20"
@@ -64,8 +66,7 @@ if (ARG1 == 0) {
             g_1(x, y) lc rgb "orange" notitle nocontours, \
             trialfile index 2 ls 5 lc rgb "green" title "trial points" nocontours, \
             trialfile index 0 ls 5 lc rgb "blue" title "X" nocontours, \
-            trialfile index 1 ls 5 lc rgb "red" title "X*" nocontours, \
-            f_1(x, y) with labels notitle nosurface
+            trialfile index 1 ls 5 lc rgb "red" title "X*" nocontours
 } else {
       set title "Chart of test function 2" font "Helvetica Bold, 20"
       set xrange [0.0:80.0]
@@ -74,8 +75,7 @@ if (ARG1 == 0) {
             g_2(x, y) lc rgb "orange" notitle nocontours, \
             trialfile index 5 ls 5 lc rgb "green" title "trial points" nocontours, \
             trialfile index 3 ls 5 lc rgb "blue" title "X" nocontours, \
-            trialfile index 4 ls 5 lc rgb "red" title "X*" nocontours, \
-            f_2(x, y) with labels notitle nosurface
+            trialfile index 4 ls 5 lc rgb "red" title "X*" nocontours
 }
 
 bind all "alt-End" "exit gnuplot"
