@@ -8,49 +8,8 @@
 
 using namespace std;
 
-enum Stop {ACCURACY, NUMBER, ACCURNUMBER};
-
-struct trial {
-    double x, z;
-    size_t nu;
-
-    trial(double _x = 0.0, double _z = 0.0, int _nu = 0) : x(_x), z(_z), nu(_nu) {}
-};
-
 void addInSort(vector<trial> &vec, trial tr);
 double searchMinXTrial(vector<trial> &trials, int m);
-
-class optimization_method {
-protected:
-    double (*f)(vector<double>, int);
-    int n, m;
-    vector<double> A, B;
-    double eps;
-    int Nmax;
-
-    vector<trial> trial_points;
-
-    virtual trial newTrial(double x) = 0;
-    virtual double newPoint(size_t t) = 0;
-    virtual double selectNewPoint(size_t &t, trial last_trial) = 0;
-
-public:
-    optimization_method(double (*_f)(vector<double>, int), int _n, int _m, const vector<double> &_A, const vector<double> &_B, double _eps, int _Nmax) 
-        : f(_f), n(_n), m(_m), A(_A), B(_B), eps(_eps), Nmax(_Nmax) {}
-
-    void setF(double (*_f)(vector<double>, int)) { f = _f; };
-    void setN(int _n) { n = _n; };
-    void setM(int _m) { m = _m; };
-    void setNmax(int _Nmax) { Nmax = _Nmax; };
-    void setEps(double _eps) { eps = _eps; };
-    void setA(const vector<double> &_A) { A = _A; };
-    void setB(const vector<double> &_B) { B = _B; };
-    void setAB(const vector<double> &_A, const vector<double> &_B) { A = _A; B = _B; };
-
-    void getTrialPoints(vector<trial> &trial_vec) const { trial_vec = trial_points; };
-
-    virtual void solve(int &n, vector<double> &X, Stop stop = ACCURACY) = 0;
-};
 
 class imgo_method : public optimization_method {
 protected:

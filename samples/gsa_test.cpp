@@ -1,26 +1,21 @@
-#include<iostream>
-#include<iomanip>
+#include <iostream>
 #if defined( _MSC_VER )
     #define _USE_MATH_DEFINES
-    #include<math.h>
+    #include <math.h>
 #else
-    #include<cmath>
+    #include <cmath>
 #endif
-#include<gsa.h>
 
-using namespace std;
+#include <gsa.h>
+#include <task.h>
 
-struct task {
-    double (*f)(double);
-    double a, b;
-    double x_min;
-
-    task(double (*_f)(double), double _a, double _b, double _x_min)
-        : f(_f), a(_a), b(_b), x_min(_x_min) {}
-};
+using std::vector;
+using std::cout;
+using std::endl;
 
 double f1(double x) {
-    return -(-1.0 / 6.0 * pow(x, 6) + 52.0 / 25.0 * pow(x, 5) - 39.0 / 80.0 * pow(x, 4) - 71.0 / 10.0 * pow(x, 3) + 79.0 / 20.0 * x * x + x - 1.0 / 10.0);
+    return -(-1.0 / 6.0 * pow(x, 6) + 52.0 / 25.0 * pow(x, 5) - 39.0 / 80.0 * pow(x, 4) - 
+             71.0 / 10.0 * pow(x, 3) + 79.0 / 20.0 * x * x + x - 1.0 / 10.0);
 }
 
 double f2(double x) {
@@ -115,51 +110,57 @@ double f20(double x) {
 
 int main() {
     double eps = 0.001;
+    int Nmax = 1000;
     double r = 2.0; // > 1
+    Stop stop = ACCURACY;
 
-    double x_min;
-    int n;
+    double x;
+    int count;
 
-    vector<task> task_arr = { {f1, -1.5, 11.0, 10.0},
-                              {f2, 2.7, 7.5, 5.145735},
-                              {f3, -10.0, 10.0, 5.791785},
-                              {f4, 1.9, 3.9, 2.868},
-                              {f5, 0.0, 1.2, 0.96609},
-                              {f6, -10.0, 10.0, 0.67956},
-                              {f7, 2.7, 7.5, 5.19978},
-                              {f8, -10.0, 10.0, -7.0835},
-                              {f9, 3.1, 20.4, 17.039},
-                              {f10, 0.0, 10.0, 7.9787},
-                              {f11, -1.57, 6.28, 2.094},
-                              {f12, 0.0, 6.28, 3.142},
-                              {f13, 0.001, 0.99, 0.7071},
-                              {f14, 0.0, 4.0, 0.224885},
-                              {f15, -5.0, 5.0, 2.4142},
-                              {f16, -3.0, 3.0, 3.0},
-                              {f17, -4.0, 4.0, -3.0},
-                              {f18, 0.0, 6.0, 2.0},
-                              {f19, 0.0, 6.5, 5.87287},
-                              {f20, -10.0, 10.0, 1.195137} };
+    vector<task_gsa> task_array = { task_gsa(f1, "f1(x)", -1.5, 11.0, 10.0, eps, Nmax, r, stop),
+                                    task_gsa(f2, "f2(x)", 2.7, 7.5, 5.145735, eps, Nmax, r, stop),
+                                    task_gsa(f3, "f3(x)", -10.0, 10.0, 5.791785, eps, Nmax, r, stop),
+                                    task_gsa(f4, "f4(x)", 1.9, 3.9, 2.868, eps, Nmax, r, stop),
+                                    task_gsa(f5, "f5(x)", 0.0, 1.2, 0.96609, eps, Nmax, r, stop),
+                                    task_gsa(f6, "f6(x)", -10.0, 10.0, 0.67956, eps, Nmax, r, stop),
+                                    task_gsa(f7, "f7(x)", 2.7, 7.5, 5.19978, eps, Nmax, r, stop),
+                                    task_gsa(f8, "f8(x)", -10.0, 10.0, -7.0835, eps, Nmax, r, stop),
+                                    task_gsa(f9, "f9(x)", 3.1, 20.4, 17.039, eps, Nmax, r, stop),
+                                    task_gsa(f10, "f10(x)", 0.0, 10.0, 7.9787, eps, Nmax, r, stop),
+                                    task_gsa(f11, "f11(x)", -1.57, 6.28, 2.094, eps, Nmax, r, stop),
+                                    task_gsa(f12, "f12(x)", 0.0, 6.28, 3.142, eps, Nmax, r, stop),
+                                    task_gsa(f13, "f13(x)", 0.001, 0.99, 0.7071, eps, Nmax, r, stop),
+                                    task_gsa(f14, "f14(x)", 0.0, 4.0, 0.224885, eps, Nmax, r, stop),
+                                    task_gsa(f15, "f15(x)", -5.0, 5.0, 2.4142, eps, Nmax, r, stop),
+                                    task_gsa(f16, "f16(x)", -3.0, 3.0, 3.0, eps, Nmax, r, stop),
+                                    task_gsa(f17, "f17(x)", -4.0, 4.0, -3.0, eps, Nmax, r, stop),
+                                    task_gsa(f18, "f18(x)", 0.0, 6.0, 2.0, eps, Nmax, r, stop),
+                                    task_gsa(f19, "f19(x)", 0.0, 6.5, 5.87287, eps, Nmax, r, stop),
+                                    task_gsa(f20, "f20(x)", -10.0, 10.0, 1.195137, eps, Nmax, r, stop) };
 
-    gsa_method gsa(&f1, 0.0, 0.0, eps, r);
+    gsa_method gsa(nullptr);
 
-    for (int i = 0; i < task_arr.size(); i++) {
-        gsa.setFunc(task_arr[i].f);
-        gsa.setA(task_arr[i].a);
-        gsa.setB(task_arr[i].b);
-        x_min = gsa.solve(n);
+    for (int i = 0; i < task_array.size(); i++) {
+        gsa.setF(task_array[i].f);
+        gsa.setAB(task_array[i].A[0], task_array[i].B[0]);
+        gsa.setEps(task_array[i].eps);
+        gsa.setNmax(task_array[i].Nmax);
+        gsa.setR(task_array[i].r);
 
-        cout << "f" << i + 1 << "(x)\n";
-        cout << "[a; b] = [" << task_arr[i].a << "; " << task_arr[i].b << "]" << endl;
-        cout << "x_min = " << setprecision(6) << x_min << endl;
-        cout << "Number of trials = " << n << endl;
-        cout << "|f" << i + 1 << "(x_min) - f" << i + 1 << "(x_opt)| = " << 
-                abs(task_arr[i].f(x_min) - task_arr[i].f(task_arr[i].x_min)) << endl;
+        gsa.solve(count, x, task_array[i].stop);
+
+        cout << "Function: " << task_array[i].name << endl;
+        cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
+        cout << "X* = " << task_array[i].X_opt[0] << endl;
+        cout << "X = " << x << endl;
+        cout << "|X* - X| = " << abs(task_array[i].X_opt[0] - x) << endl;
+        cout << "|f(X*) - f(X)| = " << abs(task_array[i].f(task_array[i].X_opt[0]) - task_array[i].f(x)) << endl;
+        cout << "Count of trials = " << count << endl;
         cout << endl;
     }
 
-    #if defined( _MSC_VER )
-        cin.get();
-    #endif
+#if defined( _MSC_VER )
+    cin.get();
+#endif
     return 0;
 }

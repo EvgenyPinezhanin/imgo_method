@@ -1,99 +1,112 @@
-#include<gsa.h>
+#include <gsa.h>
 
-gsa_method::gsa_method(double (*_f)(double), double _a, double _b, double _eps, double _r) 
-    : f(_f), a(_a), b(_b), eps(_eps), r(_r) { }
+#include <algorithm>
 
-void gsa_method::addInSort(double x) {
-    vector<trial>::iterator iter = trial_points.begin();
-    vector<trial>::iterator iterEnd = trial_points.end();
-    while (true) {
-        if (iter == iterEnd || iter->x > x) break;
+void addInSort(vector<trial> &vec, trial tr) {
+    vector<trial>::iterator iter = vec.begin();
+    vector<trial>::iterator iterEnd = vec.end();
+    while(true) {
+        if (iter == iterEnd || iter->x > tr.x) break;
         iter++;
     }
-    trial_points.insert(iter, trial(x, f(x)));
+    vec.insert(iter, tr);
 }
 
-double gsa_method::searchMinX() {
-    double z = trial_points[0].z;
-    double x = trial_points[0].x;
-    for (int i = 1; i < trial_points.size(); i++) {
-        if (trial_points[i].z < z) {
-            z = trial_points[i].z;
-            x = trial_points[i].x;
+double searchMinX(vector<trial> &trials) {
+    double z = trials[0].z;
+    double x = trials[0].x;
+    for (int i = 1; i < trials.size(); i++) {
+        if (trials[i].z < z) {
+            z = trials[i].z;
+            x = trials[i].x;
         }
     }
     return x;
 }
 
-double gsa_method::selectNewPoint(size_t &t) {
-    static double x_k_1 = b;
-    static double M = -1.0;
-    double tmpM = 0.0;
+trial gsa_method::newTrial(double x) {
+    return trial(x, f(x));
+}
 
-    // Шаг 2
-    if (trial_points[t].x == b) {
-        M = max({M, abs((f(x_k_1) - trial_points[t - 1].z) / (x_k_1 - trial_points[t - 1].x))});
+double gsa_method::newPoint(int t) {
+    return (trial_points[t].x + trial_points[t - 1].x) / 2 - (trial_points[t].z - trial_points[t - 1].z) / (2 * m);
+}
+
+double gsa_method::selectNewPoint(int &t, trial last_trial) {
+    static double M = -1.0;
+
+    // Step 2
+    if (last_trial.x == B[0]) {
+        M = std::max({M, std::abs((last_trial.z - trial_points[t - 1].z) / (last_trial.x - trial_points[t - 1].x))});
     } else {
-        M = max({M, abs((f(x_k_1) - trial_points[t - 1].z) / (x_k_1 - trial_points[t - 1].x)), abs((trial_points[t + 1].z - f(x_k_1)) / (trial_points[t + 1].x - x_k_1))});
+        M = std::max({M, std::abs((last_trial.z - trial_points[t - 1].z) / (last_trial.x - trial_points[t - 1].x)), 
+                         std::abs((trial_points[t + 1].z - last_trial.z) / (trial_points[t + 1].x - last_trial.x))});
     }
 
-    // Шаг 3
-    double m = (M == 0.0) ? 1.0 : r * M;
+    // Step 3
+    m = (M == 0.0) ? 1.0 : r * M;
 
-    // Шаг 4, 5 
+    // Steps 4, 5
     double d_x = trial_points[1].x - trial_points[0].x;
-    double R = m * d_x + pow(trial_points[1].z - trial_points[0].z, 2.0) / (m * d_x) - 2 * (trial_points[1].z + trial_points[0].z);
+    double R = m * d_x + pow(trial_points[1].z - trial_points[0].z, 2) / (m * d_x) - 2 * (trial_points[1].z + trial_points[0].z);
     double Rtmp;
     t = 1;
-    size_t n = trial_points.size();
-    for (size_t i = 2; i < n; i++) {
+    size_t size = trial_points.size();
+    for (size_t i = 2; i < size; i++) {
         d_x = trial_points[i].x - trial_points[i - 1].x;
-        Rtmp = m * d_x + pow(trial_points[i].z - trial_points[i - 1].z, 2.0) / (m * d_x) - 2 * (trial_points[i].z + trial_points[i - 1].z);
+        Rtmp = m * d_x + pow(trial_points[i].z - trial_points[i - 1].z, 2) / (m * d_x) - 2 * (trial_points[i].z + trial_points[i - 1].z);
         if (Rtmp > R) {
             R = Rtmp;
             t = i;
         }
     }
 
-    // Шаг 6
-    x_k_1 = (trial_points[t].x + trial_points[t - 1].x) / 2 - (trial_points[t].z - trial_points[t - 1].z) / (2 * m);
-    return x_k_1;
+    // Step 6
+    return newPoint(t);
 }
 
-void gsa_method::setFunc(double (*_f)(double)) {
-    f = _f;
-}
-
-void gsa_method::setA(double _a) {
-    a = _a;
-}
-
-void gsa_method::setB(double _b) {
-    b = _b;
-}
-
-void gsa_method::setEps(double _eps) {
-    eps = _eps;
-}
-
-double gsa_method::solve(int &n) {
+void gsa_method::solve(int &count, double &x, Stop stop) {
     trial_points.clear();
 
-    trial_points.push_back(trial(a, f(a)));
-    trial_points.push_back(trial(b, f(b)));
-    n = 2;
+    trial_points.push_back(newTrial(A[0]));
+    trial_points.push_back(newTrial(B[0]));
+    count = 2;
 
     double x_k_1;
-    size_t t = 1;
+    int t = 1;
+    trial tr = newTrial(B[0]);
     while(true) {
-        x_k_1 = selectNewPoint(t);
+        x_k_1 = selectNewPoint(t, tr);
+        tr = newTrial(x_k_1);
 
-        // Шаг 1
-        addInSort(x_k_1);
+        // Step 1
+        addInSort(trial_points, tr);
         n++;
         if (trial_points[t].x - trial_points[t - 1].x <= eps) {
             break;
         }
+
+        switch (stop) {
+            case ACCURACY:
+                if (trial_points[t].x - trial_points[t - 1].x <= eps) {
+                    break;
+                }
+                break;
+            case NUMBER:
+                if (n >= Nmax) {
+                    break;
+                }
+                break;
+            case ACCURNUMBER:
+                if (trial_points[t].x - trial_points[t - 1].x <= eps || n >= Nmax) {
+                    break;
+                }
+                break;
+        }
     }
-    return searchMinX();
+    x = searchMinX(trial_points);
+}
+
+void gsa_method::solve(int &count, vector<double> &X, Stop stop) {
+    solve(count, X[0], stop);
 }

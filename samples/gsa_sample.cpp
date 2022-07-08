@@ -1,8 +1,18 @@
-#include<iostream>
-#include<cmath>
-#include<gsa.h>
+#include <iostream>
+#include <vector>
+#if defined( _MSC_VER )
+    #define _USE_MATH_DEFINES
+    #include <math.h>
+#else
+    #include <cmath>
+#endif
 
-using namespace std;
+#include <gsa.h>
+#include <task.h>
+
+using std::vector;
+using std::cout;
+using std::endl;
 
 double f1(double x) {
     return -4.0 * x + 1.0;
@@ -25,73 +35,42 @@ double f4(double x) {
 }
 
 int main() {
-    double a = 3.0, b = 4.0;
     double eps = 0.0001;
+    int Nmax = 1000;
     double r = 2.0; // > 1
+    Stop stop = ACCURACY;
 
-    double x_min;
-    double x_opt;
-    int n;
+    double x;
+    int count;
 
-    // линейная функция
-    gsa_method gsa(&f1, a, b, eps, r);
-    x_min = gsa.solve(n);
-    x_opt = 4.0;
+    vector<task_gsa> task_array = { task_gsa(f1, "f1(x) = -4.0 * x + 1.0", 3.0, 4.0, 4.0, eps, Nmax, r, stop),
+                                    task_gsa(f2, "f2(x) = 5.0 * x * x + 3.0 * x - 1.0", -2.0, 2.0, -0.3, eps, Nmax, r, stop),
+                                    task_gsa(f3, "f3(x) = x * sin(x)", 0.0, 20.0, 17.336, eps ,Nmax, r, stop),
+                                    task_gsa(f4, "f4(x) = x * sin(1 / x)", -0.4, 0.4, -0.2225, eps, Nmax, r, stop) };
 
-    cout << "f1(x) = -4.0 * x + 1.0\n";
-    cout << "[a; b] = [" << a << "; " << b << "]"<< endl;
-    cout << "x_min = " << x_min << endl;
-    cout << "Number of trials = " << n << endl;
-    cout << "|f1(x_min) - f1(x_opt)| = " << abs(f1(x_min) - f1(x_opt)) << endl;
-    cout << endl;
+    gsa_method gsa(nullptr);
 
-    // квадратичная функция
-    a = -2.0; b = 2.0;
-    x_opt = -0.3;
-    gsa.setFunc(&f2);
-    gsa.setA(a);
-    gsa.setB(b);
-    x_min = gsa.solve(n);
+    for (int i = 0; i < task_array.size(); i++) {
+        gsa.setF(task_array[i].f);
+        gsa.setAB(task_array[i].A[0], task_array[i].B[0]);
+        gsa.setEps(task_array[i].eps);
+        gsa.setNmax(task_array[i].Nmax);
+        gsa.setR(task_array[i].r);
 
-    cout << "f2(x) = 5.0 * x * x + 3.0 * x - 1.0\n";
-    cout << "[a; b] = [" << a << "; " << b << "]"<< endl;
-    cout << "x_min = " << x_min << endl;
-    cout << "Number of trials = " << n << endl;
-    cout << "|f2(x_min) - f2(x_opt)| = " << abs(f2(x_min) - f2(x_opt)) << endl;
-    cout << endl;
+        gsa.solve(count, x, task_array[i].stop);
 
-    // 1 функция с sin
-    a = 0.0; b = 20.0;
-    x_opt = 17.336;
-    gsa.setFunc(&f3);
-    gsa.setA(a);
-    gsa.setB(b);
-    x_min = gsa.solve(n);
+        cout << "Function: " << task_array[i].name << endl;
+        cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
+        cout << "X* = " << task_array[i].X_opt[0] << endl;
+        cout << "X = " << x << endl;
+        cout << "|X* - X| = " << abs(task_array[i].X_opt[0] - x) << endl;
+        cout << "|f(X*) - f(X)| = " << abs(task_array[i].f(task_array[i].X_opt[0]) - task_array[i].f(x)) << endl;
+        cout << "Count of trials = " << count << endl;
+        cout << endl;
+    }
 
-    cout << "f3(x) = x * sin(x)\n";
-    cout << "[a; b] = [" << a << "; " << b << "]"<< endl;
-    cout << "x_min = " << x_min << endl;
-    cout << "Number of trials = " << n << endl;
-    cout << "|f3(x_min) - f3(x_opt)| = " << abs(f3(x_min) - f3(x_opt)) << endl;
-    cout << endl;
-
-    // 2 функция с sin
-    a = -0.4; b = 0.4;
-    x_opt = -0.2225;
-    gsa.setFunc(&f4);
-    gsa.setA(a);
-    gsa.setB(b);
-    x_min = gsa.solve(n);
-
-    cout << "f4(x) = x * sin(1 / x)\n";
-    cout << "[a; b] = [" << a << "; " << b << "]"<< endl;
-    cout << "x_min = " << x_min << endl;
-    cout << "Number of trials = " << n << endl;
-    cout << "|f4(x_min) - f4(x_opt)| = " << abs(f4(x_min) - f4(x_opt)) << endl;
-    cout << endl;
-
-    #if defined( _MSC_VER )
-        cin.get();
-    #endif
+#if defined( _MSC_VER )
+    cin.get();
+#endif
     return 0;
 }
