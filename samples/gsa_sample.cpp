@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #if defined( _MSC_VER )
     #define _USE_MATH_DEFINES
@@ -13,6 +14,7 @@
 using std::vector;
 using std::cout;
 using std::endl;
+using std::setprecision;
 
 double f1(double x) {
     return -4.0 * x + 1.0;
@@ -61,10 +63,10 @@ int main() {
 
         cout << "Function: " << task_array[i].name << endl;
         cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
-        cout << "X* = " << task_array[i].X_opt[0] << endl;
-        cout << "X = " << x << endl;
-        cout << "|X* - X| = " << abs(task_array[i].X_opt[0] - x) << endl;
-        cout << "|f(X*) - f(X)| = " << abs(task_array[i].f(task_array[i].X_opt[0]) - task_array[i].f(x)) << endl;
+        cout << "X* = " << setprecision(7) << task_array[i].X_opt[0] << endl;
+        cout << "X = " << setprecision(7) << x << endl;
+        cout << "|X* - X| = " << setprecision(7) << std::abs(task_array[i].X_opt[0] - x) << endl;
+        cout << "|f(X*) - f(X)| = " << setprecision(7) << std::abs(task_array[i].f(task_array[i].X_opt[0]) - task_array[i].f(x)) << endl;
         cout << "Count of trials = " << count << endl;
         cout << endl;
     }

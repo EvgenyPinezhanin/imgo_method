@@ -2,12 +2,6 @@
 #define GSA_H
 
 #include <vector>
-#if defined( _MSC_VER )
-    #define _USE_MATH_DEFINES
-    #include <math.h>
-#else
-    #include <cmath>
-#endif
 
 #include <opt_method.h>
 

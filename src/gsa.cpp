@@ -1,6 +1,12 @@
 #include <gsa.h>
 
 #include <algorithm>
+#if defined( _MSC_VER )
+    #define _USE_MATH_DEFINES
+    #include <math.h>
+#else
+    #include <cmath>
+#endif
 
 void addInSort(vector<trial> &vec, trial tr) {
     vector<trial>::iterator iter = vec.begin();
@@ -81,27 +87,20 @@ void gsa_method::solve(int &count, double &x, Stop stop) {
 
         // Step 1
         addInSort(trial_points, tr);
-        n++;
-        if (trial_points[t].x - trial_points[t - 1].x <= eps) {
-            break;
-        }
 
-        switch (stop) {
-            case ACCURACY:
-                if (trial_points[t].x - trial_points[t - 1].x <= eps) {
-                    break;
-                }
+        count++;
+        if (stop == ACCURACY) {
+            if (trial_points[t].x - trial_points[t - 1].x <= eps) {
                 break;
-            case NUMBER:
-                if (n >= Nmax) {
-                    break;
-                }
+            }
+        } else if (stop == NUMBER) {
+            if (count >= Nmax) {
                 break;
-            case ACCURNUMBER:
-                if (trial_points[t].x - trial_points[t - 1].x <= eps || n >= Nmax) {
-                    break;
-                }
+            }
+        } else if (stop == ACCURNUMBER) {
+            if (trial_points[t].x - trial_points[t - 1].x <= eps || count >= Nmax) {
                 break;
+            }
         }
     }
     x = searchMinX(trial_points);

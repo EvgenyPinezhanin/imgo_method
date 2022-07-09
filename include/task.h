@@ -38,9 +38,10 @@ struct task_imgo : public task {
     int m;
     double r, d;
 
-    task_imgo(double (*_f)(double, int), string _name, int _m, vector<double> _A, vector<double> _B, 
-              vector<double> _X_opt, double _eps, int _Nmax, double _r, double _d, Stop _stop, bool _used = true)
-             : task(_name, 1, _A, _B, _X_opt, _eps, _Nmax, _stop, _used), f(_f), m(_m), r(_r), d(_d) {};
+    task_imgo(double (*_f)(double, int), string _name, int _m, double _a, double _b, double _x_opt, 
+              double _eps, int _Nmax, double _r, double _d, Stop _stop, bool _used = true)
+             : task(_name, 1, vector<double>{_a}, vector<double>{_b}, vector<double>{_x_opt}, 
+                    _eps, _Nmax, _stop, _used), f(_f), m(_m), r(_r), d(_d) {};
 };
 
 struct task_mggsa : public task {
