@@ -5,7 +5,7 @@
 
 #include <opt_method.h>
 
-using std::vector;
+using namespace std;
 
 class gsa_method : public optimization_method_non_constrained {
 private:

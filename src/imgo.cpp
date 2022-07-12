@@ -68,9 +68,9 @@ double imgo_method::selectNewPoint(int &t, trial_constr last_trial) {
     }
     for (int i = 1; i < size_I; i++) {
         mu_tmp = abs(I[nu_I][i].z - I[nu_I][i - 1].z) / (I[nu_I][i].x - I[nu_I][i - 1].x);
-        if (mu_tmp > mu[last_trial.nu - 1]) {
-            mu[last_trial.nu - 1] = mu_tmp;
-            if (abs(mu[last_trial.nu - 1]) > 1e-14) calc_I[last_trial.nu - 1] = true;
+        if (mu_tmp > mu[nu_I]) {
+            mu[nu_I] = mu_tmp;
+            if (abs(mu[nu_I]) > 1e-14) calc_I[nu_I] = true;
         }
     }
     for (int nu = 0; nu < m + 1; nu++) {
@@ -79,7 +79,7 @@ double imgo_method::selectNewPoint(int &t, trial_constr last_trial) {
 
     // Step 4
     for (int nu = 0; nu < m + 1; nu++) {
-        if (I[nu].size() != 0) {
+        if (I[nu].size() != 0.0) {
             z_star[nu] = I[nu][0].z;
             size_I = I[nu].size();
             for (int i = 1; i < size_I; i++) {
@@ -87,7 +87,7 @@ double imgo_method::selectNewPoint(int &t, trial_constr last_trial) {
                     z_star[nu] = I[nu][i].z;
                 }
             }
-            if (z_star[nu] <= 0 && nu != m) {
+            if (z_star[nu] <= 0.0 && nu != m) {
                 z_star[nu] = -mu[nu] * d;
             }
         }
@@ -175,22 +175,11 @@ void imgo_method::solve(int &count, double &x, Stop stop) {
         addInSort(I[tr.nu - 1], tr);
 
         count++;
-        switch (stop) {
-            case ACCURACY:
-                if (trial_points[t].x - trial_points[t - 1].x <= eps) {
-                    break;
-                }
-                break;
-            case NUMBER:
-                if (n >= Nmax) {
-                    break;
-                }
-                break;
-            case ACCURNUMBER:
-                if (trial_points[t].x - trial_points[t - 1].x <= eps || n >= Nmax) {
-                    break;
-                }
-                break;
+        if (trial_points[t].x - trial_points[t - 1].x <= eps) {
+            if (stop == ACCURACY || stop == ACCURNUMBER) break;
+        }
+        if (count >= Nmax) {
+            if (stop == NUMBER || stop == ACCURNUMBER) break;
         }
     }
     x = searchMinXTrial(trial_points, m);
@@ -204,7 +193,6 @@ bool imgo_method::solve_test(double x_opt, int &count, Stop stop) {
     for (int nu = 0; nu < m + 1; nu++) {
         I[nu].clear();
         calc_I[nu] = false;
-        mu[nu] = 1.0;
     }
     trial_points.clear();
     Nmax = count;
@@ -230,22 +218,11 @@ bool imgo_method::solve_test(double x_opt, int &count, Stop stop) {
         addInSort(I[tr.nu - 1], tr);
 
         count++;
-        switch (stop) {
-            case ACCURACY:
-                if (abs(x_k_1 - x_opt) <= eps) {
-                    return true;
-                }
-                break;
-            case NUMBER:
-                if (count >= Nmax) {
-                    return false;
-                }
-                break;
-            case ACCURNUMBER:
-                if (abs(x_k_1 - x_opt) <= eps || count >= Nmax) {
-                    return false;
-                }
-                break;
+        if (abs(x_k_1 - x_opt) <= eps) {
+            if (stop == ACCURACY || stop == ACCURNUMBER) return true;
+        }
+        if (count >= Nmax) {
+            if (stop == NUMBER || stop == ACCURNUMBER) return false;
         }
     }
 }

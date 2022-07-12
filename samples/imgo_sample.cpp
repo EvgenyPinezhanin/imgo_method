@@ -80,8 +80,8 @@ int main() {
         cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
         cout << "X* = " << task_array[i].X_opt[0] << endl;
         cout << "X = " << x << endl;
-        cout << "|X* - X| = " << abs(task_array[i].X_opt[0] - x) << endl;
-        cout << "|f(X*) - f(X)| = " << abs(task_array[i].f(task_array[i].X_opt[0], task_array[i].m + 1) - 
+        cout << "|X* - X| = " << std::abs(task_array[i].X_opt[0] - x) << endl;
+        cout << "|f(X*) - f(X)| = " << std::abs(task_array[i].f(task_array[i].X_opt[0], task_array[i].m + 1) - 
                                            task_array[i].f(x, task_array[i].m + 1)) << endl;
         cout << "Number of trials = " << count << endl;
         cout << endl;

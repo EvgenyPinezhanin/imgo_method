@@ -43,10 +43,10 @@ double gsa_method::selectNewPoint(int &t, trial last_trial) {
 
     // Step 2
     if (last_trial.x == B[0]) {
-        M = std::max({M, std::abs((last_trial.z - trial_points[t - 1].z) / (last_trial.x - trial_points[t - 1].x))});
+        M = max({M, abs((last_trial.z - trial_points[t - 1].z) / (last_trial.x - trial_points[t - 1].x))});
     } else {
-        M = std::max({M, std::abs((last_trial.z - trial_points[t - 1].z) / (last_trial.x - trial_points[t - 1].x)), 
-                         std::abs((trial_points[t + 1].z - last_trial.z) / (trial_points[t + 1].x - last_trial.x))});
+        M = max({M, abs((last_trial.z - trial_points[t - 1].z) / (last_trial.x - trial_points[t - 1].x)), 
+                    abs((trial_points[t + 1].z - last_trial.z) / (trial_points[t + 1].x - last_trial.x))});
     }
 
     // Step 3

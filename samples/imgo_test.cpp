@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <vector>
 #include <limits>
@@ -49,7 +50,6 @@ double f4(double x, int j) {
     }
 }
 
-// Error???
 double f5(double x, int j) {
     switch (j) {
         case 1: return 17.0 / 25.0 - 2.0 / 29763.233 * (-1.0 / 6.0 * pow(x, 6) + 52.0 / 25.0 * pow(x, 5) - 39.0 / 80.0 * pow(x, 4) -
@@ -106,14 +106,14 @@ int main() {
     if (!ofstr.is_open()) cerr << "File opening error\n";
     vector<trial_constr> trial_vec;
 
-    double eps = 0.001, r = 3.0, d = 0.0, x;
+    double eps = 0.000001, r = 2.0, d = 0.0, x;
     int count, Nmax = 1000;
     Stop stop = ACCURACY;
 
     vector<task_imgo> task_array = { task_imgo(f1, "f1(x)", 1, -2.5, 1.5, 1.05738, eps, Nmax, r, d, stop),
                                      task_imgo(f2, "f2(x)", 1, -5.0, 5.0, 1.016, eps, Nmax, r, d, stop),
                                      task_imgo(f4, "f4(x)", 2, 0.0, 4.0, 2.45956, eps ,Nmax, r, d, stop),
-                                     task_imgo(f5, "f5(x)", 2, -1.5, 11.0, 8.85725, eps, Nmax, r, d, stop),
+                                     task_imgo(f5, "f5(x)", 2, -1.5, 11.0, 9.28491, eps, Nmax, r, d, stop),
                                      task_imgo(f6, "f6(x)", 2, -4.0, 4.0, 2.32396, eps, Nmax, r, d, stop),
                                      task_imgo(f8, "f8(x)", 3, -2.5, 1.5, -1.12724, eps, Nmax, r, d, stop),
                                      task_imgo(f9, "f9(x)", 3, 0.0, 14.0, 4.0, eps, Nmax, r, d, stop) };
@@ -133,11 +133,11 @@ int main() {
 
         cout << "Function: " << task_array[i].name << endl;
         cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
-        cout << "X* = " << task_array[i].X_opt[0] << endl;
-        cout << "X = " << x << endl;
-        cout << "|X* - X| = " << abs(task_array[i].X_opt[0] - x) << endl;
-        cout << "|f(X*) - f(X)| = " << abs(task_array[i].f(task_array[i].X_opt[0], task_array[i].m + 1) - 
-                                           task_array[i].f(x, task_array[i].m + 1)) << endl;
+        cout << "X* = " << setprecision(8) << task_array[i].X_opt[0] << endl;
+        cout << "X = " << setprecision(8) << x << endl;
+        cout << "|X* - X| = " << setprecision(8) << std::abs(task_array[i].X_opt[0] - x) << endl;
+        cout << "|f(X*) - f(X)| = " << setprecision(8) << std::abs(task_array[i].f(task_array[i].X_opt[0], task_array[i].m + 1) - 
+                                                                        task_array[i].f(x, task_array[i].m + 1)) << endl;
         cout << "Number of trials = " << count << endl;
         cout << endl;
 
