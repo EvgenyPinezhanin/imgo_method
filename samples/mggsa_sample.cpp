@@ -52,77 +52,77 @@ int main() {
     double eps = 0.001, r = 2.0, d = 0.0;
     Stop stop = ACCURACY;
 
-    vector<task_mggsa> task = { task_mggsa(f1, "f1", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
-                                           vector<double>{4.0, 4.0}, eps, Nmax, r, d, den, key, stop, 1),
-                                task_mggsa(f2, "f2", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
-                                           vector<double>{1.0, 1.0}, eps, Nmax, r, d, den, key, stop, 1),
-                                task_mggsa(f3, "f3", n, 1, vector<double>{-1.0, -1.0}, vector<double>{1.0, 1.0},
-                                           vector<double>{0.5, 0.5}, eps, Nmax, r, d, den, key, stop, 1),
-                                task_mggsa(f4, "f4", n, 1, vector<double>{0.0, 0.0}, vector<double>{3.0, 3.0},
-                                           vector<double>{1.0, 1.0}, eps, Nmax, r, d, den, key, stop, 1) };
+    vector<task_mggsa> task_array = { task_mggsa(f1, "f1", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
+                                                 vector<double>{4.0, 4.0}, eps, Nmax, r, d, den, key, stop),
+                                      task_mggsa(f2, "f2", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
+                                                 vector<double>{1.0, 1.0}, eps, Nmax, r, d, den, key, stop),
+                                      task_mggsa(f3, "f3", n, 1, vector<double>{-1.0, -1.0}, vector<double>{1.0, 1.0},
+                                                 vector<double>{0.5, 0.5}, eps, Nmax, r, d, den, key, stop),
+                                      task_mggsa(f4, "f4", n, 1, vector<double>{0.0, 0.0}, vector<double>{3.0, 3.0},
+                                                 vector<double>{1.0, 1.0}, eps, Nmax, r, d, den, key, stop) };
 
-    mggsa_method imgo(nullptr);
+    mggsa_method mggsa(nullptr);
 
-    for (int i = 0; i < task.size(); i++) {
-        if (task[i].used) {
-            imgo.setF(task[i].f);
-            imgo.setN(task[i].n);
-            imgo.setM(task[i].m);
-            imgo.setAB(task[i].A, task[i].B);
-            imgo.setEps(task[i].eps);
-            imgo.setNmax(task[i].Nmax);
-            imgo.setR(task[i].r);
-            imgo.setD(task[i].d);
-            imgo.setDen(task[i].den);
-            imgo.setKey(task[i].key);
+    for (int i = 0; i < task_array.size(); i++) {
+        if (task_array[i].used) {
+            mggsa.setF(task_array[i].f);
+            mggsa.setN(task_array[i].n);
+            mggsa.setM(task_array[i].m);
+            mggsa.setAB(task_array[i].A, task_array[i].B);
+            mggsa.setEps(task_array[i].eps);
+            mggsa.setNmax(task_array[i].Nmax);
+            mggsa.setR(task_array[i].r);
+            mggsa.setD(task_array[i].d);
+            mggsa.setDen(task_array[i].den);
+            mggsa.setKey(task_array[i].key);
 
-            number_trials = task[i].Nmax;
-            imgo.solve(number_trials, X, task[i].stop);
+            number_trials = task_array[i].Nmax;
+            mggsa.solve(number_trials, X, task_array[i].stop);
 
-            cout << "Function: " << task[i].name << endl;
-            cout << "Dimension = " << task[i].n << endl;
-            cout << "Number of constrained = " << task[i].m << endl;
+            cout << "Function: " << task_array[i].name << endl;
+            cout << "Dimension = " << task_array[i].n << endl;
+            cout << "Number of constrained = " << task_array[i].m << endl;
             cout << "Parameters for constructing the Peano curve:" << endl;
-            cout << " m = " << task[i].den << " key = " << task[i].key << endl;
+            cout << "m = " << task_array[i].den << " key = " << task_array[i].key << endl;
             cout << "Trials result:" << endl;
             cout << "Number of trials = " << number_trials << endl;
-            cout << "x*_min = " << task[i].X_opt[0] << " y*_min = " << task[i].X_opt[1] << endl;
-            cout << "x_min = " << X[0] << " y_min = " << X[1] << endl;
-            cout << "||X* - X|| = " << sqrt((task[i].X_opt[0] - X[0]) * (task[i].X_opt[0] - X[0]) + 
-                                            (task[i].X_opt[1] - X[1]) * (task[i].X_opt[1] - X[1])) << endl;
-            cout << "|f(X*) - f(X)| = " << abs(task[i].f(task[i].X_opt, task[i].m + 1) - task[i].f(X, task[i].m + 1)) << endl;
+            cout << "X* = " << task_array[i].X_opt[0] << " y*_min = " << task_array[i].X_opt[1] << endl;
+            cout << "X = " << X[0] << " y_min = " << X[1] << endl;
+            cout << "||X* - X|| = " << sqrt((task_array[i].X_opt[0] - X[0]) * (task_array[i].X_opt[0] - X[0]) + 
+                                            (task_array[i].X_opt[1] - X[1]) * (task_array[i].X_opt[1] - X[1])) << endl;
+            cout << "|f(X*) - f(X)| = " << abs(task_array[i].f(task_array[i].X_opt, task_array[i].m + 1) - 
+                                               task_array[i].f(X, task_array[i].m + 1)) << endl;
             cout << endl;
 
-            // Подготовка данных для построения графика
-            ofstr << X[0] << " " << X[1] << " " << task[i].f(X, task[i].m + 1) << endl;
+            // Saving points for plotting
+            ofstr << X[0] << " " << X[1] << " " << task_array[i].f(X, task_array[i].m + 1) << endl;
             ofstr << endl << endl;
-            ofstr << task[i].X_opt[0] << " " << task[i].X_opt[1] << " " << task[i].f(task[i].X_opt, task[i].m + 1) << endl;
+            ofstr << task_array[i].X_opt[0] << " " << task_array[i].X_opt[1] << " " << 
+                     task_array[i].f(task_array[i].X_opt, task_array[i].m + 1) << endl;
             ofstr << endl << endl;
-            imgo.getPoints(trial_vec);
+            mggsa.getPoints(trial_vec);
             for (int j = 0; j < trial_vec.size(); j++) {
-                ofstr << trial_vec[j][0] << " " << trial_vec[j][1] << " " << task[i].f(trial_vec[j], task[i].m + 1) << endl;
+                ofstr << trial_vec[j][0] << " " << trial_vec[j][1] << " " << 
+                         task_array[i].f(trial_vec[j], task_array[i].m + 1) << endl;
             }
             ofstr << endl << endl;
         }
     }
     ofstr.close();
 
-    // Построение графика(работает только под Lunux с помощью gnuplot)
-#if defined(__linux__)
+    // Plotting the function(works with gnuplot)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);
     error = system("chmod +x scripts/peano_sample.gp");
     if (error != 0) {
-        std::cerr << "Error chmod" << std::endl;
+        cerr << "Error chmod" << std::endl;
     }
-
     char str[100];
     sprintf(str, "gnuplot -p -c scripts/peano_sample.gp %d", sample_func_number);
     error = system(str);
     if (error != 0) {
         std::cerr << "Error gnuplot" << std::endl;
     }
-#endif
 
     return 0;
 }

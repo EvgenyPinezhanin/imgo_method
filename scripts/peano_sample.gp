@@ -22,7 +22,7 @@ set view map
 set cntrparam bspline levels auto 10
 set cntrlabel onecolor
 set cntrlabel start 5 interval 150
-set cntrlabel font ",10"ssssssss
+set cntrlabel font ",10"
 set contour base
 set isosamples 60
 
