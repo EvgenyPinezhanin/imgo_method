@@ -1,8 +1,6 @@
 #!/usr/bin/gnuplot
 
-reset
-
-trialfile="peano_test_trial_points.txt"
+trialfile="output_data/mggsa_test_trial_points.txt"
 
 f_1(x, y) = -1.5*x**2*exp(1-x**2-20.25*(x-y)**2)-(0.5*(x-1)*(y-1))**4*exp(2-(0.5*(x-1))**4-(y-1)**4)
 g1_1(x, y) = 0.01*((x-2.2)**2+(y-1.2)**2.0-2.25)

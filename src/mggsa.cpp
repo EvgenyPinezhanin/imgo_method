@@ -133,7 +133,7 @@ double mggsa_method::selectNewPoint(int &t, trial_constr last_trial) {
     //     size_I = I[nu].size();
     //     for (int i = 1; i < size_I; i++) { // при i = 0 - нет j
     //         for (int j = 0; j < i; j++) {
-    //             mu_tmp = abs(I[nu][i].z - I[nu][j].z) / deltaX(I[nu][j].x, I[nu][i].x);
+    //             mu_tmp = abs(I[nu][i].z - I[nu][j].z) / pow(I[nu][i].x - I[nu][j].x, 1.0 / n);
     //             if (mu_tmp > mu[nu]) {
     //                 mu[nu] = mu_tmp;
     //             }
@@ -294,7 +294,8 @@ void mggsa_method::y(double x, vector<double> &X) {
 
 void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
 #if defined(TIME_TEST)
-    ofstr_test.open("imgo_time_test.txt");
+    ofstr_test.open("output_data/mggsa_time_test.txt");
+    if (!ofstr_test.is_open()) cerr << "File opening error\n";
     time_count.clear();
     time_mu.clear();
     time_z_star.clear();
@@ -431,19 +432,16 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
     }
     ofstr_test.close();
 
-#if defined(__linux__)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x chart.gp");
+    error = system("chmod +x scripts/time_test.gp");
     if (error != 0) {
-        cerr << "Error chmod" << std::endl;
+        cerr << "Error chmod" << endl;
     }
-    error = system("gnuplot -p -c time_test.gp");
+    error = system("gnuplot -p -c scripts/time_test.gp");
     if (error != 0) {
-        cerr << "Error gnuplot" << std::endl;
+        cerr << "Error gnuplot" << endl;
     }
-#endif
-
 #endif
 }
 

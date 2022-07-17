@@ -1,9 +1,7 @@
 #! /usr/bin/gnuplot
 
-reset
-
-load "operational_characteristics_opt.txt"
-datafile="operational_characteristics.txt"
+load "output_data/imgo_operational_characteristics_opt.txt"
+datafile="output_data/imgo_operational_characteristics.txt"
 
 p_hill="hill-P_s(k)-r="
 title_hill_1=p_hill.r1_hill

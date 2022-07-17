@@ -1,14 +1,12 @@
 #! /usr/bin/gnuplot
 
-reset
-
-datafile="imgo_time_test.txt"
+datafile="output_data/mggsa_time_test.txt"
 
 set xlabel "number of trial points"
 set ylabel "time, c"
 set grid
 
-set title "Time test of imgo" font "Helvetica Bold, 20"
+set title "Time test of mggsa" font "Helvetica Bold, 20"
 plot datafile using 1:2 ls 5 lc rgb "red" title "calc mu", \
      datafile using 1:3 ls 5 lc rgb "green" title "calc z*", \
      datafile using 1:4 ls 5 lc rgb "blue" title "calc R", \

@@ -1,12 +1,10 @@
 #! /usr/bin/gnuplot
 
-reset
-
-datafile="peano_operational_characteristics.txt"
+datafile="output_data/mggsa_operational_characteristics.txt"
 
 array Name[4]
 array R[3*4]
-load "peano_operational_characteristics_opt.txt"
+load "output_data/mggsa_operational_characteristics_opt.txt"
 
 ind=3*ARG1
 

@@ -9,7 +9,7 @@
 
 using namespace std;
 
-const int sample_func_number = 1; // 0 - f1, 1 - f2, 2 - f3, 3 - f4
+const int sample_func_number = 2; // 0 - f1, 1 - f2, 2 - f3, 3 - f4
 
 double f1(vector<double> x, int j) {
     switch (j) {
@@ -42,7 +42,7 @@ double f4(vector<double> x, int j) {
 }
 
 int main() {
-    ofstream ofstr("peano_sample_trial_points.txt");
+    ofstream ofstr("output_data/mggsa_sample_trial_points.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
     vector<double> X(2);
@@ -113,15 +113,15 @@ int main() {
     // Plotting the function(works with gnuplot)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/peano_sample.gp");
+    error = system("chmod +x scripts/mggsa_sample.gp");
     if (error != 0) {
-        cerr << "Error chmod" << std::endl;
+        cerr << "Error chmod" << endl;
     }
     char str[100];
-    sprintf(str, "gnuplot -p -c scripts/peano_sample.gp %d", sample_func_number);
+    sprintf(str, "gnuplot -p -c scripts/mggsa_sample.gp %d", sample_func_number);
     error = system(str);
     if (error != 0) {
-        std::cerr << "Error gnuplot" << std::endl;
+        cerr << "Error gnuplot" << endl;
     }
 
     return 0;

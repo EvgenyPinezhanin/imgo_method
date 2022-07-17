@@ -31,9 +31,9 @@ double f_shekel(double x, int j) {
 
 int main() {
 #if defined(CALC)
-    ofstream ofstr("operational_characteristics.txt");
+    ofstream ofstr("output_data/imgo_operational_characteristics.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
-    ofstream ofstr_opt("operational_characteristics_opt.txt");
+    ofstream ofstr_opt("output_data/imgo_operational_characteristics_opt.txt");
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
     int count_func;
@@ -120,21 +120,19 @@ int main() {
 #endif
 
     // Drawing graphs of operational characteristics
-#if defined(__linux__)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/oper_characteristics.gp");
+    error = system("chmod +x scripts/imgo_operational_characteristics.gp");
     if (error != 0) {
         cerr << "Error chmod" << std::endl;
     }
 
     char str[100];
-    sprintf(str, "gnuplot -p -c scripts/oper_characteristics.gp %d", chart_number);
+    sprintf(str, "gnuplot -p -c scripts/imgo_operational_characteristics.gp %d", chart_number);
     error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << std::endl;
     }
-#endif
 
 #if defined(_MSC_VER)
     cin.get();

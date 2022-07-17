@@ -1,8 +1,6 @@
 #!/usr/bin/gnuplot
 
-reset
-
-trialfile="peano_sample_trial_points.txt"
+trialfile="output_data/mggsa_sample_trial_points.txt"
 
 f_1(x, y) = 1.0-x-y
 
@@ -24,7 +22,7 @@ set cntrlabel onecolor
 set cntrlabel start 5 interval 150
 set cntrlabel font ",10"
 set contour base
-set isosamples 60
+set isosamples 100
 
 set xlabel "X"
 set ylabel "Y"

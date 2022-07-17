@@ -60,9 +60,9 @@ double f_constr_gkls(vector<double> x, int j) {
 
 int main() {
 #if defined(CALC)
-    ofstream ofstr("peano_operational_characteristics.txt");
+    ofstream ofstr("output_data/mggsa_operational_characteristics.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
-    ofstream ofstr_opt("peano_operational_characteristics_opt.txt");
+    ofstream ofstr_opt("output_data/mggsa_operational_characteristics_opt.txt");
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
     int count_func;
@@ -133,7 +133,6 @@ int main() {
         cout << "time: " << work_time << endl;
     }
 
-    // Параметры
     Kmax = 1500;
 
     ofstr_opt << "Name[2]=\"GKLS\"" << endl;
@@ -174,7 +173,6 @@ int main() {
         cout << "time: " << work_time << endl;
     }
 
-    // Параметры
     Kmax = 2500;
 
     ofstr_opt << "Name[3]=\"GrishaginConstrained\"" << endl;
@@ -215,7 +213,6 @@ int main() {
         cout << "time: " << work_time << endl;
     }
 
-    // Праметры
     Kmax = 4000;
 
     ofstr_opt << "Name[4]=\"GKLSConstrained\"" << endl;
@@ -263,13 +260,13 @@ int main() {
     // Plotting operational characteristics(works with gnuplot)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/peano_oper_characteristics.gp");
+    error = system("chmod +x scripts/mggsa_operational_characteristics.gp");
     if (error != 0) {
         cerr << "Error chmod" << endl;
     }
 
     char str[100];
-    sprintf(str, "gnuplot -p -c scripts/peano_oper_characteristics.gp %d", family_number);
+    sprintf(str, "gnuplot -p -c scripts/mggsa_operational_characteristics.gp %d", family_number);
     error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << endl;
