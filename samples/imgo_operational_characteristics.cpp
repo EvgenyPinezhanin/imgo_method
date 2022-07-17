@@ -51,9 +51,7 @@ int main() {
     vector<int> count_Hill(hillProblems.GetFamilySize(), 0);
     vector<int> count_Shekel(shekelProblems.GetFamilySize(), 0);
 
-    imgo_method imgo(nullptr);
-    imgo.setEps(eps);
-    imgo.setD(d);
+    imgo_method imgo(nullptr, -1, 0.0, 0.0, -1.0, d, eps);
 
     for (int i = 0; i < hill_r_array.size(); i++) {
         ofstr_opt << "r" << i + 1 << "_hill = \"" << hill_r_array[i] << "\"" << endl; 
@@ -119,7 +117,7 @@ int main() {
     ofstr_opt.close();
 #endif
 
-    // Drawing graphs of operational characteristics
+    // Plotting operational characteristics(works with gnuplot)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);
     error = system("chmod +x scripts/imgo_operational_characteristics.gp");

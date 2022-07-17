@@ -6,8 +6,7 @@
 
 #include <opt_method.h>
 
-using std::string;
-using std::vector;
+using namespace std;
 
 struct task {
     string name;

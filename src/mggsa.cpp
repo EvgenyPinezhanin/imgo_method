@@ -25,7 +25,7 @@
 
 const double peano_a = 0.0, peano_b = 1.0, peano_random = 0.5;
 
-double dist_vec(vector<double> val1, vector<double> val2) {
+double euclidean_distance(vector<double> val1, vector<double> val2) {
     double res = 0.0;
     size_t size = val1.size();
     for (int i = 0; i < size; i++) {
@@ -35,7 +35,8 @@ double dist_vec(vector<double> val1, vector<double> val2) {
     return res;
 }
 
-template <typename T> int sgn(T val) {
+template<typename T> 
+int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
@@ -82,7 +83,7 @@ trial_constr mggsa_method::newTrial(double x) {
     }
 
 #if defined(DEBUG)
-    std::cout << x << " " << X[0] << " " << X[1] << " " << f(X, m + 1) << " " << tr.nu << std::endl;
+    cout << x << " " << X[0] << " " << X[1] << " " << f(X, m + 1) << " " << tr.nu << endl;
 #endif
 
     return tr;
@@ -92,9 +93,9 @@ double mggsa_method::newPoint(int t) {
     if (trial_points[t].nu != trial_points[t - 1].nu) {
         return (trial_points[t].x + trial_points[t - 1].x) / 2.0;
     } else {
-        return (trial_points[t].x + trial_points[t - 1].x) / 2.0 
-                   - sgn(trial_points[t].z - trial_points[t - 1].z) / (2.0 * r) 
-                   * pow(abs(trial_points[t].z - trial_points[t - 1].z) / mu[trial_points[t].nu - 1], n);
+        return (trial_points[t].x + trial_points[t - 1].x) / 2.0 - 
+                sgn(trial_points[t].z - trial_points[t - 1].z) / (2.0 * r) * 
+                pow(abs(trial_points[t].z - trial_points[t - 1].z) / mu[trial_points[t].nu - 1], n);
     }
 }
 
@@ -105,8 +106,8 @@ double mggsa_method::selectNewPoint(int &t, trial_constr last_trial) {
     
     // Step 3
     double mu_tmp;
-    size_t size_I = I[last_trial.nu - 1].size();
     int nu_I = last_trial.nu - 1;
+    size_t size_I = I[nu_I].size();
     for (int nu = 0; nu < m + 1; nu++) {
         if (!calc_I[nu]) mu[nu] = 0.0;
     }
@@ -432,6 +433,7 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
     }
     ofstr_test.close();
 
+    // Plotting the functions of time(works with gnuplot)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);
     error = system("chmod +x scripts/time_test.gp");
@@ -446,7 +448,7 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
 }
 
 
-bool mggsa_method::solve_test(vector<double> x_opt, int &count, Stop stop) {
+bool mggsa_method::solve_test(vector<double> X_opt, int &count, Stop stop) {
     for (int nu = 0; nu < m + 1; nu++) {
         I[nu].clear();
         calc_I[nu] = false;
@@ -486,7 +488,7 @@ bool mggsa_method::solve_test(vector<double> x_opt, int &count, Stop stop) {
 
         count++;
         y(x_k_1, X);
-        if (dist_vec(X, x_opt) <= eps) {
+        if (euclidean_distance(X, X_opt) <= eps) {
             if (stop == ACCURACY || stop == ACCURNUMBER) return true;
         }
         if (count >= Nmax) {

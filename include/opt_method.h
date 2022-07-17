@@ -62,7 +62,7 @@ struct trial_constr {
 
 class optimization_method_constrained : public optimization_method {
 protected:
-    double (*f)(vector<double>, int);
+    double (*f)(vector<double>, int); // target function
     int m; // number of constraints
 
     vector<trial_constr> trial_points;

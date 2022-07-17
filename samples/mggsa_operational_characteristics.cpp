@@ -89,11 +89,7 @@ int main() {
     number_trials[2].resize(grishaginConstrainedProblems.GetFamilySize(), 0);
     number_trials[3].resize(GKLSConstrainedProblems.GetFamilySize(), 0);
 
-    mggsa_method mggsa(nullptr);
-    mggsa.setEps(eps);
-    mggsa.setD(d);
-    mggsa.setDen(den);
-    mggsa.setKey(key);
+    mggsa_method mggsa(nullptr, -1, -1, A, B, -1.0, d, den, key, eps);
 
     ofstr_opt << "Name[1]=\"Grishagin\"" << endl;
     for (int i = 0; i < r_array[0].size(); i++) {

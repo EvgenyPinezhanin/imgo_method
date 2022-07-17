@@ -46,10 +46,9 @@ int main() {
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
     vector<double> X(2);
-    std::vector<vector<double>> trial_vec;
-    int number_trials;
-    int n = 2, den = 10, key = 1, Nmax = 1000;
+    vector<vector<double>> trial_vec;
     double eps = 0.001, r = 2.0, d = 0.0;
+    int count, n = 2, den = 10, key = 1, Nmax = 1000;
     Stop stop = ACCURACY;
 
     vector<task_mggsa> task_array = { task_mggsa(f1, "f1", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
@@ -76,8 +75,7 @@ int main() {
             mggsa.setDen(task_array[i].den);
             mggsa.setKey(task_array[i].key);
 
-            number_trials = task_array[i].Nmax;
-            mggsa.solve(number_trials, X, task_array[i].stop);
+            mggsa.solve(count, X, task_array[i].stop);
 
             cout << "Function: " << task_array[i].name << endl;
             cout << "Dimension = " << task_array[i].n << endl;
@@ -85,7 +83,7 @@ int main() {
             cout << "Parameters for constructing the Peano curve:" << endl;
             cout << "m = " << task_array[i].den << " key = " << task_array[i].key << endl;
             cout << "Trials result:" << endl;
-            cout << "Number of trials = " << number_trials << endl;
+            cout << "Number of trials = " << count << endl;
             cout << "X* = " << task_array[i].X_opt[0] << " y*_min = " << task_array[i].X_opt[1] << endl;
             cout << "X = " << X[0] << " y_min = " << X[1] << endl;
             cout << "||X* - X|| = " << sqrt((task_array[i].X_opt[0] - X[0]) * (task_array[i].X_opt[0] - X[0]) + 
@@ -124,5 +122,8 @@ int main() {
         cerr << "Error gnuplot" << endl;
     }
 
+#if defined(_MSC_VER)
+    cin.get();
+#endif
     return 0;
 }

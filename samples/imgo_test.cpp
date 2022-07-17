@@ -1,6 +1,5 @@
 #include <iostream>
 #include <iomanip>
-#include <fstream>
 #include <vector>
 #include <limits>
 #if defined( _MSC_VER )
@@ -13,16 +12,13 @@
 #include <imgo.h>
 #include <task.h>
 
-using std::ofstream;
-using std::cerr;
-using std::cout;
-using std::endl;
+using namespace std;
 
 double f1(double x, int j) {
     switch (j) {
         case 1: return exp(-sin(3.0 * x)) - 1.0 / 10.0 * pow(x - 1.0 / 2.0, 2.0) - 1.0;
         case 2: return -13.0 / 6.0 * x + sin(13.0 / 4.0 * (2.0 * x + 5.0)) - 53.0 / 12.0;
-        default: return std::numeric_limits<double>::quiet_NaN();
+        default: return numeric_limits<double>::quiet_NaN();
     }
 }
 
@@ -30,7 +26,7 @@ double f2(double x, int j) {
     switch (j) {
         case 1: return 1.0 / 20.0 - exp(-2.0 / 5.0 * (x + 5.0)) * sin(4.0 / 5.0 * M_PI * (x + 5.0));
         case 2: return (11.0 * x * x - 10.0 * x + 21.0) / (2.0 * (x * x + 1));
-        default: return std::numeric_limits<double>::quiet_NaN();
+        default: return numeric_limits<double>::quiet_NaN();
     }
 }
 
@@ -46,7 +42,7 @@ double f4(double x, int j) {
                 sin(2.0 * M_PI * (x - 1.0 / 10.0));
         case 3: return 4.0 * sin(M_PI / 4.0 * x + 1.0 / 20.0) * 
                 pow(pow(sin(M_PI / 2.0 * x + 1.0 / 10.0), 3.0) + pow(cos(M_PI / 2.0 * x + 1.0 / 10.0), 3.0), 2.0);
-        default: return std::numeric_limits<double>::quiet_NaN();
+        default: return numeric_limits<double>::quiet_NaN();
     }
 }
 
@@ -56,7 +52,7 @@ double f5(double x, int j) {
             71.0 / 10.0 * x * x * x + 79.0 / 20.0 * x * x + x - 1.0 / 10.0);
         case 2: return -14.0 / 125.0 * (3.0 * x - 8.0) * sin(252.0 / 125.0 * (x + 3.0 / 2.0)) - 1.0 / 2.0;
         case 3: return sin(0.423531 * x + 3.13531) + sin(10.0 / 3.0 * (0.423531 * x + 3.13531)) + log(0.423531 * x + 3.13531) + 0.36634 - 0.355766 * x;
-        default: return std::numeric_limits<double>::quiet_NaN();
+        default: return numeric_limits<double>::quiet_NaN();
     }
 }
 
@@ -65,7 +61,7 @@ double f6(double x, int j) {
         case 1: return 40.0 * (cos(4.0 * x) * (x - sin(x)) * exp( -(x * x) / 2.0));
         case 2: return 2.0 / 25.0 * (x + 4.0) - sin(12.0 / 5.0 * (x + 4.0));
         case 3: return -7.0 / 40.0 * (3.0 * x + 4.0) * sin(63.0 / 20.0 * (x + 4.0));
-        default: return std::numeric_limits<double>::quiet_NaN();
+        default: return numeric_limits<double>::quiet_NaN();
     }
 }
 
@@ -81,7 +77,7 @@ double f8(double x, int j) {
             return 3.0 / 10.0 - sum;
         case 3: return (-21.0 / 20.0 * x - 13.0 / 8.0) * sin(63.0 / 10.0 * x + 63.0 / 4.0) + 1.0 / 5.0;
         case 4: return cos(7.0 / 4.0 * x + 241.0 / 40.0) - sin(35.0 / 4.0 * x + 241.0 / 8.0) - 5.0;
-        default: return std::numeric_limits<double>::quiet_NaN();
+        default: return numeric_limits<double>::quiet_NaN();
     }
 }
 
@@ -97,15 +93,11 @@ double f9(double x, int j) {
                 sum += 1.0 / 5.0 * sin((i + 1.0) * x - 1.0) + 2.0;
             }
             return sum;
-        default: return std::numeric_limits<double>::quiet_NaN();
+        default: return numeric_limits<double>::quiet_NaN();
     }
 }
 
 int main() {
-    ofstream ofstr("output_data_test.txt");
-    if (!ofstr.is_open()) cerr << "File opening error\n";
-    vector<trial_constr> trial_vec;
-
     double eps = 0.000001, r = 2.0, d = 0.0, x;
     int count, Nmax = 1000;
     Stop stop = ACCURACY;
@@ -135,22 +127,13 @@ int main() {
         cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
         cout << "X* = " << setprecision(8) << task_array[i].X_opt[0] << endl;
         cout << "X = " << setprecision(8) << x << endl;
-        cout << "|X* - X| = " << setprecision(8) << std::abs(task_array[i].X_opt[0] - x) << endl;
-        cout << "|f(X*) - f(X)| = " << setprecision(8) << std::abs(task_array[i].f(task_array[i].X_opt[0], task_array[i].m + 1) - 
+        cout << "|X* - X| = " << setprecision(8) << abs(task_array[i].X_opt[0] - x) << endl;
+        cout << "|f(X*) - f(X)| = " << setprecision(8) << abs(task_array[i].f(task_array[i].X_opt[0], task_array[i].m + 1) - 
                                                                         task_array[i].f(x, task_array[i].m + 1)) << endl;
         cout << "Number of trials = " << count << endl;
         cout << endl;
-
-        imgo.getTrialPoints(trial_vec);
-        ofstr << task_array[i].A[0] << " " << task_array[i].B[0] << " " << task_array[i].m 
-              << " " << x << " " << task_array[i].X_opt[0] << endl;
-        for (int j = 0; j < trial_vec.size(); j++) {
-            ofstr << trial_vec[j].x << " " << trial_vec[j].z << endl;
-        }
-        ofstr << endl;
     }
 
-    ofstr.close();
 #if defined( _MSC_VER )
     cin.get();
 #endif

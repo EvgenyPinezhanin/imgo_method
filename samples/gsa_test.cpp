@@ -10,10 +10,7 @@
 #include <gsa.h>
 #include <task.h>
 
-using std::vector;
-using std::cout;
-using std::endl;
-using std::setprecision;
+using namespace std;
 
 double f1(double x) {
     return -(-1.0 / 6.0 * pow(x, 6) + 52.0 / 25.0 * pow(x, 5) - 39.0 / 80.0 * pow(x, 4) - 
@@ -111,13 +108,9 @@ double f20(double x) {
 }
 
 int main() {
-    double eps = 0.001;
-    int Nmax = 1000;
-    double r = 2.0; // > 1
+    double x, eps = 0.001, r = 2.0; // > 1
+    int count, Nmax = 1000;
     Stop stop = ACCURACY;
-
-    double x;
-    int count;
 
     vector<task_gsa> task_array = { task_gsa(f1, "f1(x)", -1.5, 11.0, 10.0, eps, Nmax, r, stop),
                                     task_gsa(f2, "f2(x)", 2.7, 7.5, 5.145735, eps, Nmax, r, stop),
@@ -143,22 +136,24 @@ int main() {
     gsa_method gsa(nullptr);
 
     for (int i = 0; i < task_array.size(); i++) {
-        gsa.setF(task_array[i].f);
-        gsa.setAB(task_array[i].A[0], task_array[i].B[0]);
-        gsa.setEps(task_array[i].eps);
-        gsa.setNmax(task_array[i].Nmax);
-        gsa.setR(task_array[i].r);
+        if (task_array[i].used) {
+            gsa.setF(task_array[i].f);
+            gsa.setAB(task_array[i].A[0], task_array[i].B[0]);
+            gsa.setEps(task_array[i].eps);
+            gsa.setNmax(task_array[i].Nmax);
+            gsa.setR(task_array[i].r);
 
-        gsa.solve(count, x, task_array[i].stop);
+            gsa.solve(count, x, task_array[i].stop);
 
-        cout << "Function: " << task_array[i].name << endl;
-        cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
-        cout << "X* = " << setprecision(7) << task_array[i].X_opt[0] << endl;
-        cout << "X = " << setprecision(7)  << x << endl;
-        cout << "|X* - X| = " << setprecision(7) << std::abs(task_array[i].X_opt[0] - x) << endl;
-        cout << "|f(X*) - f(X)| = " << setprecision(7) << std::abs(task_array[i].f(task_array[i].X_opt[0]) - task_array[i].f(x)) << endl;
-        cout << "Count of trials = " << count << endl;
-        cout << endl;
+            cout << "Function: " << task_array[i].name << endl;
+            cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
+            cout << "X* = " << setprecision(8) << task_array[i].X_opt[0] << endl;
+            cout << "X = " << setprecision(8)  << x << endl;
+            cout << "|X* - X| = " << setprecision(8) << abs(task_array[i].X_opt[0] - x) << endl;
+            cout << "|f(X*) - f(X)| = " << setprecision(8) << abs(task_array[i].f(task_array[i].X_opt[0]) - task_array[i].f(x)) << endl;
+            cout << "Count of trials = " << count << endl;
+            cout << endl;
+        }
     }
 
 #if defined( _MSC_VER )

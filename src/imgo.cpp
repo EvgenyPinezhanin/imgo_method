@@ -61,8 +61,8 @@ double imgo_method::newPoint(int t) {
 double imgo_method::selectNewPoint(int &t, trial_constr last_trial) {
     // Step 3
     double mu_tmp;
-    size_t size_I = I[last_trial.nu - 1].size();
     int nu_I = last_trial.nu - 1;
+    size_t size_I = I[nu_I].size();
     for (int nu = 0; nu < m + 1; nu++) {
         if (!calc_I[nu]) mu[nu] = 0.0;
     }
@@ -151,6 +151,7 @@ void imgo_method::setM(int _m) {
 void imgo_method::solve(int &count, double &x, Stop stop) {
     for (int i = 0; i < I.size(); i++) {
         I[i].clear();
+        calc_I[i] = false;
     }
     trial_points.clear();
 

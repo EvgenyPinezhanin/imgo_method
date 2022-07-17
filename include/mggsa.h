@@ -41,7 +41,7 @@ public:
     void y(double x, vector<double> &X);
     
     void solve(int &count, vector<double> &X, Stop stop = ACCURACY);
-    bool solve_test(vector<double> x_opt, int &count, Stop stop = ACCURACY);
+    bool solve_test(vector<double> X_opt, int &count, Stop stop = ACCURACY);
 };
 
 #endif // MGGSA_H

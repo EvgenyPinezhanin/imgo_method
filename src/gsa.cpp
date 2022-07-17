@@ -57,8 +57,8 @@ double gsa_method::selectNewPoint(int &t, trial last_trial) {
     double R = m * d_x + pow(trial_points[1].z - trial_points[0].z, 2) / (m * d_x) - 2 * (trial_points[1].z + trial_points[0].z);
     double Rtmp;
     t = 1;
-    size_t size = trial_points.size();
-    for (size_t i = 2; i < size; i++) {
+    size_t size_tr_pt = trial_points.size();
+    for (size_t i = 2; i < size_tr_pt; i++) {
         d_x = trial_points[i].x - trial_points[i - 1].x;
         Rtmp = m * d_x + pow(trial_points[i].z - trial_points[i - 1].z, 2) / (m * d_x) - 2 * (trial_points[i].z + trial_points[i - 1].z);
         if (Rtmp > R) {
@@ -89,18 +89,11 @@ void gsa_method::solve(int &count, double &x, Stop stop) {
         addInSort(trial_points, tr);
 
         count++;
-        if (stop == ACCURACY) {
-            if (trial_points[t].x - trial_points[t - 1].x <= eps) {
-                break;
-            }
-        } else if (stop == NUMBER) {
-            if (count >= Nmax) {
-                break;
-            }
-        } else if (stop == ACCURNUMBER) {
-            if (trial_points[t].x - trial_points[t - 1].x <= eps || count >= Nmax) {
-                break;
-            }
+        if (trial_points[t].x - trial_points[t - 1].x <= eps) {
+            if (stop == ACCURACY || stop == ACCURNUMBER) break;
+        }
+        if (count >= Nmax) {
+            if (stop == NUMBER || stop == ACCURNUMBER) break;
         }
     }
     x = searchMinX(trial_points);
