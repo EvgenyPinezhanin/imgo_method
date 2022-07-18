@@ -40,7 +40,7 @@ int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
-void addInSort(vector<trial_constr> &vec, trial_constr tr) {
+inline void addInSort(vector<trial_constr> &vec, trial_constr tr) {
     vector<trial_constr>::iterator iter = vec.begin();
     vector<trial_constr>::iterator iterEnd = vec.end();
     while(true) {
@@ -50,7 +50,7 @@ void addInSort(vector<trial_constr> &vec, trial_constr tr) {
     vec.insert(iter, tr);
 }
 
-double searchMinXTrial(vector<trial_constr> &trials, int m) {
+inline double searchMinXTrial(vector<trial_constr> &trials, int m) {
     double z = 0.0, x = 0.0;
     int k = 0;
     for (int i = 0; i < trials.size(); i++) {
@@ -90,12 +90,12 @@ trial_constr mggsa_method::newTrial(double x) {
 }
 
 double mggsa_method::newPoint(int t) {
-    if (trial_points[t].nu != trial_points[t - 1].nu) {
-        return (trial_points[t].x + trial_points[t - 1].x) / 2.0;
+    if (trial_points[t].nu != trial_points[(size_t)t - 1].nu) {
+        return (trial_points[t].x + trial_points[(size_t)t - 1].x) / 2.0;
     } else {
-        return (trial_points[t].x + trial_points[t - 1].x) / 2.0 - 
-                sgn(trial_points[t].z - trial_points[t - 1].z) / (2.0 * r) * 
-                pow(abs(trial_points[t].z - trial_points[t - 1].z) / mu[trial_points[t].nu - 1], n);
+        return (trial_points[t].x + trial_points[(size_t)t - 1].x) / 2.0 -
+                sgn(trial_points[t].z - trial_points[(size_t)t - 1].z) / (2.0 * r) *
+                pow(abs(trial_points[t].z - trial_points[(size_t)t - 1].z) / mu[(size_t)trial_points[t].nu - 1], n);
     }
 }
 
@@ -112,8 +112,8 @@ double mggsa_method::selectNewPoint(int &t, trial_constr last_trial) {
         if (!calc_I[nu]) mu[nu] = 0.0;
     }
     for (int i = 0; i < size_I; i++) {
-        if (I[last_trial.nu - 1][i].x != last_trial.x) {
-            mu_tmp = abs(I[nu_I][i].z - last_trial.z) / pow(abs(I[last_trial.nu - 1][i].x - last_trial.x), 1.0 / n);
+        if (I[nu_I][i].x != last_trial.x) {
+            mu_tmp = abs(I[nu_I][i].z - last_trial.z) / pow(abs(I[nu_I][i].x - last_trial.x), 1.0 / n);
             if (mu_tmp > mu[nu_I]) {
                 mu[nu_I] = mu_tmp;
                 if (abs(mu[nu_I]) > 1e-14) calc_I[nu_I] = true;
@@ -214,17 +214,17 @@ double mggsa_method::selectNewPoint(int &t, trial_constr last_trial) {
     double R, Rtmp = 0.0;
     double mu_v, z_star_v;
     if (trial_points[1].nu == trial_points[0].nu) {
-        mu_v = mu[trial_points[1].nu - 1];
-        z_star_v = z_star[trial_points[1].nu - 1];
+        mu_v = mu[(size_t)trial_points[1].nu - 1];
+        z_star_v = z_star[(size_t)trial_points[1].nu - 1];
         R = d_x + pow(trial_points[1].z - trial_points[0].z, 2) / (r * r * mu_v * mu_v * d_x) -
             2.0 * (trial_points[1].z + trial_points[0].z - 2.0 * z_star_v) / (r * mu_v);
     } else if (trial_points[0].nu < trial_points[1].nu) {
-        mu_v = mu[trial_points[1].nu - 1];
-        z_star_v = z_star[trial_points[1].nu - 1];
+        mu_v = mu[(size_t)trial_points[1].nu - 1];
+        z_star_v = z_star[(size_t)trial_points[1].nu - 1];
         R = 2.0 * d_x  - 4.0 * (trial_points[1].z - z_star_v) / (r * mu_v);
     } else {
-        mu_v = mu[trial_points[0].nu - 1];
-        z_star_v = z_star[trial_points[0].nu - 1];
+        mu_v = mu[(size_t)trial_points[0].nu - 1];
+        z_star_v = z_star[(size_t)trial_points[0].nu - 1];
         R = 2.0 * d_x  - 4.0 * (trial_points[0].z - z_star_v) / (r * mu_v);
     }
 
@@ -236,22 +236,22 @@ double mggsa_method::selectNewPoint(int &t, trial_constr last_trial) {
     for (size_t i = 2; i < size_tr_pt; i++) {
         d_x = pow(trial_points[i].x - trial_points[i - 1].x, 1.0 / n);
         if (trial_points[i].nu == trial_points[i - 1].nu) {
-            mu_v = mu[trial_points[i].nu - 1];
-            z_star_v = z_star[trial_points[i].nu - 1];
+            mu_v = mu[(size_t)trial_points[i].nu - 1];
+            z_star_v = z_star[(size_t)trial_points[i].nu - 1];
             Rtmp = d_x + pow(trial_points[i].z - trial_points[i - 1].z, 2) / (r * r * mu_v * mu_v * d_x) -
                    2.0 * (trial_points[i].z + trial_points[i - 1].z - 2.0 * z_star_v) / (r * mu_v);
         } else if (trial_points[i - 1].nu < trial_points[i].nu) {
-            mu_v = mu[trial_points[i].nu - 1];
-            z_star_v = z_star[trial_points[i].nu - 1];
+            mu_v = mu[(size_t)trial_points[i].nu - 1];
+            z_star_v = z_star[(size_t)trial_points[i].nu - 1];
             Rtmp = 2.0 * d_x  - 4.0 * (trial_points[i].z - z_star_v) / (r * mu_v);
         } else  {
-            mu_v = mu[trial_points[i - 1].nu - 1];
-            z_star_v = z_star[trial_points[i - 1].nu - 1];
+            mu_v = mu[(size_t)trial_points[i - 1].nu - 1];
+            z_star_v = z_star[(size_t)trial_points[i - 1].nu - 1];
             Rtmp = 2.0 * d_x  - 4.0 * (trial_points[i - 1].z - z_star_v) / (r * mu_v);
         }
         if (Rtmp > R) {
             R = Rtmp;
-            t = i;
+            t = (int)i;
         }
 
 #if defined(DEBUG)
@@ -271,10 +271,10 @@ double mggsa_method::selectNewPoint(int &t, trial_constr last_trial) {
 
 void mggsa_method::setM(int _m) {
     optimization_method_constrained::setM(_m);
-    I.resize(m + 1);
-    calc_I.resize(m + 1);
-    mu.resize(m + 1);
-    z_star.resize(m + 1);
+    I.resize((size_t)m + 1);
+    calc_I.resize((size_t)m + 1);
+    mu.resize((size_t)m + 1);
+    z_star.resize((size_t)m + 1);
 }
 
 void mggsa_method::getPoints(vector<vector<double>> &points_vec) {
@@ -351,7 +351,7 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
     start_time = clock();
 #endif
 
-    addInSort(I[tr.nu - 1], tr);
+    addInSort(I[(size_t)tr.nu - 1], tr);
 
 #if defined(TIME_TEST)
     end_time = clock();
@@ -400,7 +400,7 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
     #endif
 
         // Step 2
-        addInSort(I[tr.nu - 1], tr);
+        addInSort(I[(size_t)tr.nu - 1], tr);
 
     #if defined(TIME_TEST)
         end_time = clock();
@@ -417,11 +417,11 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
             cout << pow(abs(trial_points[t].x - trial_points[t - 1].x), 1.0 / n) << endl;
         #endif
 
-        if (pow(trial_points[t].x - trial_points[t - 1].x, 1.0 / n) <= eps) {
-            if (stop == ACCURACY || stop == ACCURNUMBER) break;
+        if (pow(trial_points[t].x - trial_points[(size_t)t - 1].x, 1.0 / n) <= eps) {
+            if (stop == Stop::ACCURACY || stop == Stop::ACCURNUMBER) break;
         }
         if (count >= Nmax) {
-            if (stop == NUMBER || stop == ACCURNUMBER) break;
+            if (stop == Stop::NUMBER || stop == Stop::ACCURNUMBER) break;
         }
     }
     y(searchMinXTrial(trial_points, m), X);
@@ -440,7 +440,7 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
     if (error != 0) {
         cerr << "Error chmod" << endl;
     }
-    error = system("gnuplot -p -c scripts/time_test.gp");
+    error = system("gnuplot -c scripts/time_test.gp");
     if (error != 0) {
         cerr << "Error gnuplot" << endl;
     }
@@ -463,7 +463,7 @@ bool mggsa_method::solve_test(vector<double> X_opt, int &count, Stop stop) {
     trial_points.push_back(tr);
     tr = newTrial(peano_random);
     addInSort(trial_points, tr);
-    addInSort(I[tr.nu - 1], tr);
+    addInSort(I[(size_t)tr.nu - 1], tr);
     if (tr.nu > M) {
         M = tr.nu;
     }
@@ -480,7 +480,7 @@ bool mggsa_method::solve_test(vector<double> X_opt, int &count, Stop stop) {
         addInSort(trial_points, tr);
 
         // Step 2
-        addInSort(I[tr.nu - 1], tr);
+        addInSort(I[(size_t)tr.nu - 1], tr);
 
         if (tr.nu > M) {
             M = tr.nu;
@@ -489,10 +489,10 @@ bool mggsa_method::solve_test(vector<double> X_opt, int &count, Stop stop) {
         count++;
         y(x_k_1, X);
         if (euclidean_distance(X, X_opt) <= eps) {
-            if (stop == ACCURACY || stop == ACCURNUMBER) return true;
+            if (stop == Stop::ACCURACY || stop == Stop::ACCURNUMBER) return true;
         }
         if (count >= Nmax) {
-            if (stop == NUMBER || stop == ACCURNUMBER) return false;
+            if (stop == Stop::NUMBER || stop == Stop::ACCURNUMBER) return false;
         }
     }
 }

@@ -110,7 +110,7 @@ double f20(double x) {
 int main() {
     double x, eps = 0.001, r = 2.0; // > 1
     int count, Nmax = 1000;
-    Stop stop = ACCURACY;
+    Stop stop = Stop::ACCURACY;
 
     vector<task_gsa> task_array = { task_gsa(f1, "f1(x)", -1.5, 11.0, 10.0, eps, Nmax, r, stop),
                                     task_gsa(f2, "f2(x)", 2.7, 7.5, 5.145735, eps, Nmax, r, stop),

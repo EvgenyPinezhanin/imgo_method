@@ -7,7 +7,7 @@
     #include <cmath>
 #endif
 
-void addInSort(vector<trial_constr> &vec, trial_constr tr) {
+inline void addInSort(vector<trial_constr> &vec, trial_constr tr) {
     vector<trial_constr>::iterator iter = vec.begin();
     vector<trial_constr>::iterator iterEnd = vec.end();
     while(true) {
@@ -17,7 +17,7 @@ void addInSort(vector<trial_constr> &vec, trial_constr tr) {
     vec.insert(iter, tr);
 }
 
-double searchMinXTrial(vector<trial_constr> &trials, int m) {
+inline double searchMinXTrial(vector<trial_constr> &trials, int m) {
     double z = 0.0, x = 0.0;
     int k = 0;
     for (int i = 0; i < trials.size(); i++) {
@@ -50,11 +50,11 @@ trial_constr imgo_method::newTrial(double x) {
 }
 
 double imgo_method::newPoint(int t) {
-    if (trial_points[t].nu != trial_points[t - 1].nu) {
-        return (trial_points[t].x + trial_points[t - 1].x) / 2.0;
+    if (trial_points[t].nu != trial_points[(size_t)t - 1].nu) {
+        return (trial_points[t].x + trial_points[(size_t)t - 1].x) / 2.0;
     } else {
-        return (trial_points[t].x + trial_points[t - 1].x) / 2.0 - 
-               (trial_points[t].z - trial_points[t - 1].z) / (2.0 * r * mu[trial_points[t].nu - 1]);
+        return (trial_points[t].x + trial_points[(size_t)t - 1].x) / 2.0 - 
+               (trial_points[t].z - trial_points[(size_t)t - 1].z) / (2.0 * r * mu[(size_t)trial_points[t].nu - 1]);
     }
 }
 
@@ -67,7 +67,7 @@ double imgo_method::selectNewPoint(int &t, trial_constr last_trial) {
         if (!calc_I[nu]) mu[nu] = 0.0;
     }
     for (int i = 1; i < size_I; i++) {
-        mu_tmp = abs(I[nu_I][i].z - I[nu_I][i - 1].z) / (I[nu_I][i].x - I[nu_I][i - 1].x);
+        mu_tmp = abs(I[nu_I][i].z - I[nu_I][(size_t)i - 1].z) / (I[nu_I][i].x - I[nu_I][(size_t)i - 1].x);
         if (mu_tmp > mu[nu_I]) {
             mu[nu_I] = mu_tmp;
             if (abs(mu[nu_I]) > 1e-14) calc_I[nu_I] = true;
@@ -99,17 +99,17 @@ double imgo_method::selectNewPoint(int &t, trial_constr last_trial) {
     double R, Rtmp = 0.0;
     double mu_v, z_star_v;
     if (trial_points[1].nu == trial_points[0].nu) {
-        mu_v = mu[trial_points[1].nu - 1];
-        z_star_v = z_star[trial_points[1].nu - 1];
+        mu_v = mu[(size_t)trial_points[1].nu - 1];
+        z_star_v = z_star[(size_t)trial_points[1].nu - 1];
         R = d_x + pow(trial_points[1].z - trial_points[0].z, 2) / (r * r * mu_v * mu_v * d_x) -
             2.0 * (trial_points[1].z + trial_points[0].z - 2.0 * z_star_v) / (r * mu_v);
     } else if (trial_points[0].nu < trial_points[1].nu) {
-        mu_v = mu[trial_points[1].nu - 1];
-        z_star_v = z_star[trial_points[1].nu - 1];
+        mu_v = mu[(size_t)trial_points[1].nu - 1];
+        z_star_v = z_star[(size_t)trial_points[1].nu - 1];
         R = 2.0 * d_x  - 4.0 * (trial_points[1].z - z_star_v) / (r * mu_v);
     } else {
-        mu_v = mu[trial_points[0].nu - 1];
-        z_star_v = z_star[trial_points[0].nu - 1];
+        mu_v = mu[(size_t)trial_points[0].nu - 1];
+        z_star_v = z_star[(size_t)trial_points[0].nu - 1];
         R = 2.0 * d_x  - 4.0 * (trial_points[0].z - z_star_v) / (r * mu_v);
     }
 
@@ -117,22 +117,22 @@ double imgo_method::selectNewPoint(int &t, trial_constr last_trial) {
     for (size_t i = 2; i < size_tr_pt; i++) {
         d_x = trial_points[i].x - trial_points[i - 1].x;
         if (trial_points[i].nu == trial_points[i - 1].nu) {
-            mu_v = mu[trial_points[i].nu - 1];
-            z_star_v = z_star[trial_points[i].nu - 1];
+            mu_v = mu[(size_t)trial_points[i].nu - 1];
+            z_star_v = z_star[(size_t)trial_points[i].nu - 1];
             Rtmp = d_x + pow(trial_points[i].z - trial_points[i - 1].z, 2) / (r * r * mu_v * mu_v * d_x) -
                    2.0 * (trial_points[i].z + trial_points[i - 1].z - 2.0 * z_star_v) / (r * mu_v);
         } else if (trial_points[i - 1].nu < trial_points[i].nu) {
-            mu_v = mu[trial_points[i].nu - 1];
-            z_star_v = z_star[trial_points[i].nu - 1];
+            mu_v = mu[(size_t)trial_points[i].nu - 1];
+            z_star_v = z_star[(size_t)trial_points[i].nu - 1];
             Rtmp = 2.0 * d_x  - 4.0 * (trial_points[i].z - z_star_v) / (r * mu_v);
         } else  {
-            mu_v = mu[trial_points[i - 1].nu - 1];
-            z_star_v = z_star[trial_points[i - 1].nu - 1];
+            mu_v = mu[(size_t)trial_points[i - 1].nu - 1];
+            z_star_v = z_star[(size_t)trial_points[i - 1].nu - 1];
             Rtmp = 2.0 * d_x  - 4.0 * (trial_points[i - 1].z - z_star_v) / (r * mu_v);
         }
         if (Rtmp > R) {
             R = Rtmp;
-            t = i;
+            t = (int)i;
         }
     }
 
@@ -142,10 +142,10 @@ double imgo_method::selectNewPoint(int &t, trial_constr last_trial) {
 
 void imgo_method::setM(int _m) {
     optimization_method_constrained::setM(_m);
-    I.resize(m + 1);
-    calc_I.resize(m + 1);
-    mu.resize(m + 1);
-    z_star.resize(m + 1);
+    I.resize((size_t)m + 1);
+    calc_I.resize((size_t)m + 1);
+    mu.resize((size_t)m + 1);
+    z_star.resize((size_t)m + 1);
 }
 
 void imgo_method::solve(int &count, double &x, Stop stop) {
@@ -157,10 +157,10 @@ void imgo_method::solve(int &count, double &x, Stop stop) {
 
     trial_constr tr = newTrial(A[0]);
     trial_points.push_back(tr);
-    addInSort(I[tr.nu - 1], tr);
+    addInSort(I[(size_t)tr.nu - 1], tr);
     tr = newTrial(B[0]);
     trial_points.push_back(tr);
-    addInSort(I[tr.nu - 1], tr);
+    addInSort(I[(size_t)tr.nu - 1], tr);
     count = 2;
 
     double x_k_1;
@@ -173,14 +173,14 @@ void imgo_method::solve(int &count, double &x, Stop stop) {
         addInSort(trial_points, tr);
 
         // Step 2
-        addInSort(I[tr.nu - 1], tr);
+        addInSort(I[(size_t)tr.nu - 1], tr);
 
         count++;
-        if (trial_points[t].x - trial_points[t - 1].x <= eps) {
-            if (stop == ACCURACY || stop == ACCURNUMBER) break;
+        if (trial_points[t].x - trial_points[(size_t)t - 1].x <= eps) {
+            if (stop == Stop::ACCURACY || stop == Stop::ACCURNUMBER) break;
         }
         if (count >= Nmax) {
-            if (stop == NUMBER || stop == ACCURNUMBER) break;
+            if (stop == Stop::NUMBER || stop == Stop::ACCURNUMBER) break;
         }
     }
     x = searchMinXTrial(trial_points, m);
@@ -200,10 +200,10 @@ bool imgo_method::solve_test(double x_opt, int &count, Stop stop) {
 
     trial_constr tr = newTrial(A[0]);
     trial_points.push_back(tr);
-    addInSort(I[tr.nu - 1], tr);
+    addInSort(I[(size_t)tr.nu - 1], tr);
     tr = newTrial(B[0]);
     trial_points.push_back(tr);
-    addInSort(I[tr.nu - 1], tr);
+    addInSort(I[(size_t)tr.nu - 1], tr);
     count = 2;
 
     double x_k_1;
@@ -216,14 +216,14 @@ bool imgo_method::solve_test(double x_opt, int &count, Stop stop) {
         addInSort(trial_points, tr);
 
         // Step 2
-        addInSort(I[tr.nu - 1], tr);
+        addInSort(I[(size_t)tr.nu - 1], tr);
 
         count++;
         if (abs(x_k_1 - x_opt) <= eps) {
-            if (stop == ACCURACY || stop == ACCURNUMBER) return true;
+            if (stop == Stop::ACCURACY || stop == Stop::ACCURNUMBER) return true;
         }
         if (count >= Nmax) {
-            if (stop == NUMBER || stop == ACCURNUMBER) return false;
+            if (stop == Stop::NUMBER || stop == Stop::ACCURNUMBER) return false;
         }
     }
 }

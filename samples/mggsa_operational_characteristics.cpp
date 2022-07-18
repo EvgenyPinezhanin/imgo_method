@@ -1,3 +1,7 @@
+#if defined( _MSC_VER )
+    #define _CRT_SECURE_NO_WARNINGS    
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <ctime>
@@ -112,20 +116,20 @@ int main() {
             count_trials = Kmax;
             grishaginProblems[current_func]->GetBounds(A, B);
             mggsa.setAB(A, B);
-            if (mggsa.solve_test(grishaginProblems[i]->GetOptimumPoint(), count_trials, ACCURNUMBER)) {
+            if (mggsa.solve_test(grishaginProblems[i]->GetOptimumPoint(), count_trials, Stop::ACCURNUMBER)) {
                 number_trials[0][i] = count_trials;
             } else {
                 number_trials[0][i] = count_trials + 1;
             }
         }
         for (int i = K0; i <= Kmax; i += Kstep) {
-            count_successful = count_if(number_trials[0].begin(), number_trials[0].end(), [i](double elem){ return elem <= i; });
+            count_successful = (int)count_if(number_trials[0].begin(), number_trials[0].end(), [i](double elem){ return elem <= i; });
             cout << "K = " << i << " success rate = " << (double)count_successful / count_func << endl;
             ofstr << i << " " << (double)count_successful / count_func << endl;
         }
         ofstr << endl << endl;
         end_time = clock();
-        work_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+        work_time = ((double)end_time - start_time) / CLOCKS_PER_SEC;
         cout << "time: " << work_time << endl;
     }
 
@@ -152,20 +156,20 @@ int main() {
             count_trials = Kmax;
             GKLSProblems[current_func]->GetBounds(A, B);
             mggsa.setAB(A, B);
-            if (mggsa.solve_test(GKLSProblems[i]->GetOptimumPoint(), count_trials, ACCURNUMBER)) {
+            if (mggsa.solve_test(GKLSProblems[i]->GetOptimumPoint(), count_trials, Stop::ACCURNUMBER)) {
                 number_trials[1][i] = count_trials;
             } else {
                 number_trials[1][i] = count_trials + 1;
             }
         }
         for (int i = K0; i <= Kmax; i += Kstep) {
-            count_successful = count_if(number_trials[1].begin(), number_trials[1].end(), [i](double elem){ return elem <= i; });
+            count_successful = (int)count_if(number_trials[1].begin(), number_trials[1].end(), [i](double elem){ return elem <= i; });
             cout << "K = " << i << " success rate = " << (double)count_successful / count_func << endl;
             ofstr << i << " " << (double)count_successful / count_func << endl;
         }
         ofstr << endl << endl;
         end_time = clock();
-        work_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+        work_time = ((double)end_time - start_time) / CLOCKS_PER_SEC;
         cout << "time: " << work_time << endl;
     }
 
@@ -192,20 +196,20 @@ int main() {
             count_trials = Kmax;
             grishaginConstrainedProblems[current_func]->GetBounds(A, B);
             mggsa.setAB(A, B);
-            if (mggsa.solve_test(grishaginConstrainedProblems[i]->GetOptimumPoint(), count_trials, ACCURNUMBER)) {
+            if (mggsa.solve_test(grishaginConstrainedProblems[i]->GetOptimumPoint(), count_trials, Stop::ACCURNUMBER)) {
                 number_trials[2][i] = count_trials;
             } else {
                 number_trials[2][i] = count_trials + 1;
             }
         }
         for (int i = K0; i <= Kmax; i += Kstep) {
-            count_successful = count_if(number_trials[2].begin(), number_trials[2].end(), [i](double elem){ return elem <= i; });
+            count_successful = (int)count_if(number_trials[2].begin(), number_trials[2].end(), [i](double elem){ return elem <= i; });
             cout << "K = " << i << " success rate = " << (double)count_successful / count_func << endl;
             ofstr << i << " " << (double)count_successful / count_func << endl;
         }
         ofstr << endl << endl;
         end_time = clock();
-        work_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+        work_time = ((double)end_time - start_time) / CLOCKS_PER_SEC;
         cout << "time: " << work_time << endl;
     }
 
@@ -232,20 +236,20 @@ int main() {
             count_trials = Kmax;
             GKLSProblems[current_func]->GetBounds(A, B);
             mggsa.setAB(A, B);
-            if (mggsa.solve_test(GKLSProblems[i]->GetOptimumPoint(), count_trials, ACCURNUMBER)) {
+            if (mggsa.solve_test(GKLSProblems[i]->GetOptimumPoint(), count_trials, Stop::ACCURNUMBER)) {
                 number_trials[3][i] = count_trials;
             } else {
                 number_trials[3][i] = count_trials + 1;
             }
         }
         for (int i = K0; i <= Kmax; i += Kstep) {
-            count_successful = count_if(number_trials[3].begin(), number_trials[3].end(), [i](double elem){ return elem <= i; });
+            count_successful = (int)count_if(number_trials[3].begin(), number_trials[3].end(), [i](double elem){ return elem <= i; });
             cout << "K = " << i << " success rate = " << (double)count_successful / count_func << endl;
             ofstr << i << " " << (double)count_successful / count_func << endl;
         }
         ofstr << endl << endl;
         end_time = clock();
-        work_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+        work_time = ((double)end_time - start_time) / CLOCKS_PER_SEC;
         cout << "time: " << work_time << endl;
     }
 
@@ -255,14 +259,16 @@ int main() {
 
     // Plotting operational characteristics(works with gnuplot)
     int error;
+#if defined(__linux__)
     setenv("QT_QPA_PLATFORM", "xcb", false);
     error = system("chmod +x scripts/mggsa_operational_characteristics.gp");
     if (error != 0) {
         cerr << "Error chmod" << endl;
     }
+#endif
 
     char str[100];
-    sprintf(str, "gnuplot -p -c scripts/mggsa_operational_characteristics.gp %d", family_number);
+    sprintf(str, "gnuplot -c scripts/mggsa_operational_characteristics.gp %d", family_number);
     error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << endl;

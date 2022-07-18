@@ -41,7 +41,7 @@ double f3(double x, int j) {
 int main() {
     double eps = 0.001, r = 3.0, d = 0.0, x;
     int count, Nmax = 1000;
-    Stop stop = ACCURACY;
+    Stop stop = Stop::ACCURACY;
 
     vector<task_imgo> task_array = { task_imgo(f1, "f1(x)", 1, 2.0, 8.0, 2.0 * M_PI, eps, Nmax, r, d, stop),
                                      task_imgo(f2, "f2(x)", 2, -2.0, 2.0, 0.1, eps, Nmax, r, d, stop),

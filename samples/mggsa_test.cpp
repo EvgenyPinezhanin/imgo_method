@@ -1,3 +1,7 @@
+#if defined( _MSC_VER )
+    #define _CRT_SECURE_NO_WARNINGS    
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -52,7 +56,7 @@ int main() {
     std::vector<vector<double>> trial_vec;
     double eps = 0.001, r = 3.0, d = 0.001;
     int count, n = 2, den = 10, key = 1, Nmax = 1000;
-    Stop stop = ACCURACY;
+    Stop stop = Stop::ACCURACY;
 
     vector<task_mggsa> task_array = { task_mggsa(f1, "f1", n, 3, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
                                                  vector<double>{0.942, 0.944}, eps, Nmax, r, d, den, key, stop, 1),
@@ -109,14 +113,16 @@ int main() {
 
     // Plotting the function(works with gnuplot)
     int error;
+#if defined(__linux__)
     setenv("QT_QPA_PLATFORM", "xcb", false);
     error = system("chmod +x scripts/mggsa_test.gp");
     if (error != 0) {
         cerr << "Error chmod" << std::endl;
     }
+#endif
 
     char str[100];
-    sprintf(str, "gnuplot -p -c scripts/mggsa_test.gp %d", test_func_number);
+    sprintf(str, "gnuplot -c scripts/mggsa_test.gp %d", test_func_number);
     error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << std::endl;

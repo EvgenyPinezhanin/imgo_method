@@ -28,7 +28,7 @@ public:
                  vector<double> _B = vector<double>(), double _r = 2.0, double _d = 0.01, int _den = 10, 
                  int _key = 1, double _eps = 0.0001, int _Nmax = 1000)
                 : optimization_method_constrained(_f, _n, _m, _A, _B, _eps, _Nmax), r(_r), d(_d), den(_den), key(_key), 
-                  M(0), I(m + 1), calc_I(m + 1), mu(m + 1), z_star(m + 1) {}
+                  M(0), I((size_t)m + 1), calc_I((size_t)m + 1), mu((size_t)m + 1), z_star((size_t)m + 1) {}
     
     void setM(int _m);
     void setR(double _r) { r = _r; };
@@ -40,8 +40,8 @@ public:
 
     void y(double x, vector<double> &X);
     
-    void solve(int &count, vector<double> &X, Stop stop = ACCURACY);
-    bool solve_test(vector<double> X_opt, int &count, Stop stop = ACCURACY);
+    void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY);
+    bool solve_test(vector<double> X_opt, int &count, Stop stop = Stop::ACCURACY);
 };
 
 #endif // MGGSA_H

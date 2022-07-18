@@ -100,7 +100,7 @@ double f9(double x, int j) {
 int main() {
     double eps = 0.000001, r = 2.0, d = 0.0, x;
     int count, Nmax = 1000;
-    Stop stop = ACCURACY;
+    Stop stop = Stop::ACCURACY;
 
     vector<task_imgo> task_array = { task_imgo(f1, "f1(x)", 1, -2.5, 1.5, 1.05738, eps, Nmax, r, d, stop),
                                      task_imgo(f2, "f2(x)", 1, -5.0, 5.0, 1.016, eps, Nmax, r, d, stop),

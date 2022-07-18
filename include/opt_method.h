@@ -5,7 +5,7 @@
 
 using namespace std;
 
-enum Stop { ACCURACY, NUMBER, ACCURNUMBER };
+enum class Stop { ACCURACY, NUMBER, ACCURNUMBER };
 
 class optimization_method {
 protected:
@@ -25,7 +25,7 @@ public:
     void setB(const vector<double> &_B) { B = _B; };
     void setAB(const vector<double> &_A, const vector<double> &_B) { A = _A; B = _B; };
 
-    virtual void solve(int &count, vector<double> &X, Stop stop = ACCURACY) = 0;
+    virtual void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY) = 0;
 };
 
 struct trial {

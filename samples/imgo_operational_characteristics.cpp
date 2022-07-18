@@ -1,3 +1,7 @@
+#if defined( _MSC_VER )
+    #define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -51,7 +55,7 @@ int main() {
     vector<int> count_Hill(hillProblems.GetFamilySize(), 0);
     vector<int> count_Shekel(shekelProblems.GetFamilySize(), 0);
 
-    imgo_method imgo(nullptr, -1, 0.0, 0.0, -1.0, d, eps);
+    imgo_method imgo(nullptr, 0, 0.0, 0.0, -1.0, d, eps);
 
     for (int i = 0; i < hill_r_array.size(); i++) {
         ofstr_opt << "r" << i + 1 << "_hill = \"" << hill_r_array[i] << "\"" << endl; 
@@ -69,14 +73,14 @@ int main() {
             count_trials = Kmax;
             hillProblems[current_func]->GetBounds(A, B);
             imgo.setAB(A[0], B[0]);
-            if (imgo.solve_test(hillProblems[i]->GetOptimumPoint()[0], count_trials, ACCURNUMBER)) {
+            if (imgo.solve_test(hillProblems[i]->GetOptimumPoint()[0], count_trials, Stop::ACCURNUMBER)) {
                 count_Hill[i] = count_trials;
             } else {
                 count_Hill[i] = count_trials + 1;
             }
         }
         for (int i = K0; i <= Kmax; i += Kstep) {
-            count_successful = count_if(count_Hill.begin(), count_Hill.end(), [i](double elem){ return elem <= i; });
+            count_successful = (int)count_if(count_Hill.begin(), count_Hill.end(), [i](double elem){ return elem <= i; });
             cout << "K = " << i << " success rate = " << (double)count_successful / count_func << endl;
             ofstr << i << " " << (double)count_successful / count_func << endl;
         }
@@ -99,14 +103,14 @@ int main() {
             count_trials = Kmax;
             shekelProblems[current_func]->GetBounds(A, B);
             imgo.setAB(A[0], B[0]);
-            if (imgo.solve_test(shekelProblems[i]->GetOptimumPoint()[0], count_trials, ACCURNUMBER)) {
+            if (imgo.solve_test(shekelProblems[i]->GetOptimumPoint()[0], count_trials, Stop::ACCURNUMBER)) {
                 count_Shekel[i] = count_trials;
             } else {
                 count_Shekel[i] = count_trials + 1;
             }
         }
         for (int i = K0; i <= Kmax; i += Kstep) {
-            count_successful = count_if(count_Shekel.begin(), count_Shekel.end(), [i](double elem){ return elem <= i; });
+            count_successful = (int)count_if(count_Shekel.begin(), count_Shekel.end(), [i](double elem){ return elem <= i; });
             cout << "K = " << i << " success rate = " << (double)count_successful / count_func << endl;
             ofstr << i << " " << (double)count_successful / count_func << endl;
         }
@@ -119,17 +123,19 @@ int main() {
 
     // Plotting operational characteristics(works with gnuplot)
     int error;
+#if defined(__linux__)
     setenv("QT_QPA_PLATFORM", "xcb", false);
     error = system("chmod +x scripts/imgo_operational_characteristics.gp");
     if (error != 0) {
-        cerr << "Error chmod" << std::endl;
+        cerr << "Error chmod" << endl;
     }
+#endif
 
     char str[100];
-    sprintf(str, "gnuplot -p -c scripts/imgo_operational_characteristics.gp %d", chart_number);
+    sprintf(str, "gnuplot -c scripts/imgo_operational_characteristics.gp %d", chart_number);
     error = system(str);
     if (error != 0) {
-        cerr << "Error gnuplot" << std::endl;
+        cerr << "Error gnuplot" << endl;
     }
 
 #if defined(_MSC_VER)

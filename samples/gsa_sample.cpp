@@ -36,7 +36,7 @@ double f4(double x) {
 int main() {
     double x, eps = 0.0001, r = 2.0; // > 1 
     int count, Nmax = 1000;
-    Stop stop = ACCURACY;
+    Stop stop = Stop::ACCURACY;
 
     vector<task_gsa> task_array = { task_gsa(f1, "f1(x) = -4.0 * x + 1.0", 3.0, 4.0, 4.0, eps, Nmax, r, stop),
                                     task_gsa(f2, "f2(x) = 5.0 * x * x + 3.0 * x - 1.0", -2.0, 2.0, -0.3, eps, Nmax, r, stop),

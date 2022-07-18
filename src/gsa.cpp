@@ -35,7 +35,7 @@ trial gsa_method::newTrial(double x) {
 }
 
 double gsa_method::newPoint(int t) {
-    return (trial_points[t].x + trial_points[t - 1].x) / 2 - (trial_points[t].z - trial_points[t - 1].z) / (2 * m);
+    return (trial_points[t].x + trial_points[(size_t)t - 1].x) / 2 - (trial_points[t].z - trial_points[(size_t)t - 1].z) / (2 * m);
 }
 
 double gsa_method::selectNewPoint(int &t, trial last_trial) {
@@ -43,10 +43,10 @@ double gsa_method::selectNewPoint(int &t, trial last_trial) {
 
     // Step 2
     if (last_trial.x == B[0]) {
-        M = max({M, abs((last_trial.z - trial_points[t - 1].z) / (last_trial.x - trial_points[t - 1].x))});
+        M = max({M, abs((last_trial.z - trial_points[(size_t)t - 1].z) / (last_trial.x - trial_points[(size_t)t - 1].x))});
     } else {
-        M = max({M, abs((last_trial.z - trial_points[t - 1].z) / (last_trial.x - trial_points[t - 1].x)), 
-                    abs((trial_points[t + 1].z - last_trial.z) / (trial_points[t + 1].x - last_trial.x))});
+        M = max({M, abs((last_trial.z - trial_points[(size_t)t - 1].z) / (last_trial.x - trial_points[(size_t)t - 1].x)), 
+                    abs((trial_points[(size_t)t + 1].z - last_trial.z) / (trial_points[(size_t)t + 1].x - last_trial.x))});
     }
 
     // Step 3
@@ -63,7 +63,7 @@ double gsa_method::selectNewPoint(int &t, trial last_trial) {
         Rtmp = m * d_x + pow(trial_points[i].z - trial_points[i - 1].z, 2) / (m * d_x) - 2 * (trial_points[i].z + trial_points[i - 1].z);
         if (Rtmp > R) {
             R = Rtmp;
-            t = i;
+            t = (int)i;
         }
     }
 
@@ -89,11 +89,11 @@ void gsa_method::solve(int &count, double &x, Stop stop) {
         addInSort(trial_points, tr);
 
         count++;
-        if (trial_points[t].x - trial_points[t - 1].x <= eps) {
-            if (stop == ACCURACY || stop == ACCURNUMBER) break;
+        if (trial_points[t].x - trial_points[(size_t)t - 1].x <= eps) {
+            if (stop == Stop::ACCURACY || stop == Stop::ACCURNUMBER) break;
         }
         if (count >= Nmax) {
-            if (stop == NUMBER || stop == ACCURNUMBER) break;
+            if (stop == Stop::NUMBER || stop == Stop::ACCURNUMBER) break;
         }
     }
     x = searchMinX(trial_points);
