@@ -1,51 +1,44 @@
 #ifndef IMGO_H
 #define IMGO_H
 
-#include<vector>
-#include<algorithm>
-#include<cmath>
+#include <vector>
+
+#include <opt_method.h>
+#include <task.h>
 
 using namespace std;
 
-struct trial {
-    double x, z;
-    size_t nu;
-
-    trial(double _x = 0.0, double _z = 0.0, int _nu = 0) : x(_x), z(_z), nu(_nu) {}
-};
-
-class imgo_method {
-protected:
+class imgo_method : public optimization_method_constrained {
+private:
     double (*f)(double, int);
-    size_t m;
-    double a, b;
-    double eps;
-    double r;
-    double d;
+    double r, d;
 
-    vector<trial> trial_points;
-    vector<vector<trial>> I;
-    vector<double> z_star;
+    vector<vector<trial_constr>> I;
+    vector<bool> calc_I;
     vector<double> mu;
+    vector<double> z_star;
 
-    void addInSort(vector<trial> &vec, trial tr);
-    double searchMinX();
-    trial newTrial(double x);
-    double selectNewPoint(size_t &t);
+    trial_constr newTrial(double x);
+    double newPoint(int t);
+    double selectNewPoint(int &t, trial_constr last_trial);
 
 public:
-    imgo_method(double (*_f)(double, int), size_t _m = 0, double _a = 0.0, double _b = 10.0, double _eps = 0.0001, double _r = 2.0, double _d = 0.01);
+    imgo_method(double (*_f)(double, int), int _m = 0, double _a = 0.0, double _b = 10.0, double _r = 2.0, double _d = 0.0, double _eps = 0.0001, int _Nmax = 1000)
+               : optimization_method_constrained(nullptr, 1, _m, vector<double>{_a}, vector<double>{_b}, _eps, _Nmax), 
+               f(_f), r(_r), d(_d), I((size_t)m + 1), calc_I((size_t)m + 1), mu((size_t)m + 1), z_star((size_t)m + 1) {}
     
-    void setFunc(double (*_f)(double, int));
-    void setA(double _a);
-    void setB(double _b);
-    void setM(size_t _m);
-    void setEps(double _eps);
+    void setF(double (*_f)(double, int)) { f = _f; };
+    void setA(double _a) { optimization_method::setA(vector<double>{_a}); };
+    void setB(double _b) { optimization_method::setB(vector<double>{_b}); };
+    void setAB(double _a, double _b) { optimization_method::setAB(vector<double>{_a}, vector<double>{_b}); };
+    void setM(int _m);
+    void setR(double _r) { r = _r; };
+    void setD(double _d) { d = _d; };
 
-    void getTrialPoints(vector<trial> &trial_vec);
+    void solve(int &count, double &x, Stop stop = Stop::ACCURACY);
+    void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY);
     
-    double solve(int &n);
-    bool solve_test(double x_opt, int k);
+    bool solve_test(double x_opt, int &count, Stop stop = Stop::ACCURACY);
 };
 
-#endif
+#endif // IMGO_H

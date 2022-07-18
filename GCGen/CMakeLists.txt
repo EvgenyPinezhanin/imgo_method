@@ -6,7 +6,6 @@ project (${PROJECT_LIBRARY_PROBLEMS})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
 
-
 file(GLOB SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/sample_src/*.cpp
                     ${CMAKE_CURRENT_SOURCE_DIR}/sample_src/*.h
                     ${CMAKE_CURRENT_SOURCE_DIR}/sample_src/*.hpp
