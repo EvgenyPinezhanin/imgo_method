@@ -173,7 +173,7 @@ int main() {
         cout << "time: " << work_time << endl;
     }
 
-    Kmax = 2500;
+    Kmax = 3000;
 
     ofstr_opt << "Name[3]=\"GrishaginConstrained\"" << endl;
     for (int i = 0; i < r_array[2].size(); i++) {
@@ -213,7 +213,7 @@ int main() {
         cout << "time: " << work_time << endl;
     }
 
-    Kmax = 4000;
+    Kmax = 4500;
 
     ofstr_opt << "Name[4]=\"GKLSConstrained\"" << endl;
     for (int i = 0; i < r_array[3].size(); i++) {

@@ -14,13 +14,16 @@ private:
 
     double m; // parameter m
 
+    trial last_trial;
+
     trial newTrial(double x);
     double newPoint(int t);
-    double selectNewPoint(int &t, trial last_trial);
+    double selectNewPoint(int &t) override;
 
 public:
     gsa_method(double (*_f)(double), double _a = 0.0, double _b = 10.0, double _r = 2.0, double _eps = 0.001, int _Nmax = 1000)
-        : optimization_method_non_constrained(nullptr, 1, vector<double>{_a}, vector<double>{_b}, _eps, _Nmax), f(_f), r(_r), m(0) {}
+        : optimization_method_non_constrained(nullptr, 1, vector<double>{_a}, vector<double>{_b}, _eps, _Nmax), 
+          f(_f), r(_r), m(0), last_trial(0.0, 0.0) {}
     
     void setF(double (*_f)(double)) { f = _f; };
     void setA(double _a) { optimization_method::setA(vector<double>{_a}); };

@@ -42,7 +42,7 @@ protected:
 
     virtual trial newTrial(double x) = 0;
     virtual double newPoint(int t) = 0;
-    virtual double selectNewPoint(int &t, trial last_trial) = 0;
+    virtual double selectNewPoint(int &t) = 0;
 
 public:
     optimization_method_non_constrained(double (*_f)(vector<double>), int _n, const vector<double> &_A, const vector<double> &_B, double _eps, int _Nmax) 
@@ -69,7 +69,7 @@ protected:
 
     virtual trial_constr newTrial(double x) = 0;
     virtual double newPoint(int t) = 0;
-    virtual double selectNewPoint(int &t, trial_constr last_trial) = 0;
+    virtual double selectNewPoint(int &t) = 0;
 
 public:
     optimization_method_constrained(double (*_f)(vector<double>, int), int _n, int _m, const vector<double> &_A, const vector<double> &_B, double _eps, int _Nmax) 

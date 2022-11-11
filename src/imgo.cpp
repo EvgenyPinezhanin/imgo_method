@@ -58,7 +58,7 @@ double imgo_method::newPoint(int t) {
     }
 }
 
-double imgo_method::selectNewPoint(int &t, trial_constr last_trial) {
+double imgo_method::selectNewPoint(int &t) {
     // Step 3
     double mu_tmp;
     int nu_I = last_trial.nu - 1;
@@ -155,25 +155,25 @@ void imgo_method::solve(int &count, double &x, Stop stop) {
     }
     trial_points.clear();
 
-    trial_constr tr = newTrial(A[0]);
-    trial_points.push_back(tr);
-    addInSort(I[(size_t)tr.nu - 1], tr);
-    tr = newTrial(B[0]);
-    trial_points.push_back(tr);
-    addInSort(I[(size_t)tr.nu - 1], tr);
+    last_trial = newTrial(A[0]);
+    trial_points.push_back(last_trial);
+    addInSort(I[(size_t)last_trial.nu - 1], last_trial);
+    last_trial = newTrial(B[0]);
+    trial_points.push_back(last_trial);
+    addInSort(I[(size_t)last_trial.nu - 1], last_trial);
     count = 2;
 
     double x_k_1;
     int t = 1;
     while(true) {
-        x_k_1 = selectNewPoint(t, tr);
-        tr = newTrial(x_k_1);
+        x_k_1 = selectNewPoint(t);
+        last_trial = newTrial(x_k_1);
 
         // Step 1
-        addInSort(trial_points, tr);
+        addInSort(trial_points, last_trial);
 
         // Step 2
-        addInSort(I[(size_t)tr.nu - 1], tr);
+        addInSort(I[(size_t)last_trial.nu - 1], last_trial);
 
         count++;
         if (trial_points[t].x - trial_points[(size_t)t - 1].x <= eps) {
@@ -198,25 +198,25 @@ bool imgo_method::solve_test(double x_opt, int &count, Stop stop) {
     trial_points.clear();
     Nmax = count;
 
-    trial_constr tr = newTrial(A[0]);
-    trial_points.push_back(tr);
-    addInSort(I[(size_t)tr.nu - 1], tr);
-    tr = newTrial(B[0]);
-    trial_points.push_back(tr);
-    addInSort(I[(size_t)tr.nu - 1], tr);
+    last_trial = newTrial(A[0]);
+    trial_points.push_back(last_trial);
+    addInSort(I[(size_t)last_trial.nu - 1], last_trial);
+    last_trial = newTrial(B[0]);
+    trial_points.push_back(last_trial);
+    addInSort(I[(size_t)last_trial.nu - 1], last_trial);
     count = 2;
 
     double x_k_1;
     int t = 1;
     while (true) {
-        x_k_1 = selectNewPoint(t, tr);
-        tr = newTrial(x_k_1);
+        x_k_1 = selectNewPoint(t);
+        last_trial = newTrial(x_k_1);
 
         // Step 1
-        addInSort(trial_points, tr);
+        addInSort(trial_points, last_trial);
 
         // Step 2
-        addInSort(I[(size_t)tr.nu - 1], tr);
+        addInSort(I[(size_t)last_trial.nu - 1], last_trial);
 
         count++;
         if (abs(x_k_1 - x_opt) <= eps) {

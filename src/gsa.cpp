@@ -38,7 +38,7 @@ double gsa_method::newPoint(int t) {
     return (trial_points[t].x + trial_points[(size_t)t - 1].x) / 2 - (trial_points[t].z - trial_points[(size_t)t - 1].z) / (2 * m);
 }
 
-double gsa_method::selectNewPoint(int &t, trial last_trial) {
+double gsa_method::selectNewPoint(int &t) {
     static double M = -1.0;
 
     // Step 2
@@ -80,13 +80,13 @@ void gsa_method::solve(int &count, double &x, Stop stop) {
 
     double x_k_1;
     int t = 1;
-    trial tr = newTrial(B[0]);
+    last_trial = newTrial(B[0]);
     while(true) {
-        x_k_1 = selectNewPoint(t, tr);
-        tr = newTrial(x_k_1);
+        x_k_1 = selectNewPoint(t);
+        last_trial = newTrial(x_k_1);
 
         // Step 1
-        addInSort(trial_points, tr);
+        addInSort(trial_points, last_trial);
 
         count++;
         if (trial_points[t].x - trial_points[(size_t)t - 1].x <= eps) {
