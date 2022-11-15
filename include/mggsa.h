@@ -13,7 +13,6 @@ private:
     int den, key;
     int incr;
 
-    trial_constr last_trial;
     vector<trial_constr> last_trials;
     vector<int> last_trials_pos;
 
@@ -39,7 +38,7 @@ public:
                  vector<double> _B = vector<double>(), double _r = 2.0, double _d = 0.01, int _den = 10, 
                  int _key = 1, double _eps = 0.0001, int _Nmax = 1000, int _incr = 1)
                 : optimization_method_constrained(_f, _n, _m, _A, _B, _eps, _Nmax), r(_r), d(_d), den(_den), key(_key), incr(_incr), 
-                  last_trial(0.0, 0.0, 0), last_trials(0), last_trials_pos(0), M(0), I((size_t)m + 1), h_nu(0), calc_I((size_t)m + 1), 
+                  last_trials(1), last_trials_pos(1), M(0), I((size_t)m + 1), h_nu(0), calc_I((size_t)m + 1), 
                   mu((size_t)m + 1), z_star((size_t)m + 1) {}
     
     void setM(int _m);
@@ -50,6 +49,7 @@ public:
     void setIncr(int _incr) { incr = _incr; };
 
     void getPoints(vector<vector<double>> &points_vec);
+    int getCountPoints() const { return trial_points.size(); };
     
     void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY);
     bool solve_test(vector<double> X_opt, int &count, Stop stop = Stop::ACCURACY);

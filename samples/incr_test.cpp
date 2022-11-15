@@ -8,7 +8,7 @@
 
 using namespace std;
 
-// #define CALC
+#define CALC
 
 double f(vector<double> x, int j) {
     switch (j) {

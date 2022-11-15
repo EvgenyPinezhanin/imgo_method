@@ -13,8 +13,6 @@ set xrange [-0.5:1.0]
 set yrange [-0.5:1.0]
 set key box
 set key opaque
-# set xrange [-0.5:0.5]
-# set yrange [-0.5:0.5]
 set title "Map test" font "Helvetica Bold, 20"
 
 if (ARG1 == 1) {

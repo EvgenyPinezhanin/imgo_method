@@ -16,7 +16,7 @@
 using namespace std;
 
 #define CALC
-const int family_number = 3; // 0 - Grishagin, 1 - GKLS,
+const int family_number = 2; // 0 - Grishagin, 1 - GKLS,
                              // 2 - Grishagin(constrained), 3 - GKLS(constrained),
                              // 4 - comparison Grishagin and GKLS, 5 - comparison Grishagin and GKLS (constrained)
 const int number_family = 4;
@@ -81,6 +81,8 @@ int main() {
     int den = 10, key = 1, m = 0;
     double eps = 0.01, r = 0.0, d = 0.0;
 
+    int Nmax = 5000;
+
     vector<double> A, B;
     vector<vector<double>> r_array{ {2.5, 3.0, 3.5},
                                     {3.5, 4.3, 5.0},
@@ -93,7 +95,7 @@ int main() {
     number_trials[2].resize(grishaginConstrainedProblems.GetFamilySize(), 0);
     number_trials[3].resize(GKLSConstrainedProblems.GetFamilySize(), 0);
 
-    mggsa_method mggsa(nullptr, -1, -1, A, B, -1.0, d, den, key, eps);
+    mggsa_method mggsa(nullptr, -1, -1, A, B, -1.0, d, den, key, eps, Nmax);
 
     ofstr_opt << "Name[1]=\"Grishagin\"" << endl;
     for (int i = 0; i < r_array[0].size(); i++) {

@@ -52,6 +52,7 @@ int main() {
     cout << "m = " << m << " key = " << key << " incr = " << incr << endl;
     cout << "Trials result:" << endl;
     cout << "Number of trials = " << count << endl;
+    cout << "Number of points = " << mggsa.getCountPoints() << endl;
     cout << "X* = " << X_opt[0] << " Y* = " << X_opt[1] << endl;
     cout << "X = " << X_opt_num[0] << " Y = " << X_opt_num[1] << endl;
     cout << "||X* - X|| = " << sqrt((X_opt[0] - X_opt_num[0]) * (X_opt[0] - X_opt_num[0]) + 
