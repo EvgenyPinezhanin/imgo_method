@@ -5,6 +5,8 @@
 #include <vector>
 
 #include <opt_method.h>
+#include <IGeneralOptProblem.hpp>
+#include <IGeneralOptProblemFamily.hpp>
 
 using namespace std;
 
@@ -52,6 +54,61 @@ struct task_mggsa : public task {
     task_mggsa(double (*_f)(vector<double>, int), string _name, int _n, int _m, vector<double> _A, vector<double> _B, 
                vector<double> _X_opt, double _eps, int _Nmax, double _r, double _d, int _den, int _key, Stop _stop, bool _used = true)
               : task(_name, _n, _A, _B, _X_opt, _eps, _Nmax, _stop, _used), f(_f), m(_m), r(_r), d(_d), den(_den), key(_key) {};
+};
+
+enum class type_constraned { CONSTR, NONCONSTR };
+
+struct class_problems {
+    string name;
+    string short_name;
+    type_constraned type;
+
+    bool used;
+
+    class_problems(string _name, type_constraned _type, string _short_name = "def", bool _used = true) 
+        : name(_name), short_name(_short_name), type(_type), used(_used) {};
+};
+
+struct class_problems_o : public class_problems {
+    IGeneralOptProblem *problem;
+
+    class_problems_o(string _name, IGeneralOptProblem *_problem, type_constraned _type, string _short_name = "def", bool _used = true) 
+        : class_problems(_name, _type, _short_name, used), problem(_problem) {};
+};
+
+struct class_problems_os : public class_problems_o {
+    double (*f)(double, int);
+
+    class_problems_os(string _name, IGeneralOptProblem *_problem, type_constraned _type, double (*_f)(double, int), string _short_name = "def",
+        bool _used = true) : class_problems_o(_name, _problem, _type, _short_name, _used), f(_f) {};
+};
+
+struct class_problems_om : public class_problems_o {
+    double (*f)(vector<double>, int);
+
+    class_problems_om(string _name, IGeneralOptProblem *_problem, type_constraned _type, double (*_f)(vector<double>, int), 
+    string _short_name = "def", bool _used = true) : class_problems_o(_name, _problem, _type, _short_name, _used), f(_f) {};
+};
+
+struct class_problems_f : public class_problems {
+    IGeneralOptProblemFamily *problem;
+
+    class_problems_f(string _name, IGeneralOptProblemFamily *_problem, type_constraned _type, string _short_name = "def", bool _used = true) 
+        : class_problems(_name, _type, _short_name, used), problem(_problem) {};
+};
+
+struct class_problems_fs : public class_problems_f {
+    double (*f)(double, int);
+
+    class_problems_fs(string _name, IGeneralOptProblemFamily *_problem, type_constraned _type, double (*_f)(double, int), 
+        string _short_name = "def", bool _used = true) : class_problems_f(_name, _problem, _type, _short_name, _used), f(_f) {};
+};
+
+struct class_problems_fm : public class_problems_f {
+    double (*f)(vector<double>, int);
+
+    class_problems_fm(string _name, IGeneralOptProblemFamily *_problem, type_constraned _type, double (*_f)(vector<double>, int), 
+    string _short_name = "def", bool _used = true) : class_problems_f(_name, _problem, _type, _short_name, _used), f(_f) {};
 };
 
 #endif // TASK_H

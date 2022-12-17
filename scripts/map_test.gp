@@ -2,8 +2,8 @@
 
 reset
 
-datafile = "trial_points.txt"
-peanofile = "map_test.txt"
+datafile = "output_data/trial_points.txt"
+peanofile = "output_data/map_test.txt"
 
 set hidden3d front
 set grid

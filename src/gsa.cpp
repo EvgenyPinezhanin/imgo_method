@@ -1,6 +1,7 @@
 #include <gsa.h>
 
 #include <algorithm>
+#include <limits>
 #if defined( _MSC_VER )
     #define _USE_MATH_DEFINES
     #include <math.h>
@@ -8,7 +9,7 @@
     #include <cmath>
 #endif
 
-void addInSort(vector<trial> &vec, trial tr) {
+inline void insert_in_sorted(vector<trial> &vec, trial tr) {
     vector<trial>::iterator iter = vec.begin();
     vector<trial>::iterator iterEnd = vec.end();
     while(true) {
@@ -18,10 +19,9 @@ void addInSort(vector<trial> &vec, trial tr) {
     vec.insert(iter, tr);
 }
 
-double searchMinX(vector<trial> &trials) {
-    double z = trials[0].z;
-    double x = trials[0].x;
-    for (int i = 1; i < trials.size(); i++) {
+inline double search_min(vector<trial> &trials) {
+    double z = numeric_limits<double>::infinity(), x;
+    for (int i = 0; i < trials.size(); i++) {
         if (trials[i].z < z) {
             z = trials[i].z;
             x = trials[i].x;
@@ -53,12 +53,11 @@ double gsa_method::selectNewPoint(int &t) {
     m = (M == 0.0) ? 1.0 : r * M;
 
     // Steps 4, 5
-    double d_x = trial_points[1].x - trial_points[0].x;
-    double R = m * d_x + pow(trial_points[1].z - trial_points[0].z, 2) / (m * d_x) - 2 * (trial_points[1].z + trial_points[0].z);
-    double Rtmp;
-    t = 1;
+    double R = -numeric_limits<double>::infinity(), Rtmp = 0.0;
+    double d_x;
+    
     size_t size_tr_pt = trial_points.size();
-    for (size_t i = 2; i < size_tr_pt; i++) {
+    for (size_t i = 1; i < size_tr_pt; i++) {
         d_x = trial_points[i].x - trial_points[i - 1].x;
         Rtmp = m * d_x + pow(trial_points[i].z - trial_points[i - 1].z, 2) / (m * d_x) - 2 * (trial_points[i].z + trial_points[i - 1].z);
         if (Rtmp > R) {
@@ -86,7 +85,7 @@ void gsa_method::solve(int &count, double &x, Stop stop) {
         last_trial = newTrial(x_k_1);
 
         // Step 1
-        addInSort(trial_points, last_trial);
+        insert_in_sorted(trial_points, last_trial);
 
         count++;
         if (trial_points[t].x - trial_points[(size_t)t - 1].x <= eps) {
@@ -96,7 +95,7 @@ void gsa_method::solve(int &count, double &x, Stop stop) {
             if (stop == Stop::NUMBER || stop == Stop::ACCURNUMBER) break;
         }
     }
-    x = searchMinX(trial_points);
+    x = search_min(trial_points);
 }
 
 void gsa_method::solve(int &count, vector<double> &X, Stop stop) {

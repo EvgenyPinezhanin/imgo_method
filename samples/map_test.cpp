@@ -16,8 +16,8 @@ double f(vector<double> x, int j) {
 }
 
 int main() {
-    ofstream ofstr_map("map_test.txt");
-    ofstream ofstr_points("trial_points.txt");
+    ofstream ofstr_map("output_data/map_test.txt");
+    ofstream ofstr_points("output_data/trial_points.txt");
 
     vector<double> X_opt_num(2), A{-1.0 / 2.0, -1.0 / 2.0}, B{1.0, 1.0}, X_opt{0.0, 0.0};
     vector<vector<double>> trial_vec;

@@ -22,7 +22,7 @@ if (ARG1 < 4) {
           datafile index ind+2 using 1:2 with lines ls 5 lc rgb "blue" title "r=".R[ind+3]
 }
 if (ARG1 == 4) {
-     set title "Comparison of operational characteristics" font "Helvetica Bold, 20"
+     set title "Comparison of operational characteristics Grishagin and GKLS" font "Helvetica Bold, 20"
      plot datafile index 0 using 1:2 with lines ls 5 lc rgb "red" title Name[1]."-r=".R[1], \
           datafile index 1 using 1:2 with lines ls 5 lc rgb "green" title Name[1]."-r=".R[2], \
           datafile index 2 using 1:2 with lines ls 5 lc rgb "blue" title Name[1]."-r=".R[3], \
@@ -31,7 +31,7 @@ if (ARG1 == 4) {
           datafile index 5 using 1:2 with lines ls 5 lc rgb "violet" title Name[2]."-r=".R[6]
 }
 if (ARG1 == 5) {
-     set title "Comparison of operational characteristics" font "Helvetica Bold, 20"
+     set title "Comparison of operational characteristics Grishagin and GKLS (constrained)" font "Helvetica Bold, 20"
      plot datafile index 6 using 1:2 with lines ls 5 lc rgb "red" title Name[3]."-r=".R[7], \
           datafile index 7 using 1:2 with lines ls 5 lc rgb "green" title Name[3]."-r=".R[8], \
           datafile index 8 using 1:2 with lines ls 5 lc rgb "blue" title Name[3]."-r=".R[9], \

@@ -14,14 +14,15 @@ private:
     double r, d;
 
     trial_constr last_trial;
+    int last_trial_pos;
 
     vector<vector<trial_constr>> I;
     vector<bool> calc_I;
     vector<double> mu;
     vector<double> z_star;
 
-    trial_constr newTrial(double x);
-    double newPoint(int t);
+    trial_constr newTrial(double x) override;
+    double newPoint(int t) override;
     double selectNewPoint(int &t) override;
 
 public:

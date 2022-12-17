@@ -16,8 +16,8 @@ private:
 
     trial last_trial;
 
-    trial newTrial(double x);
-    double newPoint(int t);
+    trial newTrial(double x) override;
+    double newPoint(int t) override;
     double selectNewPoint(int &t) override;
 
 public:

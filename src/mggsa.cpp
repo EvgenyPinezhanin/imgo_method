@@ -27,7 +27,7 @@
 
 const double peano_a = 0.0, peano_b = 1.0, peano_random = 0.5;
 
-double euclidean_distance(vector<double> val1, vector<double> val2) {
+inline double euclidean_distance(vector<double> val1, vector<double> val2) {
     double res = 0.0;
     size_t size = val1.size();
     for (int i = 0; i < size; i++) {
@@ -239,7 +239,6 @@ double mggsa_method::selectNewPoint(int &t) {
 #endif
 
     // Steps 5, 6
-    t = 1;
     double R = -numeric_limits<double>::infinity(), Rtmp = 0.0;
     double mu_v, z_star_v, d_x;
 
@@ -315,6 +314,7 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
         calc_I[nu] = false;
     }
     trial_points.clear();
+    X.resize(n);
 
     last_trials[0] = trial_constr{peano_a, -1.0, 0};
     trial_points.push_back(last_trials[0]);
