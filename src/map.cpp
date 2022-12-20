@@ -6,9 +6,7 @@
     #include <cmath>
 #endif
 
-int n1, nexp, l, iq, iu[10], iv[10];
-
-void node(int is) {
+void node(int is, int& n1, int nexp, int& l, int& iq, int *iu, int *iv) {
     /* calculate iu = u[s], iv = v[s], l = l[s] by is = s */
 
     int n, j, k1, k2, iff;
@@ -65,6 +63,7 @@ void mapd(double x, int m, double* y, int n, int key) {
     float p, r;
     int iw[11];
     int it, is, i, j, k;
+	int n1, nexp, l, iq, iu[10], iv[10];
 
     p = 0.0;
     n1 = n - 1;
@@ -102,7 +101,7 @@ void mapd(double x, int m, double* y, int n, int key) {
     		  d = d - is;
     	}
     	i = is;
-    	node(i);
+    	node(i, n1, nexp, l, iq, iu, iv);
     	i = iu[0];
     	iu[0] = iu[it];
     	iu[it] = i;
@@ -147,7 +146,7 @@ void mapd(double x, int m, double* y, int n, int key) {
     }
 }
 
-void numbr(int *iss) {
+void numbr(int *iss, int& n1, int nexp, int& l, int* iu, int* iv) {
  	/* calculate s(u) = is,l(u) = l,v(u) = iv by u = iu */
 
   	int n, is, iff, k1, k2, l1;
@@ -191,6 +190,7 @@ void xyd(double *xx, int m, float y[], int n) {
  	float r;
  	int iw[10];
  	int i, j, it, is;
+	int n1, nexp, l, iu[10], iv[10];
 
  	n1 = n - 1;
  	for (nexp = 1, i = 0; i < n; i++) {
@@ -211,16 +211,16 @@ void xyd(double *xx, int m, float y[], int n) {
 		i = iu[0];
 		iu[0] = iu[it];
 		iu[it] = i;
-		numbr(&is);
+		numbr(&is, n1, nexp, l, iu, iv);
 		i = iv[0];
 		iv[0] = iv[it];
 		iv[it] = i;
 		for (i = 0; i < n; i++)
 		  	iw[i] = -iw[i] * iv[i];
 		if (l == 0) {
-			l=it;
+			l = it;
 		} else if (l == it) {
-			l=0;
+			l = 0;
 		}
 		it = l;
 		r1 = r1 / nexp;
@@ -228,8 +228,6 @@ void xyd(double *xx, int m, float y[], int n) {
  	}
  	*xx = x;
 }
-
-double del;
 
 void invmad(int m, double xp[], int kp, int *kxx, double p[], int n, int incr) {
  	/* calculate kx preimage p node */
@@ -248,6 +246,7 @@ void invmad(int m, double xp[], int kp, int *kxx, double p[], int n, int incr) {
   	double mne, d1, dd, x, dr;
   	float r, d, u[10], y[10];
   	int i, k, kx, nexp;
+	double del;
 
   	kx = 0;
   	kp--;

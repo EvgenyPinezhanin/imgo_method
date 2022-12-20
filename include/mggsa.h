@@ -48,6 +48,10 @@ public:
     void setKey(int _key) { key = _key; };
     void setIncr(int _incr) { incr = _incr; };
 
+    int getM() const { return m; };
+    double getR() const { return r; };
+    double getD() const { return d; };
+
     void getPoints(vector<vector<double>> &points_vec);
     int getCountPoints() const { return trial_points.size() - 2; };
     void getMu(vector<double> &mu_vec) const { mu_vec = mu; };

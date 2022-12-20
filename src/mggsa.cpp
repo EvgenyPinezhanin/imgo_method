@@ -14,6 +14,8 @@
 
 #include <map.h>
 
+#include <iomanip>
+
 // #define DEBUG
 // #define EPS
 // #define TIME_TEST
@@ -21,7 +23,7 @@
 #if defined(TIME_TEST)
     ofstream ofstr_test;
     vector<int> time_count;
-    vector<double> time_mu, time_z_star, time_R, time_trial, time_add_trial, time_add_I;
+    vector<double> time_mu, time_z_star, time_R, time_trial, time_add_trial, time_add_I, time_P;
     int start_time, end_time;
 #endif
 
@@ -76,19 +78,26 @@ trial_constr mggsa_method::newTrial(double x) {
     }
 
 #if defined(DEBUG)
-    cout << "trial: x = " << x << " X = " << X[0] << " Y = " << X[1] << " z = " << f(X, m + 1) << " nu = " << tr.nu << endl;
+    if (den != 9) cout << "trial: x = " << x << " X = " << X[0] << " Y = " << X[1] << " z = " << f(X, m + 1) << " nu = " << tr.nu << endl;
 #endif
 
     return tr;
 }
 
 double mggsa_method::newPoint(int t) {
+#if defined(DEBUG)
+    if (den != 9) {
+        cout << "t = " << t << endl;
+        cout << "t_p[t].x = " << trial_points[t].x << " t_p[t-1].x = " << trial_points[(size_t)t - 1].x << endl;
+        cout << "mu[t_p[t].nu] = " << mu[(size_t)trial_points[t].nu - 1] << endl;
+    }
+#endif
     if (trial_points[t].nu != trial_points[(size_t)t - 1].nu) {
         return (trial_points[t].x + trial_points[(size_t)t - 1].x) / 2.0;
     } else {
         return (trial_points[t].x + trial_points[(size_t)t - 1].x) / 2.0 -
-                sgn(trial_points[t].z - trial_points[(size_t)t - 1].z) / (2.0 * r) *
-                pow(abs(trial_points[t].z - trial_points[(size_t)t - 1].z) / mu[(size_t)trial_points[t].nu - 1], n);
+               sgn(trial_points[t].z - trial_points[(size_t)t - 1].z) / (2.0 * r) *
+               pow(abs(trial_points[t].z - trial_points[(size_t)t - 1].z) / mu[(size_t)trial_points[t].nu - 1], n);
     }
 }
 
@@ -111,6 +120,30 @@ bool mggsa_method::check_density(double h_j) {
 void mggsa_method::y(double x, vector<double> &X) {
     int d = (key != 3) ? den : den + 1;
     mapd(x, d, X.data(), n, key);
+
+#if defined(DEBUG)
+    if (den != 9)  {
+        cout << "X = (";
+        for (int i = 0; i < n - 1; i++) {
+            cout << setprecision(16) << X[i] << ", ";
+        }
+        cout << setprecision(16) << X[n - 1] << ")" << endl;
+
+        cout << "A = (";
+        for (int i = 0; i < n - 1; i++) {
+            cout << setprecision(16) << A[i] << ", ";
+        }
+        cout << setprecision(16) << A[n - 1] << ")" << endl;
+
+        cout << "B = (";
+        for (int i = 0; i < n - 1; i++) {
+            cout << setprecision(16) << B[i] << ", ";
+        }
+        cout << setprecision(16) << B[n - 1] << ")" << endl;
+
+    }
+#endif
+
     for (int i = 0; i < n; i++) {
         X[i] = X[i] * (B[i] - A[i]) + (A[i] + B[i]) / 2.0;
     }
@@ -123,6 +156,20 @@ void mggsa_method::x(const vector<double> &P, vector<double> &X) {
     for (int i = 0; i < n; i++) {
         P_correct[i] = (P[i] - (A[i] + B[i]) / 2.0) / (B[i] - A[i]);
     }
+
+#if defined(DEBUG)
+    if (den != 9)  {
+        cout << "den = " << den + 1 << endl;
+        cout << "n = " << n << endl;
+        cout << "incr = " << incr << endl;
+        cout << "P_corr = (";
+        for (int i = 0; i < n - 1; i++) {
+            cout << setprecision(16) << P_correct[i] << ", ";
+        }
+        cout << setprecision(16) << P_correct[n - 1] << ")" << endl;
+    }
+#endif
+
     invmad(den + 1, X.data(), pow(2, n), &size_x, P_correct.data(), n, incr);
     X.resize(size_x);
 }
@@ -193,11 +240,13 @@ double mggsa_method::selectNewPoint(int &t) {
 #endif
 
 #if defined(DEBUG)
+if (den != 9) {
     cout << "mu: ";
     for (int nu = 0; nu < m + 1; nu++) {
         cout << mu[nu] << " ";
     }
     cout << endl;
+}
 #endif
 
 #if defined(TIME_TEST)
@@ -227,11 +276,13 @@ double mggsa_method::selectNewPoint(int &t) {
 #endif
 
 #if defined(DEBUG)
+if (den != 9) {
     cout << "z_star: ";
     for (int nu = 0; nu < m + 1; nu++) {
         cout << z_star[nu] << " ";
     }
     cout << endl;
+}
 #endif
 
 #if defined(TIME_TEST)
@@ -265,7 +316,7 @@ double mggsa_method::selectNewPoint(int &t) {
         }
 
 #if defined(DEBUG)
-    cout << "R[" << trial_points[i - 1].x << ", " << trial_points[i].x << "] = " << Rtmp << endl;
+if (den != 9) cout << "R[" << trial_points[i - 1].x << ", " << trial_points[i].x << "] = " << Rtmp << endl;
 #endif
 
     }
@@ -307,6 +358,7 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
     time_trial.clear();
     time_add_trial.clear();
     time_add_I.clear();
+    time_P.clear();
 #endif
 
     for (int nu = 0; nu < m + 1; nu++) {
@@ -322,7 +374,7 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
     trial_points.push_back(last_trials[0]);
 
 #if defined(DEBUG)
-    cout << "Trial number: " << 1 << endl;
+if (den != 9) cout << "Trial number: " << 1 << endl;
 #endif
 
 #if defined(TIME_TEST)
@@ -340,6 +392,7 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
     time_mu.push_back(0.0);
     time_z_star.push_back(0.0);
     time_R.push_back(0.0);
+    time_P.push_back(0.0);
     time_trial.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
 #endif
 
@@ -377,14 +430,39 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
     #endif
 
     #if defined(DEBUG)
-        cout << "Trial number: " << count + 1 << endl;
+    if (den != 9) cout << "Trial number: " << count + 1 << endl;
     #endif
 
         // Steps 3, 4, 5, 6, Pre-7
         x_k_1 = selectNewPoint(t);
+
+    #if defined(DEBUG)
+        if (den != 9) cout << "x^{k+1} = " << x_k_1 << endl;
+    #endif
+
         if (key == 3) {
+        #if defined(TIME_TEST)
+            start_time = clock();
+        #endif
+
             h = calc_h(x_k_1);
             y(h, P);
+
+        #if defined(DEBUG)
+            if (den != 9)  {
+                cout << "h = " << setprecision(16) << h << endl;
+                cout << "P = (";
+                for (int i = 0; i < n - 1; i++) {
+                    cout << setprecision(16) << P[i] << ", ";
+                }
+                cout << setprecision(16) << P[n - 1] << ")" << endl;
+            }
+        #endif
+
+        #if defined(TIME_TEST)
+            end_time = clock();
+            time_P.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
+        #endif
         }
 
         delta_t = pow(trial_points[t].x - trial_points[(size_t)t - 1].x, 1.0 / n);
@@ -404,6 +482,14 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
             for (int i = 0; i < h_nu.size(); i++) {
                 last_trials.push_back(newTrial(h_nu[i]));
             }
+        #if defined(DEBUG)
+        if (den != 9) {
+                for (int i = 0; i < h_nu.size(); i++) {
+                cout << setprecision(8) << "h_nu[" << i << "] = " << h_nu[i] << " "; 
+            }
+            cout << endl;
+        }
+        #endif
         }
 
     #if defined(TIME_TEST)
@@ -465,9 +551,12 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
     y(search_min(trial_points, m), X);
 
 #if defined(TIME_TEST)
+    int k = (key == 3); 
     for (int i = 0; i < count - 1; i++) {
         ofstr_test << time_count[i] << " " << time_mu[i] << " " << time_z_star[i] << " "
-                   << time_R[i] << " " << time_trial[i] << " "  << time_add_trial[i] << " " << time_add_I[i] << endl;
+                   << time_R[i] << " " << time_trial[i] << " "  << time_add_trial[i] << " " << time_add_I[i];
+        if (k) ofstr_test << " " << time_P[i];
+        ofstr_test << endl;
     }
     ofstr_test.close();
 
@@ -478,7 +567,9 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
     if (error != 0) {
         cerr << "Error chmod" << endl;
     }
-    error = system("gnuplot -c scripts/time_test.gp");
+    char str[100];
+    sprintf(str, "gnuplot -c scripts/time_test.gp %d", k);
+    error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << endl;
     }

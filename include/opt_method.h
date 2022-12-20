@@ -25,6 +25,12 @@ public:
     void setB(const vector<double> &_B) { B = _B; };
     void setAB(const vector<double> &_A, const vector<double> &_B) { A = _A; B = _B; };
 
+    int getN() { return n; };
+    int getNmax() { return Nmax; };
+    double getEps() { return eps; };
+    vector<double> getA() { return A; };
+    vector<double> getB() { return B; };
+
     virtual void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY) = 0;
 };
 
