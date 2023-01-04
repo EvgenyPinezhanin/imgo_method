@@ -25,19 +25,23 @@ int main() {
     int incr = 1, constr = 0, count, Nmax = 1000;
     Stop stop = Stop::ACCURNUMBER;
 
-    int m = 9, n = 2, key = 3;
+    int m = 9, n = 2, key = 1;
     double *X = new double[n];
 
     double k = (key != 3) ? 1.0 / (pow(2.0, n * m) - 1.0) :
                             1.0 / (pow(2.0, m * n) * (pow(2.0, n) - 1.0)) + 0.0000000001;
     if (key == 3) m++;
-    for (double i = 0.0; i <= 1.0 + k; i += k) {
+    for (double i = 0.0; i <= 1.0; i += k) {
         mapd(i, m, X, n, key);
         ofstr_map << X[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " " 
                   << X[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
     }
+    mapd(1.0, m, X, n, key);
+        ofstr_map << X[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " " 
+                  << X[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
     if (key == 3) m--;
     ofstr_map.close();
+    delete [] X;
 
     mggsa_method mggsa(f, n, constr, A, B, r, d, m, key, eps, Nmax, incr);
 

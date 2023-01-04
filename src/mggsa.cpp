@@ -14,8 +14,6 @@
 
 #include <map.h>
 
-#include <iomanip>
-
 // #define DEBUG
 // #define EPS
 // #define TIME_TEST
@@ -78,7 +76,7 @@ trial_constr mggsa_method::newTrial(double x) {
     }
 
 #if defined(DEBUG)
-    if (den != 9) cout << "trial: x = " << x << " X = " << X[0] << " Y = " << X[1] << " z = " << f(X, m + 1) << " nu = " << tr.nu << endl;
+    cout << "trial: x = " << x << " X = " << X[0] << " Y = " << X[1] << " z = " << f(X, m + 1) << " nu = " << tr.nu << endl;
 #endif
 
     return tr;
@@ -86,12 +84,11 @@ trial_constr mggsa_method::newTrial(double x) {
 
 double mggsa_method::newPoint(int t) {
 #if defined(DEBUG)
-    if (den != 9) {
-        cout << "t = " << t << endl;
-        cout << "t_p[t].x = " << trial_points[t].x << " t_p[t-1].x = " << trial_points[(size_t)t - 1].x << endl;
-        cout << "mu[t_p[t].nu] = " << mu[(size_t)trial_points[t].nu - 1] << endl;
-    }
+    cout << "t = " << t << endl;
+    cout << "t_p[t].x = " << trial_points[t].x << " t_p[t-1].x = " << trial_points[(size_t)t - 1].x << endl;
+    cout << "mu[t_p[t].nu] = " << mu[(size_t)trial_points[t].nu - 1] << endl;
 #endif
+
     if (trial_points[t].nu != trial_points[(size_t)t - 1].nu) {
         return (trial_points[t].x + trial_points[(size_t)t - 1].x) / 2.0;
     } else {
@@ -122,26 +119,11 @@ void mggsa_method::y(double x, vector<double> &X) {
     mapd(x, d, X.data(), n, key);
 
 #if defined(DEBUG)
-    if (den != 9)  {
-        cout << "X = (";
-        for (int i = 0; i < n - 1; i++) {
-            cout << setprecision(16) << X[i] << ", ";
-        }
-        cout << setprecision(16) << X[n - 1] << ")" << endl;
-
-        cout << "A = (";
-        for (int i = 0; i < n - 1; i++) {
-            cout << setprecision(16) << A[i] << ", ";
-        }
-        cout << setprecision(16) << A[n - 1] << ")" << endl;
-
-        cout << "B = (";
-        for (int i = 0; i < n - 1; i++) {
-            cout << setprecision(16) << B[i] << ", ";
-        }
-        cout << setprecision(16) << B[n - 1] << ")" << endl;
-
+    cout << "X = (";
+    for (int i = 0; i < n - 1; i++) {
+        cout << X[i] << ", ";
     }
+    cout << X[n - 1] << ")" << endl;
 #endif
 
     for (int i = 0; i < n; i++) {
@@ -157,19 +139,6 @@ void mggsa_method::x(const vector<double> &P, vector<double> &X) {
         P_correct[i] = (P[i] - (A[i] + B[i]) / 2.0) / (B[i] - A[i]);
     }
 
-#if defined(DEBUG)
-    if (den != 9)  {
-        cout << "den = " << den + 1 << endl;
-        cout << "n = " << n << endl;
-        cout << "incr = " << incr << endl;
-        cout << "P_corr = (";
-        for (int i = 0; i < n - 1; i++) {
-            cout << setprecision(16) << P_correct[i] << ", ";
-        }
-        cout << setprecision(16) << P_correct[n - 1] << ")" << endl;
-    }
-#endif
-
     invmad(den + 1, X.data(), pow(2, n), &size_x, P_correct.data(), n, incr);
     X.resize(size_x);
 }
@@ -180,35 +149,55 @@ double mggsa_method::selectNewPoint(int &t) {
 #endif
     
     // Step 3
-    // with optimization
+    // with optimization (const) (not work)
+    // double mu_tmp;
+    // int nu_I = last_trials[0].nu - 1;
+    // size_t size_I = I[nu_I].size();
+    // for (int nu = 0; nu < m + 1; nu++) {
+    //     if (!calc_I[nu]) mu[nu] = 0.0;
+    // }
+    // if (I[nu_I].size() >= 3) {
+    //     for (int i = 0; i < last_trials_pos.size(); i++) {
+    //         if (last_trials_pos[i] == 0) {
+    //             mu[nu_I] = max({ mu[nu_I], abs(I[nu_I][1].z - I[nu_I][0].z) / pow(I[nu_I][1].x - I[nu_I][0].x, 1.0 / n) });  
+    //         } else if (last_trials_pos[i] == size_I - 1) {
+    //             mu[nu_I] = max({ mu[nu_I],
+    //                              abs(I[nu_I][size_I - 1].z - I[nu_I][size_I - 2].z) / 
+    //                              pow(I[nu_I][size_I - 1].x - I[nu_I][size_I - 2].x, 1.0 / n) });
+    //         } else {
+    //             mu[nu_I] = max({ mu[nu_I],
+    //                              abs(I[nu_I][last_trials_pos[i]].z - I[nu_I][last_trials_pos[i] - 1].z) / 
+    //                              pow(I[nu_I][last_trials_pos[i]].x - I[nu_I][last_trials_pos[i] - 1].x, 1.0 / n),
+    //                              abs(I[nu_I][last_trials_pos[i] + 1].z - I[nu_I][last_trials_pos[i]].z) / 
+    //                              pow(I[nu_I][last_trials_pos[i] + 1].x - I[nu_I][last_trials_pos[i]].x, 1.0 / n) });
+    //         }
+    //     }
+    // } else if (I[nu_I].size() == 2) {
+    //     mu[nu_I] = max({ mu[nu_I], abs(I[nu_I][1].z - I[nu_I][0].z) / pow(I[nu_I][1].x - I[nu_I][0].x, 1.0 / n) });
+    // }
+    // if (mu[nu_I] > 1e-14) calc_I[nu_I] = true;
+    // for (int nu = 0; nu < m + 1; nu++) {
+    //     if (mu[nu] < 1e-14) mu[nu] = 1.0;
+    // }
+
+    // with optimization (linear)
     double mu_tmp;
     int nu_I = last_trials[0].nu - 1;
     size_t size_I = I[nu_I].size();
     for (int nu = 0; nu < m + 1; nu++) {
         if (!calc_I[nu]) mu[nu] = 0.0;
     }
-    if (I[nu_I].size() >= 3) {
-        for (int i = 0; i < last_trials_pos.size(); i++) {
-            if (last_trials_pos[i] == 0) {
-                mu[nu_I] = max({ mu[nu_I],
-                                 abs(I[nu_I][last_trials_pos[i] + 1].z - I[nu_I][last_trials_pos[i]].z) / 
-                                 pow(I[nu_I][last_trials_pos[i] + 1].x - I[nu_I][last_trials_pos[i]].x, 1.0 / n) });  
-            } else if (last_trials_pos[i] == I[nu_I].size() - 1) {
-                mu[nu_I] = max({ mu[nu_I],
-                                 abs(I[nu_I][last_trials_pos[i]].z - I[nu_I][last_trials_pos[i] - 1].z) / 
-                                 pow(I[nu_I][last_trials_pos[i]].x - I[nu_I][last_trials_pos[i] - 1].x, 1.0 / n) });
-            } else {
-                mu[nu_I] = max({ mu[nu_I],
-                                 abs(I[nu_I][last_trials_pos[i]].z - I[nu_I][last_trials_pos[i] - 1].z) / 
-                                 pow(I[nu_I][last_trials_pos[i]].x - I[nu_I][last_trials_pos[i] - 1].x, 1.0 / n),
-                                 abs(I[nu_I][last_trials_pos[i] + 1].z - I[nu_I][last_trials_pos[i]].z) / 
-                                 pow(I[nu_I][last_trials_pos[i] + 1].x - I[nu_I][last_trials_pos[i]].x, 1.0 / n) });
+    for (int i = 0; i < last_trials.size(); i++) {
+        for (int j = 0; j < size_I; j++) {
+            if (I[nu_I][j].x != last_trials[i].x) {
+                mu_tmp = abs(I[nu_I][j].z - last_trials[i].z) / pow(abs(I[nu_I][j].x - last_trials[i].x), 1.0 / n);
+                if (mu_tmp > mu[nu_I]) {
+                    mu[nu_I] = mu_tmp;
+                    if (abs(mu[nu_I]) > 1e-14) calc_I[nu_I] = true;
+                }
             }
         }
-    } else if (I[nu_I].size() == 2) {
-        mu[nu_I] = max({ mu[nu_I], abs(I[nu_I][1].z - I[nu_I][0].z) / pow(I[nu_I][1].x - I[nu_I][0].x, 1.0 / n) });
     }
-    if (abs(mu[nu_I]) > 1e-14) calc_I[nu_I] = true;
     for (int nu = 0; nu < m + 1; nu++) {
         if (abs(mu[nu]) < 1e-14) mu[nu] = 1.0;
     }
@@ -240,13 +229,11 @@ double mggsa_method::selectNewPoint(int &t) {
 #endif
 
 #if defined(DEBUG)
-if (den != 9) {
     cout << "mu: ";
     for (int nu = 0; nu < m + 1; nu++) {
         cout << mu[nu] << " ";
     }
     cout << endl;
-}
 #endif
 
 #if defined(TIME_TEST)
@@ -276,13 +263,11 @@ if (den != 9) {
 #endif
 
 #if defined(DEBUG)
-if (den != 9) {
     cout << "z_star: ";
     for (int nu = 0; nu < m + 1; nu++) {
         cout << z_star[nu] << " ";
     }
     cout << endl;
-}
 #endif
 
 #if defined(TIME_TEST)
@@ -316,7 +301,7 @@ if (den != 9) {
         }
 
 #if defined(DEBUG)
-if (den != 9) cout << "R[" << trial_points[i - 1].x << ", " << trial_points[i].x << "] = " << Rtmp << endl;
+    cout << "R[" << trial_points[i - 1].x << ", " << trial_points[i].x << "] = " << Rtmp << endl;
 #endif
 
     }
@@ -374,7 +359,7 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
     trial_points.push_back(last_trials[0]);
 
 #if defined(DEBUG)
-if (den != 9) cout << "Trial number: " << 1 << endl;
+    cout << "Trial number: " << 1 << endl;
 #endif
 
 #if defined(TIME_TEST)
@@ -430,14 +415,14 @@ if (den != 9) cout << "Trial number: " << 1 << endl;
     #endif
 
     #if defined(DEBUG)
-    if (den != 9) cout << "Trial number: " << count + 1 << endl;
+        cout << "Trial number: " << count + 1 << endl;
     #endif
 
         // Steps 3, 4, 5, 6, Pre-7
         x_k_1 = selectNewPoint(t);
 
     #if defined(DEBUG)
-        if (den != 9) cout << "x^{k+1} = " << x_k_1 << endl;
+        cout << "x^{k+1} = " << x_k_1 << endl;
     #endif
 
         if (key == 3) {
@@ -449,14 +434,12 @@ if (den != 9) cout << "Trial number: " << 1 << endl;
             y(h, P);
 
         #if defined(DEBUG)
-            if (den != 9)  {
-                cout << "h = " << setprecision(16) << h << endl;
-                cout << "P = (";
-                for (int i = 0; i < n - 1; i++) {
-                    cout << setprecision(16) << P[i] << ", ";
-                }
-                cout << setprecision(16) << P[n - 1] << ")" << endl;
+            cout << "h = " << h << endl;
+            cout << "P = (";
+            for (int i = 0; i < n - 1; i++) {
+                cout << P[i] << ", ";
             }
+            cout << P[n - 1] << ")" << endl;
         #endif
 
         #if defined(TIME_TEST)
@@ -483,12 +466,10 @@ if (den != 9) cout << "Trial number: " << 1 << endl;
                 last_trials.push_back(newTrial(h_nu[i]));
             }
         #if defined(DEBUG)
-        if (den != 9) {
-                for (int i = 0; i < h_nu.size(); i++) {
-                cout << setprecision(8) << "h_nu[" << i << "] = " << h_nu[i] << " "; 
+            for (int i = 0; i < h_nu.size(); i++) {
+                cout << "h_nu[" << i << "] = " << h_nu[i] << " ";
             }
             cout << endl;
-        }
         #endif
         }
 

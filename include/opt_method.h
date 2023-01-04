@@ -56,6 +56,8 @@ public:
 
     void setF(double (*_f)(vector<double>)) { f = _f; };
 
+    auto getF() const -> double (*)(vector<double>) { return f; };
+
     void getTrialPoints(vector<trial> &trial_vec) const { trial_vec = trial_points; };
 };
 
@@ -83,6 +85,9 @@ public:
 
     void setF(double (*_f)(vector<double>, int)) { f = _f; };
     void setM(int _m) { m = _m; };
+
+    auto getF() const -> double (*)(vector<double>, int) { return f; };
+    int getM() const { return m; };
 
     void getTrialPoints(vector<trial_constr> &trial_vec) const { trial_vec = trial_points; };
 };

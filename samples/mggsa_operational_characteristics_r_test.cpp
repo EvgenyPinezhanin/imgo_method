@@ -7,6 +7,7 @@
 #include <ctime>
 #include <algorithm>
 
+#include <omp.h>
 #include <Grishagin/GrishaginProblemFamily.hpp>
 #include <Grishagin/GrishaginConstrainedProblemFamily.hpp>
 #include <GKLS/GKLSProblemFamily.hpp>
@@ -18,9 +19,8 @@ using namespace std;
 
 #define CALC
 
-const int family_number = 0; // 0 - Grishagin, 1 - GKLS,
+const int family_number = 3; // 0 - Grishagin, 1 - GKLS,
                              // 2 - Grishagin(constrained), 3 - GKLS(constrained),
-                             // 4 - comparison Grishagin and GKLS, 5 - comparison Grishagin and GKLS (constrained)
 const int number_family = 4;
 int current_func;
 
@@ -66,39 +66,42 @@ double f_constr_gkls(vector<double> x, int j) {
 
 int main() {
 #if defined(CALC)
-    ofstream ofstr("output_data/mggsa_operational_characteristics.txt");
+    ofstream ofstr("output_data/mggsa_operational_characteristics_r_test.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
-    ofstream ofstr_opt("output_data/mggsa_operational_characteristics_opt.txt");
+    ofstream ofstr_opt("output_data/mggsa_operational_characteristics_r_test_opt.txt");
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
     int count_func;
 
-    int start_time, end_time;
-    double work_time;
-
     vector<vector<int>> K{ {0, 700, 25},
-                           {0, 1500, 25},
-                           {0, 3000, 25},
+                           {0, 1200, 25},
+                           {0, 2200, 25},
                            {0, 4500, 25} };
 
     int count_successful = 0;
     int count_trials;
 
-    int den = 10, key = 1, m = 0;
-    double eps = 0.01, r = 0.0, d = 0.0;
-    int Nmax = 5000;
+    int den = 10, m = 0;
+    double eps = 0.01, d = 0.0;
+    int Nmax = 5000, incr = 30, key = 3;
+    int chunk = 2;
 
     vector<double> A, B, X_opt;
-    vector<vector<double>> r_array{ {2.5, 3.0, 3.5},
-                                    {3.5, 4.3, 5.0},
-                                    {2.5, 3.0, 3.5},
-                                    {4.0, 4.5, 4.9} };
+    vector<double> r_min{1.0, 1.0, 2.2, 3.0};
+    vector<double> r_max{1.0, 1.0, 2.2, 3.0}; // 3.0, 4.2, 3.0, 4.7
+    vector<double> step_array{0.1, 0.1, 0.05, 0.05};
+    vector<vector<double>> r_array(number_family);
+    for (int i = 0; i < number_family; i++) {
+        for (double j = r_min[i]; j <= r_max[i]; j += step_array[i]) {
+            r_array[i].push_back(j);
+        }
+    }
+    vector<vector<double>> P_vector(number_family);
+    for (int i = 0; i < number_family; i++) {
+        P_vector[i].resize(r_array[i].size());
+    }
 
-    vector<vector<int>> count_trials_vec(number_family);
-    count_trials_vec[0].resize(grishaginProblems.GetFamilySize(), 0);
-    count_trials_vec[1].resize(GKLSProblems.GetFamilySize(), 0);
-    count_trials_vec[2].resize(grishaginConstrainedProblems.GetFamilySize(), 0);
-    count_trials_vec[3].resize(GKLSConstrainedProblems.GetFamilySize(), 0);
+    vector<int> count_trials_vec;
 
     vector<class_problems_fm> problems{ class_problems_fm("GrishaginProblemFamily", &grishaginProblems, type_constraned::NONCONSTR,
                                                           f_grishagin, "Grishagin"),
@@ -109,37 +112,34 @@ int main() {
                                         class_problems_fm("GKLSProblemConstrainedFamily", &GKLSConstrainedProblems, 
                                                           type_constraned::CONSTR, f_constr_gkls, "GKLSConstrained") };
 
-    mggsa_method mggsa(nullptr, -1, -1, A, B, -1.0, d, den, key, eps, Nmax);
+    mggsa_method mggsa(nullptr, -1, -1, A, B, -1.0, d, den, key, eps, Nmax, incr);
 
     IOptProblemFamily *opt_problem_family;
     IConstrainedOptProblemFamily *constr_opt_problem_family;
     for (int i = 0; i < number_family; i++) {
-        ofstr_opt << "Name[" << i + 1 << "]=\"" << problems[i].short_name << "\"" << endl;
-        for (int j = 0; j < r_array[i].size(); j++) {
-            ofstr_opt << "R[" << (i * 3) + j + 1 << "]=\"" << r_array[i][j] << "\"" << endl; 
-        }
-
         if (problems[i].type == type_constraned::CONSTR) {
             constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].problem);
             mggsa.setN((*constr_opt_problem_family)[0]->GetDimension());
             mggsa.setM((*constr_opt_problem_family)[0]->GetConstraintsNumber());
             (*constr_opt_problem_family)[0]->GetBounds(A, B);
+            count_trials_vec.resize(constr_opt_problem_family->GetFamilySize());
         } else {
             opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].problem);
             mggsa.setN((*opt_problem_family)[0]->GetDimension());
             mggsa.setM(0);
             (*opt_problem_family)[0]->GetBounds(A, B);
+            count_trials_vec.resize(opt_problem_family->GetFamilySize());
         }
         mggsa.setAB(A, B);
         mggsa.setF(problems[i].f);
         count_func = problems[i].problem->GetFamilySize();
 
         cout << problems[i].name << endl;
-        ofstr << "# " << problems[i].name << endl;
+    #pragma omp parallel for schedule(dynamic, chunk) proc_bind(spread) num_threads(omp_get_num_procs()) \
+            shared(P_vector, r_array, count_func, current_func, K, problems, constr_opt_problem_family, opt_problem_family) \
+            firstprivate(count_trials_vec, mggsa) private(count_trials, X_opt, count_successful)
         for (int j = 0; j < r_array[i].size(); j++) {
-            cout << "r = " << r_array[i][j] << endl;
             mggsa.setR(r_array[i][j]);
-            start_time = clock();
             for (int k = 0; k < count_func; k++) {
                 current_func = k;
                 count_trials = K[i][1];
@@ -149,24 +149,32 @@ int main() {
                     X_opt = (*opt_problem_family)[k]->GetOptimumPoint();
                 }
                 if (mggsa.solve_test(X_opt, count_trials, Stop::ACCURNUMBER)) {
-                    count_trials_vec[i][k] = count_trials;
+                    count_trials_vec[k] = count_trials;
                 } else {
-                    count_trials_vec[i][k] = count_trials + 1;
+                    count_trials_vec[k] = count_trials + 1;
                 }
             }
-            for (int k = K[i][0]; k <= K[i][1]; k += K[i][2]) {
-                count_successful = (int)count_if(count_trials_vec[i].begin(), count_trials_vec[i].end(), [k](double elem){ return elem <= k; });
-                cout << "K = " << k << " success rate = " << (double)count_successful / count_func << endl;
-                ofstr << k << " " << (double)count_successful / count_func << endl;
-            }
-            ofstr << endl << endl;
-            end_time = clock();
-            work_time = ((double)end_time - start_time) / CLOCKS_PER_SEC;
-            cout << "time: " << work_time << endl;
+
+            int k = K[i][1];
+            count_successful = (int)count_if(count_trials_vec.begin(), count_trials_vec.end(), [k](double elem){ return elem <= k; });
+            P_vector[i][j] = (double)count_successful / count_func;
+
+            string str = "r = " + to_string(r_array[i][j]) + " t_num = " + to_string(omp_get_thread_num()) + "\n";
+            cout << str;
         }
     }
 
+    for (int i = 0; i < number_family; i++) {
+        for (int j = 0; j < P_vector[i].size(); j++) {
+            ofstr << r_array[i][j] << " " << P_vector[i][j] << endl;
+        }
+        ofstr << endl << endl;
+    }
     ofstr.close();
+
+    for (int i = 0; i < number_family; i++) {
+        ofstr_opt << "Name[" << i + 1 << "]=\"" << problems[i].short_name << "\"" << endl;
+    }
     ofstr_opt.close();
 #endif
 
@@ -174,14 +182,14 @@ int main() {
     int error;
 #if defined(__linux__)
     setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/mggsa_operational_characteristics.gp");
+    error = system("chmod +x scripts/mggsa_operational_characteristics_r_test.gp");
     if (error != 0) {
         cerr << "Error chmod" << endl;
     }
 #endif
 
     char str[100];
-    sprintf(str, "gnuplot -c scripts/mggsa_operational_characteristics.gp %d", family_number);
+    sprintf(str, "gnuplot -c scripts/mggsa_operational_characteristics_r_test.gp %d", family_number);
     error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << endl;

@@ -14,7 +14,7 @@
 
 using namespace std;
 
-const int test_func_number = 0; // 0 - f1, 1 - f2
+const int test_func_number = 1; // 0 - f1, 1 - f2
 
 double f1(vector<double> x, int j) {
     switch (j) {
@@ -59,9 +59,9 @@ int main() {
     Stop stop = Stop::ACCURACY;
 
     vector<task_mggsa> task_array = { task_mggsa(f1, "f1", n, 3, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
-                                                 vector<double>{0.942, 0.944}, eps, Nmax, r, d, den, key, stop, 1),
+                                                 vector<double>{0.942, 0.944}, eps, Nmax, r, d, den, key, stop, false),
                                       task_mggsa(f2, "f2", n, 4, vector<double>{0.0, 0.0}, vector<double>{80.0, 80.0},
-                                                 vector<double>{77.489, 63.858}, 0.001, Nmax, 3.3, 0.01, den, key, stop, 1) };
+                                                 vector<double>{77.489, 63.858}, 0.001, Nmax, 3.3, 0.01, den, key, stop, true) };
 
     mggsa_method mggsa(nullptr);
 
@@ -117,7 +117,7 @@ int main() {
     setenv("QT_QPA_PLATFORM", "xcb", false);
     error = system("chmod +x scripts/mggsa_test.gp");
     if (error != 0) {
-        cerr << "Error chmod" << std::endl;
+        cerr << "Error chmod" << endl;
     }
 #endif
 
@@ -125,7 +125,7 @@ int main() {
     sprintf(str, "gnuplot -c scripts/mggsa_test.gp %d", test_func_number);
     error = system(str);
     if (error != 0) {
-        cerr << "Error gnuplot" << std::endl;
+        cerr << "Error gnuplot" << endl;
     }
 
 #if defined(_MSC_VER)

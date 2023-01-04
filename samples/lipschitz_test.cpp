@@ -14,8 +14,8 @@ using namespace std;
 
 using vector_4d = vector<vector<vector<vector<double>>>>;
 
-#define CALC
-#define OUTPUT_INFO
+// #define CALC
+// #define OUTPUT_INFO
 
 TGrishaginProblem grishaginProblem;
 double f_grishagin(vector<double> x, int j) {
@@ -63,7 +63,7 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, class_problems
 const int type = 1; // 0 - grishagin, 1 - GKLS
                     // 2 - constrained grisagin, 3 - constrained GKLS 
 const int incr_min = 1, incr_max = 40;
-const int m_min = 5, m_max = 13;
+const int m_min = 8, m_max = 12;
 const int key_min = 1, key_max = 3;
 
 int main() {

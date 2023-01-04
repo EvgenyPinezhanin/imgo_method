@@ -36,7 +36,7 @@ private:
 public:
     mggsa_method(double (*_f)(vector<double>, int), int _n = 2, int _m = 0, vector<double> _A = vector<double>(), 
                  vector<double> _B = vector<double>(), double _r = 2.0, double _d = 0.01, int _den = 10, 
-                 int _key = 1, double _eps = 0.0001, int _Nmax = 1000, int _incr = 1)
+                 int _key = 1, double _eps = 0.0001, int _Nmax = 1000, int _incr = 0)
                 : optimization_method_constrained(_f, _n, _m, _A, _B, _eps, _Nmax), r(_r), d(_d), den(_den), key(_key), incr(_incr), 
                   last_trials(1), last_trials_pos(1), M(0), I((size_t)m + 1), h_nu(0), calc_I((size_t)m + 1), 
                   mu((size_t)m + 1), z_star((size_t)m + 1) {}

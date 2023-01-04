@@ -2,6 +2,7 @@
 
 reset
 
+load "output_data/incr_test_opt.txt"
 datafile = "output_data/incr_test.txt"
 
 set linetype 1 lc rgb "#0000FF" lw 5 pt 1 dt 1
@@ -39,7 +40,7 @@ set linetype cycle 27
 set datafile separator " "
 
 set xlabel "incr"
-set xrange [ARG7:ARG8]
+set xrange [I_MIN[ARG2 - ARG3 + 1]:I_MAX[ARG2 - ARG3 + 1]]
 
 set title 'increment test for Rastrigin function(N = '.ARG2.')'
 
