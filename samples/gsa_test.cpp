@@ -109,7 +109,7 @@ double f20(double x) {
 
 int main() {
     double x, eps = 0.001, r = 2.0; // > 1
-    int count, Nmax = 1000;
+    int count_trials, Nmax = 1000;
     Stop stop = Stop::ACCURACY;
 
     vector<task_gsa> task_array = { task_gsa(f1, "f1(x)", -1.5, 11.0, 10.0, eps, Nmax, r, stop),
@@ -119,7 +119,7 @@ int main() {
                                     task_gsa(f5, "f5(x)", 0.0, 1.2, 0.96609, eps, Nmax, r, stop),
                                     task_gsa(f6, "f6(x)", -10.0, 10.0, 0.67956, eps, Nmax, r, stop),
                                     task_gsa(f7, "f7(x)", 2.7, 7.5, 5.19978, eps, Nmax, r, stop),
-                                    task_gsa(f8, "f8(x)", -10.0, 10.0, -7.0835, eps, Nmax, r, stop),
+                                    task_gsa(f8, "f8(x)", -10.0, 10.0, 5.48286, eps, Nmax, r, stop),
                                     task_gsa(f9, "f9(x)", 3.1, 20.4, 17.039, eps, Nmax, r, stop),
                                     task_gsa(f10, "f10(x)", 0.0, 10.0, 7.9787, eps, Nmax, r, stop),
                                     task_gsa(f11, "f11(x)", -1.57, 6.28, 2.094, eps, Nmax, r, stop),
@@ -143,15 +143,21 @@ int main() {
             gsa.setNmax(task_array[i].Nmax);
             gsa.setR(task_array[i].r);
 
-            gsa.solve(count, x, task_array[i].stop);
+            gsa.solve(count_trials, x, task_array[i].stop);
 
             cout << "Function: " << task_array[i].name << endl;
             cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
             cout << "X* = " << setprecision(8) << task_array[i].X_opt[0] << endl;
-            cout << "X = " << setprecision(8)  << x << endl;
+            cout << "f(X*) = " << setprecision(8) << task_array[i].f(task_array[i].X_opt[0]) << endl;
+            cout << "Parameters for method:" << endl;
+            cout << "eps = " << eps << " r = " << r << endl;
+            cout << "Trials result:" << endl;
+            cout << "Number of trials = " << count_trials << endl;
+            cout << "Estimation of the Lipschitz constant = " << gsa.getMu() << endl;
+            cout << "X = " << setprecision(8) << x << endl;
+            cout << "f(X) = " << setprecision(8) << task_array[i].f(x) << endl;
             cout << "|X* - X| = " << setprecision(8) << abs(task_array[i].X_opt[0] - x) << endl;
             cout << "|f(X*) - f(X)| = " << setprecision(8) << abs(task_array[i].f(task_array[i].X_opt[0]) - task_array[i].f(x)) << endl;
-            cout << "Count of trials = " << count << endl;
             cout << endl;
         }
     }
@@ -159,5 +165,6 @@ int main() {
 #if defined( _MSC_VER )
     cin.get();
 #endif
+
     return 0;
 }

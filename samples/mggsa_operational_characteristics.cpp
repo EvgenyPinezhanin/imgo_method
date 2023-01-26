@@ -18,7 +18,7 @@ using namespace std;
 
 #define CALC
 
-const int family_number = 0; // 0 - Grishagin, 1 - GKLS,
+const int family_number = 3; // 0 - Grishagin, 1 - GKLS,
                              // 2 - Grishagin(constrained), 3 - GKLS(constrained),
                              // 4 - comparison Grishagin and GKLS, 5 - comparison Grishagin and GKLS (constrained)
 const int number_family = 4;
@@ -89,10 +89,10 @@ int main() {
     int Nmax = 5000;
 
     vector<double> A, B, X_opt;
-    vector<vector<double>> r_array{ {2.5, 3.0, 3.5},
-                                    {3.5, 4.3, 5.0},
-                                    {2.5, 3.0, 3.5},
-                                    {4.0, 4.5, 4.9} };
+    vector<vector<double>> r_array{ {2.7, 3.0, 3.3},
+                                    {4.0, 4.3, 4.6},
+                                    {2.7, 3.0, 3.3},
+                                    {4.2, 4.5, 4.8} };
 
     vector<vector<int>> count_trials_vec(number_family);
     count_trials_vec[0].resize(grishaginProblems.GetFamilySize(), 0);

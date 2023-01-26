@@ -16,7 +16,7 @@ using namespace std;
 
 #define CALC
 
-const int chart_number = 0; // 0 - Hill, 1 - Shekel, 2 - comparsion Hill and Shekel
+const int family_number = 2; // 0 - Hill, 1 - Shekel, 2 - comparsion Hill and Shekel
 const int count_family = 2;
 int current_func;
 
@@ -50,8 +50,8 @@ int main() {
     int K0 = 0, Kmax = 500, Kstep = 10;
 
     vector<double> A, B;
-    vector<vector<double>> r_array{ {2.4, 3.2, 3.7},
-                                    {2.5, 3.4, 4.0} };
+    vector<vector<double>> r_array{ {3.0, 3.2, 3.4},
+                                    {3.1, 3.4, 3.7} };
     double eps = 0.0001, d = 0.0;
     int m = 0;
 
@@ -115,7 +115,7 @@ int main() {
 #endif
 
     char str[100];
-    sprintf(str, "gnuplot -c scripts/imgo_operational_characteristics.gp %d", chart_number);
+    sprintf(str, "gnuplot -c scripts/imgo_operational_characteristics.gp %d", family_number);
     error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << endl;

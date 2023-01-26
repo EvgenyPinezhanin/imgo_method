@@ -63,13 +63,11 @@ double imgo_method::selectNewPoint(int &t) {
     }
     if (I[nu_I].size() >= 3) {
         if (last_trial_pos == 0) {
-            mu[nu_I] = max({ mu[nu_I],
-                             abs(I[nu_I][last_trial_pos + 1].z - I[nu_I][last_trial_pos].z) / 
-                             pow(I[nu_I][last_trial_pos + 1].x - I[nu_I][last_trial_pos].x, 1.0 / n) });  
+            mu[nu_I] = max({ mu[nu_I], abs(I[nu_I][1].z - I[nu_I][0].z) / pow(I[nu_I][1].x - I[nu_I][0].x, 1.0 / n) });  
         } else if (last_trial_pos == I[nu_I].size() - 1) {
             mu[nu_I] = max({ mu[nu_I],
-                             abs(I[nu_I][last_trial_pos].z - I[nu_I][last_trial_pos - 1].z) / 
-                             pow(I[nu_I][last_trial_pos].x - I[nu_I][last_trial_pos - 1].x, 1.0 / n) });
+                             abs(I[nu_I][size_I - 1].z - I[nu_I][size_I - 2].z) / 
+                             pow(I[nu_I][size_I - 1].x - I[nu_I][size_I - 2].x, 1.0 / n) });
         } else {
             mu[nu_I] = max({ mu[nu_I],
                              abs(I[nu_I][last_trial_pos].z - I[nu_I][last_trial_pos - 1].z) / 

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <opt_method.h>
+#include <task.h>
 
 using namespace std;
 
@@ -15,6 +16,7 @@ private:
     double m; // parameter m
 
     trial last_trial;
+    int last_trial_pos;
 
     trial newTrial(double x) override;
     double newPoint(int t) override;
@@ -30,6 +32,13 @@ public:
     void setB(double _b) { optimization_method::setB(vector<double>{_b}); };
     void setAB(double _a, double _b) { optimization_method::setAB(vector<double>{_a}, vector<double>{_b}); };
     void setR(double _r) { r = _r; };
+
+    auto getF() const -> double (*)(double) { return f; };
+    double getA() const { return A[0]; };
+    double getB() const { return B[0]; };
+    double getR() const { return r; };
+
+    double getMu() const { return m; };
     
     void solve(int &count, double &x, Stop stop = Stop::ACCURACY);
     void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY);

@@ -82,14 +82,15 @@ int main() {
     int count_trials;
 
     int den = 10, m = 0;
-    double eps = 0.01, d = 0.0;
+    double eps = 0.01;
     int Nmax = 5000, incr = 30, key = 3;
     int chunk = 2;
 
     vector<double> A, B, X_opt;
     vector<double> r_min{1.0, 1.0, 2.2, 3.0};
-    vector<double> r_max{1.0, 1.0, 2.2, 3.0}; // 3.0, 4.2, 3.0, 4.7
+    vector<double> r_max{3.0, 4.3, 3.0, 4.5};
     vector<double> step_array{0.1, 0.1, 0.05, 0.05};
+    vector<double> d_array{0.0, 0.0, 0.01, 0.01};
     vector<vector<double>> r_array(number_family);
     for (int i = 0; i < number_family; i++) {
         for (double j = r_min[i]; j <= r_max[i]; j += step_array[i]) {
@@ -112,7 +113,7 @@ int main() {
                                         class_problems_fm("GKLSProblemConstrainedFamily", &GKLSConstrainedProblems, 
                                                           type_constraned::CONSTR, f_constr_gkls, "GKLSConstrained") };
 
-    mggsa_method mggsa(nullptr, -1, -1, A, B, -1.0, d, den, key, eps, Nmax, incr);
+    mggsa_method mggsa(nullptr, -1, -1, A, B, -1.0, -1.0, den, key, eps, Nmax, incr);
 
     IOptProblemFamily *opt_problem_family;
     IConstrainedOptProblemFamily *constr_opt_problem_family;
@@ -132,6 +133,7 @@ int main() {
         }
         mggsa.setAB(A, B);
         mggsa.setF(problems[i].f);
+        mggsa.setD(d_array[i]);
         count_func = problems[i].problem->GetFamilySize();
 
         cout << problems[i].name << endl;

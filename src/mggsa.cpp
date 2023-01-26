@@ -465,6 +465,7 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
             for (int i = 0; i < h_nu.size(); i++) {
                 last_trials.push_back(newTrial(h_nu[i]));
             }
+
         #if defined(DEBUG)
             for (int i = 0; i < h_nu.size(); i++) {
                 cout << "h_nu[" << i << "] = " << h_nu[i] << " ";
@@ -518,9 +519,9 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
 
         count++;
 
-        #if defined(EPS)
-            cout << pow(abs(trial_points[t].x - trial_points[t - 1].x), 1.0 / n) << endl;
-        #endif
+    #if defined(EPS)
+        cout << pow(abs(trial_points[t].x - trial_points[t - 1].x), 1.0 / n) << endl;
+    #endif
 
         if (delta_t <= eps) {
             if (stop == Stop::ACCURACY || stop == Stop::ACCURNUMBER) break;

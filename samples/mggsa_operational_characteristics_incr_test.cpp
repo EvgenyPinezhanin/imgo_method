@@ -19,7 +19,7 @@ using namespace std;
 
 // #define CALC
 
-const int type = 0; // 0 - count trials, 1 - count points, 2 - c_points / c_trials
+const int type = 2; // 0 - count trials, 1 - count points, 2 - c_points / c_trials
 const int family_number = 3; // 0 - Grishagin, 1 - GKLS,
                              // 2 - Grishagin(constrained), 3 - GKLS(constrained),
 const int number_family = 4;
@@ -109,7 +109,7 @@ int main() {
 
     vector<class_problems_fm> problems{ class_problems_fm("GrishaginProblemFamily", &grishaginProblems, type_constraned::NONCONSTR,
                                                           f_grishagin, "Grishagin"),
-                                        class_problems_fm("GKLSProblemFamily", &GKLSProblems, type_constraned::NONCONSTR, 
+                                        class_problems_fm("GKLSProblemFamily", &GKLSProblems, type_constraned::NONCONSTR,
                                                           f_gkls, "GKLS"),
                                         class_problems_fm("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
                                                           type_constraned::CONSTR, f_constr_grishagin, "GrishaginConstrained"),
@@ -223,5 +223,5 @@ int main() {
 #if defined(_MSC_VER)
     cin.get();
 #endif
-	return 0;
+    return 0;
 }

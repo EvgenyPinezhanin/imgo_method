@@ -9,14 +9,16 @@
     #include <cmath>
 #endif
 
-inline void insert_in_sorted(vector<trial> &vec, trial tr) {
+inline int insert_in_sorted(vector<trial> &vec, trial tr) {
     vector<trial>::iterator iter = vec.begin();
     vector<trial>::iterator iterEnd = vec.end();
+    int pos = 0;
     while(true) {
         if (iter == iterEnd || iter->x > tr.x) break;
-        iter++;
+        iter++; pos++;
     }
     vec.insert(iter, tr);
+    return pos;
 }
 
 inline double search_min(vector<trial> &trials) {
@@ -43,10 +45,12 @@ double gsa_method::selectNewPoint(int &t) {
 
     // Step 2
     if (last_trial.x == B[0]) {
-        M = max({M, abs((last_trial.z - trial_points[(size_t)t - 1].z) / (last_trial.x - trial_points[(size_t)t - 1].x))});
+        M = abs((trial_points[1].z - trial_points[0].z) / (trial_points[1].x - trial_points[0].x));
     } else {
-        M = max({M, abs((last_trial.z - trial_points[(size_t)t - 1].z) / (last_trial.x - trial_points[(size_t)t - 1].x)), 
-                    abs((trial_points[(size_t)t + 1].z - last_trial.z) / (trial_points[(size_t)t + 1].x - last_trial.x))});
+        M = max({M, abs((last_trial.z - trial_points[(size_t)last_trial_pos - 1].z) / 
+                        (last_trial.x - trial_points[(size_t)last_trial_pos - 1].x)), 
+                    abs((trial_points[(size_t)last_trial_pos + 1].z - last_trial.z) / 
+                        (trial_points[(size_t)last_trial_pos + 1].x - last_trial.x))});
     }
 
     // Step 3
@@ -80,12 +84,13 @@ void gsa_method::solve(int &count, double &x, Stop stop) {
     double x_k_1;
     int t = 1;
     last_trial = newTrial(B[0]);
+    last_trial_pos = 1;
     while(true) {
         x_k_1 = selectNewPoint(t);
         last_trial = newTrial(x_k_1);
 
         // Step 1
-        insert_in_sorted(trial_points, last_trial);
+        last_trial_pos = insert_in_sorted(trial_points, last_trial);
 
         count++;
         if (trial_points[t].x - trial_points[(size_t)t - 1].x <= eps) {

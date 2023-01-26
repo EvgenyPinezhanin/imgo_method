@@ -39,8 +39,8 @@ double f3(double x, int j) {
 }
 
 int main() {
-    double eps = 0.001, r = 3.0, d = 0.0, x;
-    int count, Nmax = 1000;
+    double x, eps = 0.001, r = 3.0, d = 0.0;
+    int count_trials, Nmax = 1000;
     Stop stop = Stop::ACCURACY;
 
     vector<task_imgo> task_array = { task_imgo(f1, "f1(x)", 1, 2.0, 8.0, 2.0 * M_PI, eps, Nmax, r, d, stop),
@@ -58,21 +58,28 @@ int main() {
         imgo.setR(task_array[i].r);
         imgo.setD(task_array[i].d);
 
-        imgo.solve(count, x, task_array[i].stop);
+        imgo.solve(count_trials, x, task_array[i].stop);
 
         cout << "Function: " << task_array[i].name << endl;
+        cout << "Number of constrained = " << task_array[i].m << endl;
         cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
         cout << "X* = " << setprecision(8) << task_array[i].X_opt[0] << endl;
+        cout << "f(X*) = " << setprecision(8) << task_array[i].f(task_array[i].X_opt[0], task_array[i].m + 1) << endl;
+        cout << "Parameters for method:" << endl;
+        cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
+        cout << "Trials result:" << endl;
+        cout << "Number of trials = " << count_trials << endl;
         cout << "X = " << setprecision(8) << x << endl;
+        cout << "f(X) = " << setprecision(8) << task_array[i].f(x, task_array[i].m + 1) << endl;
         cout << "|X* - X| = " << setprecision(8) << abs(task_array[i].X_opt[0] - x) << endl;
         cout << "|f(X*) - f(X)| = " << setprecision(8) << abs(task_array[i].f(task_array[i].X_opt[0], task_array[i].m + 1) - 
-                                           task_array[i].f(x, task_array[i].m + 1)) << endl;
-        cout << "Number of trials = " << count << endl;
+                                                              task_array[i].f(x, task_array[i].m + 1)) << endl;
         cout << endl;
     }
 
 #if defined( _MSC_VER )
     cin.get();
 #endif
+
     return 0;
 }

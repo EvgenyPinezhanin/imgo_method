@@ -60,7 +60,7 @@ double f_constr_gkls(vector<double> x, int j) {
 void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, class_problems_om problem, int num_func,
                                     double r, int key, int m, int incr, double eps, double d, Stop stop);
 
-const int type = 1; // 0 - grishagin, 1 - GKLS
+const int type = 3; // 0 - grishagin, 1 - GKLS
                     // 2 - constrained grisagin, 3 - constrained GKLS 
 const int incr_min = 1, incr_max = 40;
 const int m_min = 8, m_max = 12;
@@ -68,7 +68,7 @@ const int key_min = 1, key_max = 3;
 
 int main() {
 #if defined(CALC)
-    ofstream ofstr_lipschitz("lipschitz_test.txt");
+    ofstream ofstr_lipschitz("output_data/lipschitz_test.txt");
 
     int count_func = 4;
     vector<class_problems_om> problems{ class_problems_om("Grishagin", &grishaginProblem, type_constraned::NONCONSTR, f_grishagin),

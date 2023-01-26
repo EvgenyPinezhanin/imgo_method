@@ -38,6 +38,13 @@ public:
     void setR(double _r) { r = _r; };
     void setD(double _d) { d = _d; };
 
+    auto getF() const -> double (*)(double, int) { return f; };
+    double getA() const { return A[0]; };
+    double getB() const { return B[0]; };
+    int getM() const { return m; };
+    double getR() const { return r; };
+    double getD() const { return d; };
+
     void solve(int &count, double &x, Stop stop = Stop::ACCURACY);
     void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY);
     
