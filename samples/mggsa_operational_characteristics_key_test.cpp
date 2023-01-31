@@ -16,52 +16,10 @@
 
 using namespace std;
 
-// #define CALC
+#define CALC
 
 const int family_number = 3; // 0 - Grishagin, 1 - GKLS,
                              // 2 - Grishagin(constrained), 3 - GKLS(constrained),
-const int number_family = 4;
-int current_func;
-
-TGrishaginProblemFamily grishaginProblems;
-double f_grishagin(vector<double> x, int j) {
-    switch (j) {
-        case 1: return grishaginProblems[current_func]->ComputeFunction(x);
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-};
-
-TGrishaginConstrainedProblemFamily grishaginConstrainedProblems;
-double f_constr_grishagin(vector<double> x, int j) {
-    int constr = grishaginConstrainedProblems[current_func]->GetConstraintsNumber();
-    if (j >= 1 && j <= constr) {
-        return grishaginConstrainedProblems[current_func]->ComputeConstraint(j - 1, x);
-    } else if (j - 1 == constr) {
-        return grishaginConstrainedProblems[current_func]->ComputeFunction(x);
-    } else {
-        return numeric_limits<double>::quiet_NaN();
-    }
-};
-
-TGKLSProblemFamily GKLSProblems;
-double f_gkls(vector<double> x, int j) {
-    switch (j) {
-        case 1: return GKLSProblems[current_func]->ComputeFunction({ x });
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-};
-
-TGKLSConstrainedProblemFamily GKLSConstrainedProblems;
-double f_constr_gkls(vector<double> x, int j) {
-    int constr = GKLSConstrainedProblems[current_func]->GetConstraintsNumber();
-    if (j >= 1 && j <= constr) {
-        return GKLSConstrainedProblems[current_func]->ComputeConstraint(j - 1, x);
-    } else if (j - 1 == constr) {
-        return GKLSConstrainedProblems[current_func]->ComputeFunction(x);
-    } else {
-        return numeric_limits<double>::quiet_NaN();
-    }
-};
 
 int main() {
 #if defined(CALC)
@@ -70,7 +28,7 @@ int main() {
     ofstream ofstr_opt("output_data/mggsa_operational_characteristics_key_test_opt.txt");
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
-    int count_func;
+    int count_func, count_successful, count_trials;
 
     int start_time, end_time;
     double work_time;
@@ -80,12 +38,8 @@ int main() {
                            {0, 2200, 25},
                            {0, 4500, 25} };
 
-    int count_successful = 0;
-    int count_trials;
-
-    int den = 10, m = 0;
+    int den = 10, m = 0, Nmax = 5000, incr = 30;
     double eps = 0.01;
-    int Nmax = 5000, incr = 30;
 
     vector<double> A, B, X_opt;
     vector<vector<double>> r_array{ {3.0, 2.4, 1.6, 1.0},
@@ -95,41 +49,48 @@ int main() {
     vector<int> key_array{1, 3, 3, 3};
     vector<double> d_array{0.0, 0.0, 0.01, 0.01};
 
+    const int number_family = 4;
+
+    TGrishaginProblemFamily grishaginProblems;
+    TGrishaginConstrainedProblemFamily grishaginConstrainedProblems;
+    TGKLSProblemFamily GKLSProblems;
+    TGKLSConstrainedProblemFamily GKLSConstrainedProblems;
+
     vector<vector<int>> count_trials_vec(number_family);
     count_trials_vec[0].resize(grishaginProblems.GetFamilySize(), 0);
     count_trials_vec[1].resize(GKLSProblems.GetFamilySize(), 0);
     count_trials_vec[2].resize(grishaginConstrainedProblems.GetFamilySize(), 0);
     count_trials_vec[3].resize(GKLSConstrainedProblems.GetFamilySize(), 0);
 
-    vector<class_problems_fm> problems{ class_problems_fm("GrishaginProblemFamily", &grishaginProblems, type_constraned::NONCONSTR,
-                                                          f_grishagin, "Grishagin"),
-                                        class_problems_fm("GKLSProblemFamily", &GKLSProblems, type_constraned::NONCONSTR, 
-                                                          f_gkls, "GKLS"),
-                                        class_problems_fm("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
-                                                          type_constraned::CONSTR, f_constr_grishagin, "GrishaginConstrained"),
-                                        class_problems_fm("GKLSProblemConstrainedFamily", &GKLSConstrainedProblems, 
-                                                          type_constraned::CONSTR, f_constr_gkls, "GKLSConstrained") };
+    vector<class_problems_f> problems{ class_problems_f("GrishaginProblemFamily", &grishaginProblems, type_constraned::NONCONSTR,
+                                                        "Grishagin"),
+                                       class_problems_f("GKLSProblemFamily", &GKLSProblems, type_constraned::NONCONSTR, "GKLS"),
+                                       class_problems_f("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
+                                                          type_constraned::CONSTR, "GrishaginConstrained"),
+                                       class_problems_f("GKLSProblemConstrainedFamily", &GKLSConstrainedProblems, 
+                                                          type_constraned::CONSTR, "GKLSConstrained") };
 
     mggsa_method mggsa(nullptr, -1, -1, A, B, -1.0, -1.0, den, -1, eps, Nmax, incr);
 
-    IOptProblemFamily *opt_problem_family;
-    IConstrainedOptProblemFamily *constr_opt_problem_family;
     for (int i = 0; i < number_family; i++) {
+        functor_non_constr func_non_constr;
+        functor_constr func_constr;
         if (problems[i].type == type_constraned::CONSTR) {
-            constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].problem);
-            mggsa.setN((*constr_opt_problem_family)[0]->GetDimension());
-            mggsa.setM((*constr_opt_problem_family)[0]->GetConstraintsNumber());
-            (*constr_opt_problem_family)[0]->GetBounds(A, B);
+            func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].problem);
+            (*func_constr.constr_opt_problem_family)[0]->GetBounds(A, B);
+            mggsa.setN((*func_constr.constr_opt_problem_family)[0]->GetDimension());
+            mggsa.setM((*func_constr.constr_opt_problem_family)[0]->GetConstraintsNumber());
         } else {
-            opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].problem);
-            mggsa.setN((*opt_problem_family)[0]->GetDimension());
+            func_non_constr.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].problem);
+            (*func_non_constr.opt_problem_family)[0]->GetBounds(A, B);
+            mggsa.setN((*func_non_constr.opt_problem_family)[0]->GetDimension());
             mggsa.setM(0);
-            (*opt_problem_family)[0]->GetBounds(A, B);
         }
-        mggsa.setAB(A, B);
-        mggsa.setF(problems[i].f);
-        mggsa.setD(d_array[i]);
+
+        count_trials_vec.resize(problems[i].problem->GetFamilySize());
         count_func = problems[i].problem->GetFamilySize();
+        mggsa.setAB(A, B);
+        mggsa.setD(d_array[i]);
 
         cout << problems[i].name << endl;
         ofstr << "# " << problems[i].name << endl;
@@ -139,12 +100,15 @@ int main() {
             mggsa.setR(r_array[i][j]);
             start_time = clock();
             for (int k = 0; k < count_func; k++) {
-                current_func = k;
                 count_trials = K[i][1];
                 if (problems[i].type == type_constraned::CONSTR) {
-                    X_opt = (*constr_opt_problem_family)[k]->GetOptimumPoint();
+                    func_constr.current_func = k;
+                    X_opt = (*func_constr.constr_opt_problem_family)[k]->GetOptimumPoint();
+                    mggsa.setF(function<double(vector<double>, int)>(func_constr));
                 } else {
-                    X_opt = (*opt_problem_family)[k]->GetOptimumPoint();
+                    func_non_constr.current_func = k;
+                    X_opt = (*func_non_constr.opt_problem_family)[k]->GetOptimumPoint();
+                    mggsa.setF(function<double(vector<double>, int)>(func_non_constr));
                 }
                 if (mggsa.solve_test(X_opt, count_trials, Stop::ACCURNUMBER)) {
                     count_trials_vec[i][k] = count_trials;
@@ -200,5 +164,6 @@ int main() {
 #if defined(_MSC_VER)
     cin.get();
 #endif
+
 	return 0;
 }

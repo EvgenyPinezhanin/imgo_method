@@ -9,7 +9,7 @@
 
 using namespace std;
 
-// #define CALC
+#define CALC
 // #define OUTPUT_INFO
 
 double euclidean_distance(vector<double> val1, vector<double> val2) {
@@ -35,12 +35,14 @@ double f_rastrigin(vector<double> x, int j) {
 
 const int type = 3; // 0 - count trials, 1 - count points,
                     // 2 - accuracy, 3 - c_points / c_trials
-const int n = 3; // n_min ... n_max
+const int n_type = 3; // n_min ... n_max
+
 const int n_min = 2, n_max = 3;
-const int n_count = 2;
+const int n_count = n_max - n_min + 1;
 const int incr_array[n_count][2] = { {1, 60},
                                      {1, 100} };
 const int m_min = 8, m_max = 10;
+
 const int chunk = 2;
 
 int main() {
@@ -48,23 +50,21 @@ int main() {
 #if defined(CALC)
     ofstream ofstr_incr("output_data/incr_test.txt");
 
-    vector<double> X_opt_num, X_opt, A, B;
+    vector<double> X, X_opt, A, B;
     double eps = 0.01, r = 2.1, d = 0.0;
-    int constr = 0, count, Nmax = 2000;
+    int constr = 0, Nmax = 10000, key = 3;
     Stop stop = Stop::ACCURNUMBER;
-    int key = 3;
 
-    vector<vector<vector<double>>> accuracy(n_max - n_min + 1);
-    vector<vector<vector<int>>> count_trials(n_max - n_min + 1);
-    vector<vector<vector<double>>> count_points(n_max - n_min + 1);
+    vector<vector<vector<double>>> accuracy_vec(n_count), count_points_vec(n_count);
+    vector<vector<vector<int>>> count_trials_vec(n_count);
     for (int i = n_min; i <= n_max; i++) {
-        accuracy[i - n_min].resize(m_max - m_min + 1);
-        count_trials[i - n_min].resize(m_max - m_min + 1);
-        count_points[i - n_min].resize(m_max - m_min + 1);
+        accuracy_vec[i - n_min].resize(m_max - m_min + 1);
+        count_trials_vec[i - n_min].resize(m_max - m_min + 1);
+        count_points_vec[i - n_min].resize(m_max - m_min + 1);
         for (int j = m_min; j <= m_max; j++) {
-            accuracy[i - n_min][j - m_min].resize(incr_array[i - n_min][1] - incr_array[i - n_min][0] + 1);
-            count_trials[i - n_min][j - m_min].resize(incr_array[i - n_min][1] - incr_array[i - n_min][0] + 1);
-            count_points[i - n_min][j - m_min].resize(incr_array[i - n_min][1] - incr_array[i - n_min][0] + 1);
+            accuracy_vec[i - n_min][j - m_min].resize(incr_array[i - n_min][1] - incr_array[i - n_min][0] + 1);
+            count_trials_vec[i - n_min][j - m_min].resize(incr_array[i - n_min][1] - incr_array[i - n_min][0] + 1);
+            count_points_vec[i - n_min][j - m_min].resize(incr_array[i - n_min][1] - incr_array[i - n_min][0] + 1);
         }
     }
 
@@ -72,68 +72,83 @@ int main() {
 
     for (int i = 0; i < n_min - 1; i++) {
         X_opt.push_back(0.0);
-        A.push_back(-1.0 / 2.0); 
+        A.push_back(-1.0 / 2.0);
         B.push_back(1.0);
     }
 
     double t1, t2, dt;
     t1 = omp_get_wtime ();
 
-    double accur;
-    int count_pnts;
+    double accuracy;
+    int count_points, count_trials;
     for (int i = n_min; i <= n_max; i++) {
-        cout << "Rastrigin function" << endl;
-        cout << "Number of constrained = " << constr << endl;
-        cout << "Dimension = " << i << endl;
-        cout << "Parameters for method:" << endl;
-        cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
-        cout << endl;
-
         N = i;
-        mggsa.setN(i);
+        mggsa.setN(N);
         X_opt.push_back(0.0);
-        A.push_back(-1.0 / 2.0); 
+        A.push_back(-1.0 / 2.0);
         B.push_back(1.0);
         mggsa.setAB(A, B);
 
+        cout << "Rastrigin function" << endl;
+        cout << "Dimension = " << N << endl;
+        cout << "Number of constrained = " << constr << endl;
+        cout << "[A; B] = [(";
+        for (int j = 0; j < A.size() - 1; j++) {
+            cout << A[j] << ", "; 
+        }
+        cout << A[A.size() - 1] << "); (" << endl;
+        for (int j = 0; j < B.size() - 1; j++) {
+            cout << B[j] << ", "; 
+        }
+        cout << B[B.size() - 1] << ")]" << endl;
+        cout << "X* = (";
+        for (int l = 0; l < X_opt.size() - 1; l++) {
+            cout << X_opt[l] << ", ";
+        }
+        cout << X_opt[X_opt.size() - 1] << ")" << endl;
+        cout << "f(X*) = " << f_rastrigin(X_opt, constr + 1) << endl;
+        cout << "Parameters for method:" << endl;
+        cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
+        cout << "Parameters for constructing the Peano curve:" << endl;
+        cout << "key = " << key << endl;
+        cout << endl;
+
+        vector<double> mu;
     #pragma omp parallel for schedule(dynamic, chunk) proc_bind(spread) num_threads(omp_get_num_procs()) collapse(2) \
-            shared(incr_array, accuracy, count_trials, count_points, stop) firstprivate(mggsa) private(accur, count_pnts, count, X_opt_num)
+            shared(incr_array, accuracy_vec, count_trials_vec, count_points_vec, stop) \
+            firstprivate(mggsa) private(accuracy, count_points, count_trials, X, mu)
         for (int j = m_min; j <= m_max; j++) {
             for (int k = incr_array[i - n_min][0]; k <= incr_array[i - n_min][1]; k++) {
                 mggsa.setDen(j);
                 mggsa.setIncr(k);
  
-                mggsa.solve(count, X_opt_num, stop);
+                mggsa.solve(count_trials, X, stop);
+                mggsa.getMu(mu);
  
-                accur = euclidean_distance(X_opt, X_opt_num);
-                count_pnts = mggsa.getCountPoints();
-                accuracy[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = accur;
-                count_trials[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = count;
-                count_points[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = count_pnts;
+                accuracy = euclidean_distance(X_opt, X);
+                count_points = mggsa.getCountPoints();
+                accuracy_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = accuracy;
+                count_trials_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = count_trials;
+                count_points_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = count_points;
 
             #if defined(OUTPUT_INFO)
                 cout << "Parameters for constructing the Peano curve:" << endl;
-                cout << "m = " << j << " key = " << key << " incr = " << k << endl;
+                cout << "m = " << j << " incr = " << k << endl;
                 cout << "Trials result:" << endl;
-                cout << "Number of trials = " << count << endl;
-                cout << "Number of points = " << count_pnts << endl;
-                cout << "X* = (";
-                for (int l = 0; l < X_opt.size() - 1; l++) {
-                    cout << X_opt[l] << ", ";
-                }
-                cout << X_opt[X_opt.size() - 1] << ")" << endl;
+                cout << "Number of trials = " << count_trials << endl;
+                cout << "Number of points = " << count_points << endl;
+                cout << "Estimation of the Lipschitz constant = " << mu[0] << endl;
                 cout << "X = (";
-                for (int l = 0; l < X_opt_num.size() - 1; l++) {
-                    cout << X_opt_num[l] << ", ";
+                for (int l = 0; l < X.size() - 1; l++) {
+                    cout << X[l] << ", ";
                 }
-                cout << X_opt_num[X_opt_num.size() - 1] << ")" << endl;
-                cout << "||X* - X|| = " << accur << endl;
-                cout << "f(X*) = " << f_rastrigin(X_opt, constr + 1) << endl;
-                cout << "f(X) = " << f_rastrigin(X_opt_num, constr + 1) << endl;
-                cout << "|f(X*) - f(X)| = " << abs(f_rastrigin(X_opt, constr + 1) - f_rastrigin(X_opt_num, constr + 1)) << endl;
+                cout << X[X.size() - 1] << ")" << endl;
+                cout << "f(X) = " << f_rastrigin(X, constr + 1) << endl;
+                cout << "||X* - X|| = " << accuracy << endl;
+
+                cout << "|f(X*) - f(X)| = " << abs(f_rastrigin(X_opt, constr + 1) - f_rastrigin(X, constr + 1)) << endl;
                 cout << endl;
-            #endif
-            #if not defined(OUTPUT_INFO)
+            #else
                 string str = "n = " + to_string(i) + " m = " + to_string(j) + " incr = " + to_string(k) +
                              " t_num = " + to_string(omp_get_thread_num()) + "\n";
                 cout << str;
@@ -142,16 +157,16 @@ int main() {
         }
     }
 
-    t2 = omp_get_wtime ();
+    t2 = omp_get_wtime();
     dt = t2 - t1;
     cout << "Time: " << dt << endl;
 
     for (int i = n_min; i <= n_max; i++) {
         for (int j = m_min; j <= m_max; j++) {
             for (int k = incr_array[i - n_min][0]; k <= incr_array[i - n_min][1]; k++) {
-                ofstr_incr << k << " " << count_trials[i - n_min][j - m_min][k - incr_array[i - n_min][0]]
-                                << " " << count_points[i - n_min][j - m_min][k - incr_array[i - n_min][0]] 
-                                << " " << accuracy[i - n_min][j - m_min][k - incr_array[i - n_min][0]] << endl;
+                ofstr_incr << k << " " << count_trials_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]]
+                                << " " << count_points_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] 
+                                << " " << accuracy_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] << endl;
             }
             ofstr_incr << endl << endl;
         }
@@ -176,7 +191,7 @@ int main() {
         cerr << "Error chmod" << endl;
     }
     char str[100];
-    sprintf(str, "gnuplot -c scripts/incr_test.gp %d %d %d %d %d %d", type, n, n_min, n_max, m_min, m_max);
+    sprintf(str, "gnuplot -c scripts/incr_test.gp %d %d %d %d %d %d", type, n_type, n_min, n_max, m_min, m_max);
     error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << endl;

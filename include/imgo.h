@@ -2,6 +2,7 @@
 #define IMGO_H
 
 #include <vector>
+#include <functional>
 
 #include <opt_method.h>
 #include <task.h>
@@ -10,7 +11,7 @@ using namespace std;
 
 class imgo_method : public optimization_method_constrained {
 private:
-    double (*f)(double, int);
+    function<double(double, int)> f;
     double r, d;
 
     trial_constr last_trial;
@@ -26,11 +27,12 @@ private:
     double selectNewPoint(int &t) override;
 
 public:
-    imgo_method(double (*_f)(double, int), int _m = 0, double _a = 0.0, double _b = 10.0, double _r = 2.0, double _d = 0.0, double _eps = 0.0001, int _Nmax = 1000)
-               : optimization_method_constrained(nullptr, 1, _m, vector<double>{_a}, vector<double>{_b}, _eps, _Nmax), 
-               f(_f), r(_r), d(_d), last_trial(0.0, 0.0, 0), I((size_t)m + 1), calc_I((size_t)m + 1), mu((size_t)m + 1), z_star((size_t)m + 1) {}
+    imgo_method(function<double(double, int)> _f, int _m = 0, double _a = 0.0, double _b = 10.0, double _r = 2.0, double _d = 0.0, 
+                double _eps = 0.0001, int _Nmax = 1000) : optimization_method_constrained(nullptr, 1, _m, vector<double>{_a}, 
+                vector<double>{_b}, _eps, _Nmax), f(_f), r(_r), d(_d), last_trial(0.0, 0.0, 0), I((size_t)m + 1), 
+                calc_I((size_t)m + 1), mu((size_t)m + 1), z_star((size_t)m + 1) {}
     
-    void setF(double (*_f)(double, int)) { f = _f; };
+    void setF(const function<double(double, int)> &_f) { f = _f; };
     void setA(double _a) { optimization_method::setA(vector<double>{_a}); };
     void setB(double _b) { optimization_method::setB(vector<double>{_b}); };
     void setAB(double _a, double _b) { optimization_method::setAB(vector<double>{_a}, vector<double>{_b}); };
@@ -38,7 +40,7 @@ public:
     void setR(double _r) { r = _r; };
     void setD(double _d) { d = _d; };
 
-    auto getF() const -> double (*)(double, int) { return f; };
+    function<double(double, int)> getF() const { return f; };
     double getA() const { return A[0]; };
     double getB() const { return B[0]; };
     int getM() const { return m; };

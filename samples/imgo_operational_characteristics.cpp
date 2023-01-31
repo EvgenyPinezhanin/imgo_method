@@ -17,24 +17,6 @@ using namespace std;
 #define CALC
 
 const int family_number = 2; // 0 - Hill, 1 - Shekel, 2 - comparsion Hill and Shekel
-const int count_family = 2;
-int current_func;
-
-THillProblemFamily hillProblems;
-double f_hill(double x, int j) {
-    switch (j) {
-        case 1: return hillProblems[current_func]->ComputeFunction({x});
-        default: return std::numeric_limits<double>::quiet_NaN();
-    }
-}
-
-TShekelProblemFamily shekelProblems;
-double f_shekel(double x, int j) {
-    switch (j) {
-        case 1: return shekelProblems[current_func]->ComputeFunction({x});
-        default: return std::numeric_limits<double>::quiet_NaN();
-    }
-}
 
 int main() {
 #if defined(CALC)
@@ -43,9 +25,7 @@ int main() {
     ofstream ofstr_opt("output_data/imgo_operational_characteristics_opt.txt");
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
-    int count_func;
-    int count_successful;
-    int count_trials;
+    int count_func, count_successful, count_trials;
 
     int K0 = 0, Kmax = 500, Kstep = 10;
 
@@ -55,25 +35,27 @@ int main() {
     double eps = 0.0001, d = 0.0;
     int m = 0;
 
+    const int count_family = 2;
+    THillProblemFamily hillProblems;
+    TShekelProblemFamily shekelProblems;
+
     vector<vector<int>> count_trials_vec(count_family);
     count_trials_vec[0].resize(hillProblems.GetFamilySize(), 0);
     count_trials_vec[1].resize(shekelProblems.GetFamilySize(), 0);
 
-    vector<class_problems_fs> problems{ class_problems_fs("HillProblemFamily", &hillProblems, type_constraned::NONCONSTR, f_hill, "hill"),
-                                        class_problems_fs("ShekelProblemFamily", &shekelProblems, 
-                                                          type_constraned::NONCONSTR, f_shekel, "shekel") };
+    vector<class_problems_f> problems{ class_problems_f("HillProblemFamily", &hillProblems, type_constraned::NONCONSTR, "hill"),
+                                       class_problems_f("ShekelProblemFamily", &shekelProblems, type_constraned::NONCONSTR, "shekel") };
 
     imgo_method imgo(nullptr, m, 0.0, 0.0, -1.0, d, eps);
 
-    IOptProblemFamily *opt_problem_family;
+    functor_non_constr functor;
     for (int i = 0; i < count_family; i++) {
-        opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].problem);
-
         for (int j = 0; j < r_array[0].size(); j++) {
             ofstr_opt << "r" << j + 1 << "_" << problems[i].short_name << " = \"" << r_array[i][j] << "\"" << endl; 
         }
 
-        imgo.setF(problems[i].f);
+        functor.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].problem);
+
         count_func = problems[i].problem->GetFamilySize();
         cout << problems[i].name << endl;
         ofstr << "# " << problems[i].name << endl;
@@ -81,11 +63,12 @@ int main() {
             cout << "r = " << r_array[i][j] << endl;
             imgo.setR(r_array[i][j]);
             for (int k = 0; k < count_func; k++) {
-                current_func = k;
+                functor.current_func = k;
+                imgo.setF(function<double(double, int)>(functor));
                 count_trials = Kmax;
-                (*opt_problem_family)[k]->GetBounds(A, B);
+                (*functor.opt_problem_family)[k]->GetBounds(A, B);
                 imgo.setAB(A[0], B[0]);
-                if (imgo.solve_test((*opt_problem_family)[k]->GetOptimumPoint()[0], count_trials, Stop::ACCURNUMBER)) {
+                if (imgo.solve_test((*functor.opt_problem_family)[k]->GetOptimumPoint()[0], count_trials, Stop::ACCURNUMBER)) {
                     count_trials_vec[i][k] = count_trials;
                 } else {
                     count_trials_vec[i][k] = count_trials + 1;

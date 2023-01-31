@@ -2,6 +2,7 @@
 #define OPT_METHOD_H
 
 #include <vector>
+#include <functional>
 
 using namespace std;
 
@@ -70,7 +71,7 @@ struct trial_constr {
 
 class optimization_method_constrained : public optimization_method {
 protected:
-    double (*f)(vector<double>, int); // target function
+    function<double(vector<double>, int)> f; // target function
     int m; // number of constraints
 
     vector<trial_constr> trial_points;
@@ -80,13 +81,13 @@ protected:
     virtual double selectNewPoint(int &t) = 0;
 
 public:
-    optimization_method_constrained(double (*_f)(vector<double>, int), int _n, int _m, const vector<double> &_A, const vector<double> &_B, double _eps, int _Nmax) 
-        : optimization_method(_n, _A, _B, _eps, _Nmax), f(_f), m(_m) {}
+    optimization_method_constrained(function<double(vector<double>, int)> _f, int _n, int _m, const vector<double> &_A, 
+        const vector<double> &_B, double _eps, int _Nmax) : optimization_method(_n, _A, _B, _eps, _Nmax), f(_f), m(_m) {}
 
-    void setF(double (*_f)(vector<double>, int)) { f = _f; };
+    void setF(function<double(vector<double>, int)> _f) { f = _f; };
     void setM(int _m) { m = _m; };
 
-    auto getF() const -> double (*)(vector<double>, int) { return f; };
+    function<double(vector<double>, int)> getF() const { return f; };
     int getM() const { return m; };
 
     void getTrialPoints(vector<trial_constr> &trial_vec) const { trial_vec = trial_points; };
