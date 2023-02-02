@@ -49,6 +49,7 @@ int main() {
 
     imgo_method imgo(nullptr);
 
+    vector<double> mu;
     for (int i = 0; i < task_array.size(); i++) {
         imgo.setF(task_array[i].f);
         imgo.setM(task_array[i].m);
@@ -59,6 +60,7 @@ int main() {
         imgo.setD(task_array[i].d);
 
         imgo.solve(count_trials, x, task_array[i].stop);
+        imgo.getMu(mu);
 
         cout << "Function: " << task_array[i].name << endl;
         cout << "Number of constrained = " << task_array[i].m << endl;
@@ -69,6 +71,11 @@ int main() {
         cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
         cout << "Trials result:" << endl;
         cout << "Number of trials = " << count_trials << endl;
+        cout << "Estimation of the Lipschitz constant:" << endl;
+        cout << "L(" << task_array[i].name << ") = " << mu[task_array[i].m] << endl;
+        for (int j = 0; j < task_array[i].m; j++) {
+            cout << "L(g" << j + 1 << ") = " << mu[j] << endl;
+        }
         cout << "X = " << setprecision(8) << x << endl;
         cout << "f(X) = " << setprecision(8) << task_array[i].f(x, task_array[i].m + 1) << endl;
         cout << "|X* - X| = " << setprecision(8) << abs(task_array[i].X_opt[0] - x) << endl;

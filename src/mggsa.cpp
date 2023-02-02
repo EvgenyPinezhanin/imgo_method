@@ -18,6 +18,8 @@
 // #define EPS
 // #define TIME_TEST
 
+const double epsilon = 1e-14;
+
 #if defined(TIME_TEST)
     ofstream ofstr_test;
     vector<int> time_count;
@@ -175,9 +177,9 @@ double mggsa_method::selectNewPoint(int &t) {
     // } else if (I[nu_I].size() == 2) {
     //     mu[nu_I] = max({ mu[nu_I], abs(I[nu_I][1].z - I[nu_I][0].z) / pow(I[nu_I][1].x - I[nu_I][0].x, 1.0 / n) });
     // }
-    // if (mu[nu_I] > 1e-14) calc_I[nu_I] = true;
+    // if (mu[nu_I] > epsilon) calc_I[nu_I] = true;
     // for (int nu = 0; nu < m + 1; nu++) {
-    //     if (mu[nu] < 1e-14) mu[nu] = 1.0;
+    //     if (mu[nu] <= epsilon) mu[nu] = 1.0;
     // }
 
     // with optimization (linear)
@@ -193,13 +195,13 @@ double mggsa_method::selectNewPoint(int &t) {
                 mu_tmp = abs(I[nu_I][j].z - last_trials[i].z) / pow(abs(I[nu_I][j].x - last_trials[i].x), 1.0 / n);
                 if (mu_tmp > mu[nu_I]) {
                     mu[nu_I] = mu_tmp;
-                    if (abs(mu[nu_I]) > 1e-14) calc_I[nu_I] = true;
+                    if (abs(mu[nu_I]) > epsilon) calc_I[nu_I] = true;
                 }
             }
         }
     }
     for (int nu = 0; nu < m + 1; nu++) {
-        if (abs(mu[nu]) < 1e-14) mu[nu] = 1.0;
+        if (abs(mu[nu]) <= epsilon) mu[nu] = 1.0;
     }
 
     // without optimization
@@ -218,7 +220,7 @@ double mggsa_method::selectNewPoint(int &t) {
     //             }
     //         }
     //     }
-    //     if (abs(mu[nu]) < 1e-14) {
+    //     if (abs(mu[nu]) <= epsilon) {
     //         mu[nu] = 1.0;
     //     };
     // }

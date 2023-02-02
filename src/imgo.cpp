@@ -8,6 +8,8 @@
     #include <cmath>
 #endif
 
+const double epsilon = 1e-14;
+
 inline int insert_in_sorted(vector<trial_constr> &vec, trial_constr tr) {
     vector<trial_constr>::iterator iter = vec.begin();
     vector<trial_constr>::iterator iterEnd = vec.end();
@@ -54,7 +56,7 @@ double imgo_method::newPoint(int t) {
 
 double imgo_method::selectNewPoint(int &t) {
     // Step 3
-    // with optimization
+    // with optimization(const)
     double mu_tmp;
     int nu_I = last_trial.nu - 1;
     size_t size_I = I[nu_I].size();
@@ -78,12 +80,12 @@ double imgo_method::selectNewPoint(int &t) {
     } else if (I[nu_I].size() == 2) {
         mu[nu_I] = max({ mu[nu_I], abs(I[nu_I][1].z - I[nu_I][0].z) / pow(I[nu_I][1].x - I[nu_I][0].x, 1.0 / n) });
     }
-    if (abs(mu[nu_I]) > 1e-14) calc_I[nu_I] = true;
+    if (abs(mu[nu_I]) > epsilon) calc_I[nu_I] = true;
     for (int nu = 0; nu < m + 1; nu++) {
-        if (abs(mu[nu]) < 1e-14) mu[nu] = 1.0;
+        if (abs(mu[nu]) <= epsilon) mu[nu] = 1.0;
     }
 
-    // without optimization
+    // with optimization(linear)
     // double mu_tmp;
     // int nu_I = last_trial.nu - 1;
     // size_t size_I = I[nu_I].size();
@@ -94,11 +96,32 @@ double imgo_method::selectNewPoint(int &t) {
     //     mu_tmp = abs(I[nu_I][i].z - I[nu_I][(size_t)i - 1].z) / (I[nu_I][i].x - I[nu_I][(size_t)i - 1].x);
     //     if (mu_tmp > mu[nu_I]) {
     //         mu[nu_I] = mu_tmp;
-    //         if (abs(mu[nu_I]) > 1e-14) calc_I[nu_I] = true;
+    //         if (abs(mu[nu_I]) > epsilon) calc_I[nu_I] = true;
     //     }
     // }
     // for (int nu = 0; nu < m + 1; nu++) {
-    //     if (abs(mu[nu]) < 1e-14) mu[nu] = 1.0;
+    //     if (abs(mu[nu]) <= epsilon) mu[nu] = 1.0;
+    // }
+
+    // without optimization
+    // double mu_tmp;
+    // size_t size_I;
+    // for (int nu = 0; nu < m + 1; nu++) {
+    //     mu[nu] = 0.0;
+    // }
+    // for (int nu = 0; nu < m + 1; nu++) {
+    //     size_I = I[nu].size();
+    //     for (int i = 1; i < size_I; i++) {
+    //         for (int j = 0; j < i; j++) {
+    //             mu_tmp = abs(I[nu][i].z - I[nu][j].z) / (I[nu][i].x - I[nu][j].x);
+    //             if (mu_tmp > mu[nu]) {
+    //                 mu[nu] = mu_tmp;
+    //             }
+    //         }
+    //     }
+    //     if (abs(mu[nu]) <= epsilon) {
+    //         mu[nu] = 1.0;
+    //     };
     // }
 
     // Step 4

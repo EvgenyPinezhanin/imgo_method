@@ -43,7 +43,7 @@ struct trial {
 
 class optimization_method_non_constrained : public optimization_method {
 protected:
-    double (*f)(vector<double>); // target function
+    function<double(vector<double>)> f; // target function
 
     vector<trial> trial_points;
 
@@ -52,12 +52,12 @@ protected:
     virtual double selectNewPoint(int &t) = 0;
 
 public:
-    optimization_method_non_constrained(double (*_f)(vector<double>), int _n, const vector<double> &_A, const vector<double> &_B, double _eps, int _Nmax) 
+    optimization_method_non_constrained(function<double(vector<double>)> _f, int _n, const vector<double> &_A, const vector<double> &_B, double _eps, int _Nmax) 
         : optimization_method(_n, _A, _B, _eps, _Nmax), f(_f) {}
 
-    void setF(double (*_f)(vector<double>)) { f = _f; };
+    void setF(function<double(vector<double>)> _f) { f = _f; };
 
-    auto getF() const -> double (*)(vector<double>) { return f; };
+    function<double(vector<double>)> getF() const { return f; };
 
     void getTrialPoints(vector<trial> &trial_vec) const { trial_vec = trial_points; };
 };

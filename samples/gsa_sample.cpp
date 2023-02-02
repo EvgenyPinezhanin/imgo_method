@@ -34,7 +34,7 @@ double f4(double x) {
 }
 
 int main() {
-    double x, eps = 0.0001, r = 2.0; // > 1 
+    double x, eps = 0.0001, r = 2.1;
     int count_trials, Nmax = 1000;
     Stop stop = Stop::ACCURACY;
 

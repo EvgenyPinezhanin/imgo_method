@@ -47,6 +47,8 @@ public:
     double getR() const { return r; };
     double getD() const { return d; };
 
+    void getMu(vector<double> &mu_vec) const { mu_vec = mu; };
+
     void solve(int &count, double &x, Stop stop = Stop::ACCURACY);
     void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY);
     

@@ -2,6 +2,7 @@
 #define GSA_H
 
 #include <vector>
+#include <functional>
 
 #include <opt_method.h>
 #include <task.h>
@@ -10,8 +11,8 @@ using namespace std;
 
 class gsa_method : public optimization_method_non_constrained {
 private:
+    function<double(double)> f;
     double r;
-    double (*f)(double);
 
     double m; // parameter m
 
@@ -23,17 +24,17 @@ private:
     double selectNewPoint(int &t) override;
 
 public:
-    gsa_method(double (*_f)(double), double _a = 0.0, double _b = 10.0, double _r = 2.0, double _eps = 0.001, int _Nmax = 1000)
-        : optimization_method_non_constrained(nullptr, 1, vector<double>{_a}, vector<double>{_b}, _eps, _Nmax), 
-          f(_f), r(_r), m(0), last_trial(0.0, 0.0) {}
+    gsa_method(function<double(double)> _f, double _a = 0.0, double _b = 10.0, double _r = 2.0, double _eps = 0.001, 
+        int _Nmax = 1000) : optimization_method_non_constrained(nullptr, 1, vector<double>{_a}, vector<double>{_b}, 
+        _eps, _Nmax), f(_f), r(_r), m(0), last_trial(0.0, 0.0) {}
     
-    void setF(double (*_f)(double)) { f = _f; };
+    void setF(function<double(double)> _f) { f = _f; };
     void setA(double _a) { optimization_method::setA(vector<double>{_a}); };
     void setB(double _b) { optimization_method::setB(vector<double>{_b}); };
     void setAB(double _a, double _b) { optimization_method::setAB(vector<double>{_a}, vector<double>{_b}); };
     void setR(double _r) { r = _r; };
 
-    auto getF() const -> double (*)(double) { return f; };
+    function<double(double)> getF() const { return f; };
     double getA() const { return A[0]; };
     double getB() const { return B[0]; };
     double getR() const { return r; };

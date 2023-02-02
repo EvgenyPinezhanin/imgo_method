@@ -9,6 +9,8 @@
     #include <cmath>
 #endif
 
+const double epsilon = 1e-14;
+
 inline int insert_in_sorted(vector<trial> &vec, trial tr) {
     vector<trial>::iterator iter = vec.begin();
     vector<trial>::iterator iterEnd = vec.end();
@@ -44,6 +46,7 @@ double gsa_method::selectNewPoint(int &t) {
     static double M = -1.0;
 
     // Step 2
+    // with optimization(const)
     if (last_trial.x == B[0]) {
         M = abs((trial_points[1].z - trial_points[0].z) / (trial_points[1].x - trial_points[0].x));
     } else {
@@ -53,8 +56,17 @@ double gsa_method::selectNewPoint(int &t) {
                         (trial_points[(size_t)last_trial_pos + 1].x - last_trial.x))});
     }
 
+    // without optimization
+    // double M_tmp;
+    // size_t size = trial_points.size();
+    // M = 0.0;
+    // for (int i = 1; i < size; i++) {
+    //     M_tmp = abs(trial_points[i].z - trial_points[(size_t)i - 1].z) / (trial_points[i].x - trial_points[(size_t)i - 1].x);
+    //     if (M_tmp > M) M = M_tmp;
+    // }
+
     // Step 3
-    m = (M == 0.0) ? 1.0 : r * M;
+    m = (abs(M) <= epsilon) ? 1.0 : r * M;
 
     // Steps 4, 5
     double R = -numeric_limits<double>::infinity(), Rtmp = 0.0;
@@ -86,19 +98,24 @@ void gsa_method::solve(int &count, double &x, Stop stop) {
     last_trial = newTrial(B[0]);
     last_trial_pos = 1;
     while(true) {
+        count++;
+
+        // Steps 2, 3, 4, 5, 6
         x_k_1 = selectNewPoint(t);
+
+        // Trial
         last_trial = newTrial(x_k_1);
 
-        // Step 1
-        last_trial_pos = insert_in_sorted(trial_points, last_trial);
-
-        count++;
+        // Stop conditions
         if (trial_points[t].x - trial_points[(size_t)t - 1].x <= eps) {
             if (stop == Stop::ACCURACY || stop == Stop::ACCURNUMBER) break;
         }
         if (count >= Nmax) {
             if (stop == Stop::NUMBER || stop == Stop::ACCURNUMBER) break;
         }
+
+        // Step 1
+        last_trial_pos = insert_in_sorted(trial_points, last_trial);
     }
     x = search_min(trial_points);
 }
