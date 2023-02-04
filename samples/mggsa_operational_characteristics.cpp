@@ -16,9 +16,9 @@
 
 using namespace std;
 
-#define CALC
+// #define CALC
 
-const int family_number = 3; // 0 - Grishagin, 1 - GKLS,
+const int family_number = 5; // 0 - Grishagin, 1 - GKLS,
                              // 2 - Grishagin(constrained), 3 - GKLS(constrained),
                              // 4 - comparison Grishagin and GKLS, 5 - comparison Grishagin and GKLS (constrained)
 
@@ -75,11 +75,6 @@ int main() {
     functor_constr func_constr;
     function<double(vector<double>, int)> f;
     for (int i = 0; i < number_family; i++) {
-        ofstr_opt << "Name[" << i + 1 << "]=\"" << problems[i].short_name << "\"" << endl;
-        for (int j = 0; j < r_array[i].size(); j++) {
-            ofstr_opt << "R[" << (i * 3) + j + 1 << "]=\"" << r_array[i][j] << "\"" << endl; 
-        }
-
         if (problems[i].type == type_constraned::CONSTR) {
             func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].problem);
             (*func_constr.constr_opt_problem_family)[0]->GetBounds(A, B);
@@ -132,8 +127,16 @@ int main() {
             cout << "time: " << work_time << endl;
         }
     }
-
     ofstr.close();
+
+    ofstr_opt << "array Name[" << number_family << "]" << endl;
+    ofstr_opt << "array R[" << r_array.size() * 3 << "]" << endl;
+    for (int i = 0; i < number_family; i++) {
+        ofstr_opt << "Name[" << i + 1 << "]=\"" << problems[i].short_name << "\"" << endl;
+        for (int j = 0; j < r_array[i].size(); j++) {
+            ofstr_opt << "R[" << (i * 3) + j + 1 << "]=\"" << r_array[i][j] << "\"" << endl; 
+        }
+    }
     ofstr_opt.close();
 #endif
 

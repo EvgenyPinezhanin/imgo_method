@@ -35,25 +35,21 @@ int main() {
     double eps = 0.0001, d = 0.0;
     int m = 0;
 
-    const int count_family = 2;
+    const int number_family = 2;
     THillProblemFamily hillProblems;
     TShekelProblemFamily shekelProblems;
 
-    vector<vector<int>> count_trials_vec(count_family);
+    vector<vector<int>> count_trials_vec(number_family);
     count_trials_vec[0].resize(hillProblems.GetFamilySize(), 0);
     count_trials_vec[1].resize(shekelProblems.GetFamilySize(), 0);
 
-    vector<class_problems_f> problems{ class_problems_f("HillProblemFamily", &hillProblems, type_constraned::NONCONSTR, "hill"),
-                                       class_problems_f("ShekelProblemFamily", &shekelProblems, type_constraned::NONCONSTR, "shekel") };
+    vector<class_problems_f> problems{ class_problems_f("HillProblemFamily", &hillProblems, type_constraned::NONCONSTR, "Hill"),
+                                       class_problems_f("ShekelProblemFamily", &shekelProblems, type_constraned::NONCONSTR, "Shekel") };
 
     imgo_method imgo(nullptr, m, 0.0, 0.0, -1.0, d, eps);
 
     functor_non_constr functor;
-    for (int i = 0; i < count_family; i++) {
-        for (int j = 0; j < r_array[0].size(); j++) {
-            ofstr_opt << "r" << j + 1 << "_" << problems[i].short_name << " = \"" << r_array[i][j] << "\"" << endl; 
-        }
-
+    for (int i = 0; i < number_family; i++) {
         functor.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].problem);
 
         count_func = problems[i].problem->GetFamilySize();
@@ -82,8 +78,16 @@ int main() {
             ofstr << endl << endl;
         }
     }
-
     ofstr.close();
+
+    ofstr_opt << "array Name[" << number_family << "]" << endl;
+    ofstr_opt << "array R[" << r_array.size() * 3 << "]" << endl;
+    for (int i = 0; i < number_family; i++) {
+        ofstr_opt << "Name[" << i + 1 << "] = \"" << problems[i].short_name << "\"" << endl;
+        for (int j = 0; j < r_array[i].size(); j++) {
+            ofstr_opt << "R[" << (i * 3 + 1) + j << "] = \"" << r_array[i][j] << "\"" << endl; 
+        }
+    }
     ofstr_opt.close();
 #endif
 
@@ -107,5 +111,6 @@ int main() {
 #if defined(_MSC_VER)
     cin.get();
 #endif
+
 	return 0;
 }

@@ -1,45 +1,33 @@
 #! /usr/bin/gnuplot
 
-load "output_data/imgo_operational_characteristics_opt.txt"
 datafile="output_data/imgo_operational_characteristics.txt"
 
-p_hill="hill-P_s(k)-r="
-title_hill_1=p_hill.r1_hill
-title_hill_2=p_hill.r2_hill
-title_hill_3=p_hill.r3_hill
+load "output_data/imgo_operational_characteristics_opt.txt"
 
-p_shekel="shekel-P_s(k)-r="
-title_shekel_1=p_shekel.r1_shekel
-title_shekel_2=p_shekel.r2_shekel
-title_shekel_3=p_shekel.r3_shekel
+set linetype 1 lc rgb "red"
+set linetype 2 lc rgb "green"
+set linetype 3 lc rgb "blue"
+set linetype 4 lc rgb "orange"
+set linetype 5 lc rgb "black"
+set linetype 6 lc rgb "violet"
+
+set linetype cycle 6
+
+set grid
 
 set xlabel "K" font ", 13"
 set ylabel "P_s(k)" font ", 13"
-set grid
 
 set tics font ", 13"
 set key font ", 15"
 
-if (ARG1 == 0) {
-     set title "Operational characteristics on a family of tasks Hill" font "Helvetica Bold, 25"
-     plot datafile index 0 using 1:2 with lines ls 5 lc rgb "red" title title_hill_1, \
-          datafile index 1 using 1:2 with lines ls 5 lc rgb "green" title title_hill_2, \
-          datafile index 2 using 1:2 with lines ls 5 lc rgb "blue" title title_hill_3
-}
-if (ARG1 == 1) {
-     set title "Operational characteristics on a family of tasks Shekel" font "Helvetica Bold, 20"
-     plot datafile index 3 using 1:2 with lines ls 5 lc rgb "red" title title_shekel_1, \
-          datafile index 4 using 1:2 with lines ls 5 lc rgb "green" title title_shekel_2, \
-          datafile index 5 using 1:2 with lines ls 5 lc rgb "blue" title title_shekel_3
+if (ARG1 == 0 || ARG1 == 1) {
+    set title "Operational characteristics on a family of tasks ".Name[ARG1 + 1] font "Helvetica Bold, 25"
+    plot for [i = 1:3] datafile index ARG1 * 3 + i - 1 using 1:2 with lines lt i title "r = ".R[ARG1 * 3 + i]
 }
 if (ARG1 == 2) {
-     set title "Comparison of operational characteristics" font "Helvetica Bold, 20"
-     plot datafile index 0 using 1:2 with lines ls 5 lc rgb "red" title title_hill_1, \
-          datafile index 1 using 1:2 with lines ls 5 lc rgb "green" title title_hill_2, \
-          datafile index 2 using 1:2 with lines ls 5 lc rgb "blue" title title_hill_3, \
-          datafile index 3 using 1:2 with lines ls 5 lc rgb "orange" title title_shekel_1, \
-          datafile index 4 using 1:2 with lines ls 5 lc rgb "black" title title_shekel_2, \
-          datafile index 5 using 1:2 with lines ls 5 lc rgb "violet" title title_shekel_3
+    set title "Comparison of operational characteristics for the Hill and Shekel families" font "Helvetica Bold, 20"
+    plot for [i = 1:6] datafile index i - 1 using 1:2 with lines lt i title "r = ".R[i]."(".Name[(i - 1) / 3 + 1].")"
 }
 
 bind all "alt-End" "exit gnuplot"
