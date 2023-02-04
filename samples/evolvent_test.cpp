@@ -16,14 +16,16 @@ double f(vector<double> x, int j) {
 }
 
 int main() {
-    ofstream ofstr_map("output_data/map_test.txt");
-    ofstream ofstr_points("output_data/trial_points.txt");
+    ofstream ofstr("output_data/evolvent_test.txt");
+    if (!ofstr.is_open()) cerr << "File opening error\n";
+    ofstream ofstr_points("output_data/evolvent_test_points.txt");
+    if (!ofstr_points.is_open()) cerr << "File opening error\n";
 
-    vector<double> X(2), A{-1.0 / 2.0, -1.0 / 2.0}, B{1.0, 1.0}, X_opt{0.0, 0.0};
-    vector<vector<double>> trial_vec;
+    vector<double> A{-1.0 / 2.0, -1.0 / 2.0}, B{1.0, 1.0}, X_opt{0.0, 0.0};
     double eps = 0.01, r = 2.0, d = 0.0;
     int constr = 0, count_trials, Nmax = 1000;
     int m = 10, n = 2, key = 2, incr = 10;
+    vector<double> X(n); 
     Stop stop = Stop::ACCURACY;
 
     double k = (key != 3) ? 1.0 / (pow(2.0, n * m) - 1.0) :
@@ -31,21 +33,23 @@ int main() {
     if (key == 3) m++;
     for (double i = 0.0; i <= 1.0; i += k) {
         mapd(i, m, X.data(), n, key);
-        ofstr_map << X[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " " 
-                  << X[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
+        ofstr << X[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " " 
+              << X[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
     }
     mapd(1.0, m, X.data(), n, key);
-    ofstr_map << X[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " "
-              << X[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
+    ofstr << X[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " "
+          << X[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
     if (key == 3) m--;
-    ofstr_map.close();
+    ofstr.close();
 
     mggsa_method mggsa(f, n, constr, A, B, r, d, m, key, eps, Nmax, incr);
 
-    mggsa.solve(count_trials, X, stop);
-
     vector<double> mu;
+    vector<vector<double>> points;
+
+    mggsa.solve(count_trials, X, stop);
     mggsa.getMu(mu);
+
     cout << "Function: " << "x^2 + y^2 - cos(18.0 * x) - cos(18.0 * y)" << endl;
     cout << "Dimension = " << n << endl;
     cout << "Number of constrained = " << constr << endl;
@@ -68,15 +72,15 @@ int main() {
     cout << "|f(X*) - f(X)| = " << abs(f(X_opt, constr + 1) - f(X, constr + 1)) << endl;
     cout << endl;
 
-    ofstr_points << X[0] << " " << X[1] << " " << f(X, constr + 1) << endl;
-    ofstr_points << endl << endl;
     ofstr_points << X_opt[0] << " " << X_opt[1] << " " << f(X_opt, constr + 1) << endl;
     ofstr_points << endl << endl;
-    mggsa.getPoints(trial_vec);
-    for (int j = 0; j < trial_vec.size(); j++) {
-        ofstr_points << trial_vec[j][0] << " " << trial_vec[j][1] << " " << f(trial_vec[j], constr + 1) << endl;
-    }
+    ofstr_points << X[0] << " " << X[1] << " " << f(X, constr + 1) << endl;
     ofstr_points << endl << endl;
+    mggsa.getPoints(points);
+    for (int j = 0; j < points.size(); j++) {
+        ofstr_points << points[j][0] << " " << points[j][1] << " " << f(points[j], constr + 1) << endl;
+    }
+    ofstr_points.close();
 
     // Plotting the function(works with gnuplot)
     int error;

@@ -1,5 +1,5 @@
-#include <fstream>
 #include <iostream>
+#include <fstream>
 #include <vector>
 
 #include <omp.h>
@@ -15,7 +15,7 @@ using namespace std;
 
 using vector_4d = vector<vector<vector<vector<double>>>>;
 
-#define CALC
+// #define CALC
 // #define OUTPUT_INFO
 
 TGrishaginProblem grishaginProblem;
@@ -71,16 +71,22 @@ const int key_min = 1, key_max = 3;
 const int chunk = 4;
 
 int main() {
-#if defined(CALC)
-    ofstream ofstr_lipschitz("output_data/lipschitz_test.txt");
+    ofstream ofstr_opt("output_data/lipschitz_test_opt.txt");
+    if (!ofstr_opt.is_open()) cerr << "File opening error\n";
+    
+    const int count_func = 4;
 
-    int count_func = 4;
     vector<class_problems_om> problems{ class_problems_om("Grishagin", &grishaginProblem, type_constraned::NONCONSTR, f_grishagin),
                                         class_problems_om("GKLS", &GKLSProblem, type_constraned::NONCONSTR, f_gkls),
                                         class_problems_om("GrishaginConstrained", &grishaginConstrainedProblem, 
-                                                                                      type_constraned::CONSTR, f_constr_grishagin),
+                                                          type_constraned::CONSTR, f_constr_grishagin),
                                         class_problems_om("GKLSConstrained", &GKLSConstrainedProblem, 
-                                                                                           type_constraned::CONSTR, f_constr_gkls) };
+                                                          type_constraned::CONSTR, f_constr_gkls) };
+
+#if defined(CALC)
+    ofstream ofstr("output_data/lipschitz_test.txt");
+    if (!ofstr.is_open()) cerr << "File opening error\n";
+
     double eps = 0.01, d = 0.0, r = 2.0;
     int Nmax = 2000;
     Stop stop = Stop::ACCURNUMBER;
@@ -103,8 +109,8 @@ int main() {
     cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
 
 #pragma omp parallel for schedule(dynamic, chunk) proc_bind(spread) num_threads(omp_get_num_procs()) collapse(4) \
-    shared(count_func, key_min, key_max, m_min, m_max, incr_min, incr_max, problems, r_vec, lipschitz_const, stop) \
-    firstprivate(mggsa)
+        shared(count_func, key_min, key_max, m_min, m_max, incr_min, incr_max, problems, r_vec, lipschitz_const, stop) \
+        firstprivate(mggsa)
     for (int i = 0; i < count_func; i++) {
         for (int j = key_min; j <= key_max; j++) {
             for (int k = m_min; k <= m_max; k++) {
@@ -129,15 +135,20 @@ int main() {
         for (int j = key_min; j <= key_max; j++) {
             for (int k = m_min; k <= m_max; k++) {
                 for (int l = incr_min; l <= incr_max; l++) {
-                    ofstr_lipschitz << l << " " << lipschitz_const[i][j - key_min][k - m_min][l - incr_min] << endl;
+                    ofstr << l << " " << lipschitz_const[i][j - key_min][k - m_min][l - incr_min] << endl;
                 }
-                ofstr_lipschitz << endl << endl;
+                ofstr << endl << endl;
             }
         }
     }
-    ofstr_lipschitz.close();
-
+    ofstr.close(); 
 #endif
+
+    ofstr_opt << "array Name[" << count_func << "]" << endl;
+    for (int i = 0; i < count_func; i++) {
+        ofstr_opt << "Name[" << i + 1 << "] = \"" << problems[i].name << "\"" << endl;
+    }
+    ofstr_opt.close();
 
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);
@@ -165,13 +176,13 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, class_problems
     IOptProblem *opt_problem;
 
     if (problem.type == type_constraned::CONSTR) {
-        constr_opt_problem = dynamic_cast<IConstrainedOptProblem*>(problem.problem);
+        constr_opt_problem = static_cast<IConstrainedOptProblem*>(problem.problem);
         n = constr_opt_problem->GetDimension();
         constr_opt_problem->GetBounds(A, B);
         constr = constr_opt_problem->GetConstraintsNumber();
         X_opt = constr_opt_problem->GetOptimumPoint();
     } else {
-        opt_problem = dynamic_cast<IOptProblem*>(problem.problem);
+        opt_problem = static_cast<IOptProblem*>(problem.problem);
         n = opt_problem->GetDimension();
         opt_problem->GetBounds(A, B);
         constr = 0;
@@ -199,7 +210,7 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, class_problems
     cout << "Function: " << problem.name << endl;
     cout << "Dimension = " << n << endl;
     cout << "Number of constrained = " << constr << endl;
-    cout << "[A; B] = [(" << A[0] << ", " << A[1] << "); (" << 
+    cout << "[A; B] = [(" << A[0] << ", " << A[1] << "); (" <<
                              B[0] << ", " << B[1] << ")]"<< endl;
     cout << "X* = (" << X_opt[0] << ", " << X_opt[1] << ")" << endl;
     cout << "f(X*) = " << problem.f(X_opt, constr + 1) << endl;
@@ -208,6 +219,11 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, class_problems
     cout << "Trials result:" << endl;
     cout << "Number of trials = " << count_trials << endl;
     cout << "Number of points = " << count_points << endl;
+    cout << "Estimation of the Lipschitz constant:" << endl;
+    cout << "L(f(x)) = " << mu[constr] << endl;
+    for (int j = 0; j < constr; j++) {
+        cout << "L(g" << j + 1 << ") = " << mu[j] << endl;
+    }
     cout << "X = (" << X[0] << ", " << X[1] << ")" << endl;
     cout << "f(X) = " << problem.f(X, constr + 1) << endl;
     cout << "||X* - X|| = " << accuracy << endl;

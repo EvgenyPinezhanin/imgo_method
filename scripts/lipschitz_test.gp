@@ -1,8 +1,8 @@
 #! /usr/bin/gnuplot
 
-reset
-
 datafile = "output_data/lipschitz_test.txt"
+
+load "output_data/lipschitz_test_opt.txt"
 
 set linetype 1 lc rgb "#0000FF" lw 5 pt 1 dt 1
 set linetype 2 lc rgb "#0020FF" lw 5 pt 1 dt 2
@@ -36,30 +36,14 @@ set linetype 27 lc rgb "#FF00FF" lw 1 pt 1 dt 1
 
 set linetype cycle 27
 
-set xlabel "incr"
-set ylabel "lipschitz"
+set xlabel "increment"
+set ylabel "Lipschitz constant"
 set xrange [ARG6:ARG7]
 
-if (ARG1 == 0) {
-    set title 'lipschitz test(Grishagin)'
-    plot for [i = ARG2:ARG3] for [j = ARG4:ARG5] datafile index (ARG5 - ARG4 + 1) * (i - 1) + j - ARG4 using 1:2 with lines \
-         lt 9 * (i - 1) + j - ARG4 + 1 title sprintf("key = %d, m = %d", i, j)
-}
-if (ARG1 == 1) {
-    set title 'lipschitz test(GKLS)'
-    plot for [i = ARG2:ARG3] for [j = ARG4:ARG5] datafile index (ARG5 - ARG4 + 1) * ARG3 + (ARG5 - ARG4 + 1) * (i - 1) + j - ARG4 using 1:2 with lines \
-         lt 9 * (i - 1) + j - ARG4 + 1 title sprintf("key = %d, m = %d", i, j)
-}
-if (ARG1 == 2) {
-    set title 'lipschitz test(GrishaginConstrained)'
-    plot for [i = ARG2:ARG3] for [j = ARG4:ARG5] datafile index (ARG5 - ARG4 + 1) * ARG3 * 2 + (ARG5 - ARG4 + 1) * (i - 1) + j - ARG4 using 1:2 with lines \
-         lt 9 * (i - 1) + j - ARG4 + 1 title sprintf("key = %d, m = %d", i, j)
-}
-if (ARG1 == 3) {
-    set title 'lipschitz test(GKLSConstrained)'
-    plot for [i = ARG2:ARG3] for [j = ARG4:ARG5] datafile index (ARG5 - ARG4 + 1) * ARG3 * 3 + (ARG5 - ARG4 + 1) * (i - 1) + j - ARG4 using 1:2 with lines \
-         lt 9 * (i - 1) + j - ARG4 + 1 title sprintf("key = %d, m = %d", i, j)
-}
+set title 'Lipschitz test for the function '.Name[ARG1 + 1] font "Helvetica Bold, 20"
+
+plot for [i = ARG2:ARG3] for [j = ARG4:ARG5] datafile index (ARG5 - ARG4 + 1) * (i - 1) + j - ARG4 using 1:2 with lines \
+     lt 9 * (i - 1) + j - ARG4 + 1 title sprintf("key = %d, m = %d", i, j)
 
 bind all "alt-End" "exit gnuplot"
 pause mouse close

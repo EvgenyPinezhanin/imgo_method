@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#define CALC
+// #define CALC
 // #define OUTPUT_INFO
 
 double euclidean_distance(vector<double> val1, vector<double> val2) {
@@ -33,7 +33,7 @@ double f_rastrigin(vector<double> x, int j) {
     }
 }
 
-const int type = 3; // 0 - count trials, 1 - count points,
+const int type = 1; // 0 - count trials, 1 - count points,
                     // 2 - accuracy, 3 - c_points / c_trials
 const int n_type = 3; // n_min ... n_max
 
@@ -47,8 +47,10 @@ const int chunk = 2;
 
 int main() {
     ofstream ofstr_opt("output_data/incr_test_opt.txt");
+    if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 #if defined(CALC)
-    ofstream ofstr_incr("output_data/incr_test.txt");
+    ofstream ofstr("output_data/incr_test.txt");
+    if (!ofstr.is_open()) cerr << "File opening error\n";
 
     vector<double> X, X_opt, A, B;
     double eps = 0.01, r = 2.1, d = 0.0;
@@ -164,15 +166,15 @@ int main() {
     for (int i = n_min; i <= n_max; i++) {
         for (int j = m_min; j <= m_max; j++) {
             for (int k = incr_array[i - n_min][0]; k <= incr_array[i - n_min][1]; k++) {
-                ofstr_incr << k << " " << count_trials_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]]
+                ofstr << k << " " << count_trials_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]]
                                 << " " << count_points_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] 
                                 << " " << accuracy_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] << endl;
             }
-            ofstr_incr << endl << endl;
+            ofstr << endl << endl;
         }
-        ofstr_incr << endl << endl;
+        ofstr << endl << endl;
     }
-    ofstr_incr.close();
+    ofstr.close();
 
 #endif
 
