@@ -14,7 +14,7 @@
 
 using namespace std;
 
-const int test_func_number = 1; // 0 - f1, 1 - f2
+const int test_func_number = 0; // 0 - f1, 1 - f2
 
 double f1(vector<double> x, int j) {
     switch (j) {
@@ -49,23 +49,25 @@ double f2(vector<double> x, int j) {
 }
 
 int main() {
-    ofstream ofstr("output_data/mggsa_test_trial_points.txt");
+    ofstream ofstr("output_data/mggsa_test.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
+    ofstream ofstr_opt("output_data/mggsa_test_opt.txt");
+    if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
-    vector<double> X(2);
-    std::vector<vector<double>> trial_vec;
     double eps = 0.001, r = 2.2, d = 0.05;
     int count_trials, n = 2, den = 10, key = 1, Nmax = 1000;
+    vector<double> X(n);
     Stop stop = Stop::ACCURACY;
 
     vector<task_mggsa> task_array = { task_mggsa(f1, "f1", n, 3, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
-                                                 vector<double>{0.942, 0.944}, eps, Nmax, r, d, 12, key, stop, true),
+                                                 vector<double>{0.942, 0.944}, vector<double>{}, eps, Nmax, r, d, 12, key, stop, true),
                                       task_mggsa(f2, "f2", n, 4, vector<double>{0.0, 0.0}, vector<double>{80.0, 80.0},
-                                                 vector<double>{77.489, 63.858}, eps, Nmax, 3.3, 0.01, den, key, stop, true) };
+                                                 vector<double>{77.489, 63.858}, vector<double>{}, eps, Nmax, 3.3, 0.01, den, key, stop, true) };
 
     mggsa_method mggsa(nullptr);
 
     vector<double> mu;
+    vector<vector<double>> points;
     for (int i = 0; i < task_array.size(); i++) {
         if (task_array[i].used) {
             mggsa.setF(task_array[i].f);
@@ -110,20 +112,33 @@ int main() {
             cout << endl;
 
             // Saving points for plotting
-            ofstr << X[0] << " " << X[1] << " " << task_array[i].f(X, task_array[i].m + 1) << endl;
-            ofstr << endl << endl;
             ofstr << task_array[i].X_opt[0] << " " << task_array[i].X_opt[1] << " " << 
                      task_array[i].f(task_array[i].X_opt, task_array[i].m + 1) << endl;
             ofstr << endl << endl;
-            mggsa.getPoints(trial_vec);
-            for (int j = 0; j < trial_vec.size(); j++) {
-                ofstr << trial_vec[j][0] << " " << trial_vec[j][1] << " " << 
-                         task_array[i].f(trial_vec[j], task_array[i].m + 1) << endl;
+            ofstr << X[0] << " " << X[1] << " " << task_array[i].f(X, task_array[i].m + 1) << endl;
+            ofstr << endl << endl;
+            mggsa.getPoints(points);
+            for (int j = 0; j < points.size(); j++) {
+                ofstr << points[j][0] << " " << points[j][1] << " " << 
+                         task_array[i].f(points[j], task_array[i].m + 1) << endl;
             }
             ofstr << endl << endl;
         }
     }
     ofstr.close();
+
+    int size = task_array.size();
+    ofstr_opt << "array AX[" << size << "]" << endl;
+    ofstr_opt << "array AY[" << size << "]" << endl;
+    ofstr_opt << "array BX[" << size << "]" << endl;
+    ofstr_opt << "array BY[" << size << "]" << endl;
+    for (int i = 0; i < size; i++) {
+        ofstr_opt << "AX[" << i + 1 << "] = " << task_array[i].A[0] << endl;
+        ofstr_opt << "BX[" << i + 1 << "] = " << task_array[i].B[0] << endl;
+        ofstr_opt << "AY[" << i + 1 << "] = " << task_array[i].A[1] << endl;
+        ofstr_opt << "BY[" << i + 1 << "] = " << task_array[i].B[1] << endl;
+    }
+    ofstr_opt.close();
 
     // Plotting the function(works with gnuplot)
     int error;

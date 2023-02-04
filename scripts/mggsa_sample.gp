@@ -1,18 +1,25 @@
 #!/usr/bin/gnuplot
 
-trialfile="output_data/mggsa_sample_trial_points.txt"
+trialfile = "output_data/mggsa_sample.txt"
 
-f_1(x, y) = 1.0-x-y
+load "output_data/mggsa_sample_opt.txt"
 
-f_2(x, y) = (x-1.0)**2 / 5.0 + (y - 1.0)**2 / 5.0
+f1(x, y) = 1.0 - x - y
+g1(x, y) = 1 / 0
 
-f_3(x, y) = x**2 / 5.0 + y**2 / 5.0
-g1_3(x, y) = 1.0-x-y
-g_3(x, y) = (g1_3(x, y) <= 0.0) ? g1_3(x, y) : 1/0
+f2(x, y) = (x - 1.0) ** 2 / 5.0 + (y - 1.0) ** 2 / 5.0
+g2(x, y) = 1 / 0
 
-f_4(x, y) = x**2 / 5.0 + y**2 / 5.0
-g1_4(x, y) = (x - 2.0)**2 + (y - 2.0)**2 - 2.0
-g_4(x, y) = (g1_4(x, y) <= 0.0) ? g1_4(x, y) : 1/0
+f3(x, y) = x ** 2 / 5.0 + y ** 2 / 5.0
+g3_1(x, y) = 1.0 - x - y
+g3(x, y) = (g3_1(x, y) <= 0.0) ? g3_1(x, y) : 1 / 0
+
+f4(x, y) = x ** 2 / 5.0 + y ** 2 / 5.0
+g4_1(x, y) = (x - 2.0) ** 2 + (y - 2.0) ** 2 - 2.0
+g4(x, y) = (g4_1(x, y) <= 0.0) ? g4_1(x, y) : 1 / 0
+
+title_name(n) = sprintf("Graph of the sample function №%d", n)
+function_name(s, n) = sprintf("%s%d(x, y)", s, n)
 
 set grid
 set contour
@@ -27,48 +34,21 @@ set isosamples 100
 set xlabel "X"
 set ylabel "Y"
 
-if (ARG1 == 0) {
-      set title "Chart of sample function 1" font "Helvetica Bold, 20"
-      set xrange [-4.0:4.0]
-      set yrange [-4.0:4.0]
-      splot f_1(x, y) title "φ(x, y)" nosurface, \
-            trialfile index 2 ls 5 lc rgb "green" title "trial points" nocontours, \
-            trialfile index 1 ls 5 lc rgb "red" title "X*" nocontours, \
-            trialfile index 0 ls 5 lc rgb "blue" title "X" nocontours, \
-            f_1(x, y) with labels notitle nosurface
-}
-if (ARG1 == 1) {
-      set title "Chart of sample function 2" font "Helvetica Bold, 20"
-      set xrange [-4.0:4.0]
-      set yrange [-4.0:4.0]
-      splot f_2(x, y) title "φ(x, y)" nosurface, \
-            trialfile index 5 ls 5 lc rgb "green" title "trial points" nocontours, \
-            trialfile index 4 ls 5 lc rgb "red" title "X*" nocontours, \
-            trialfile index 3 ls 5 lc rgb "blue" title "X" nocontours, \
-            f_2(x, y) with labels notitle nosurface
-}
-if (ARG1 == 2) {
-      set title "Chart of sample function 3" font "Helvetica Bold, 20"
-      set xrange [-1.0:1.0]
-      set yrange [-1.0:1.0]
-      splot f_3(x, y) title "φ(x, y)" nosurface, \
-            g_3(x, y) lc rgb "orange" notitle nocontours, \
-            trialfile index 8 ls 5 lc rgb "green" title "trial points" nocontours, \
-            trialfile index 7 ls 5 lc rgb "red" title "X*" nocontours, \
-            trialfile index 6 ls 5 lc rgb "blue" title "X" nocontours, \
-            f_3(x, y) with labels notitle nosurface
-}
-if (ARG1 == 3) {
-      set title "Chart of sample function 4" font "Helvetica Bold, 20"
-      set xrange [0.0:3.0]
-      set yrange [0.0:3.0]
-      splot f_4(x, y) title "φ(x, y)" nosurface, \
-            g_4(x, y) lc rgb "orange" notitle nocontours, \
-            trialfile index 11 ls 5 lc rgb "green" title "trial points" nocontours, \
-            trialfile index 10 ls 5 lc rgb "red" title "X*" nocontours, \
-            trialfile index 9 ls 5 lc rgb "blue" title "X" nocontours, \
-            f_4(x, y) with labels notitle nosurface
-}
+ind = 3 * ARG1
+function_f = function_name("f", ARG1 + 1)
+function_g = function_name("g", ARG1 + 1)
+
+set title title_name(ARG1 + 1) font "Helvetica Bold, 20"
+
+set xrange [AX[ARG1 + 1]:BX[ARG1 + 1]]
+set yrange [AY[ARG1 + 1]:BY[ARG1 + 1]]
+
+splot @function_f title "φ(x, y)" nosurface, \
+      @function_g lc rgb "orange" title "g(x, y)" nocontours, \
+      trialfile index ind + 2 ls 5 lc rgb "green" title "trial points" nocontours, \
+      trialfile index ind + 1 ls 5 lc rgb "blue" title "X" nocontours, \
+      trialfile index ind ls 5 lc rgb "red" title "X*" nocontours, \
+      @function_f with labels notitle nosurface
 
 bind all "alt-End" "exit gnuplot"
 pause mouse close

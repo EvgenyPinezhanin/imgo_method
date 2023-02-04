@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include <cstdlib>
 #include <cmath>
 #include <limits>
@@ -13,7 +14,7 @@
 
 using namespace std;
 
-const int sample_func_number = 1; // 0 - f1, 1 - f2, 2 - f3, 3 - f4
+const int sample_func_number = 2; // 0 - f1, 1 - f2, 2 - f3, 3 - f4
 
 double f1(vector<double> x, int j) {
     switch (j) {
@@ -39,34 +40,36 @@ double f3(vector<double> x, int j) {
 
 double f4(vector<double> x, int j) {
     switch (j) {
-        case 1: return pow(x[0] - 2.0, 2) + pow(x[1] - 2.0, 2) - 2.0;
+        case 1: return (x[0] - 2.0) * (x[0] - 2.0) + (x[1] - 2.0) * (x[1] - 2.0) - 2.0;
         case 2: return x[0] * x[0] / 5.0 + x[1] * x[1] / 5.0;
         default: return numeric_limits<double>::quiet_NaN();
     }
 }
 
 int main() {
-    ofstream ofstr("output_data/mggsa_sample_trial_points.txt");
+    ofstream ofstr("output_data/mggsa_sample.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
+    ofstream ofstr_opt("output_data/mggsa_sample_opt.txt");
+    if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
-    vector<double> X(2);
-    vector<vector<double>> trial_vec;
-    double eps = 0.01, r = 2.0, d = 0.0;
+    double eps = 0.01, r = 2.2, d = 0.0;
     int count_trials, n = 2, den = 10, key = 1, Nmax = 1000;
+    vector<double> X(n);
     Stop stop = Stop::ACCURACY;
 
     vector<task_mggsa> task_array = { task_mggsa(f1, "f1", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
-                                                 vector<double>{4.0, 4.0}, eps, Nmax, r, d, den, key, stop),
+                                                 vector<double>{4.0, 4.0}, vector<double>{}, eps, Nmax, r, d, den, key, stop),
                                       task_mggsa(f2, "f2", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
-                                                 vector<double>{1.0, 1.0}, eps, Nmax, 1.0, d, den, key, stop),
+                                                 vector<double>{1.0, 1.0}, vector<double>{}, eps, Nmax, 1.0, d, den, key, stop),
                                       task_mggsa(f3, "f3", n, 1, vector<double>{-1.0, -1.0}, vector<double>{1.0, 1.0},
-                                                 vector<double>{0.5, 0.5}, eps, Nmax, r, d, den, key, stop),
+                                                 vector<double>{0.5, 0.5}, vector<double>{}, eps, Nmax, r, d, den, key, stop),
                                       task_mggsa(f4, "f4", n, 1, vector<double>{0.0, 0.0}, vector<double>{3.0, 3.0},
-                                                 vector<double>{1.0, 1.0}, eps, Nmax, r, d, den, key, stop) };
+                                                 vector<double>{1.0, 1.0}, vector<double>{}, eps, Nmax, r, d, den, key, stop) };
 
     mggsa_method mggsa(nullptr);
 
     vector<double> mu;
+    vector<vector<double>> points;
     for (int i = 0; i < task_array.size(); i++) {
         if (task_array[i].used) {
             mggsa.setF(task_array[i].f);
@@ -110,20 +113,33 @@ int main() {
             cout << endl;
 
             // Saving points for plotting
-            ofstr << X[0] << " " << X[1] << " " << task_array[i].f(X, task_array[i].m + 1) << endl;
-            ofstr << endl << endl;
             ofstr << task_array[i].X_opt[0] << " " << task_array[i].X_opt[1] << " " << 
                      task_array[i].f(task_array[i].X_opt, task_array[i].m + 1) << endl;
             ofstr << endl << endl;
-            mggsa.getPoints(trial_vec);
-            for (int j = 0; j < trial_vec.size(); j++) {
-                ofstr << trial_vec[j][0] << " " << trial_vec[j][1] << " " << 
-                         task_array[i].f(trial_vec[j], task_array[i].m + 1) << endl;
+            ofstr << X[0] << " " << X[1] << " " << task_array[i].f(X, task_array[i].m + 1) << endl;
+            ofstr << endl << endl;
+            mggsa.getPoints(points);
+            for (int j = 0; j < points.size(); j++) {
+                ofstr << points[j][0] << " " << points[j][1] << " " << 
+                         task_array[i].f(points[j], task_array[i].m + 1) << endl;
             }
             ofstr << endl << endl;
         }
     }
     ofstr.close();
+
+    int size = task_array.size();
+    ofstr_opt << "array AX[" << size << "]" << endl;
+    ofstr_opt << "array AY[" << size << "]" << endl;
+    ofstr_opt << "array BX[" << size << "]" << endl;
+    ofstr_opt << "array BY[" << size << "]" << endl;
+    for (int i = 0; i < size; i++) {
+        ofstr_opt << "AX[" << i + 1 << "] = " << task_array[i].A[0] << endl;
+        ofstr_opt << "BX[" << i + 1 << "] = " << task_array[i].B[0] << endl;
+        ofstr_opt << "AY[" << i + 1 << "] = " << task_array[i].A[1] << endl;
+        ofstr_opt << "BY[" << i + 1 << "] = " << task_array[i].B[1] << endl;
+    }
+    ofstr_opt.close();
 
     // Plotting the function(works with gnuplot)
     int error;
