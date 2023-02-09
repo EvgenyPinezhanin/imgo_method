@@ -108,6 +108,7 @@ int main() {
     cout << "Parameters for method:" << endl;
     cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
 
+    int start_time = clock();
 #pragma omp parallel for schedule(dynamic, chunk) proc_bind(spread) num_threads(omp_get_num_procs()) collapse(4) \
         shared(count_func, key_min, key_max, m_min, m_max, incr_min, incr_max, problems, r_vec, lipschitz_const, stop) \
         firstprivate(mggsa)
@@ -130,6 +131,9 @@ int main() {
             }
         }
     }
+    int end_time = clock();
+    double work_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+    cout << "Total time: " << work_time << endl;
 
     for (int i = 0; i < count_func; i++) {
         for (int j = key_min; j <= key_max; j++) {
@@ -141,7 +145,7 @@ int main() {
             }
         }
     }
-    ofstr.close(); 
+    ofstr.close();
 #endif
 
     ofstr_opt << "array Name[" << count_func << "]" << endl;
@@ -175,6 +179,8 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, class_problems
     IConstrainedOptProblem *constr_opt_problem;
     IOptProblem *opt_problem;
 
+    double t1 = omp_get_wtime();
+
     if (problem.type == type_constraned::CONSTR) {
         constr_opt_problem = static_cast<IConstrainedOptProblem*>(problem.problem);
         n = constr_opt_problem->GetDimension();
@@ -206,6 +212,9 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, class_problems
                     (X_opt[1] - X[1]) * (X_opt[1] - X[1]));
     count_points = mggsa.getCountPoints();
 
+    double t2 = omp_get_wtime();
+    double dt = t2 - t1;
+
 #if defined(OUTPUT_INFO)
     cout << "Function: " << problem.name << endl;
     cout << "Dimension = " << n << endl;
@@ -231,7 +240,7 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, class_problems
     cout << endl;
 #else
     string str = problem.name + " key = " + to_string(key) + " m = " + to_string(m) + " incr = " + to_string(incr) +
-                                " t_num = " + to_string(omp_get_thread_num()) + "\n";
+                 " time: " + to_string(dt) + " t_num = " + to_string(omp_get_thread_num()) + "\n";
     cout << str;
 #endif
 }

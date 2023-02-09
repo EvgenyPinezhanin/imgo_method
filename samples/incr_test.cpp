@@ -78,11 +78,10 @@ int main() {
         B.push_back(1.0);
     }
 
-    double t1, t2, dt;
-    t1 = omp_get_wtime ();
-
     double accuracy;
     int count_points, count_trials;
+
+    int start_time = clock();
     for (int i = n_min; i <= n_max; i++) {
         N = i;
         mggsa.setN(N);
@@ -91,6 +90,7 @@ int main() {
         B.push_back(1.0);
         mggsa.setAB(A, B);
 
+    #if defined(OUTPUT_INFO)
         cout << "Rastrigin function" << endl;
         cout << "Dimension = " << N << endl;
         cout << "Number of constrained = " << constr << endl;
@@ -114,6 +114,7 @@ int main() {
         cout << "Parameters for constructing the Peano curve:" << endl;
         cout << "key = " << key << endl;
         cout << endl;
+    #endif
 
         vector<double> mu;
     #pragma omp parallel for schedule(dynamic, chunk) proc_bind(spread) num_threads(omp_get_num_procs()) collapse(2) \
@@ -121,6 +122,8 @@ int main() {
             firstprivate(mggsa) private(accuracy, count_points, count_trials, X, mu)
         for (int j = m_min; j <= m_max; j++) {
             for (int k = incr_array[i - n_min][0]; k <= incr_array[i - n_min][1]; k++) {
+                double t1 = omp_get_wtime();
+
                 mggsa.setDen(j);
                 mggsa.setIncr(k);
  
@@ -132,6 +135,9 @@ int main() {
                 accuracy_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = accuracy;
                 count_trials_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = count_trials;
                 count_points_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = count_points;
+
+                double t2 = omp_get_wtime();
+                double dt = t2 - t1;
 
             #if defined(OUTPUT_INFO)
                 cout << "Parameters for constructing the Peano curve:" << endl;
@@ -151,17 +157,16 @@ int main() {
                 cout << "|f(X*) - f(X)| = " << abs(f_rastrigin(X_opt, constr + 1) - f_rastrigin(X, constr + 1)) << endl;
                 cout << endl;
             #else
-                string str = "n = " + to_string(i) + " m = " + to_string(j) + " incr = " + to_string(k) +
-                             " t_num = " + to_string(omp_get_thread_num()) + "\n";
+                string str = "Rastrigin: n = " + to_string(i) + " m = " + to_string(j) + " incr = " + to_string(k) +
+                             " time: " + to_string(dt) + " t_num = " + to_string(omp_get_thread_num()) + "\n";
                 cout << str;
             #endif
             }
         }
     }
-
-    t2 = omp_get_wtime();
-    dt = t2 - t1;
-    cout << "Time: " << dt << endl;
+    int end_time = clock();
+    double work_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+    cout << "Total time: " << work_time << endl;
 
     for (int i = n_min; i <= n_max; i++) {
         for (int j = m_min; j <= m_max; j++) {
@@ -175,7 +180,6 @@ int main() {
         ofstr << endl << endl;
     }
     ofstr.close();
-
 #endif
 
     ofstr_opt << "array I_MIN[" << n_count << "]" << endl;
@@ -192,11 +196,13 @@ int main() {
     if (error != 0) {
         cerr << "Error chmod" << endl;
     }
+
     char str[100];
     sprintf(str, "gnuplot -c scripts/incr_test.gp %d %d %d %d %d %d", type, n_type, n_min, n_max, m_min, m_max);
     error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << endl;
     }
+
     return 0;
 }
