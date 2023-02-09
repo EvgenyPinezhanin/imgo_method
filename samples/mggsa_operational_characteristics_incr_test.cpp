@@ -19,10 +19,10 @@
 
 using namespace std;
 
-#define CALC
+// #define CALC
 
-const int type = 2; // 0 - count trials, 1 - count points, 2 - c_points / c_trials
-const int family_number = 0; // 0 - Grishagin, 1 - GKLS,
+const int type = 0; // 0 - count trials, 1 - count points, 2 - c_points / c_trials
+const int family_number = 2; // 0 - Grishagin, 1 - GKLS,
                              // 2 - Grishagin(constrained), 3 - GKLS(constrained)
 
 int main() {

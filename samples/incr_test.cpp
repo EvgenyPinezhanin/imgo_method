@@ -33,9 +33,9 @@ double f_rastrigin(vector<double> x, int j) {
     }
 }
 
-const int type = 1; // 0 - count trials, 1 - count points,
+const int type = 3; // 0 - count trials, 1 - count points,
                     // 2 - accuracy, 3 - c_points / c_trials
-const int n_type = 3; // n_min ... n_max
+const int n_type = 2; // n_min ... n_max
 
 const int n_min = 2, n_max = 3;
 const int n_count = n_max - n_min + 1;
