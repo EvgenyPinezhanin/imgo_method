@@ -2,6 +2,7 @@
 #define OPT_METHOD_H
 
 #include <vector>
+#include <functional>
 
 using namespace std;
 
@@ -25,6 +26,12 @@ public:
     void setB(const vector<double> &_B) { B = _B; };
     void setAB(const vector<double> &_A, const vector<double> &_B) { A = _A; B = _B; };
 
+    int getN() { return n; };
+    int getNmax() { return Nmax; };
+    double getEps() { return eps; };
+    vector<double> getA() { return A; };
+    vector<double> getB() { return B; };
+
     virtual void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY) = 0;
 };
 
@@ -36,19 +43,21 @@ struct trial {
 
 class optimization_method_non_constrained : public optimization_method {
 protected:
-    double (*f)(vector<double>); // target function
+    function<double(vector<double>)> f; // target function
 
     vector<trial> trial_points;
 
     virtual trial newTrial(double x) = 0;
     virtual double newPoint(int t) = 0;
-    virtual double selectNewPoint(int &t, trial last_trial) = 0;
+    virtual double selectNewPoint(int &t) = 0;
 
 public:
-    optimization_method_non_constrained(double (*_f)(vector<double>), int _n, const vector<double> &_A, const vector<double> &_B, double _eps, int _Nmax) 
+    optimization_method_non_constrained(function<double(vector<double>)> _f, int _n, const vector<double> &_A, const vector<double> &_B, double _eps, int _Nmax) 
         : optimization_method(_n, _A, _B, _eps, _Nmax), f(_f) {}
 
-    void setF(double (*_f)(vector<double>)) { f = _f; };
+    void setF(function<double(vector<double>)> _f) { f = _f; };
+
+    function<double(vector<double>)> getF() const { return f; };
 
     void getTrialPoints(vector<trial> &trial_vec) const { trial_vec = trial_points; };
 };
@@ -62,21 +71,24 @@ struct trial_constr {
 
 class optimization_method_constrained : public optimization_method {
 protected:
-    double (*f)(vector<double>, int); // target function
+    function<double(vector<double>, int)> f; // target function
     int m; // number of constraints
 
     vector<trial_constr> trial_points;
 
     virtual trial_constr newTrial(double x) = 0;
     virtual double newPoint(int t) = 0;
-    virtual double selectNewPoint(int &t, trial_constr last_trial) = 0;
+    virtual double selectNewPoint(int &t) = 0;
 
 public:
-    optimization_method_constrained(double (*_f)(vector<double>, int), int _n, int _m, const vector<double> &_A, const vector<double> &_B, double _eps, int _Nmax) 
-        : optimization_method(_n, _A, _B, _eps, _Nmax), f(_f), m(_m) {}
+    optimization_method_constrained(function<double(vector<double>, int)> _f, int _n, int _m, const vector<double> &_A, 
+        const vector<double> &_B, double _eps, int _Nmax) : optimization_method(_n, _A, _B, _eps, _Nmax), f(_f), m(_m) {}
 
-    void setF(double (*_f)(vector<double>, int)) { f = _f; };
+    void setF(function<double(vector<double>, int)> _f) { f = _f; };
     void setM(int _m) { m = _m; };
+
+    function<double(vector<double>, int)> getF() const { return f; };
+    int getM() const { return m; };
 
     void getTrialPoints(vector<trial_constr> &trial_vec) const { trial_vec = trial_points; };
 };
