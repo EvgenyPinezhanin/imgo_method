@@ -23,7 +23,7 @@ inline int insert_in_sorted(vector<trial_constr> &vec, trial_constr tr) {
 }
 
 inline double search_min(vector<trial_constr> &trials, int m) {
-    double z = numeric_limits<double>::infinity(), x;
+    double z = numeric_limits<double>::infinity(), x = 0.0;
     for (int i = 0; i < trials.size(); i++) {
         if (trials[i].nu == m + 1 && trials[i].z < z) {
             z = trials[i].z;
@@ -57,7 +57,6 @@ double imgo_method::newPoint(int t) {
 double imgo_method::selectNewPoint(int &t) {
     // Step 3
     // with optimization(const)
-    double mu_tmp;
     int nu_I = last_trial.nu - 1;
     size_t size_I = I[nu_I].size();
     for (int nu = 0; nu < m + 1; nu++) {
@@ -72,10 +71,10 @@ double imgo_method::selectNewPoint(int &t) {
                              pow(I[nu_I][size_I - 1].x - I[nu_I][size_I - 2].x, 1.0 / n) });
         } else {
             mu[nu_I] = max({ mu[nu_I],
-                             abs(I[nu_I][last_trial_pos].z - I[nu_I][last_trial_pos - 1].z) / 
-                             pow(I[nu_I][last_trial_pos].x - I[nu_I][last_trial_pos - 1].x, 1.0 / n),
-                             abs(I[nu_I][last_trial_pos + 1].z - I[nu_I][last_trial_pos].z) / 
-                             pow(I[nu_I][last_trial_pos + 1].x - I[nu_I][last_trial_pos].x, 1.0 / n) });
+                             abs(I[nu_I][last_trial_pos].z - I[nu_I][(size_t)last_trial_pos - 1].z) / 
+                             pow(I[nu_I][last_trial_pos].x - I[nu_I][(size_t)last_trial_pos - 1].x, 1.0 / n),
+                             abs(I[nu_I][(size_t)last_trial_pos + 1].z - I[nu_I][last_trial_pos].z) / 
+                             pow(I[nu_I][(size_t)last_trial_pos + 1].x - I[nu_I][last_trial_pos].x, 1.0 / n) });
         }
     } else if (I[nu_I].size() == 2) {
         mu[nu_I] = max({ mu[nu_I], abs(I[nu_I][1].z - I[nu_I][0].z) / pow(I[nu_I][1].x - I[nu_I][0].x, 1.0 / n) });

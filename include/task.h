@@ -132,9 +132,9 @@ struct functor_constr {
     double operator() (double x, int j) {
         int constr = (*constr_opt_problem_family)[current_func]->GetConstraintsNumber();
         if (j >= 1 && j <= constr) {
-            return (*constr_opt_problem_family)[current_func]->ComputeConstraint(j - 1, vector<double>(x));
+            return (*constr_opt_problem_family)[current_func]->ComputeConstraint(j - 1, vector<double>{x});
         } else if (j - 1 == constr) {
-            return (*constr_opt_problem_family)[current_func]->ComputeFunction(vector<double>(x));
+            return (*constr_opt_problem_family)[current_func]->ComputeFunction(vector<double>{x});
         } else {
             return numeric_limits<double>::quiet_NaN();
         }

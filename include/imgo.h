@@ -29,7 +29,7 @@ private:
 public:
     imgo_method(function<double(double, int)> _f, int _m = 0, double _a = 0.0, double _b = 10.0, double _r = 2.0, double _d = 0.0, 
                 double _eps = 0.0001, int _Nmax = 1000) : optimization_method_constrained(nullptr, 1, _m, vector<double>{_a}, 
-                vector<double>{_b}, _eps, _Nmax), f(_f), r(_r), d(_d), last_trial(0.0, 0.0, 0), I((size_t)m + 1), 
+                vector<double>{_b}, _eps, _Nmax), f(_f), r(_r), d(_d), last_trial(0.0, 0.0, 0), last_trial_pos(0), I((size_t)m + 1),
                 calc_I((size_t)m + 1), mu((size_t)m + 1), z_star((size_t)m + 1) {}
     
     void setF(const function<double(double, int)> &_f) { f = _f; };

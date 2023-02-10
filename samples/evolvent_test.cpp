@@ -1,5 +1,9 @@
-#include <fstream>
+#if defined( _MSC_VER )
+    #define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <cmath>
 
@@ -98,6 +102,10 @@ int main() {
     if (error != 0) {
         cerr << "Error gnuplot" << endl;
     }
+
+#if defined( _MSC_VER )
+    cin.get();
+#endif
 
     return 0;
 }

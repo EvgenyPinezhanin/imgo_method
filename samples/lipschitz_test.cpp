@@ -155,11 +155,13 @@ int main() {
     ofstr_opt.close();
 
     int error;
+#if defined(__linux__)
     setenv("QT_QPA_PLATFORM", "xcb", false);
     error = system("chmod +x scripts/lipschitz_test.gp");
     if (error != 0) {
         cerr << "Error chmod" << endl;
     }
+#endif
 
     char str[100];
     sprintf(str, "gnuplot -c scripts/lipschitz_test.gp %d %d %d %d %d %d %d", type, key_min, key_max, m_min, m_max, incr_min, incr_max);
@@ -207,7 +209,7 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, class_problems
     mggsa.solve(count_trials, X, stop);
     mggsa.getMu(mu);
 
-    lipschitz_const[num_func][key - key_min][m - m_min][incr - incr_min] = mu[0];
+    lipschitz_const[num_func][(size_t)key - key_min][(size_t)m - m_min][(size_t)incr - incr_min] = mu[0];
     accuracy = sqrt((X_opt[0] - X[0]) * (X_opt[0] - X[0]) + 
                     (X_opt[1] - X[1]) * (X_opt[1] - X[1]));
     count_points = mggsa.getCountPoints();

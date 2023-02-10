@@ -24,7 +24,7 @@ inline int insert_in_sorted(vector<trial> &vec, trial tr) {
 }
 
 inline double search_min(vector<trial> &trials) {
-    double z = numeric_limits<double>::infinity(), x;
+    double z = numeric_limits<double>::infinity(), x = 0.0;
     for (int i = 0; i < trials.size(); i++) {
         if (trials[i].z < z) {
             z = trials[i].z;

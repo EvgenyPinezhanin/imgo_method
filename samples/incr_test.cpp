@@ -1,7 +1,16 @@
+#if defined( _MSC_VER )
+    #define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include <cmath>
+#if defined( _MSC_VER )
+    #define _USE_MATH_DEFINES
+    #include <math.h>
+#else
+    #include <cmath>
+#endif
 
 #include <omp.h>
 #include <mggsa.h>
@@ -191,11 +200,13 @@ int main() {
     ofstr_opt.close();
 
     int error;
+#if defined(__linux__)
     setenv("QT_QPA_PLATFORM", "xcb", false);
     error = system("chmod +x scripts/incr_test.gp");
     if (error != 0) {
         cerr << "Error chmod" << endl;
     }
+#endif
 
     char str[100];
     sprintf(str, "gnuplot -c scripts/incr_test.gp %d %d %d %d %d %d", type, n_type, n_min, n_max, m_min, m_max);

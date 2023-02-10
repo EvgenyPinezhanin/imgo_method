@@ -63,8 +63,8 @@ void mapd(double x, int m, double* y, int n, int key) {
     double d, mne, dd, dr;
     float p, r;
     int iw[11];
-    int it, is, i, j, k;
-    int n1, nexp, l, iq, iu[10], iv[10];
+    int it, is = 0, i, j, k;
+    int n1, nexp, l, iq, iu[10] = { 0 }, iv[10] = {0};
 
     p = 0.0;
     n1 = n - 1;
@@ -150,7 +150,7 @@ void mapd(double x, int m, double* y, int n, int key) {
 void numbr(int *iss, int& n1, int nexp, int& l, int* iu, int* iv) {
     /* calculate s(u) = is,l(u) = l,v(u) = iv by u = iu */
 
-    int n, is, iff, k1, k2, l1;
+    int n, is, iff, k1, k2, l1 = 0;
 
     n = n1 + 1;
     iff = nexp;
@@ -191,7 +191,7 @@ void xyd(double *xx, int m, float y[], int n) {
     float r;
     int iw[10];
     int i, j, it, is;
-    int n1, nexp, l, iu[10], iv[10];
+    int n1, nexp, l, iu[10] = {0}, iv[10];
 
     n1 = n - 1;
     for (nexp = 1, i = 0; i < n; i++) {

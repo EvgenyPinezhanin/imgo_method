@@ -2,6 +2,12 @@
     #define _CRT_SECURE_NO_WARNINGS    
 #endif
 
+#if defined( _MSC_VER )
+    #define PROC_BIND
+#else
+    #define PROC_BIND proc_bind(spread)
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -79,8 +85,8 @@ int main() {
 
     mggsa_method mggsa(nullptr, -1, -1, A, B, -1.0, -1.0, den, key, eps, Nmax, -1);
 
-#pragma omp parallel for schedule(static, chunk_family) proc_bind(spread) num_threads(num_threads_family) \
-        shared(number_family, problems, d_array, r_array, incr_array, max_count_trials, max_count_points), firstprivate(mggsa) \
+#pragma omp parallel for schedule(static, chunk_family) PROC_BIND num_threads(num_threads_family) \
+        shared(number_family, problems, d_array, r_array, incr_array, max_count_trials, max_count_points) firstprivate(mggsa) \
         private(A, B, count_func, start_time, end_time, work_time, X_opt, count_trials, count_trials_vec, count_points_vec)
     for (int i = 0; i < number_family; i++) {
         functor_non_constr func_non_constr;
@@ -127,7 +133,7 @@ int main() {
                     count_points_vec[l] = mggsa.getCountPoints();
                 }
                 end_time = clock();
-                work_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+                work_time = ((double)end_time - start_time) / CLOCKS_PER_SEC;
 
                 auto iter = max_element(count_trials_vec.begin(), count_trials_vec.end());
                 max_count_trials[i][j][k] = *iter;
@@ -153,7 +159,7 @@ int main() {
     }
     ofstr.close();
 
-    int size = incr_array.size();
+    size_t size = incr_array.size();
     ofstr_opt << "count_key = " << size << endl;
     ofstr_opt << "array Name[" << number_family << "]" << endl;
     ofstr_opt << "array R[" << size * number_family << "]" << endl;

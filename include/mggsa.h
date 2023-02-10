@@ -53,7 +53,7 @@ public:
     double getD() const { return d; };
 
     void getPoints(vector<vector<double>> &points_vec);
-    int getCountPoints() const { return trial_points.size() - 2; };
+    int getCountPoints() const { return (int)trial_points.size() - 2; };
     void getMu(vector<double> &mu_vec) const { mu_vec = mu; };
     
     void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY);

@@ -127,7 +127,7 @@ int main() {
     }
     ofstr.close();
 
-    int size = task_array.size();
+    size_t size = task_array.size();
     ofstr_opt << "array AX[" << size << "]" << endl;
     ofstr_opt << "array AY[" << size << "]" << endl;
     ofstr_opt << "array BX[" << size << "]" << endl;

@@ -2,6 +2,12 @@
     #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#if defined( _MSC_VER )
+    #define PROC_BIND
+#else
+    #define PROC_BIND proc_bind(spread)
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -19,7 +25,7 @@
 
 using namespace std;
 
-// #define CALC
+#define CALC
 
 const int type = 1; // 0 - P_max, 1 - count_trials, 2 - count points, 3 - c_points / c_trials
 const int family_number = 3; // 0 - Grishagin, 1 - GKLS,
@@ -57,7 +63,7 @@ int main() {
         for (double j = r_min[i]; j <= r_max[i]; j += step_array[i]) {
             r_array[i].push_back(j);
         }
-        r_size[i] = r_array[i].size();
+        r_size[i] = (int)r_array[i].size();
     }
     vector<int> key_array{1, 3};
 
@@ -100,7 +106,7 @@ int main() {
     int den = 10, incr = 20;
     double eps = 0.01;
     vector<double> d_array{0.0, 0.0, 0.01, 0.01};
-    vector<double> Nmax_array{10000, 15000, 25000, 30000};
+    vector<int> Nmax_array{10000, 15000, 25000, 30000};
 
     mggsa_method mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, -1, eps, -1, incr);
 
@@ -109,7 +115,7 @@ int main() {
         count_r += r_size[i];
     }
 
-#pragma omp parallel for schedule(static, chunk) proc_bind(spread) num_threads(omp_get_num_procs()) collapse(2) \
+#pragma omp parallel for schedule(static, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
         shared(count_r, d_array, Nmax_array, r_array, P_vector, trials_data, points_data) \
         firstprivate(K, r_size, key_array, problems, mggsa)
     for (int t = 0; t < count_r; t++) {
@@ -170,10 +176,10 @@ int main() {
             trials_data[i][j][k] = count_trials_vec;
             points_data[i][j][k] = count_points_vec;
             int end_time = clock();
-            double work_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+            double work_time = ((double)end_time - start_time) / CLOCKS_PER_SEC;
 
             string str_input = problems[i].name + " key = " + to_string(key_array[j]) + " r = " + to_string(r_array[i][k]) + 
-                               " time: " + to_string(work_time) + " t_num: " + to_string(omp_get_thread_num()) + "\n";
+                " time: " + to_string(work_time) + " t_num: " + to_string(omp_get_thread_num()) + "\n";
             cout << str_input;
         }
     }

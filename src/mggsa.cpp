@@ -55,7 +55,7 @@ inline int insert_in_sorted(vector<trial_constr> &vec, trial_constr tr) {
 }
 
 inline double search_min(vector<trial_constr> &trials, int m) {
-    double z = numeric_limits<double>::infinity(), x;
+    double z = numeric_limits<double>::infinity(), x = 0.0;
     for (int i = 0; i < trials.size(); i++) {
         if (trials[i].nu == m + 1 && trials[i].z < z) {
             z = trials[i].z;
@@ -136,12 +136,12 @@ void mggsa_method::y(double x, vector<double> &X) {
 void mggsa_method::x(const vector<double> &P, vector<double> &X) {
     vector<double> P_correct(n);
     int size_x;
-    X.resize(pow(2, n));
+    X.resize((size_t)pow(2, n));
     for (int i = 0; i < n; i++) {
         P_correct[i] = (P[i] - (A[i] + B[i]) / 2.0) / (B[i] - A[i]);
     }
 
-    invmad(den + 1, X.data(), pow(2, n), &size_x, P_correct.data(), n, incr);
+    invmad(den + 1, X.data(), (int)pow(2, n), &size_x, P_correct.data(), n, incr);
     X.resize(size_x);
 }
 
@@ -579,7 +579,7 @@ bool mggsa_method::solve_test(vector<double> X_opt, int &count, Stop stop) {
     M = last_trials[0].nu;
     count = 1;
 
-    double x_k_1, h, delta_t;
+    double x_k_1, h;
     int t = 1;
     vector<double> P(n), X(n);
     while (true) {
