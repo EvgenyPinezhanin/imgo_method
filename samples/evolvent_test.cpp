@@ -90,14 +90,14 @@ int main() {
     int error;
 #if defined(__linux__)
     setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/map_test.gp");
+    error = system("chmod +x scripts/evolvent_test.gp");
     if (error != 0) {
         cerr << "Error chmod" << endl;
     }
 #endif
 
     char str[100];
-    sprintf(str, "gnuplot -c scripts/map_test.gp %d", key);
+    sprintf(str, "gnuplot -c scripts/evolvent_test.gp %d", key);
     error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << endl;

@@ -9,14 +9,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/release)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/debug)
 
 set(PROJECT_LIBRARY "${PROJECT_NAME}")
-set(PROJECT_LIBRARY_PROBLEMS "${PROJECT_NAME}_problems")
 set(PROJECT_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR}/include")
-set(PROJECT_PROBLEMS "${CMAKE_CURRENT_SOURCE_DIR}/GCGen")
 set(PROJECT_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 include_directories("${PROJECT_INCLUDE}")
-include_directories("${PROJECT_PROBLEMS}/sample_src")
-include_directories("${PROJECT_PROBLEMS}/src")
 
 # OUTPUT DIR
 if(CMAKE_BUILD_TYPE STREQUAL Release)
@@ -31,26 +27,31 @@ add_custom_target(${COPY_RESOURCE} ALL)
 add_custom_command(
   TARGET ${COPY_RESOURCE} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-          ${CMAKE_SOURCE_DIR}/scripts/
-          ${OUT_DIR}/scripts)
-
+  ${CMAKE_SOURCE_DIR}/scripts/
+  ${OUT_DIR}/scripts
+)
+  
 # MAKE DIR
 set(MAKE_DIR make_directory)
 add_custom_target(${MAKE_DIR} ALL)
 add_custom_command(
   TARGET ${MAKE_DIR} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E make_directory
-          ${OUT_DIR}/output_data)
+  ${OUT_DIR}/output_data
+)
+  
+# GCGEN
+add_subdirectory(GCGen)
+include_directories(${GCGEN_INC_NAME})
 
 # BUILD
-add_subdirectory(GCGen)
 add_subdirectory(src)
 add_subdirectory(samples)
 
 # REPORT
-message( STATUS "")
-message( STATUS "General configuration for ${PROJECT_NAME}")
-message( STATUS "======================================")
-message( STATUS "")
-message( STATUS "   Configuration: ${CMAKE_BUILD_TYPE}")
-message( STATUS "")
+message(STATUS "")
+message(STATUS "General configuration for ${PROJECT_NAME}")
+message(STATUS "======================================")
+message(STATUS "")
+message(STATUS "   Configuration: ${CMAKE_BUILD_TYPE}")
+message(STATUS "")
