@@ -44,6 +44,9 @@ add_custom_command(
 add_subdirectory(GCGen)
 include_directories(${GCGEN_INC_NAME})
 
+# DIRECT
+add_subdirectory(DiRect)
+
 # BUILD
 add_subdirectory(src)
 add_subdirectory(samples)

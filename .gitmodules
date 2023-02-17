@@ -1,3 +1,6 @@
 [submodule "GCGen"]
 	path = GCGen
 	url = https://github.com/EvgenyPinezhanin/GCGen
+[submodule "DiRect"]
+	path = DiRect
+	url = https://github.com/EvgenyPinezhanin/DiRect
