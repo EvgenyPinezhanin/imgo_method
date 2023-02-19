@@ -46,6 +46,7 @@ include_directories(${GCGEN_INC_NAME})
 
 # DIRECT
 add_subdirectory(DiRect)
+include_directories(${DIRECT_INC_NAME})
 
 # BUILD
 add_subdirectory(src)

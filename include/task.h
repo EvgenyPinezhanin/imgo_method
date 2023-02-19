@@ -1,6 +1,7 @@
 #ifndef TASK_H
 #define TASK_H
 
+#include <cstdio>
 #include <string>
 #include <vector>
 #include <limits>
@@ -10,6 +11,7 @@
 #include <IGeneralOptProblemFamily.hpp>
 #include <IOptProblemFamily.hpp>
 #include <IConstrainedOptProblemFamily.hpp>
+#include <direct_method.h>
 
 using namespace std;
 
@@ -57,6 +59,32 @@ struct task_mggsa : public task {
                vector<double> _X_opt, vector<double> _L, double _eps, int _Nmax, double _r, double _d, int _den, int _key, 
                Stop _stop, bool _used = true) : task(_name, _n, _A, _B, _X_opt, _L, _eps, _Nmax, _stop, _used), f(_f), 
                m(_m), r(_r), d(_d), den(_den), key(_key) {};
+};
+
+
+
+struct task_direct {
+    string name;
+
+    direct_objective_func f;
+    void *f_data;
+    int n;
+    vector<double> A, B, X_opt, L;
+
+    int max_feval, max_iter; 
+    double magic_eps, volume_reltol, sigma_reltol;
+
+    FILE *logfile;
+    direct_algorithm algorithm;
+
+    bool used;
+
+    task_direct(string _name, direct_objective_func _f, void *_f_data, int _n, vector<double> _A, vector<double> _B, 
+                vector<double> _X_opt, vector<double> _L, int _max_feval, int _max_iter, double _magic_eps, double _volume_reltol, 
+                double _sigma_reltol, FILE *_logfile, direct_algorithm _algorithm, bool _used = true) : name(_name), f(_f), 
+                f_data(_f_data), n(_n), A(_A), B(_B), X_opt(_X_opt), L(_L), max_feval(_max_feval), max_iter(_max_iter),
+                magic_eps(_magic_eps), volume_reltol(_volume_reltol), sigma_reltol(_sigma_reltol), logfile(_logfile),
+                algorithm(_algorithm), used(_used) {};
 };
 
 enum class type_constraned { CONSTR, NONCONSTR };
