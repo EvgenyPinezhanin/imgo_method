@@ -14,7 +14,7 @@
 
 using namespace std;
 
-#define CALC
+// #define CALC
 
 const int family_number = 2; // 0 - Hill, 1 - Shekel, 2 - comparsion Hill and Shekel
 
@@ -43,16 +43,16 @@ int main() {
     count_trials_vec[0].resize(hillProblems.GetFamilySize(), 0);
     count_trials_vec[1].resize(shekelProblems.GetFamilySize(), 0);
 
-    vector<class_problems_f> problems{ class_problems_f("HillProblemFamily", &hillProblems, type_constraned::NONCONSTR, "Hill"),
-                                       class_problems_f("ShekelProblemFamily", &shekelProblems, type_constraned::NONCONSTR, "Shekel") };
+    vector<problem_family> problems{ problem_family("HillProblemFamily", &hillProblems, type_constraned::NONCONSTR, "Hill"),
+                                     problem_family("ShekelProblemFamily", &shekelProblems, type_constraned::NONCONSTR, "Shekel") };
 
     imgo_method imgo(nullptr, m, 0.0, 0.0, -1.0, d, eps);
 
     functor_non_constr functor;
     for (int i = 0; i < number_family; i++) {
-        functor.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].problem);
+        functor.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
 
-        count_func = problems[i].problem->GetFamilySize();
+        count_func = problems[i].optProblemFamily->GetFamilySize();
         cout << problems[i].name << endl;
         ofstr << "# " << problems[i].name << endl;
         for (int j = 0; j < r_array[i].size(); j++) {

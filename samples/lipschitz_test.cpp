@@ -18,47 +18,7 @@ using vector_4d = vector<vector<vector<vector<double>>>>;
 // #define CALC
 // #define OUTPUT_INFO
 
-TGrishaginProblem grishaginProblem;
-double f_grishagin(vector<double> x, int j) {
-    switch (j) {
-        case 1: return grishaginProblem.ComputeFunction(x);
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-};
-
-GrishaginConstrainedProblem grishaginConstrainedProblem;
-double f_constr_grishagin(vector<double> x, int j) {
-    int constr = grishaginConstrainedProblem.GetConstraintsNumber();
-    if (j >= 1 && j <= constr) {
-        return grishaginConstrainedProblem.ComputeConstraint(j - 1, x);
-    } else if (j - 1 == constr) {
-        return grishaginConstrainedProblem.ComputeFunction(x);
-    } else {
-        return numeric_limits<double>::quiet_NaN();
-    }
-};
-
-TGKLSProblem GKLSProblem;
-double f_gkls(vector<double> x, int j) {
-    switch (j) {
-        case 1: return GKLSProblem.ComputeFunction({ x });
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-};
-
-TGKLSConstrainedProblem GKLSConstrainedProblem;
-double f_constr_gkls(vector<double> x, int j) {
-    int constr = GKLSConstrainedProblem.GetConstraintsNumber();
-    if (j >= 1 && j <= constr) {
-        return GKLSConstrainedProblem.ComputeConstraint(j - 1, x);
-    } else if (j - 1 == constr) {
-        return GKLSConstrainedProblem.ComputeFunction(x);
-    } else {
-        return numeric_limits<double>::quiet_NaN();
-    }
-};
-
-void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, class_problems_om problem, int num_func,
+void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single problem, int num_func,
                                                             double r, int key, int m, int incr, Stop stop);
 
 const int type = 0; // 0 - grishagin, 1 - GKLS
@@ -76,12 +36,15 @@ int main() {
     
     const int count_func = 4;
 
-    vector<class_problems_om> problems{ class_problems_om("Grishagin", &grishaginProblem, type_constraned::NONCONSTR, f_grishagin),
-                                        class_problems_om("GKLS", &GKLSProblem, type_constraned::NONCONSTR, f_gkls),
-                                        class_problems_om("GrishaginConstrained", &grishaginConstrainedProblem, 
-                                                          type_constraned::CONSTR, f_constr_grishagin),
-                                        class_problems_om("GKLSConstrained", &GKLSConstrainedProblem, 
-                                                          type_constraned::CONSTR, f_constr_gkls) };
+    TGrishaginProblem grishaginProblem;
+    GrishaginConstrainedProblem grishaginConstrainedProblem;
+    TGKLSProblem gklsProblem;
+    TGKLSConstrainedProblem gklsConstrainedProblem;
+
+    vector<problem_single> problems{ problem_single("Grishagin", &grishaginProblem, type_constraned::NONCONSTR),
+                                     problem_single("GKLS", &gklsProblem, type_constraned::NONCONSTR),
+                                     problem_single("GrishaginConstrained", &grishaginConstrainedProblem, type_constraned::CONSTR),
+                                     problem_single("GKLSConstrained", &gklsConstrainedProblem, type_constraned::CONSTR) };
 
 #if defined(CALC)
     ofstream ofstr("output_data/lipschitz_test.txt");
@@ -173,28 +136,32 @@ int main() {
     return 0;
 }
 
-void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, class_problems_om problem, int num_func,
-                                                            double r, int key, int m, int incr, Stop stop) {
-    double accuracy;                                                            
+void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single problem, int num_func,
+                                                          double r, int key, int m, int incr, Stop stop) {
+    double accuracy, f_X_opt, f_X;                                                            
     int constr, count_trials, count_points, n;
     vector<double> A, B, X_opt, X, mu;
-    IConstrainedOptProblem *constr_opt_problem;
-    IOptProblem *opt_problem;
+    functor_single func;
+    functor_single_constr func_constr;
 
     double t1 = omp_get_wtime();
 
     if (problem.type == type_constraned::CONSTR) {
-        constr_opt_problem = static_cast<IConstrainedOptProblem*>(problem.problem);
-        n = constr_opt_problem->GetDimension();
-        constr_opt_problem->GetBounds(A, B);
-        constr = constr_opt_problem->GetConstraintsNumber();
-        X_opt = constr_opt_problem->GetOptimumPoint();
+        func_constr.constr_opt_problem = static_cast<IConstrainedOptProblem*>(problem.optProblem);
+        func_constr.constr_opt_problem->GetBounds(A, B);
+        n = func_constr.constr_opt_problem->GetDimension();
+        constr = func_constr.constr_opt_problem->GetConstraintsNumber();
+        X_opt = func_constr.constr_opt_problem->GetOptimumPoint();
+        mggsa.setF(func_constr);
+        f_X_opt = func_constr(X_opt, constr + 1);
     } else {
-        opt_problem = static_cast<IOptProblem*>(problem.problem);
-        n = opt_problem->GetDimension();
-        opt_problem->GetBounds(A, B);
+        func.opt_problem = static_cast<IOptProblem*>(problem.optProblem);
+        func.opt_problem->GetBounds(A, B);
+        n = func.opt_problem->GetDimension();
         constr = 0;
-        X_opt = opt_problem->GetOptimumPoint();
+        X_opt = func.opt_problem->GetOptimumPoint();
+        mggsa.setF(func);
+        f_X_opt = func(X_opt, 1);
     }
 
     mggsa.setM(constr);
@@ -204,11 +171,15 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, class_problems
     mggsa.setDen(m);
     mggsa.setIncr(incr);
     mggsa.setR(r);
-    mggsa.setF(problem.f);
 
     mggsa.solve(count_trials, X, stop);
     mggsa.getMu(mu);
 
+    if (problem.type == type_constraned::CONSTR) {
+        f_X = func_constr(X, constr + 1);
+    } else {
+        f_X = func(X, 1);
+    }
     lipschitz_const[num_func][(size_t)key - key_min][(size_t)m - m_min][(size_t)incr - incr_min] = mu[0];
     accuracy = sqrt((X_opt[0] - X[0]) * (X_opt[0] - X[0]) + 
                     (X_opt[1] - X[1]) * (X_opt[1] - X[1]));
@@ -224,7 +195,7 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, class_problems
     cout << "[A; B] = [(" << A[0] << ", " << A[1] << "); (" <<
                              B[0] << ", " << B[1] << ")]"<< endl;
     cout << "X* = (" << X_opt[0] << ", " << X_opt[1] << ")" << endl;
-    cout << "f(X*) = " << problem.f(X_opt, constr + 1) << endl;
+    cout << "f(X*) = " << f_X_opt << endl;
     cout << "Parameters for constructing the Peano curve:" << endl;
     cout << "m = " << m << " key = " << key << " incr = " << incr << endl;
     cout << "Trials result:" << endl;
@@ -236,13 +207,13 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, class_problems
         cout << "L(g" << j + 1 << ") = " << mu[j] << endl;
     }
     cout << "X = (" << X[0] << ", " << X[1] << ")" << endl;
-    cout << "f(X) = " << problem.f(X, constr + 1) << endl;
+    cout << "f(X) = " << f_X << endl;
     cout << "||X* - X|| = " << accuracy << endl;
-    cout << "|f(X*) - f(X)| = " << abs(problem.f(X_opt, constr + 1) - problem.f(X, constr + 1)) << endl;
+    cout << "|f(X*) - f(X)| = " << abs(f_X_opt - f_X) << endl;
     cout << endl;
 #else
-    string str = problem.name + " key = " + to_string(key) + " m = " + to_string(m) + " incr = " + to_string(incr) +
-                 " time: " + to_string(dt) + " t_num = " + to_string(omp_get_thread_num()) + "\n";
-    cout << str;
+    string str_output = problem.name + " key = " + to_string(key) + " m = " + to_string(m) + " incr = " + to_string(incr) +
+                        " time: " + to_string(dt) + " t_num = " + to_string(omp_get_thread_num()) + "\n";
+    cout << str_output;
 #endif
 }

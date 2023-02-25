@@ -1,3 +1,7 @@
+#if defined( _MSC_VER )
+    #define _CRT_SECURE_NO_WARNINGS    
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -8,46 +12,60 @@
 
 using namespace std;
 
-const int sample_func_number = 3; // 0 - f1, 1 - f2, 2 - f3, 3 - f4
+const int test_func_number = 1; // 0 - f1, 1 - f2
 
 double f1(int n, const double *X, int *undefined_flag, void *data) {
     data_direct *f_data = static_cast<data_direct*>(data);
     f_data->count_trials++;
     f_data->points.push_back(vector<double>{X[0], X[1]});
 
-    return 1.0 - X[0] - X[1];
+    bool is_constr = true;
+    vector<double> constr(3);
+    constr[0] = 0.01 * (pow((X[0] - 2.2), 2.0) + pow((X[1] - 1.2), 2.0) - 2.25);
+    constr[1] = 100.0 * (1.0 - pow((X[0] - 2.0), 2.0) / 1.44 - pow(0.5 * X[1], 2.0));
+    constr[2] = 10.0 * (X[1] - 1.5 - 1.5 * sin(6.283 * (X[0] - 1.75)));
+    for (int i = 0; i < 3; i++) {
+        if (constr[i] > 0.0) is_constr = false;
+    }
+    if (is_constr) *undefined_flag = 1;
+
+    return -1.5 * X[0] * X[0] * exp(1.0 - X[0] * X[0] - 20.25 * pow((X[0] - X[1]), 2.0)) - 
+            pow(0.5 * (X[0] - 1.0) * (X[1] - 1.0), 4.0) * exp(2.0 - pow(0.5 * (X[0] - 1.0), 4.0) - 
+            pow(X[1] - 1.0, 4.0));
 }
+
+const double C[20] = {75.1963666677,-3.8112755343,0.1269366345,-0.0020567665,0.000010345,
+                      -6.8306567631,0.0302344793,-0.0012813448,0.0000352559,-0.0000002266,
+                      0.2564581253,-0.0034604030,0.0000135139,-28.1064434908,-0.0000052375,
+                      -0.0000000063,0.0000000007,0.0003405462,-0.0000016638,-2.8673112392 };
 
 double f2(int n, const double *X, int *undefined_flag, void *data) {
     data_direct *f_data = static_cast<data_direct*>(data);
     f_data->count_trials++;
     f_data->points.push_back(vector<double>{X[0], X[1]});
 
-    return (X[0] - 1.0) * (X[0] - 1.0) / 5.0 + (X[1] - 1.0) * (X[1] - 1.0) / 5.0;
-}
+    bool is_constr = true;
+    vector<double> constr(4);
+    constr[0] = 450.0 - X[0] * X[1];
+    constr[1] = (0.1 * X[0] - 1.0) * (0.1 * X[0] - 1.0) - X[1];
+    constr[2] = 8.0 * (X[0] - 40.0) - (X[1] - 30.0) * (X[1] - 55.0);
+    constr[3] = X[1] + (X[0] - 35.0) * (X[0] - 30.0) / 125.0 - 80.0;
+    for (int i = 0; i < 3; i++) {
+        if (constr[i] > 0.0) is_constr = false;
+    }
+    if (is_constr) *undefined_flag = 1;
 
-double f3(int n, const double *X, int *undefined_flag, void *data) {
-    data_direct *f_data = static_cast<data_direct*>(data);
-    f_data->count_trials++;
-    f_data->points.push_back(vector<double>{X[0], X[1]});
-
-    if (1.0 - X[0] - X[1] > 0.0) *undefined_flag = 1;
-    return X[0] * X[0] / 5.0 + X[1] * X[1] / 5.0;
-}
-
-double f4(int n, const double *X, int *undefined_flag, void *data) {
-    data_direct *f_data = static_cast<data_direct*>(data);
-    f_data->count_trials++;
-    f_data->points.push_back(vector<double>{X[0], X[1]});
-    
-    if ((X[0] - 2.0) * (X[0] - 2.0) + (X[1] - 2.0) * (X[1] - 2.0) - 2.0 > 0.0) *undefined_flag = 1;
-    return X[0] * X[0] / 5.0 + X[1] * X[1] / 5.0;
+    return -(C[0] + C[1] * X[0] + C[2] * X[0] * X[0] + C[3] * pow(X[0], 3) + C[4] * pow(X[0], 4) + C[5] * X[1] +
+             C[6] * X[0] * X[1] + C[7] * X[0] * X[0] * X[1] + C[8] * pow(X[0], 3) * X[1] + C[9] * pow(X[0], 4) * X[1] +
+             C[10] * X[1] * X[1] + C[11] * pow(X[1], 3) + C[12] * pow(X[1], 4) + C[13] / (X[1] + 1) + C[14] * X[0] * X[0] * X[1] *X[1] +
+             C[15] * pow(X[0], 3) * X[1] * X[1] + C[16] * pow(X[0], 3) * pow(X[1], 3) + C[17] * X[0] * X[1] * X[1] +
+             C[18] * X[0] * pow(X[1], 3) + C[19] * exp(0.0005 * X[0] * X[1]));
 }
 
 int main() {
-    ofstream ofstr("output_data/direct_sample.txt");
+    ofstream ofstr("output_data/direct_test.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
-    ofstream ofstr_opt("output_data/direct_sample_opt.txt");
+    ofstream ofstr_opt("output_data/direct_test_opt.txt");
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
     data_direct f_data;
@@ -60,17 +78,11 @@ int main() {
     vector<double> X;
     double minf;
 
-    vector<task_direct> task_array = { task_direct("f1", f1, &f_data, n, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
-                                                   vector<double>{4.0, 4.0}, vector<double>{}, max_feval, max_iter, magic_eps,
+    vector<task_direct> task_array = { task_direct("f1", f1, &f_data, n, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
+                                                   vector<double>{0.942, 0.944}, vector<double>{}, max_feval, max_iter, magic_eps,
                                                    volume_reltol, sigma_reltol, nullptr, algorithm),
-                                       task_direct("f2", f2, &f_data, n, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
-                                                   vector<double>{1.0, 1.0}, vector<double>{}, max_feval, max_iter, magic_eps,
-                                                   volume_reltol, sigma_reltol, nullptr, algorithm),
-                                       task_direct("f3", f3, &f_data, n, vector<double>{-1.0, -1.0}, vector<double>{1.0, 1.0},
-                                                   vector<double>{0.5, 0.5}, vector<double>{}, max_feval, max_iter, magic_eps,
-                                                   volume_reltol, sigma_reltol, nullptr, algorithm),
-                                       task_direct("f4", f4, &f_data, n, vector<double>{0.0, 0.0}, vector<double>{3.0, 3.0},
-                                                   vector<double>{1.0, 1.0}, vector<double>{}, max_feval, max_iter, magic_eps,
+                                       task_direct("f2", f2, &f_data, n, vector<double>{0.0, 0.0}, vector<double>{80.0, 80.0},
+                                                   vector<double>{77.489, 63.858}, vector<double>{}, max_feval, max_iter, magic_eps,
                                                    volume_reltol, sigma_reltol, nullptr, algorithm) };
 
     direct_method direct;
@@ -132,6 +144,7 @@ int main() {
             ofstr << endl << endl;
         }
     }
+    ofstr.close();
 
     size_t size = task_array.size();
     ofstr_opt << "array AX[" << size << "]" << endl;
@@ -150,14 +163,14 @@ int main() {
     int error;
 #if defined(__linux__)
     setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/direct_sample.gp");
+    error = system("chmod +x scripts/direct_test.gp");
     if (error != 0) {
         cerr << "Error chmod" << endl;
     }
 #endif
 
     char str[100];
-    sprintf(str, "gnuplot -c scripts/direct_sample.gp %d", sample_func_number);
+    sprintf(str, "gnuplot -c scripts/direct_test.gp %d", test_func_number);
     error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << endl;

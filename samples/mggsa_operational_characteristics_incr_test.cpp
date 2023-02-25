@@ -25,7 +25,7 @@
 
 using namespace std;
 
-#define CALC
+// #define CALC
 
 const int type = 0; // 0 - count trials, 1 - count points, 2 - c_points / c_trials
 const int family_number = 2; // 0 - Grishagin, 1 - GKLS,
@@ -75,13 +75,13 @@ int main() {
     TGrishaginConstrainedProblemFamily grishaginConstrainedProblems;
     TGKLSConstrainedProblemFamily GKLSConstrainedProblems;
 
-    vector<class_problems_f> problems{ class_problems_f("GrishaginProblemFamily", &grishaginProblems, type_constraned::NONCONSTR,
-                                                        "Grishagin"),
-                                       class_problems_f("GKLSProblemFamily", &GKLSProblems, type_constraned::NONCONSTR, "GKLS"),
-                                       class_problems_f("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
-                                                        type_constraned::CONSTR, "GrishaginConstrained"),
-                                       class_problems_f("GKLSProblemConstrainedFamily", &GKLSConstrainedProblems, 
-                                                        type_constraned::CONSTR, "GKLSConstrained") };
+    vector<problem_family> problems{ problem_family("GrishaginProblemFamily", &grishaginProblems, type_constraned::NONCONSTR,
+                                                    "Grishagin"),
+                                     problem_family("GKLSProblemFamily", &GKLSProblems, type_constraned::NONCONSTR, "GKLS"),
+                                     problem_family("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
+                                                    type_constraned::CONSTR, "GrishaginConstrained"),
+                                     problem_family("GKLSProblemConstrainedFamily", &GKLSConstrainedProblems, 
+                                                    type_constraned::CONSTR, "GKLSConstrained") };
 
     mggsa_method mggsa(nullptr, -1, -1, A, B, -1.0, -1.0, den, key, eps, Nmax, -1);
 
@@ -89,23 +89,23 @@ int main() {
         shared(number_family, problems, d_array, r_array, incr_array, max_count_trials, max_count_points) firstprivate(mggsa) \
         private(A, B, count_func, start_time, end_time, work_time, X_opt, count_trials, count_trials_vec, count_points_vec)
     for (int i = 0; i < number_family; i++) {
-        functor_non_constr func_non_constr;
-        functor_constr func_constr;
+        functor_family func;
+        functor_family_constr func_constr;
         if (problems[i].type == type_constraned::CONSTR) {
-            func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].problem);
+            func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
             (*func_constr.constr_opt_problem_family)[0]->GetBounds(A, B);
             mggsa.setN((*func_constr.constr_opt_problem_family)[0]->GetDimension());
             mggsa.setM((*func_constr.constr_opt_problem_family)[0]->GetConstraintsNumber());
         } else {
-            func_non_constr.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].problem);
-            (*func_non_constr.opt_problem_family)[0]->GetBounds(A, B);
-            mggsa.setN((*func_non_constr.opt_problem_family)[0]->GetDimension());
+            func.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
+            (*func.opt_problem_family)[0]->GetBounds(A, B);
+            mggsa.setN((*func.opt_problem_family)[0]->GetDimension());
             mggsa.setM(0);
         }
 
-        count_trials_vec.resize(problems[i].problem->GetFamilySize());
-        count_points_vec.resize(problems[i].problem->GetFamilySize());
-        count_func = problems[i].problem->GetFamilySize();
+        count_trials_vec.resize(problems[i].optProblemFamily->GetFamilySize());
+        count_points_vec.resize(problems[i].optProblemFamily->GetFamilySize());
+        count_func = problems[i].optProblemFamily->GetFamilySize();
         mggsa.setAB(A, B);
         mggsa.setD(d_array[i]);
 
@@ -119,11 +119,11 @@ int main() {
                     if (problems[i].type == type_constraned::CONSTR) {
                         func_constr.current_func = l;
                         X_opt = (*func_constr.constr_opt_problem_family)[l]->GetOptimumPoint();
-                        mggsa.setF(function<double(vector<double>, int)>(func_constr));
+                        mggsa.setF(func_constr);
                     } else {
-                        func_non_constr.current_func = l;
-                        X_opt = (*func_non_constr.opt_problem_family)[l]->GetOptimumPoint();
-                        mggsa.setF(function<double(vector<double>, int)>(func_non_constr));
+                        func.current_func = l;
+                        X_opt = (*func.opt_problem_family)[l]->GetOptimumPoint();
+                        mggsa.setF(func);
                     }
                     if (mggsa.solve_test(X_opt, count_trials, Stop::ACCURNUMBER)) {
                         count_trials_vec[l] = count_trials;

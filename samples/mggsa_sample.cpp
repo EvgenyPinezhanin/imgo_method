@@ -60,7 +60,7 @@ int main() {
     vector<task_mggsa> task_array = { task_mggsa(f1, "f1", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
                                                  vector<double>{4.0, 4.0}, vector<double>{}, eps, Nmax, r, d, den, key, stop),
                                       task_mggsa(f2, "f2", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
-                                                 vector<double>{1.0, 1.0}, vector<double>{}, eps, Nmax, 1.0, d, den, key, stop),
+                                                 vector<double>{1.0, 1.0}, vector<double>{}, eps, Nmax, r, d, den, key, stop),
                                       task_mggsa(f3, "f3", n, 1, vector<double>{-1.0, -1.0}, vector<double>{1.0, 1.0},
                                                  vector<double>{0.5, 0.5}, vector<double>{}, eps, Nmax, r, d, den, key, stop),
                                       task_mggsa(f4, "f4", n, 1, vector<double>{0.0, 0.0}, vector<double>{3.0, 3.0},

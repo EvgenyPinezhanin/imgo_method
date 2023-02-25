@@ -61,7 +61,156 @@ struct task_mggsa : public task {
                m(_m), r(_r), d(_d), den(_den), key(_key) {};
 };
 
+enum class type_constraned { CONSTR, NONCONSTR };
 
+struct problem {
+    string name;
+    type_constraned type;
+    string short_name;
+
+    bool used;
+
+    problem(string _name, type_constraned _type, string _short_name = "", bool _used = true) 
+            : name(_name), short_name(_short_name), type(_type), used(_used) {};
+};
+
+struct problem_single : public problem {
+    IGeneralOptProblem *optProblem;
+
+    problem_single(string _name, IGeneralOptProblem *_optProblem, type_constraned _type, string _short_name = "", bool _used = true) 
+                   : problem(_name, _type, _short_name, used), optProblem(_optProblem) {};
+};
+
+struct problem_family : public problem {
+    IGeneralOptProblemFamily *optProblemFamily;
+
+    problem_family(string _name, IGeneralOptProblemFamily *_optProblemFamily, type_constraned _type, string _short_name = "", bool _used = true) 
+                   : problem(_name, _type, _short_name, used), optProblemFamily(_optProblemFamily) {};
+};
+
+class Functor {
+public:
+    Functor() {};
+
+    virtual double operator() (double x, int j) = 0;
+    virtual double operator() (vector<double> x, int j) = 0; 
+};
+
+class functor_single : public Functor {
+public:
+    IOptProblem *opt_problem;
+
+    functor_single(IOptProblem *_opt_problem = nullptr) 
+                   : Functor(), opt_problem(_opt_problem) {};
+
+    double operator() (double x, int j) override {
+        switch (j) {
+            case 1: return opt_problem->ComputeFunction(vector<double>{x});
+            default: return numeric_limits<double>::quiet_NaN();
+        }
+    }
+
+    double operator() (vector<double> x, int j) override {
+        switch (j) {
+            case 1: return opt_problem->ComputeFunction(x);
+            default: return numeric_limits<double>::quiet_NaN();
+        }
+    }
+};
+
+class functor_single_constr : public Functor {
+public:
+    IConstrainedOptProblem *constr_opt_problem;
+
+    functor_single_constr(IConstrainedOptProblem *_constr_opt_problem = nullptr) 
+        : Functor(), constr_opt_problem(_constr_opt_problem) {}
+
+    double operator() (double x, int j) override {
+        int constr = constr_opt_problem->GetConstraintsNumber();
+        if (j >= 1 && j <= constr) {
+            return constr_opt_problem->ComputeConstraint(j - 1, vector<double>{x});
+        } else if (j == constr + 1) {
+            return constr_opt_problem->ComputeFunction(vector<double>{x});
+        } else {
+            return numeric_limits<double>::quiet_NaN();
+        }
+    }
+
+    double operator() (vector<double> x, int j) override {
+        int constr = constr_opt_problem->GetConstraintsNumber();
+        if (j >= 1 && j <= constr) {
+            return constr_opt_problem->ComputeConstraint(j - 1, x);
+        } else if (j == constr + 1) {
+            return constr_opt_problem->ComputeFunction(x);
+        } else {
+            return numeric_limits<double>::quiet_NaN();
+        }
+    }
+};
+
+class functor_family : public Functor {
+public:
+    IOptProblemFamily *opt_problem_family;
+    int current_func;
+
+    functor_family(IOptProblemFamily *_opt_problem_family = nullptr) 
+        : Functor(), opt_problem_family(_opt_problem_family), current_func(0) {};
+
+    double operator() (double x, int j) override {
+        switch (j) {
+            case 1: return (*opt_problem_family)[current_func]->ComputeFunction(vector<double>{x});
+            default: return numeric_limits<double>::quiet_NaN();
+        }
+    }
+
+    double operator() (vector<double> x, int j) override {
+        switch (j) {
+            case 1: return (*opt_problem_family)[current_func]->ComputeFunction(x);
+            default: return numeric_limits<double>::quiet_NaN();
+        }
+    }
+};
+
+class functor_family_constr : public Functor {
+public:
+    IConstrainedOptProblemFamily *constr_opt_problem_family;
+    int current_func;
+
+    functor_family_constr(IConstrainedOptProblemFamily *_constr_opt_problem_family = nullptr) 
+        : Functor(), constr_opt_problem_family(_constr_opt_problem_family), current_func(0) {}
+
+    double operator() (double x, int j) {
+        int constr = (*constr_opt_problem_family)[current_func]->GetConstraintsNumber();
+        if (j >= 1 && j <= constr) {
+            return (*constr_opt_problem_family)[current_func]->ComputeConstraint(j - 1, vector<double>{x});
+        } else if (j == constr + 1) {
+            return (*constr_opt_problem_family)[current_func]->ComputeFunction(vector<double>{x});
+        } else {
+            return numeric_limits<double>::quiet_NaN();
+        }
+    }
+
+    double operator() (vector<double> x, int j) {
+        int constr = (*constr_opt_problem_family)[current_func]->GetConstraintsNumber();
+        if (j >= 1 && j <= constr) {
+            return (*constr_opt_problem_family)[current_func]->ComputeConstraint(j - 1, x);
+        } else if (j == constr + 1) {
+            return (*constr_opt_problem_family)[current_func]->ComputeFunction(x);
+        } else {
+            return numeric_limits<double>::quiet_NaN();
+        }
+    }
+};
+
+struct data_direct {
+    int count_trials;
+    vector<vector<double>> points;
+};
+
+struct data_direct_family : public data_direct {
+    Functor *functor;
+    type_constraned type;
+};
 
 struct task_direct {
     string name;
@@ -71,7 +220,7 @@ struct task_direct {
     int n;
     vector<double> A, B, X_opt, L;
 
-    int max_feval, max_iter; 
+    int max_feval, max_iter;
     double magic_eps, volume_reltol, sigma_reltol;
 
     FILE *logfile;
@@ -85,99 +234,6 @@ struct task_direct {
                 f_data(_f_data), n(_n), A(_A), B(_B), X_opt(_X_opt), L(_L), max_feval(_max_feval), max_iter(_max_iter),
                 magic_eps(_magic_eps), volume_reltol(_volume_reltol), sigma_reltol(_sigma_reltol), logfile(_logfile),
                 algorithm(_algorithm), used(_used) {};
-};
-
-enum class type_constraned { CONSTR, NONCONSTR };
-
-struct class_problems {
-    string name;
-    string short_name;
-    type_constraned type;
-
-    bool used;
-
-    class_problems(string _name, type_constraned _type, string _short_name = "def", bool _used = true) 
-        : name(_name), short_name(_short_name), type(_type), used(_used) {};
-};
-
-struct class_problems_o : public class_problems {
-    IGeneralOptProblem *problem;
-
-    class_problems_o(string _name, IGeneralOptProblem *_problem, type_constraned _type, string _short_name = "def", bool _used = true) 
-        : class_problems(_name, _type, _short_name, used), problem(_problem) {};
-};
-
-struct class_problems_os : public class_problems_o {
-    double (*f)(double, int);
-
-    class_problems_os(string _name, IGeneralOptProblem *_problem, type_constraned _type, double (*_f)(double, int), string _short_name = "def",
-        bool _used = true) : class_problems_o(_name, _problem, _type, _short_name, _used), f(_f) {};
-};
-
-struct class_problems_om : public class_problems_o {
-    double (*f)(vector<double>, int);
-
-    class_problems_om(string _name, IGeneralOptProblem *_problem, type_constraned _type, double (*_f)(vector<double>, int), 
-    string _short_name = "def", bool _used = true) : class_problems_o(_name, _problem, _type, _short_name, _used), f(_f) {};
-};
-
-struct class_problems_f : public class_problems {
-    IGeneralOptProblemFamily *problem;
-
-    class_problems_f(string _name, IGeneralOptProblemFamily *_problem, type_constraned _type, string _short_name = "def", bool _used = true) 
-        : class_problems(_name, _type, _short_name, used), problem(_problem) {};
-};
-
-struct functor_non_constr {
-    functor_non_constr(IOptProblemFamily *_opt_problem_family = nullptr) 
-        : opt_problem_family(_opt_problem_family), current_func(0) {};
-
-    IOptProblemFamily *opt_problem_family;
-    int current_func;
-
-    double operator() (double x, int j) {
-        switch (j) {
-            case 1: return (*opt_problem_family)[current_func]->ComputeFunction(vector<double>{x});
-            default: return numeric_limits<double>::quiet_NaN();
-        }
-    }
-
-    double operator() (vector<double> x, int j) {
-        switch (j) {
-            case 1: return (*opt_problem_family)[current_func]->ComputeFunction(x);
-            default: return numeric_limits<double>::quiet_NaN();
-        }
-    }
-};
-
-struct functor_constr {
-    functor_constr(IConstrainedOptProblemFamily *_constr_opt_problem_family = nullptr) 
-        : constr_opt_problem_family(_constr_opt_problem_family), current_func(0) {}
-
-    IConstrainedOptProblemFamily *constr_opt_problem_family;
-    int current_func;
-
-    double operator() (double x, int j) {
-        int constr = (*constr_opt_problem_family)[current_func]->GetConstraintsNumber();
-        if (j >= 1 && j <= constr) {
-            return (*constr_opt_problem_family)[current_func]->ComputeConstraint(j - 1, vector<double>{x});
-        } else if (j - 1 == constr) {
-            return (*constr_opt_problem_family)[current_func]->ComputeFunction(vector<double>{x});
-        } else {
-            return numeric_limits<double>::quiet_NaN();
-        }
-    }
-
-    double operator() (vector<double> x, int j) {
-        int constr = (*constr_opt_problem_family)[current_func]->GetConstraintsNumber();
-        if (j >= 1 && j <= constr) {
-            return (*constr_opt_problem_family)[current_func]->ComputeConstraint(j - 1, x);
-        } else if (j - 1 == constr) {
-            return (*constr_opt_problem_family)[current_func]->ComputeFunction(x);
-        } else {
-            return numeric_limits<double>::quiet_NaN();
-        }
-    }
 };
 
 #endif // TASK_H

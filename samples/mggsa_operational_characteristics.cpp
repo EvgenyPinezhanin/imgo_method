@@ -62,35 +62,32 @@ int main() {
     count_trials_vec[2].resize(grishaginConstrainedProblems.GetFamilySize(), 0);
     count_trials_vec[3].resize(GKLSConstrainedProblems.GetFamilySize(), 0);
 
-    vector<class_problems_f> problems{ class_problems_f("GrishaginProblemFamily", &grishaginProblems, type_constraned::NONCONSTR, "Grishagin"),
-                                       class_problems_f("GKLSProblemFamily", &GKLSProblems, type_constraned::NONCONSTR, "GKLS"),
-                                       class_problems_f("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
-                                                        type_constraned::CONSTR, "GrishaginConstrained"),
-                                       class_problems_f("GKLSProblemConstrainedFamily", &GKLSConstrainedProblems, 
-                                                        type_constraned::CONSTR, "GKLSConstrained") };
+    vector<problem_family> problems{ problem_family("GrishaginProblemFamily", &grishaginProblems, type_constraned::NONCONSTR, "Grishagin"),
+                                     problem_family("GKLSProblemFamily", &GKLSProblems, type_constraned::NONCONSTR, "GKLS"),
+                                     problem_family("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
+                                                    type_constraned::CONSTR, "GrishaginConstrained"),
+                                     problem_family("GKLSProblemConstrainedFamily", &GKLSConstrainedProblems, 
+                                                    type_constraned::CONSTR, "GKLSConstrained") };
 
     mggsa_method mggsa(nullptr, -1, -1, A, B, -1.0, d, den, key, eps, Nmax);
 
-    functor_non_constr func_non_constr;
-    functor_constr func_constr;
-    function<double(vector<double>, int)> f;
+    functor_family func;
+    functor_family_constr func_constr;
     for (int i = 0; i < number_family; i++) {
         if (problems[i].type == type_constraned::CONSTR) {
-            func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].problem);
+            func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
             (*func_constr.constr_opt_problem_family)[0]->GetBounds(A, B);
             mggsa.setN((*func_constr.constr_opt_problem_family)[0]->GetDimension());
             mggsa.setM((*func_constr.constr_opt_problem_family)[0]->GetConstraintsNumber());
-            f = func_constr;
         } else {
-            func_non_constr.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].problem);
-            (*func_non_constr.opt_problem_family)[0]->GetBounds(A, B);
-            mggsa.setN((*func_non_constr.opt_problem_family)[0]->GetDimension());
+            func.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
+            (*func.opt_problem_family)[0]->GetBounds(A, B);
+            mggsa.setN((*func.opt_problem_family)[0]->GetDimension());
             mggsa.setM(0);
-            f = func_non_constr;
         }
 
-        count_trials_vec.resize(problems[i].problem->GetFamilySize());
-        count_func = problems[i].problem->GetFamilySize();
+        count_trials_vec.resize(problems[i].optProblemFamily->GetFamilySize());
+        count_func = problems[i].optProblemFamily->GetFamilySize();
         mggsa.setAB(A, B);
 
         cout << problems[i].name << endl;
@@ -106,9 +103,9 @@ int main() {
                     X_opt = (*func_constr.constr_opt_problem_family)[k]->GetOptimumPoint();
                     mggsa.setF(func_constr);
                 } else {
-                    func_non_constr.current_func = k;
-                    X_opt = (*func_non_constr.opt_problem_family)[k]->GetOptimumPoint();
-                    mggsa.setF(func_non_constr);
+                    func.current_func = k;
+                    X_opt = (*func.opt_problem_family)[k]->GetOptimumPoint();
+                    mggsa.setF(func);
                 }
                 if (mggsa.solve_test(X_opt, count_trials, Stop::ACCURNUMBER)) {
                     count_trials_vec[i][k] = count_trials;

@@ -7,8 +7,6 @@
 #include <vector>
 #include <cmath>
 
-#include <Grishagin/grishagin_function.hpp>
-#include <GKLS/GKLSProblem.hpp>
 #include <mggsa.h>
 #include <task.h>
 

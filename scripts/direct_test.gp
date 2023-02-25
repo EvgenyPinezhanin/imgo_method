@@ -1,8 +1,8 @@
 #!/usr/bin/gnuplot
 
-trialfile = "output_data/mggsa_test.txt"
+trialfile = "output_data/direct_test.txt"
 
-load "output_data/mggsa_test_opt.txt"
+load "output_data/direct_test_opt.txt"
 
 f1(x, y) = -1.5 * x ** 2 * exp(1 - x ** 2 - 20.25 * (x - y) ** 2) - (0.5 * (x - 1) * (y - 1)) ** 4 * \
             exp(2.0 - (0.5 * (x - 1)) ** 4 - (y - 1.0) ** 4)
@@ -43,7 +43,7 @@ g2_3(x, y) = 8.0 * (x - 40.0) - (y - 30.0) * (y - 55.0)
 g2_4(x, y) = y + (x - 35.0) * (x - 30.0) / 125.0 - 80.0
 g2(x, y) = (g2_1(x, y) <= 0.0) ? (g2_2(x, y) <= 0 ? (g2_3(x, y) <= 0 ? (g2_4(x, y) <= 0 ? (g2_4(x, y)) : 1 / 0) : 1 / 0) : 1 / 0) : 1 / 0
 
-title_name(n) = sprintf("Graph of the test function №%d", n)
+title_name(n) = sprintf("Graph of the test function №%d with DIRECT", n)
 function_name(s, n) = sprintf("%s%d(x, y)", s, n)
 
 set grid
