@@ -48,7 +48,7 @@ int main() {
 
     imgo_method imgo(nullptr, m, 0.0, 0.0, -1.0, d, eps);
 
-    functor_non_constr functor;
+    functor_family functor;
     for (int i = 0; i < number_family; i++) {
         functor.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
 

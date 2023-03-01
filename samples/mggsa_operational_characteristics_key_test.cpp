@@ -1,5 +1,8 @@
 #if defined( _MSC_VER )
-    #define _CRT_SECURE_NO_WARNINGS    
+    #define _CRT_SECURE_NO_WARNINGS
+    #define PROC_BIND
+#else
+    #define PROC_BIND proc_bind(spread)
 #endif
 
 #include <iostream>
@@ -7,6 +10,7 @@
 #include <ctime>
 #include <algorithm>
 
+#include <omp.h>
 #include <Grishagin/GrishaginProblemFamily.hpp>
 #include <Grishagin/GrishaginConstrainedProblemFamily.hpp>
 #include <GKLS/GKLSProblemFamily.hpp>
@@ -18,7 +22,7 @@ using namespace std;
 
 // #define CALC
 
-const int family_number = 3; // 0 - Grishagin, 1 - GKLS,
+const int family_number = 2; // 0 - Grishagin, 1 - GKLS,
                              // 2 - Grishagin(constrained), 3 - GKLS(constrained),
 
 int main() {
@@ -28,20 +32,17 @@ int main() {
     ofstream ofstr_opt("output_data/mggsa_operational_characteristics_key_test_opt.txt");
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
-    int count_func, count_successful, count_trials;
+    const int number_family = 4;
 
-    int start_time, end_time;
-    double work_time;
+    int chunk = 2;
 
     vector<vector<int>> K{ {0, 700, 25},
                            {0, 1200, 25},
                            {0, 2200, 25},
                            {0, 4500, 25} };
 
-    int den = 10, m = 0, Nmax = 5000, incr = 30;
+    int den = 10, Nmax = 5000, incr = 30;
     double eps = 0.01;
-
-    vector<double> A, B, X_opt;
     vector<vector<double>> r_array{ {3.0, 2.4, 1.6, 1.0},
                                     {4.2, 3.8, 2.0, 1.0},
                                     {3.5, 2.6, 1.8, 1.0},
@@ -49,56 +50,62 @@ int main() {
     vector<int> key_array{1, 3, 3, 3};
     vector<double> d_array{0.0, 0.0, 0.01, 0.01};
 
-    const int number_family = 4;
+    int r_size = r_array[0].size();
+    vector<vector<vector<double>>> success_rate(number_family);
+    for (int i = 0; i < number_family; i++) {
+        success_rate[i].resize(r_size);
+        for (int j = 0; j < r_size; j++) {
+            success_rate[i][j].resize((K[i][1] - K[i][0]) / K[i][2] + 1);
+        }
+    }
 
     TGrishaginProblemFamily grishaginProblems;
     TGrishaginConstrainedProblemFamily grishaginConstrainedProblems;
-    TGKLSProblemFamily GKLSProblems;
-    TGKLSConstrainedProblemFamily GKLSConstrainedProblems;
-
-    vector<vector<int>> count_trials_vec(number_family);
-    count_trials_vec[0].resize(grishaginProblems.GetFamilySize(), 0);
-    count_trials_vec[1].resize(GKLSProblems.GetFamilySize(), 0);
-    count_trials_vec[2].resize(grishaginConstrainedProblems.GetFamilySize(), 0);
-    count_trials_vec[3].resize(GKLSConstrainedProblems.GetFamilySize(), 0);
+    TGKLSProblemFamily gklsProblems;
+    TGKLSConstrainedProblemFamily gklsConstrainedProblems;
 
     vector<problem_family> problems{ problem_family("GrishaginProblemFamily", &grishaginProblems, type_constraned::NONCONSTR,
                                                     "Grishagin"),
-                                     problem_family("GKLSProblemFamily", &GKLSProblems, type_constraned::NONCONSTR, "GKLS"),
+                                     problem_family("GKLSProblemFamily", &gklsProblems, type_constraned::NONCONSTR, "GKLS"),
                                      problem_family("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
                                                     type_constraned::CONSTR, "GrishaginConstrained"),
-                                     problem_family("GKLSProblemConstrainedFamily", &GKLSConstrainedProblems, 
+                                     problem_family("GKLSProblemConstrainedFamily", &gklsConstrainedProblems, 
                                                     type_constraned::CONSTR, "GKLSConstrained") };
 
-    mggsa_method mggsa(nullptr, -1, -1, A, B, -1.0, -1.0, den, -1, eps, Nmax, incr);
+    mggsa_method mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, -1, eps, Nmax, incr);
 
+    int total_start_time = clock();
+#pragma omp parallel for schedule(static, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
+        shared(number_family, problems, r_array, r_size, success_rate) \
+        firstprivate(mggsa, key_array, d_array)
     for (int i = 0; i < number_family; i++) {
-        functor_family func;
-        functor_family_constr func_constr;
-        if (problems[i].type == type_constraned::CONSTR) {
-            func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
-            (*func_constr.constr_opt_problem_family)[0]->GetBounds(A, B);
-            mggsa.setN((*func_constr.constr_opt_problem_family)[0]->GetDimension());
-            mggsa.setM((*func_constr.constr_opt_problem_family)[0]->GetConstraintsNumber());
-        } else {
-            func.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
-            (*func.opt_problem_family)[0]->GetBounds(A, B);
-            mggsa.setN((*func.opt_problem_family)[0]->GetDimension());
-            mggsa.setM(0);
-        }
+        for (int j = 0; j < r_size; j++) {
+            vector<double> A, B;
+            functor_family func;
+            functor_family_constr func_constr;
 
-        count_trials_vec.resize(problems[i].optProblemFamily->GetFamilySize());
-        count_func = problems[i].optProblemFamily->GetFamilySize();
-        mggsa.setAB(A, B);
-        mggsa.setD(d_array[i]);
-
-        cout << problems[i].name << endl;
-        ofstr << "# " << problems[i].name << endl;
-        for (int j = 0; j < r_array[i].size(); j++) {
-            cout << "r = " << r_array[i][j] << endl;
+            if (problems[i].type == type_constraned::CONSTR) {
+                func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
+                (*func_constr.constr_opt_problem_family)[0]->GetBounds(A, B);
+                mggsa.setN((*func_constr.constr_opt_problem_family)[0]->GetDimension());
+                mggsa.setM((*func_constr.constr_opt_problem_family)[0]->GetConstraintsNumber());
+            } else {
+                func.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
+                (*func.opt_problem_family)[0]->GetBounds(A, B);
+                mggsa.setN((*func.opt_problem_family)[0]->GetDimension());
+                mggsa.setM(0);
+            }
+            mggsa.setAB(A, B);
+            mggsa.setD(d_array[i]);
             mggsa.setKey(key_array[j]);
             mggsa.setR(r_array[i][j]);
-            start_time = clock();
+
+            vector<int> count_trials_vec(problems[i].optProblemFamily->GetFamilySize());
+            int count_func = problems[i].optProblemFamily->GetFamilySize();
+            vector<double> X_opt;
+            int count_trials, count_successful;
+
+            double start_time = omp_get_wtime();
             for (int k = 0; k < count_func; k++) {
                 count_trials = K[i][1];
                 if (problems[i].type == type_constraned::CONSTR) {
@@ -111,23 +118,35 @@ int main() {
                     mggsa.setF(func);
                 }
                 if (mggsa.solve_test(X_opt, count_trials, Stop::ACCURNUMBER)) {
-                    count_trials_vec[i][k] = count_trials;
+                    count_trials_vec[k] = count_trials;
                 } else {
-                    count_trials_vec[i][k] = count_trials + 1;
+                    count_trials_vec[k] = count_trials + 1;
                 }
             }
             for (int k = K[i][0]; k <= K[i][1]; k += K[i][2]) {
-                count_successful = (int)count_if(count_trials_vec[i].begin(), count_trials_vec[i].end(), [k](double elem){ return elem <= k; });
-                cout << "K = " << k << " success rate = " << (double)count_successful / count_func << endl;
-                ofstr << k << " " << (double)count_successful / count_func << endl;
+                count_successful = (int)count_if(count_trials_vec.begin(), count_trials_vec.end(), [k](double elem){ return elem <= k; });
+                success_rate[i][j][k / K[i][2]] = (double)count_successful / count_func;
+            }
+            double end_time = clock();
+            double work_time = ((double)end_time - start_time) / CLOCKS_PER_SEC;
+
+            string str_input = problems[i].name + " r = " + to_string(r_array[i][j]) + " key = " + to_string(key_array[j]) + 
+                               " time: " + to_string(work_time) + " t_num: " + to_string(omp_get_thread_num()) + "\n";
+            cout << str_input;
+        }
+    }
+    for (int i = 0; i < number_family; i++) {
+        for (int j = 0; j < r_size; j++) {
+            for (int k = K[i][0]; k <= K[i][1]; k += K[i][2]) {
+                ofstr << k << " " << success_rate[i][j][k / K[i][2]] << endl;
             }
             ofstr << endl << endl;
-            end_time = clock();
-            work_time = ((double)end_time - start_time) / CLOCKS_PER_SEC;
-            cout << "time: " << work_time << endl;
         }
     }
     ofstr.close();
+    int total_end_time = clock();
+    double total_work_time = ((double)total_end_time - total_start_time) / CLOCKS_PER_SEC;
+    cout << "Total time: " << total_work_time << endl;
 
     int size = key_array.size();
     ofstr_opt << "count_key = " << size << endl;

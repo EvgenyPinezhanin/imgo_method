@@ -166,7 +166,7 @@ int main() {
             cout << "eps = " << eps << " r = " << r << endl;
             cout << "Trials result:" << endl;
             cout << "Number of trials = " << count_trials << endl;
-            cout << "Estimation of the Lipschitz constant = " << gsa.getMu() << endl;
+            cout << "Estimation of the Lipschitz constant = " << gsa.getLambda() << endl;
             cout << "X = " << setprecision(8) << x << endl;
             cout << "f(X) = " << setprecision(8) << task_array[i].f(x) << endl;
             cout << "|X* - X| = " << setprecision(8) << abs(task_array[i].X_opt[0] - x) << endl;

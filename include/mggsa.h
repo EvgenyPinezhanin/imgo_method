@@ -55,7 +55,7 @@ public:
 
     void getPoints(vector<vector<double>> &points_vec);
     int getCountPoints() const { return (int)trial_points.size() - 2; };
-    void getMu(vector<double> &mu_vec) const { mu_vec = mu; };
+    void getLambda(vector<double> &mu_vec) const { mu_vec = mu; };
     
     void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY);
     bool solve_test(vector<double> X_opt, int &count, Stop stop = Stop::ACCURACY);

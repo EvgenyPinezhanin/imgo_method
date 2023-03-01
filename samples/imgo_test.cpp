@@ -182,7 +182,7 @@ int main() {
         imgo.setD(task_array[i].d);
 
         imgo.solve(count_trials, x, task_array[i].stop);
-        imgo.getMu(mu);
+        imgo.getLambda(mu);
 
         cout << "Function: " << task_array[i].name << endl;
         cout << "Number of constrained = " << task_array[i].m << endl;

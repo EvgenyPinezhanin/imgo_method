@@ -27,7 +27,7 @@ private:
     double selectNewPoint(int &t) override;
 
 public:
-    imgo_method(function<double(double, int)> _f, int _m = 0, double _a = 0.0, double _b = 10.0, double _r = 2.0, double _d = 0.0, 
+    imgo_method(function<double(double, int)> _f, int _m = 0, double _a = 0.0, double _b = 1.0, double _r = 2.0, double _d = 0.0, 
                 double _eps = 0.0001, int _Nmax = 1000) : optimization_method_constrained(nullptr, 1, _m, vector<double>{_a}, 
                 vector<double>{_b}, _eps, _Nmax), f(_f), r(_r), d(_d), last_trial(0.0, 0.0, 0), last_trial_pos(0), I((size_t)m + 1),
                 calc_I((size_t)m + 1), mu((size_t)m + 1), z_star((size_t)m + 1) {}
@@ -47,7 +47,7 @@ public:
     double getR() const { return r; };
     double getD() const { return d; };
 
-    void getMu(vector<double> &mu_vec) const { mu_vec = mu; };
+    void getLambda(vector<double> &mu_vec) const { mu_vec = mu; };
 
     void solve(int &count, double &x, Stop stop = Stop::ACCURACY);
     void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY);

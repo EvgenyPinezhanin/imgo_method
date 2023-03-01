@@ -1,11 +1,8 @@
 #if defined( _MSC_VER )
     #define _CRT_SECURE_NO_WARNINGS
-#endif
-
-#if defined( _MSC_VER )
     #define PROC_BIND
 #else
-    #define PROC_BIND proc_bind(master)
+    #define PROC_BIND proc_bind(spread)
 #endif
 
 #include <iostream>
@@ -25,7 +22,7 @@
 
 using namespace std;
 
-// #define CALC
+#define CALC
 
 const int type = 1; // 0 - P_max, 1 - count_trials, 2 - count points, 3 - c_points / c_trials
 const int family_number = 3; // 0 - Grishagin, 1 - GKLS,
@@ -96,6 +93,7 @@ int main() {
         }
     }
 
+    int total_start_time = clock();
 #if defined(CALC)
     ofstream ofstr_data("output_data/mggsa_operational_characteristics_r_test_data.txt");
     if (!ofstr_data.is_open()) cerr << "File opening error\n";
@@ -154,7 +152,7 @@ int main() {
 
             vector<double> X_opt;
             int count_trials;
-            int start_time = clock();
+            double start_time = omp_get_wtime();
             for (int l = 0; l < number_functions; l++) {
                 if (problems[i].type == type_constraned::CONSTR) {
                     func_constr.current_func = l;
@@ -174,8 +172,8 @@ int main() {
             }
             trials_data[i][j][k] = count_trials_vec;
             points_data[i][j][k] = count_points_vec;
-            int end_time = clock();
-            double work_time = ((double)end_time - start_time) / CLOCKS_PER_SEC;
+            double end_time = omp_get_wtime();
+            double work_time = end_time - start_time;
 
             string str_input = problems[i].name + " key = " + to_string(key_array[j]) + " r = " + to_string(r_array[i][k]) + 
                 " time: " + to_string(work_time) + " t_num: " + to_string(omp_get_thread_num()) + "\n";
@@ -218,6 +216,9 @@ int main() {
     }
     ifstr_data.close();
 #endif
+    int total_end_time = clock();
+    double total_work_time = ((double)total_end_time - total_start_time) / CLOCKS_PER_SEC;
+    cout << "Total time: " << total_work_time << endl;
 
     int count_successful, h, index;
     for (int i = 0; i < number_family; i++) {

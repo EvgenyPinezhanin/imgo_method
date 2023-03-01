@@ -58,8 +58,8 @@ int main() {
 
     int count_func, count_successful, count_trials;
 
-    int start_time, end_time, total_start_time, total_end_time;
-    double work_time, total_work_time;
+    int start_time, end_time;
+    double work_time;
 
     vector<vector<int>> K{ {0, 700, 25},
                            {0, 1500, 25},
@@ -101,6 +101,8 @@ int main() {
     double volume_reltol;
     functor_family func;
     functor_family_constr func_constr;
+
+    int total_start_time = clock();
     for (int i = 0; i < number_family; i++) {
         if (problems[i].type == type_constraned::CONSTR) {
             func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
@@ -141,7 +143,7 @@ int main() {
                 // }
             }
             for (int k = K[i][0]; k <= K[i][1]; k += K[i][2]) {
-                count_successful = (int)count_if(count_trials_vec[i].begin(), count_trials_vec[i].end(), [k](double elem){ return elem <= k; });
+                count_successful = (int)count_if(count_trials_vec[i].begin(), count_trials_vec[i].end(), [k] (double elem) { return elem <= k; });
                 cout << "K = " << k << " success rate = " << (double)count_successful / count_func << endl;
                 ofstr << k << " " << (double)count_successful / count_func << endl;
             }
@@ -152,6 +154,9 @@ int main() {
         }
     }
     ofstr.close();
+    int total_end_time = clock();
+    int total_work_time = ((double)end_time - start_time) / CLOCKS_PER_SEC;
+    cout << "Total time: " << total_work_time << endl;
 
     ofstr_opt << "array Name[" << number_family << "]" << endl;
     for (int i = 0; i < number_family; i++) {

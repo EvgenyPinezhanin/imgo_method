@@ -71,7 +71,7 @@ int main() {
     cout << "Parameters for method:" << endl;
     cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
 
-    int start_time = clock();
+    int total_start_time = clock();
 #pragma omp parallel for schedule(dynamic, chunk) proc_bind(spread) num_threads(omp_get_num_procs()) collapse(4) \
         shared(count_func, key_min, key_max, m_min, m_max, incr_min, incr_max, problems, r_vec, lipschitz_const, stop) \
         firstprivate(mggsa)
@@ -94,9 +94,9 @@ int main() {
             }
         }
     }
-    int end_time = clock();
-    double work_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    cout << "Total time: " << work_time << endl;
+    int total_end_time = clock();
+    double total_work_time = (double)(total_end_time - total_start_time) / CLOCKS_PER_SEC;
+    cout << "Total time: " << total_work_time << endl;
 
     for (int i = 0; i < count_func; i++) {
         for (int j = key_min; j <= key_max; j++) {
@@ -144,7 +144,7 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single
     functor_single func;
     functor_single_constr func_constr;
 
-    double t1 = omp_get_wtime();
+    double start_time = omp_get_wtime();
 
     if (problem.type == type_constraned::CONSTR) {
         func_constr.constr_opt_problem = static_cast<IConstrainedOptProblem*>(problem.optProblem);
@@ -173,7 +173,7 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single
     mggsa.setR(r);
 
     mggsa.solve(count_trials, X, stop);
-    mggsa.getMu(mu);
+    mggsa.getLambda(mu);
 
     if (problem.type == type_constraned::CONSTR) {
         f_X = func_constr(X, constr + 1);
@@ -185,8 +185,8 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single
                     (X_opt[1] - X[1]) * (X_opt[1] - X[1]));
     count_points = mggsa.getCountPoints();
 
-    double t2 = omp_get_wtime();
-    double dt = t2 - t1;
+    double end_time = omp_get_wtime();
+    double work_time = end_time - start_time;
 
 #if defined(OUTPUT_INFO)
     cout << "Function: " << problem.name << endl;
@@ -213,7 +213,7 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single
     cout << endl;
 #else
     string str_output = problem.name + " key = " + to_string(key) + " m = " + to_string(m) + " incr = " + to_string(incr) +
-                        " time: " + to_string(dt) + " t_num = " + to_string(omp_get_thread_num()) + "\n";
+                        " time: " + to_string(work_time) + " t_num = " + to_string(omp_get_thread_num()) + "\n";
     cout << str_output;
 #endif
 }

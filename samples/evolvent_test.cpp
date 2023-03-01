@@ -52,7 +52,7 @@ int main() {
     vector<vector<double>> points;
 
     mggsa.solve(count_trials, X, stop);
-    mggsa.getMu(mu);
+    mggsa.getLambda(mu);
 
     cout << "Function: " << "x^2 + y^2 - cos(18.0 * x) - cos(18.0 * y)" << endl;
     cout << "Dimension = " << n << endl;

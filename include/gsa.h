@@ -39,7 +39,7 @@ public:
     double getB() const { return B[0]; };
     double getR() const { return r; };
 
-    double getMu() const { return m; };
+    double getLambda() const { return m; };
     
     void solve(int &count, double &x, Stop stop = Stop::ACCURACY);
     void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY);

@@ -1,8 +1,5 @@
 #if defined( _MSC_VER )
-    #define _CRT_SECURE_NO_WARNINGS    
-#endif
-
-#if defined( _MSC_VER )
+    #define _CRT_SECURE_NO_WARNINGS
     #define PROC_BIND
 #else
     #define PROC_BIND proc_bind(spread)
@@ -25,7 +22,7 @@
 
 using namespace std;
 
-// #define CALC
+#define CALC
 
 const int type = 0; // 0 - count trials, 1 - count points, 2 - c_points / c_trials
 const int family_number = 2; // 0 - Grishagin, 1 - GKLS,
@@ -40,15 +37,8 @@ int main() {
 
     const int number_family = 4;
 
-    int start_time, end_time;
-    double work_time;
+    int chunk = 4;
 
-    int num_threads_family = min(number_family, omp_get_num_procs());
-    int chunk_family = 1;
-
-    int count_func, count_trials;
-
-    vector<double> A, B, X_opt;
     vector<vector<double>> r_array{ {3.0, 2.4, 1.6, 1.0},
                                     {4.2, 3.8, 2.0, 1.0},
                                     {3.5, 2.6, 1.8, 1.0},
@@ -57,8 +47,6 @@ int main() {
     vector<double> d_array{0.0, 0.0, 0.01, 0.01};
     int den = 10, Nmax = 30000, key = 3;
     double eps = 0.01;
-
-    vector<int> count_trials_vec, count_points_vec;
 
     vector<vector<vector<int>>> max_count_trials(number_family), max_count_points(number_family);
     for (int i = 0; i < number_family; i++) {
@@ -83,38 +71,48 @@ int main() {
                                      problem_family("GKLSProblemConstrainedFamily", &GKLSConstrainedProblems, 
                                                     type_constraned::CONSTR, "GKLSConstrained") };
 
-    mggsa_method mggsa(nullptr, -1, -1, A, B, -1.0, -1.0, den, key, eps, Nmax, -1);
+    mggsa_method mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, key, eps, Nmax, -1);
 
-#pragma omp parallel for schedule(static, chunk_family) PROC_BIND num_threads(num_threads_family) \
-        shared(number_family, problems, d_array, r_array, incr_array, max_count_trials, max_count_points) firstprivate(mggsa) \
-        private(A, B, count_func, start_time, end_time, work_time, X_opt, count_trials, count_trials_vec, count_points_vec)
+    int r_size = r_array[0].size();
+
+    int total_start_time = clock();
+#pragma omp parallel for schedule(static, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
+        shared(number_family, problems, d_array, r_array, r_size, incr_array, max_count_trials, max_count_points) \
+        firstprivate(mggsa)
     for (int i = 0; i < number_family; i++) {
-        functor_family func;
-        functor_family_constr func_constr;
-        if (problems[i].type == type_constraned::CONSTR) {
-            func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
-            (*func_constr.constr_opt_problem_family)[0]->GetBounds(A, B);
-            mggsa.setN((*func_constr.constr_opt_problem_family)[0]->GetDimension());
-            mggsa.setM((*func_constr.constr_opt_problem_family)[0]->GetConstraintsNumber());
-        } else {
-            func.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
-            (*func.opt_problem_family)[0]->GetBounds(A, B);
-            mggsa.setN((*func.opt_problem_family)[0]->GetDimension());
-            mggsa.setM(0);
-        }
+        for (int j = 0; j < r_size; j++) {
+            vector<double> A, B;
+            functor_family func;
+            functor_family_constr func_constr;
 
-        count_trials_vec.resize(problems[i].optProblemFamily->GetFamilySize());
-        count_points_vec.resize(problems[i].optProblemFamily->GetFamilySize());
-        count_func = problems[i].optProblemFamily->GetFamilySize();
-        mggsa.setAB(A, B);
-        mggsa.setD(d_array[i]);
+            if (problems[i].type == type_constraned::CONSTR) {
+                func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
+                (*func_constr.constr_opt_problem_family)[0]->GetBounds(A, B);
+                mggsa.setN((*func_constr.constr_opt_problem_family)[0]->GetDimension());
+                mggsa.setM((*func_constr.constr_opt_problem_family)[0]->GetConstraintsNumber());
+            } else {
+                func.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
+                (*func.opt_problem_family)[0]->GetBounds(A, B);
+                mggsa.setN((*func.opt_problem_family)[0]->GetDimension());
+                mggsa.setM(0);
+            }
 
-        string str_input;
-        for (int j = 0; j < r_array[i].size(); j++) {
+            vector<int> count_trials_vec(problems[i].optProblemFamily->GetFamilySize());
+            vector<int> count_points_vec(problems[i].optProblemFamily->GetFamilySize());
+            int count_func = problems[i].optProblemFamily->GetFamilySize();
+            mggsa.setAB(A, B);
+            mggsa.setD(d_array[i]);
             mggsa.setR(r_array[i][j]);
+
+            vector<double> X_opt; 
+            int count_trials, index;
+            string str_input;
+            double start_time, end_time, work_time;
+
             for (int k = 0; k < incr_array.size(); k++) {
                 mggsa.setIncr(incr_array[k]);
-                start_time = clock();
+
+                start_time = omp_get_wtime();
                 for (int l = 0; l < count_func; l++) {
                     if (problems[i].type == type_constraned::CONSTR) {
                         func_constr.current_func = l;
@@ -132,13 +130,15 @@ int main() {
                     }
                     count_points_vec[l] = mggsa.getCountPoints();
                 }
-                end_time = clock();
-                work_time = ((double)end_time - start_time) / CLOCKS_PER_SEC;
+                end_time = omp_get_wtime();
+                work_time = end_time - start_time;
 
                 auto iter = max_element(count_trials_vec.begin(), count_trials_vec.end());
                 max_count_trials[i][j][k] = *iter;
-                iter = max_element(count_points_vec.begin(), count_points_vec.end());
-                max_count_points[i][j][k] = *iter;
+                for (int l = 0; l < count_trials_vec.size(); l++) {
+                    if (*iter == count_trials_vec[l]) index = l;
+                }
+                max_count_points[i][j][k] = count_points_vec[index];
 
                 str_input = problems[i].name + " r = " + to_string(r_array[i][j]) + " incr = " + to_string(incr_array[k]) + 
                             " count trials = " + to_string(max_count_trials[i][j][k]) + " count points = " + 
@@ -147,6 +147,9 @@ int main() {
             }
         }
     }
+    int total_end_time = clock();
+    double total_work_time = ((double)total_end_time - total_start_time) / CLOCKS_PER_SEC;
+    cout << "Total time: " << total_work_time << endl;
 
     for (int i = 0; i < number_family; i++) {
         for (int j = 0; j < r_array[i].size(); j++) {

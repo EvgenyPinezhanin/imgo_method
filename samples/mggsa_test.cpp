@@ -80,7 +80,7 @@ int main() {
             mggsa.setKey(task_array[i].key);
 
             mggsa.solve(count_trials, X, task_array[i].stop);
-            mggsa.getMu(mu);
+            mggsa.getLambda(mu);
 
             cout << "Function: " << task_array[i].name << endl;
             cout << "Dimension = " << task_array[i].n << endl;

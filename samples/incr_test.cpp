@@ -90,7 +90,7 @@ int main() {
     double accuracy;
     int count_points, count_trials;
 
-    int start_time = clock();
+    int total_start_time = clock();
     for (int i = n_min; i <= n_max; i++) {
         N = i;
         mggsa.setN(N);
@@ -131,13 +131,13 @@ int main() {
             firstprivate(mggsa) private(accuracy, count_points, count_trials, X, mu)
         for (int j = m_min; j <= m_max; j++) {
             for (int k = incr_array[i - n_min][0]; k <= incr_array[i - n_min][1]; k++) {
-                double t1 = omp_get_wtime();
+                double start_time = omp_get_wtime();
 
                 mggsa.setDen(j);
                 mggsa.setIncr(k);
  
                 mggsa.solve(count_trials, X, stop);
-                mggsa.getMu(mu);
+                mggsa.getLambda(mu);
  
                 accuracy = euclidean_distance(X_opt, X);
                 count_points = mggsa.getCountPoints();
@@ -145,8 +145,8 @@ int main() {
                 count_trials_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = count_trials;
                 count_points_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = count_points;
 
-                double t2 = omp_get_wtime();
-                double dt = t2 - t1;
+                double end_time = omp_get_wtime();
+                double work_time = end_time - start_time;
 
             #if defined(OUTPUT_INFO)
                 cout << "Parameters for constructing the Peano curve:" << endl;
@@ -167,15 +167,15 @@ int main() {
                 cout << endl;
             #else
                 string str = "Rastrigin: n = " + to_string(i) + " m = " + to_string(j) + " incr = " + to_string(k) +
-                             " time: " + to_string(dt) + " t_num = " + to_string(omp_get_thread_num()) + "\n";
+                             " time: " + to_string(work_time) + " t_num = " + to_string(omp_get_thread_num()) + "\n";
                 cout << str;
             #endif
             }
         }
     }
-    int end_time = clock();
-    double work_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    cout << "Total time: " << work_time << endl;
+    int total_end_time = clock();
+    double total_work_time = (double)(total_end_time - total_start_time) / CLOCKS_PER_SEC;
+    cout << "Total time: " << total_work_time << endl;
 
     for (int i = n_min; i <= n_max; i++) {
         for (int j = m_min; j <= m_max; j++) {

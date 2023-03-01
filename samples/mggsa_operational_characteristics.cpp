@@ -16,7 +16,7 @@
 
 using namespace std;
 
-// #define CALC
+#define CALC
 
 const int family_number = 5; // 0 - Grishagin, 1 - GKLS,
                              // 2 - Grishagin(constrained), 3 - GKLS(constrained),
@@ -32,15 +32,16 @@ int main() {
     int count_func, count_successful, count_trials;
 
     int start_time, end_time;
-    double work_time;
+    int total_start_time, total_end_time;
+    double work_time, total_work_time;
 
     vector<vector<int>> K{ {0, 700, 25},
                            {0, 1500, 25},
                            {0, 3000, 25},
                            {0, 4500, 25} };
 
-    int den = 10, key = 1, m = 0;
-    double eps = 0.01, r = 0.0, d = 0.0;
+    int den = 10, key = 1;
+    double eps = 0.01, d = 0.0;
     int Nmax = 5000;
 
     vector<double> A, B, X_opt;
@@ -73,6 +74,8 @@ int main() {
 
     functor_family func;
     functor_family_constr func_constr;
+
+    total_start_time = clock();
     for (int i = 0; i < number_family; i++) {
         if (problems[i].type == type_constraned::CONSTR) {
             func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
@@ -121,17 +124,20 @@ int main() {
             ofstr << endl << endl;
             end_time = clock();
             work_time = ((double)end_time - start_time) / CLOCKS_PER_SEC;
-            cout << "time: " << work_time << endl;
+            cout << "Time: " << work_time << endl;
         }
     }
     ofstr.close();
+    total_end_time = clock();
+    total_work_time = ((double)total_end_time - total_start_time) / CLOCKS_PER_SEC;
+    cout << "Total time: " << total_work_time << endl;
 
     ofstr_opt << "array Name[" << number_family << "]" << endl;
     ofstr_opt << "array R[" << r_array.size() * 3 << "]" << endl;
     for (int i = 0; i < number_family; i++) {
-        ofstr_opt << "Name[" << i + 1 << "]=\"" << problems[i].short_name << "\"" << endl;
+        ofstr_opt << "Name[" << i + 1 << "] = \"" << problems[i].short_name << "\"" << endl;
         for (int j = 0; j < r_array[i].size(); j++) {
-            ofstr_opt << "R[" << (i * 3) + j + 1 << "]=\"" << r_array[i][j] << "\"" << endl; 
+            ofstr_opt << "R[" << (i * 3) + j + 1 << "] = \"" << r_array[i][j] << "\"" << endl; 
         }
     }
     ofstr_opt.close();
