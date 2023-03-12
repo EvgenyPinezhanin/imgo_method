@@ -12,17 +12,17 @@
 
 using namespace std;
 
-const int test_func_number = 1; // 0 - f1, 1 - f2
+const int test_func_number = 0; // 0 - f1, 1 - f2
 
 double f1(int n, const double *X, int *undefined_flag, void *data) {
     data_direct *f_data = static_cast<data_direct*>(data);
-    f_data->count_trials++;
+    f_data->count_evals++;
     f_data->points.push_back(vector<double>{X[0], X[1]});
 
     bool is_constr = true;
     vector<double> constr(3);
-    constr[0] = 0.01 * (pow((X[0] - 2.2), 2.0) + pow((X[1] - 1.2), 2.0) - 2.25);
-    constr[1] = 100.0 * (1.0 - pow((X[0] - 2.0), 2.0) / 1.44 - pow(0.5 * X[1], 2.0));
+    constr[0] = 0.01 * (pow(X[0] - 2.2, 2) + pow(X[1] - 1.2, 2) - 2.25);
+    constr[1] = 100.0 * (1.0 - pow(X[0] - 2.0, 2) / 1.44 - pow(0.5 * X[1], 2));
     constr[2] = 10.0 * (X[1] - 1.5 - 1.5 * sin(6.283 * (X[0] - 1.75)));
     for (int i = 0; i < 3; i++) {
         if (constr[i] > 0.0) is_constr = false;
@@ -41,7 +41,7 @@ const double C[20] = {75.1963666677,-3.8112755343,0.1269366345,-0.0020567665,0.0
 
 double f2(int n, const double *X, int *undefined_flag, void *data) {
     data_direct *f_data = static_cast<data_direct*>(data);
-    f_data->count_trials++;
+    f_data->count_evals++;
     f_data->points.push_back(vector<double>{X[0], X[1]});
 
     bool is_constr = true;
@@ -70,19 +70,20 @@ int main() {
 
     data_direct f_data;
     int n = 2;
-    int max_feval = 10000, max_iter = 10000;
-    double magic_eps = 1.0e-4, eps = 0.01;
-    double volume_reltol = eps / sqrt(n);
-    double sigma_reltol  = 0.0;
+    int max_feval = 1000, max_iter = 1000;
+    double magic_eps = 1.0e-4, magic_eps_abs = 1.0e-4;
+    double method_accuracy = 1.0e-5;
+    double volume_reltol = method_accuracy / sqrt(n);
+    double sigma_reltol = 0.0;
     direct_algorithm algorithm = DIRECT_ORIGINAL;
     vector<double> X;
     double minf;
 
     vector<task_direct> task_array = { task_direct("f1", f1, &f_data, n, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
-                                                   vector<double>{0.942, 0.944}, vector<double>{}, max_feval, max_iter, magic_eps,
+                                                   vector<double>{0.942, 0.944}, max_feval, max_iter, magic_eps, magic_eps_abs,
                                                    volume_reltol, sigma_reltol, nullptr, algorithm),
                                        task_direct("f2", f2, &f_data, n, vector<double>{0.0, 0.0}, vector<double>{80.0, 80.0},
-                                                   vector<double>{77.489, 63.858}, vector<double>{}, max_feval, max_iter, magic_eps,
+                                                   vector<double>{77.489, 63.858}, max_feval, max_iter, magic_eps, magic_eps_abs,
                                                    volume_reltol, sigma_reltol, nullptr, algorithm) };
 
     direct_method direct;
@@ -92,7 +93,7 @@ int main() {
     for (int i = 0; i < task_array.size(); i++) {
         if (task_array[i].used) {
             data = (static_cast<data_direct*>(task_array[i].f_data));
-            data->count_trials = 0;
+            data->count_evals = 0;
             data->points.clear();
 
             direct.setF(task_array[i].f);
@@ -102,6 +103,7 @@ int main() {
             direct.setMaxFeval(task_array[i].max_feval);
             direct.setMaxIter(task_array[i].max_iter);
             direct.setMagicEps(task_array[i].magic_eps);
+            direct.setMagicEpsAbs(task_array[i].magic_eps_abs);
             direct.setVolumeReltol(task_array[i].volume_reltol);
             direct.setSigmaReltol(task_array[i].sigma_reltol);
             direct.setLogfile(task_array[i].logfile);
@@ -117,12 +119,12 @@ int main() {
             cout << "f(X*) = " << task_array[i].f(task_array[i].n, task_array[i].X_opt.data(),
                                                   &flag_tmp, &data_tmp) << endl;
             cout << "Parameters for method:" << endl;
-            cout << "max_feval = " << max_feval << " max_iter = " << max_iter << endl;
-            cout << "magic_eps = " << magic_eps << endl;
-            cout << "volume_reltol = " << volume_reltol << " sigma_reltol = " << sigma_reltol << endl;
+            cout << "max_feval = " << task_array[i].max_feval << " max_iter = " << task_array[i].max_iter << endl;
+            cout << "magic_eps = " << task_array[i].magic_eps << " magic_eps_abs = " << task_array[i].magic_eps_abs << endl;
+            cout << "volume_reltol = " << task_array[i].volume_reltol << " sigma_reltol = " << task_array[i].sigma_reltol << endl;
             cout << "Type of algorithm: " << ((task_array[i].algorithm == DIRECT_ORIGINAL) ? "DIRECT_ORIGINAL" : "DIRECT_GABLONSKY") << endl;
             cout << "Trials result:" << endl;
-            cout << "Number of trials = " << data->count_trials << endl;
+            cout << "Number of trials = " << data->count_evals << endl;
             cout << "X = (" << X[0] << ", " << X[1] << ")" << endl;
             cout << "f(X) = " << minf << endl;
             cout << "||X* - X|| = " << sqrt((task_array[i].X_opt[0] - X[0]) * (task_array[i].X_opt[0] - X[0]) + 

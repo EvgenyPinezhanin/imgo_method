@@ -334,7 +334,7 @@ void mggsa_method::getPoints(vector<vector<double>> &points_vec) {
     }
 }
 
-void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
+void mggsa_method::solve(int &countTrials, vector<double> &X, TypeSolve type, Stop stop) {
 #if defined(TIME_TEST)
     ofstr_test.open("output_data/mggsa_time_test.txt");
     if (!ofstr_test.is_open()) cerr << "File opening error\n";
@@ -406,7 +406,7 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
 #endif
 
     M = last_trials[0].nu;
-    count = 1;
+    countTrials = 1;
 
     double x_k_1, h, delta_t;
     int t = 1;
@@ -519,7 +519,7 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
             M = last_trials[0].nu;
         }
 
-        count++;
+        countTrials++;
 
     #if defined(EPS)
         cout << pow(abs(trial_points[t].x - trial_points[t - 1].x), 1.0 / n) << endl;
@@ -528,7 +528,7 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
         if (delta_t <= eps) {
             if (stop == Stop::ACCURACY || stop == Stop::ACCURNUMBER) break;
         }
-        if (count >= Nmax) {
+        if (countTrials >= Nmax) {
             if (stop == Stop::NUMBER || stop == Stop::ACCURNUMBER) break;
         }
     }
@@ -558,6 +558,10 @@ void mggsa_method::solve(int &count, vector<double> &X, Stop stop) {
         cerr << "Error gnuplot" << endl;
     }
 #endif
+}
+
+void mggsa_method::solve(int &countTrials, vector<double> &X, Stop stop) {
+    solve(countTrials, X, TypeSolve::SOLVE, stop);
 }
 
 bool mggsa_method::solve_test(vector<double> X_opt, int &count, Stop stop) {

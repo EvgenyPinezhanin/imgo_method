@@ -32,7 +32,7 @@ public:
     vector<double> getA() { return A; };
     vector<double> getB() { return B; };
 
-    virtual void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY) = 0;
+    virtual void solve(int &countTrials, vector<double> &X, Stop stop = Stop::ACCURACY) = 0;
 };
 
 struct trial {

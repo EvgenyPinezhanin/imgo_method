@@ -203,13 +203,16 @@ public:
 };
 
 struct data_direct {
-    int count_trials;
+    int count_evals;
     vector<vector<double>> points;
 };
 
-struct data_direct_family : public data_direct {
+struct data_direct_oper_character : public data_direct {
     Functor *functor;
     type_constraned type;
+    bool converge;
+    int min_count_evals;
+    double eps;
 };
 
 struct task_direct {
@@ -218,10 +221,11 @@ struct task_direct {
     direct_objective_func f;
     void *f_data;
     int n;
-    vector<double> A, B, X_opt, L;
+    vector<double> A, B, X_opt;
 
     int max_feval, max_iter;
-    double magic_eps, volume_reltol, sigma_reltol;
+    double magic_eps, magic_eps_abs;
+    double volume_reltol, sigma_reltol;
 
     FILE *logfile;
     direct_algorithm algorithm;
@@ -229,11 +233,11 @@ struct task_direct {
     bool used;
 
     task_direct(string _name, direct_objective_func _f, void *_f_data, int _n, vector<double> _A, vector<double> _B, 
-                vector<double> _X_opt, vector<double> _L, int _max_feval, int _max_iter, double _magic_eps, double _volume_reltol, 
-                double _sigma_reltol, FILE *_logfile, direct_algorithm _algorithm, bool _used = true) : name(_name), f(_f), 
-                f_data(_f_data), n(_n), A(_A), B(_B), X_opt(_X_opt), L(_L), max_feval(_max_feval), max_iter(_max_iter),
-                magic_eps(_magic_eps), volume_reltol(_volume_reltol), sigma_reltol(_sigma_reltol), logfile(_logfile),
-                algorithm(_algorithm), used(_used) {};
+                vector<double> _X_opt, int _max_feval, int _max_iter, double _magic_eps, double _magic_eps_abs,
+                double _volume_reltol, double _sigma_reltol, FILE *_logfile, direct_algorithm _algorithm, bool _used = true) 
+                : name(_name), f(_f), f_data(_f_data), n(_n), A(_A), B(_B), X_opt(_X_opt), max_feval(_max_feval), 
+                max_iter(_max_iter), magic_eps(_magic_eps), magic_eps_abs(_magic_eps_abs), volume_reltol(_volume_reltol), 
+                sigma_reltol(_sigma_reltol), logfile(_logfile), algorithm(_algorithm), used(_used) {};
 };
 
 #endif // TASK_H
