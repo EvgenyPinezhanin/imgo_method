@@ -25,7 +25,8 @@ int main() {
     ofstream ofstr_opt("output_data/imgo_operational_characteristics_opt.txt");
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
-    int count_func, count_successful, count_trials;
+    int count_func, count_successful;
+    int countIters, countTrials, countEvals;
 
     int K0 = 0, Kmax = 500, Kstep = 10;
 
@@ -39,9 +40,9 @@ int main() {
     THillProblemFamily hillProblems;
     TShekelProblemFamily shekelProblems;
 
-    vector<vector<int>> count_trials_vec(number_family);
-    count_trials_vec[0].resize(hillProblems.GetFamilySize(), 0);
-    count_trials_vec[1].resize(shekelProblems.GetFamilySize(), 0);
+    vector<vector<int>> count_evals(number_family);
+    count_evals[0].resize(hillProblems.GetFamilySize(), 0);
+    count_evals[1].resize(shekelProblems.GetFamilySize(), 0);
 
     vector<problem_family> problems{ problem_family("HillProblemFamily", &hillProblems, type_constraned::NONCONSTR, "Hill"),
                                      problem_family("ShekelProblemFamily", &shekelProblems, type_constraned::NONCONSTR, "Shekel") };
@@ -61,17 +62,18 @@ int main() {
             for (int k = 0; k < count_func; k++) {
                 functor.current_func = k;
                 imgo.setF(function<double(double, int)>(functor));
-                count_trials = Kmax;
+                imgo.setMaxIters(Kmax);
+                imgo.setMaxEvals(Kmax);
                 (*functor.opt_problem_family)[k]->GetBounds(A, B);
                 imgo.setAB(A[0], B[0]);
-                if (imgo.solve_test((*functor.opt_problem_family)[k]->GetOptimumPoint()[0], count_trials, Stop::ACCURNUMBER)) {
-                    count_trials_vec[i][k] = count_trials;
+                if (imgo.solve_test((*functor.opt_problem_family)[k]->GetOptimumPoint()[0], countIters, countTrials, countEvals)) {
+                    count_evals[i][k] = countEvals;
                 } else {
-                    count_trials_vec[i][k] = count_trials + 1;
+                    count_evals[i][k] = countEvals + 1;
                 }
             }
             for (int k = K0; k <= Kmax; k += Kstep) {
-                count_successful = (int)count_if(count_trials_vec[i].begin(), count_trials_vec[i].end(), [k](double elem){ return elem <= k; });
+                count_successful = (int)count_if(count_evals[i].begin(), count_evals[i].end(), [k](double elem){ return elem <= k; });
                 cout << "K = " << k << " success rate = " << (double)count_successful / count_func << endl;
                 ofstr << k << " " << (double)count_successful / count_func << endl;
             }

@@ -28,16 +28,13 @@ const int type = 0; // 0 - count trials, 1 - count points, 2 - c_points / c_tria
 const int family_number = 2; // 0 - Grishagin, 1 - GKLS,
                              // 2 - Grishagin(constrained), 3 - GKLS(constrained)
 
+const int number_family = 4;
+
+const int chunk = 4;
+
 int main() {
-#if defined(CALC)
-    ofstream ofstr("output_data/mggsa_operational_characteristics_incr_test.txt");
-    if (!ofstr.is_open()) cerr << "File opening error\n";
     ofstream ofstr_opt("output_data/mggsa_operational_characteristics_incr_test_opt.txt");
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
-
-    const int number_family = 4;
-
-    int chunk = 4;
 
     vector<vector<double>> r_array{ {3.0, 2.4, 1.6, 1.0},
                                     {4.2, 3.8, 2.0, 1.0},
@@ -45,18 +42,6 @@ int main() {
                                     {4.7, 3.0, 2.0, 1.0} };
     vector<int> incr_array{0, 20, 40, 60};
     vector<double> d_array{0.0, 0.0, 0.01, 0.01};
-    int den = 10, Nmax = 30000, key = 3;
-    double eps = 0.01;
-
-    vector<vector<vector<int>>> max_count_trials(number_family), max_count_points(number_family);
-    for (int i = 0; i < number_family; i++) {
-        max_count_trials[i].resize(r_array[i].size());
-        max_count_points[i].resize(r_array[i].size());
-        for (int j = 0; j < r_array[i].size(); j++) {
-            max_count_trials[i][j].resize(incr_array.size());
-            max_count_points[i][j].resize(incr_array.size());
-        }
-    }
 
     TGrishaginProblemFamily grishaginProblems;
     TGKLSProblemFamily GKLSProblems;
@@ -71,13 +56,31 @@ int main() {
                                      problem_family("GKLSProblemConstrainedFamily", &GKLSConstrainedProblems, 
                                                     type_constraned::CONSTR, "GKLSConstrained") };
 
-    mggsa_method mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, key, eps, Nmax, -1);
+#if defined(CALC)
+    ofstream ofstr("output_data/mggsa_operational_characteristics_incr_test.txt");
+    if (!ofstr.is_open()) cerr << "File opening error\n";
+
+    int den = 10, key = 3;
+    double eps = 0.01;
+    int maxIters = 30000, maxEvals = 1000000;
+
+    vector<vector<vector<int>>> max_count_iters(number_family), max_count_trials(number_family);
+    for (int i = 0; i < number_family; i++) {
+        max_count_iters[i].resize(r_array[i].size());
+        max_count_trials[i].resize(r_array[i].size());
+        for (int j = 0; j < r_array[i].size(); j++) {
+            max_count_iters[i][j].resize(incr_array.size());
+            max_count_trials[i][j].resize(incr_array.size());
+        }
+    }
+
+    mggsa_method mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, key, eps, maxIters, maxEvals, -1);
 
     int r_size = r_array[0].size();
 
     int total_start_time = clock();
 #pragma omp parallel for schedule(static, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
-        shared(number_family, problems, d_array, r_array, r_size, incr_array, max_count_trials, max_count_points) \
+        shared(number_family, problems, d_array, r_array, r_size, incr_array, max_count_iters, max_count_trials) \
         firstprivate(mggsa)
     for (int i = 0; i < number_family; i++) {
         for (int j = 0; j < r_size; j++) {
@@ -97,15 +100,16 @@ int main() {
                 mggsa.setM(0);
             }
 
+            vector<int> count_iters_vec(problems[i].optProblemFamily->GetFamilySize());
             vector<int> count_trials_vec(problems[i].optProblemFamily->GetFamilySize());
-            vector<int> count_points_vec(problems[i].optProblemFamily->GetFamilySize());
             int count_func = problems[i].optProblemFamily->GetFamilySize();
             mggsa.setAB(A, B);
             mggsa.setD(d_array[i]);
             mggsa.setR(r_array[i][j]);
 
             vector<double> X_opt; 
-            int count_trials, index;
+            int index;
+            int countIters, countTrials, countEvals;
             string str_input;
             double start_time, end_time, work_time;
 
@@ -123,26 +127,27 @@ int main() {
                         X_opt = (*func.opt_problem_family)[l]->GetOptimumPoint();
                         mggsa.setF(func);
                     }
-                    if (mggsa.solve_test(X_opt, count_trials, Stop::ACCURNUMBER)) {
-                        count_trials_vec[l] = count_trials;
+                    if (mggsa.solve_test(X_opt, countIters, countTrials, countEvals)) {
+                        count_iters_vec[l] = countIters;
                     } else {
-                        count_trials_vec[l] = count_trials + 1;
+                        count_iters_vec[l] = countIters + 1;
                     }
-                    count_points_vec[l] = mggsa.getCountPoints();
+                    count_trials_vec[l] = countTrials;
                 }
                 end_time = omp_get_wtime();
                 work_time = end_time - start_time;
 
-                auto iter = max_element(count_trials_vec.begin(), count_trials_vec.end());
-                max_count_trials[i][j][k] = *iter;
-                for (int l = 0; l < count_trials_vec.size(); l++) {
-                    if (*iter == count_trials_vec[l]) index = l;
+                auto iter = max_element(count_iters_vec.begin(), count_iters_vec.end());
+                max_count_iters[i][j][k] = *iter;
+                for (int l = 0; l < count_iters_vec.size(); l++) {
+                    if (*iter == count_iters_vec[l]) index = l;
                 }
-                max_count_points[i][j][k] = count_points_vec[index];
+                max_count_trials[i][j][k] = count_trials_vec[index];
 
                 str_input = problems[i].name + " r = " + to_string(r_array[i][j]) + " incr = " + to_string(incr_array[k]) + 
-                            " count trials = " + to_string(max_count_trials[i][j][k]) + " count points = " + 
-                            to_string(max_count_points[i][j][k]) + " time: " + to_string(work_time) + " t_num: " + to_string(omp_get_thread_num()) + "\n";
+                            " count iters = " + to_string(max_count_iters[i][j][k]) + " count trials = " + 
+                            to_string(max_count_trials[i][j][k]) + " time: " + to_string(work_time) + " t_num: " +
+                            to_string(omp_get_thread_num()) + "\n";
                 cout << str_input;
             }
         }
@@ -154,13 +159,14 @@ int main() {
     for (int i = 0; i < number_family; i++) {
         for (int j = 0; j < r_array[i].size(); j++) {
             for (int k = 0; k < incr_array.size(); k++) {
-                ofstr << incr_array[k] << " " << max_count_trials[i][j][k] << " " << max_count_points[i][j][k] << endl;
+                ofstr << incr_array[k] << " " << max_count_iters[i][j][k] << " " << max_count_trials[i][j][k] << endl;
             }
             ofstr << endl << endl;
         }
         ofstr << endl << endl;
     }
     ofstr.close();
+#endif
 
     size_t size = incr_array.size();
     ofstr_opt << "count_key = " << size << endl;
@@ -173,7 +179,6 @@ int main() {
         }
     }
     ofstr_opt.close();
-#endif
 
     // Plotting operational characteristics(works with gnuplot)
     int error;

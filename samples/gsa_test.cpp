@@ -120,29 +120,29 @@ int main() {
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
     double x, eps = 0.001, r = 2.0; // > 1
-    int count_trials, Nmax = 1000;
-    Stop stop = Stop::ACCURACY;
+    int countIters, countTrials, countEvals;
+    int maxIters = 100000, maxEvals = 100000;
 
-    vector<task_gsa> task_array = { task_gsa(f1, "f1(x)", -1.5, 11.0, 10.0, 13870.0, eps, Nmax, r, stop),
-                                    task_gsa(f2, "f2(x)", 2.7, 7.5, 5.145735, 4.29, eps, Nmax, r, stop),
-                                    task_gsa(f3, "f3(x)", -10.0, 10.0, -0.49139, 67.0, eps, Nmax, r, stop),
-                                    task_gsa(f4, "f4(x)", 1.9, 3.9, 2.868, 3.0, eps, Nmax, r, stop),
-                                    task_gsa(f5, "f5(x)", 0.0, 1.2, 0.96609, 36.0, eps, Nmax, r, stop),
-                                    task_gsa(f6, "f6(x)", -10.0, 10.0, 0.67956, 2.5, eps, Nmax, r, stop),
-                                    task_gsa(f7, "f7(x)", 2.7, 7.5, 5.19978, 6.0, eps, Nmax, r, stop),
-                                    task_gsa(f8, "f8(x)", -10.0, 10.0, 5.48286, 67.0, eps, Nmax, r, stop),
-                                    task_gsa(f9, "f9(x)", 3.1, 20.4, 17.039, 1.7, eps, Nmax, r, stop),
-                                    task_gsa(f10, "f10(x)", 0.0, 10.0, 7.9787, 11.0, eps, Nmax, r, stop),
-                                    task_gsa(f11, "f11(x)", -1.57, 6.28, 2.094, 3.0, eps, Nmax, r, stop),
-                                    task_gsa(f12, "f12(x)", 0.0, 6.28, 4.712, 2.2, eps, Nmax, r, stop),
-                                    task_gsa(f13, "f13(x)", 0.001, 0.99, 0.7071, 8.5, eps, Nmax, r, stop),
-                                    task_gsa(f14, "f14(x)", 0.0, 4.0, 0.224885, 6.5, eps, Nmax, r, stop),
-                                    task_gsa(f15, "f15(x)", -5.0, 5.0, 2.4142, 6.5, eps, Nmax, r, stop),
-                                    task_gsa(f16, "f16(x)", -3.0, 3.0, 3.0, 85.0, eps, Nmax, r, stop),
-                                    task_gsa(f17, "f17(x)", -4.0, 4.0, -3.0, 2520.0, eps, Nmax, r, stop),
-                                    task_gsa(f18, "f18(x)", 0.0, 6.0, 2.0, 4.0, eps, Nmax, r, stop),
-                                    task_gsa(f19, "f19(x)", 0.0, 6.5, 5.87287, 4.0, eps, Nmax, r, stop),
-                                    task_gsa(f20, "f20(x)", -10.0, 10.0, 1.195137, 1.3, eps, Nmax, r, stop) };
+    vector<task_gsa> task_array = { task_gsa(f1, "f1(x)", -1.5, 11.0, 10.0, 13870.0, eps, maxIters, maxEvals, r),
+                                    task_gsa(f2, "f2(x)", 2.7, 7.5, 5.145735, 4.29, eps, maxIters, maxEvals, r),
+                                    task_gsa(f3, "f3(x)", -10.0, 10.0, -0.49139, 67.0, eps, maxIters, maxEvals, r),
+                                    task_gsa(f4, "f4(x)", 1.9, 3.9, 2.868, 3.0, eps, maxIters, maxEvals, r),
+                                    task_gsa(f5, "f5(x)", 0.0, 1.2, 0.96609, 36.0, eps, maxIters, maxEvals, r),
+                                    task_gsa(f6, "f6(x)", -10.0, 10.0, 0.67956, 2.5, eps, maxIters, maxEvals, r),
+                                    task_gsa(f7, "f7(x)", 2.7, 7.5, 5.19978, 6.0, eps, maxIters, maxEvals, r),
+                                    task_gsa(f8, "f8(x)", -10.0, 10.0, 5.48286, 67.0, eps, maxIters, maxEvals, r),
+                                    task_gsa(f9, "f9(x)", 3.1, 20.4, 17.039, 1.7, eps, maxIters, maxEvals, r),
+                                    task_gsa(f10, "f10(x)", 0.0, 10.0, 7.9787, 11.0, eps, maxIters, maxEvals, r),
+                                    task_gsa(f11, "f11(x)", -1.57, 6.28, 2.094, 3.0, eps, maxIters, maxEvals, r),
+                                    task_gsa(f12, "f12(x)", 0.0, 6.28, 4.712, 2.2, eps, maxIters, maxEvals, r),
+                                    task_gsa(f13, "f13(x)", 0.001, 0.99, 0.7071, 8.5, eps, maxIters, maxEvals, r),
+                                    task_gsa(f14, "f14(x)", 0.0, 4.0, 0.224885, 6.5, eps, maxIters, maxEvals, r),
+                                    task_gsa(f15, "f15(x)", -5.0, 5.0, 2.4142, 6.5, eps, maxIters, maxEvals, r),
+                                    task_gsa(f16, "f16(x)", -3.0, 3.0, 3.0, 85.0, eps, maxIters, maxEvals, r),
+                                    task_gsa(f17, "f17(x)", -4.0, 4.0, -3.0, 2520.0, eps, maxIters, maxEvals, r),
+                                    task_gsa(f18, "f18(x)", 0.0, 6.0, 2.0, 4.0, eps, maxIters, maxEvals, r),
+                                    task_gsa(f19, "f19(x)", 0.0, 6.5, 5.87287, 4.0, eps, maxIters, maxEvals, r),
+                                    task_gsa(f20, "f20(x)", -10.0, 10.0, 1.195137, 1.3, eps, maxIters, maxEvals, r) };
 
     gsa_method gsa(nullptr);
 
@@ -152,10 +152,11 @@ int main() {
             gsa.setF(task_array[i].f);
             gsa.setAB(task_array[i].A[0], task_array[i].B[0]);
             gsa.setEps(task_array[i].eps);
-            gsa.setNmax(task_array[i].Nmax);
+            gsa.setMaxIters(task_array[i].maxIters);
+            gsa.setMaxEvals(task_array[i].maxEvals);
             gsa.setR(task_array[i].r);
 
-            gsa.solve(count_trials, x, task_array[i].stop);
+            gsa.solve(countIters, countTrials, countEvals, x);
 
             cout << "Function: " << task_array[i].name << endl;
             cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
@@ -165,7 +166,9 @@ int main() {
             cout << "Parameters for method:" << endl;
             cout << "eps = " << eps << " r = " << r << endl;
             cout << "Trials result:" << endl;
-            cout << "Number of trials = " << count_trials << endl;
+            cout << "Number of iters = " << countIters << endl;
+            cout << "Number of trials = " << countTrials << endl;
+            cout << "Number of evals = " << countEvals << endl;
             cout << "Estimation of the Lipschitz constant = " << gsa.getLambda() << endl;
             cout << "X = " << setprecision(8) << x << endl;
             cout << "f(X) = " << setprecision(8) << task_array[i].f(x) << endl;

@@ -61,34 +61,34 @@ int main() {
     ofstream ofstr("output_data/incr_test.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
-    vector<double> X, X_opt, A, B;
-    double eps = 0.01, r = 2.1, d = 0.0;
-    int constr = 0, Nmax = 10000, key = 3;
-    Stop stop = Stop::ACCURNUMBER;
-
-    vector<vector<vector<double>>> accuracy_vec(n_count), count_points_vec(n_count);
-    vector<vector<vector<int>>> count_trials_vec(n_count);
+    vector<vector<vector<double>>> accuracy_vec(n_count);
+    vector<vector<vector<int>>> count_iters_vec(n_count), count_trials_vec(n_count);
     for (int i = n_min; i <= n_max; i++) {
         accuracy_vec[i - n_min].resize(m_max - m_min + 1);
+        count_iters_vec[i - n_min].resize(m_max - m_min + 1);
         count_trials_vec[i - n_min].resize(m_max - m_min + 1);
-        count_points_vec[i - n_min].resize(m_max - m_min + 1);
         for (int j = m_min; j <= m_max; j++) {
             accuracy_vec[i - n_min][j - m_min].resize(incr_array[i - n_min][1] - incr_array[i - n_min][0] + 1);
+            count_iters_vec[i - n_min][j - m_min].resize(incr_array[i - n_min][1] - incr_array[i - n_min][0] + 1);
             count_trials_vec[i - n_min][j - m_min].resize(incr_array[i - n_min][1] - incr_array[i - n_min][0] + 1);
-            count_points_vec[i - n_min][j - m_min].resize(incr_array[i - n_min][1] - incr_array[i - n_min][0] + 1);
         }
     }
 
-    mggsa_method mggsa(f_rastrigin, -1, constr, A, B, r, d, -1, key, eps, Nmax, -1);
-
+    double eps = 0.01, r = 2.1, d = 0.0;
+    int constr = 0, key = 3;
+    int maxIters = 100000, maxEvals = 100000;
+    vector<double> X_opt, A, B;
     for (int i = 0; i < n_min - 1; i++) {
         X_opt.push_back(0.0);
         A.push_back(-1.0 / 2.0);
         B.push_back(1.0);
     }
+    
+    mggsa_method mggsa(f_rastrigin, -1, constr, A, B, r, d, -1, key, eps, maxIters, maxEvals, -1);
 
+    vector<double> mu, X;
     double accuracy;
-    int count_points, count_trials;
+    int countIters, countTrials, countEvals;
 
     int total_start_time = clock();
     for (int i = n_min; i <= n_max; i++) {
@@ -125,10 +125,9 @@ int main() {
         cout << endl;
     #endif
 
-        vector<double> mu;
     #pragma omp parallel for schedule(dynamic, chunk) proc_bind(spread) num_threads(omp_get_num_procs()) collapse(2) \
-            shared(incr_array, accuracy_vec, count_trials_vec, count_points_vec, stop) \
-            firstprivate(mggsa) private(accuracy, count_points, count_trials, X, mu)
+            shared(incr_array, accuracy_vec, count_trials_vec, count_points_vec) firstprivate(mggsa) \
+            private(mu, X, accuracy, countIters, countTrials, countEvals)
         for (int j = m_min; j <= m_max; j++) {
             for (int k = incr_array[i - n_min][0]; k <= incr_array[i - n_min][1]; k++) {
                 double start_time = omp_get_wtime();
@@ -136,14 +135,13 @@ int main() {
                 mggsa.setDen(j);
                 mggsa.setIncr(k);
  
-                mggsa.solve(count_trials, X, stop);
+                mggsa.solve(countIters, countTrials, countEvals, X);
                 mggsa.getLambda(mu);
  
                 accuracy = euclidean_distance(X_opt, X);
-                count_points = mggsa.getCountPoints();
                 accuracy_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = accuracy;
-                count_trials_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = count_trials;
-                count_points_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = count_points;
+                count_iters_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = countIters;
+                count_trials_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = countTrials;
 
                 double end_time = omp_get_wtime();
                 double work_time = end_time - start_time;
@@ -152,8 +150,9 @@ int main() {
                 cout << "Parameters for constructing the Peano curve:" << endl;
                 cout << "m = " << j << " incr = " << k << endl;
                 cout << "Trials result:" << endl;
-                cout << "Number of trials = " << count_trials << endl;
-                cout << "Number of points = " << count_points << endl;
+                cout << "Number of iters = " << countIters << endl;
+                cout << "Number of trials = " << countTrials << endl;
+                cout << "Number of evals = " << countEvals << endl;
                 cout << "Estimation of the Lipschitz constant = " << mu[0] << endl;
                 cout << "X = (";
                 for (int l = 0; l < X.size() - 1; l++) {
@@ -180,9 +179,9 @@ int main() {
     for (int i = n_min; i <= n_max; i++) {
         for (int j = m_min; j <= m_max; j++) {
             for (int k = incr_array[i - n_min][0]; k <= incr_array[i - n_min][1]; k++) {
-                ofstr << k << " " << count_trials_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]]
-                                << " " << count_points_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] 
-                                << " " << accuracy_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] << endl;
+                ofstr << k << " " << count_iters_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]]
+                                  << " " << count_trials_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] 
+                                  << " " << accuracy_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] << endl;
             }
             ofstr << endl << endl;
         }

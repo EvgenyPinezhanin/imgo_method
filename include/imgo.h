@@ -28,9 +28,9 @@ private:
 
 public:
     imgo_method(function<double(double, int)> _f, int _m = 0, double _a = 0.0, double _b = 1.0, double _r = 2.0, double _d = 0.0, 
-                double _eps = 0.0001, int _Nmax = 1000) : optimization_method_constrained(nullptr, 1, _m, vector<double>{_a}, 
-                vector<double>{_b}, _eps, _Nmax), f(_f), r(_r), d(_d), last_trial(0.0, 0.0, 0), last_trial_pos(0), I((size_t)m + 1),
-                calc_I((size_t)m + 1), mu((size_t)m + 1), z_star((size_t)m + 1) {}
+                double _eps = 0.0001, int _maxIters = 1000, int _maxEvals = 1000) : optimization_method_constrained(nullptr, 1, _m,
+                vector<double>{_a}, vector<double>{_b}, _eps, _maxIters, _maxEvals), f(_f), r(_r), d(_d), last_trial(0.0, 0.0, 0),
+                last_trial_pos(0), I((size_t)m + 1), calc_I((size_t)m + 1), mu((size_t)m + 1), z_star((size_t)m + 1) {}
     
     void setF(const function<double(double, int)> &_f) { f = _f; };
     void setA(double _a) { optimization_method::setA(vector<double>{_a}); };
@@ -49,10 +49,10 @@ public:
 
     void getLambda(vector<double> &mu_vec) const { mu_vec = mu; };
 
-    void solve(int &count, double &x, Stop stop = Stop::ACCURACY);
-    void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY);
+    void solve(int &countIters, int &countTrials, int &countEvals, double &x);
+    void solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X) override;
     
-    bool solve_test(double x_opt, int &count, Stop stop = Stop::ACCURACY);
+    bool solve_test(double x_opt, int &countIters, int &countTrials, int &countEvals);
 };
 
 #endif // IMGO_H

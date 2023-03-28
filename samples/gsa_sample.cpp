@@ -45,13 +45,13 @@ int main() {
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
     double x, eps = 0.0001, r = 2.0;
-    int count_trials, Nmax = 1000;
-    Stop stop = Stop::ACCURACY;
+    int countIters, countTrials, countEvals;
+    int maxIters = 100000, maxEvals = 100000;
 
-    vector<task_gsa> task_array = { task_gsa(f1, "f1(x) = -4.0 * x + 1.0", 3.0, 4.0, 4.0, 4.0, eps, Nmax, r, stop),
-                                    task_gsa(f2, "f2(x) = 5.0 * x * x + 3.0 * x - 1.0", -2.0, 2.0, -0.3, 23.0, eps, Nmax, r, stop),
-                                    task_gsa(f3, "f3(x) = x * sin(x)", 0.0, 20.0, 17.336, 18.955, eps ,Nmax, 2.1, stop),
-                                    task_gsa(f4, "f4(x) = x * sin(1 / x)", -0.4, -0.05, -0.2225, 6 * M_PI, eps, Nmax, r, stop) };
+    vector<task_gsa> task_array = { task_gsa(f1, "f1(x) = -4.0 * x + 1.0", 3.0, 4.0, 4.0, 4.0, eps, maxIters, maxEvals, r),
+                                    task_gsa(f2, "f2(x) = 5.0 * x * x + 3.0 * x - 1.0", -2.0, 2.0, -0.3, 23.0, eps, maxIters, maxEvals, r),
+                                    task_gsa(f3, "f3(x) = x * sin(x)", 0.0, 20.0, 17.336, 18.955, eps , maxIters, maxEvals, 2.1),
+                                    task_gsa(f4, "f4(x) = x * sin(1 / x)", -0.4, -0.05, -0.2225, 6.0 * M_PI, eps, maxIters, maxEvals, r) };
 
     gsa_method gsa(nullptr);
 
@@ -61,10 +61,11 @@ int main() {
             gsa.setF(task_array[i].f);
             gsa.setAB(task_array[i].A[0], task_array[i].B[0]);
             gsa.setEps(task_array[i].eps);
-            gsa.setNmax(task_array[i].Nmax);
+            gsa.setMaxIters(task_array[i].maxIters);
+            gsa.setMaxEvals(task_array[i].maxEvals);
             gsa.setR(task_array[i].r);
 
-            gsa.solve(count_trials, x, task_array[i].stop);
+            gsa.solve(countIters, countTrials, countEvals, x);
 
             cout << "Function: " << task_array[i].name << endl;
             cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
@@ -74,7 +75,9 @@ int main() {
             cout << "Parameters for method:" << endl;
             cout << "eps = " << eps << " r = " << r << endl;
             cout << "Trials result:" << endl;
-            cout << "Number of trials = " << count_trials << endl;
+            cout << "Number of iters = " << countIters << endl;
+            cout << "Number of trials = " << countTrials << endl;
+            cout << "Number of evals = " << countEvals << endl;
             cout << "Estimation of the Lipschitz constant = " << gsa.getLambda() << endl;
             cout << "X = " << setprecision(8) << x << endl;
             cout << "f(X) = " << setprecision(8) << task_array[i].f(x) << endl;

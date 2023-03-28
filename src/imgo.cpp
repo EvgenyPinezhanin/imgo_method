@@ -36,6 +36,7 @@ inline double search_min(vector<trial_constr> &trials, int m) {
 trial_constr imgo_method::newTrial(double x) {
     trial_constr tr(x);
     for (int j = 1; j <= m + 1; j++) {
+        countEvals++;
         if ((f(x, j) > 0) || (j == m + 1)) {
             tr.z = f(x, j);
             tr.nu = j;
@@ -178,12 +179,13 @@ void imgo_method::setM(int _m) {
     z_star.resize((size_t)m + 1);
 }
 
-void imgo_method::solve(int &count, double &x, Stop stop) {
+void imgo_method::solve(int &countIters, int &countTrials, int &countEvals, double &x) {
     for (int i = 0; i < I.size(); i++) {
         I[i].clear();
         calc_I[i] = false;
     }
     trial_points.clear();
+    this->countEvals = 0;
 
     last_trial = newTrial(A[0]);
     trial_points.push_back(last_trial);
@@ -191,13 +193,18 @@ void imgo_method::solve(int &count, double &x, Stop stop) {
     last_trial = newTrial(B[0]);
     trial_points.push_back(last_trial);
     last_trial_pos = insert_in_sorted(I[(size_t)last_trial.nu - 1], last_trial);
-    count = 2;
+    countIters = 2;
+    countTrials = 2;
 
     double x_k_1;
     int t = 1;
     while(true) {
+        countIters++;
+
+        // Steps 3, 4, 5, 6, 7
         x_k_1 = selectNewPoint(t);
         last_trial = newTrial(x_k_1);
+        countTrials++;
 
         // Step 1
         insert_in_sorted(trial_points, last_trial);
@@ -205,28 +212,25 @@ void imgo_method::solve(int &count, double &x, Stop stop) {
         // Step 2
         last_trial_pos = insert_in_sorted(I[(size_t)last_trial.nu - 1], last_trial);
 
-        count++;
-        if (trial_points[t].x - trial_points[(size_t)t - 1].x <= eps) {
-            if (stop == Stop::ACCURACY || stop == Stop::ACCURNUMBER) break;
-        }
-        if (count >= Nmax) {
-            if (stop == Stop::NUMBER || stop == Stop::ACCURNUMBER) break;
-        }
+        // Stop conditions
+        if (trial_points[t].x - trial_points[(size_t)t - 1].x <= eps) break;
+        if (this->countEvals >= maxEvals || countIters >= maxIters) break;
     }
+    countEvals = this->countEvals;
     x = search_min(trial_points, m);
 }
 
-void imgo_method::solve(int &count, vector<double> &X, Stop stop) {
-    solve(count, X[0], stop);
+void imgo_method::solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X) {
+    solve(countIters, countTrials, countEvals, X[0]);
 }
 
-bool imgo_method::solve_test(double x_opt, int &count, Stop stop) {
+bool imgo_method::solve_test(double x_opt, int &countIters, int &countTrials, int &countEvals) {
     for (int nu = 0; nu < m + 1; nu++) {
         I[nu].clear();
         calc_I[nu] = false;
     }
     trial_points.clear();
-    Nmax = count;
+    this->countEvals = 0;
 
     last_trial = newTrial(A[0]);
     trial_points.push_back(last_trial);
@@ -234,11 +238,15 @@ bool imgo_method::solve_test(double x_opt, int &count, Stop stop) {
     last_trial = newTrial(B[0]);
     trial_points.push_back(last_trial);
     last_trial_pos = insert_in_sorted(I[(size_t)last_trial.nu - 1], last_trial);
-    count = 2;
+    countIters = 2;
+    countTrials = 2;
 
     double x_k_1;
     int t = 1;
     while (true) {
+        countIters++;
+
+        // Steps 3, 4, 5, 6, 7
         x_k_1 = selectNewPoint(t);
         last_trial = newTrial(x_k_1);
 
@@ -248,12 +256,14 @@ bool imgo_method::solve_test(double x_opt, int &count, Stop stop) {
         // Step 2
         last_trial_pos = insert_in_sorted(I[(size_t)last_trial.nu - 1], last_trial);
 
-        count++;
+        // Stop conditions
         if (abs(x_k_1 - x_opt) <= eps) {
-            if (stop == Stop::ACCURACY || stop == Stop::ACCURNUMBER) return true;
+            countEvals = this->countEvals;
+            return true;
         }
-        if (count >= Nmax) {
-            if (stop == Stop::NUMBER || stop == Stop::ACCURNUMBER) return false;
+        if (this->countEvals >= maxEvals || countIters >= maxIters) {
+            countEvals = this->countEvals;
+            return false;
         }
     }
 }

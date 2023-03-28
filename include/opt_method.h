@@ -6,33 +6,35 @@
 
 using namespace std;
 
-enum class Stop { ACCURACY, NUMBER, ACCURNUMBER };
-
 class optimization_method {
 protected:
     int n; // dimension
     vector<double> A, B; // area of search
     double eps; // accuracy
-    int Nmax; // maximum number of iterations
+    int maxIters; // maximum number of iterations
+    int maxEvals; // maximum number of calls to the target function
+    int countEvals; // number of calls to the target function
 
 public:
-    optimization_method(int _n, const vector<double> &_A, const vector<double> &_B, double _eps, int _Nmax) 
-        : n(_n), A(_A), B(_B), eps(_eps), Nmax(_Nmax) {}
+    optimization_method(int _n, const vector<double> &_A, const vector<double> &_B, double _eps, int _maxIters, int _maxEvals) 
+        : n(_n), A(_A), B(_B), eps(_eps), maxIters(_maxIters), maxEvals(_maxEvals), countEvals(0) {}
 
     void setN(int _n) { n = _n; };
-    void setNmax(int _Nmax) { Nmax = _Nmax; };
+    void setMaxIters(int _maxIters) { maxIters = _maxIters; };
+    void setMaxEvals(int _maxEvals) { maxEvals = _maxEvals; };
     void setEps(double _eps) { eps = _eps; };
     void setA(const vector<double> &_A) { A = _A; };
     void setB(const vector<double> &_B) { B = _B; };
     void setAB(const vector<double> &_A, const vector<double> &_B) { A = _A; B = _B; };
 
     int getN() { return n; };
-    int getNmax() { return Nmax; };
+    int getMaxIters() { return maxIters; };
+    int getMaxEvals() { return maxEvals; };
     double getEps() { return eps; };
     vector<double> getA() { return A; };
     vector<double> getB() { return B; };
 
-    virtual void solve(int &countTrials, vector<double> &X, Stop stop = Stop::ACCURACY) = 0;
+    virtual void solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X) = 0;
 };
 
 struct trial {
@@ -52,8 +54,9 @@ protected:
     virtual double selectNewPoint(int &t) = 0;
 
 public:
-    optimization_method_non_constrained(function<double(vector<double>)> _f, int _n, const vector<double> &_A, const vector<double> &_B, double _eps, int _Nmax) 
-        : optimization_method(_n, _A, _B, _eps, _Nmax), f(_f) {}
+    optimization_method_non_constrained(function<double(vector<double>)> _f, int _n, const vector<double> &_A,
+                                        const vector<double> &_B, double _eps, int _max_iters, int _max_evals)
+                                        : optimization_method(_n, _A, _B, _eps, _max_iters, _max_evals), f(_f) {}
 
     void setF(function<double(vector<double>)> _f) { f = _f; };
 
@@ -82,7 +85,8 @@ protected:
 
 public:
     optimization_method_constrained(function<double(vector<double>, int)> _f, int _n, int _m, const vector<double> &_A, 
-        const vector<double> &_B, double _eps, int _Nmax) : optimization_method(_n, _A, _B, _eps, _Nmax), f(_f), m(_m) {}
+                                    const vector<double> &_B, double _eps, int _max_iters, int _max_evals)
+                                    : optimization_method(_n, _A, _B, _eps, _max_iters, _max_evals), f(_f), m(_m) {}
 
     void setF(function<double(vector<double>, int)> _f) { f = _f; };
     void setM(int _m) { m = _m; };

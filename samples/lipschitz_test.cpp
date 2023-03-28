@@ -19,7 +19,7 @@ using vector_4d = vector<vector<vector<vector<double>>>>;
 // #define OUTPUT_INFO
 
 void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single problem, int num_func,
-                                                            double r, int key, int m, int incr, Stop stop);
+                                                                     double r, int key, int m, int incr);
 
 const int type = 0; // 0 - grishagin, 1 - GKLS
                     // 2 - constrained grisagin, 3 - constrained GKLS
@@ -51,11 +51,10 @@ int main() {
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
     double eps = 0.01, d = 0.0, r = 2.0;
-    int Nmax = 2000;
-    Stop stop = Stop::ACCURNUMBER;
+    int maxIters = 100000, maxEvals = 100000;
     vector<double> r_vec{2.8, 3.5, 2.8, 2.8};
 
-    mggsa_method mggsa(nullptr, -1, -1, vector<double>(), vector<double>(), r, d, -1, -1, eps, Nmax, -1);
+    mggsa_method mggsa(nullptr, -1, -1, vector<double>(), vector<double>(), r, d, -1, -1, eps, maxIters, maxEvals, -1);
 
     vector_4d lipschitz_const(count_func);
     for (int i = 0; i < count_func; i++) {
@@ -73,7 +72,7 @@ int main() {
 
     int total_start_time = clock();
 #pragma omp parallel for schedule(dynamic, chunk) proc_bind(spread) num_threads(omp_get_num_procs()) collapse(4) \
-        shared(count_func, key_min, key_max, m_min, m_max, incr_min, incr_max, problems, r_vec, lipschitz_const, stop) \
+        shared(count_func, key_min, key_max, m_min, m_max, incr_min, incr_max, problems, r_vec, lipschitz_const) \
         firstprivate(mggsa)
     for (int i = 0; i < count_func; i++) {
         for (int j = key_min; j <= key_max; j++) {
@@ -81,14 +80,14 @@ int main() {
                 for (int l = incr_min; l <= incr_max; l++) {
                     if (j != key_max) {
                         if (l == incr_min) {
-                            calculation(mggsa, lipschitz_const, problems[i], i, r_vec[i], j, k, l, stop);
+                            calculation(mggsa, lipschitz_const, problems[i], i, r_vec[i], j, k, l);
                             for (int m = incr_min + 1; m <= incr_max; m++) {
                                 lipschitz_const[i][j - key_min][k - m_min][m - incr_min] = 
                                     lipschitz_const[i][j - key_min][k - m_min][0];
                             }
                         }
                     } else {
-                        calculation(mggsa, lipschitz_const, problems[i], i, r_vec[i], j, k, l, stop);
+                        calculation(mggsa, lipschitz_const, problems[i], i, r_vec[i], j, k, l);
                     }
                 }
             }
@@ -137,9 +136,10 @@ int main() {
 }
 
 void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single problem, int num_func,
-                                                          double r, int key, int m, int incr, Stop stop) {
+                                                                     double r, int key, int m, int incr) {
     double accuracy, f_X_opt, f_X;                                                            
-    int constr, count_trials, count_points, n;
+    int constr, count_points, n;
+    int countIters, countTrials, countEvals;
     vector<double> A, B, X_opt, X, mu;
     functor_single func;
     functor_single_constr func_constr;
@@ -172,7 +172,7 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single
     mggsa.setIncr(incr);
     mggsa.setR(r);
 
-    mggsa.solve(count_trials, X, stop);
+    mggsa.solve(countIters, countTrials, countEvals, X);
     mggsa.getLambda(mu);
 
     if (problem.type == type_constraned::CONSTR) {
@@ -183,7 +183,6 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single
     lipschitz_const[num_func][(size_t)key - key_min][(size_t)m - m_min][(size_t)incr - incr_min] = mu[0];
     accuracy = sqrt((X_opt[0] - X[0]) * (X_opt[0] - X[0]) + 
                     (X_opt[1] - X[1]) * (X_opt[1] - X[1]));
-    count_points = mggsa.getCountPoints();
 
     double end_time = omp_get_wtime();
     double work_time = end_time - start_time;
@@ -199,8 +198,9 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single
     cout << "Parameters for constructing the Peano curve:" << endl;
     cout << "m = " << m << " key = " << key << " incr = " << incr << endl;
     cout << "Trials result:" << endl;
-    cout << "Number of trials = " << count_trials << endl;
-    cout << "Number of points = " << count_points << endl;
+    cout << "Number of iters = " << countIters << endl;
+    cout << "Number of trials = " << countTrials << endl;
+    cout << "Number of evals = " << countEvals << endl;
     cout << "Estimation of the Lipschitz constant:" << endl;
     cout << "L(f(x)) = " << mu[constr] << endl;
     for (int j = 0; j < constr; j++) {

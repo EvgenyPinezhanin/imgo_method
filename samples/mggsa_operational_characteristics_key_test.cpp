@@ -20,10 +20,14 @@
 
 using namespace std;
 
-// #define CALC
+#define CALC
 
 const int family_number = 2; // 0 - Grishagin, 1 - GKLS,
-                             // 2 - Grishagin(constrained), 3 - GKLS(constrained),
+                             // 2 - Grishagin(constrained), 3 - GKLS(constrained)
+
+const int number_family = 4;
+
+const int chunk = 2;
 
 int main() {
 #if defined(CALC)
@@ -32,16 +36,17 @@ int main() {
     ofstream ofstr_opt("output_data/mggsa_operational_characteristics_key_test_opt.txt");
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
-    const int number_family = 4;
-
-    int chunk = 2;
+    // vector<vector<int>> K{ {0, 700, 25},
+    //                        {0, 1200, 25},
+    //                        {0, 2200, 25},
+    //                        {0, 4500, 25} };
 
     vector<vector<int>> K{ {0, 700, 25},
-                           {0, 1200, 25},
-                           {0, 2200, 25},
-                           {0, 4500, 25} };
+                           {0, 1500, 25},
+                           {0, 5000, 25},
+                           {0, 7000, 25} };
 
-    int den = 10, Nmax = 5000, incr = 30;
+    int den = 10, incr = 30;
     double eps = 0.01;
     vector<vector<double>> r_array{ {3.0, 2.4, 1.6, 1.0},
                                     {4.2, 3.8, 2.0, 1.0},
@@ -72,7 +77,7 @@ int main() {
                                      problem_family("GKLSProblemConstrainedFamily", &gklsConstrainedProblems, 
                                                     type_constraned::CONSTR, "GKLSConstrained") };
 
-    mggsa_method mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, -1, eps, Nmax, incr);
+    mggsa_method mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, -1, eps, -1, -1, incr);
 
     int total_start_time = clock();
 #pragma omp parallel for schedule(static, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
@@ -95,19 +100,22 @@ int main() {
                 mggsa.setN((*func.opt_problem_family)[0]->GetDimension());
                 mggsa.setM(0);
             }
+            
+            mggsa.setMaxIters(K[i][1]);
+            mggsa.setMaxEvals(K[i][1]);
             mggsa.setAB(A, B);
             mggsa.setD(d_array[i]);
             mggsa.setKey(key_array[j]);
             mggsa.setR(r_array[i][j]);
 
-            vector<int> count_trials_vec(problems[i].optProblemFamily->GetFamilySize());
+            vector<int> count_evals(problems[i].optProblemFamily->GetFamilySize());
             int count_func = problems[i].optProblemFamily->GetFamilySize();
             vector<double> X_opt;
-            int count_trials, count_successful;
+            int count_successful;
+            int countIters, countTrials, countEvals;
 
             double start_time = omp_get_wtime();
             for (int k = 0; k < count_func; k++) {
-                count_trials = K[i][1];
                 if (problems[i].type == type_constraned::CONSTR) {
                     func_constr.current_func = k;
                     X_opt = (*func_constr.constr_opt_problem_family)[k]->GetOptimumPoint();
@@ -117,14 +125,14 @@ int main() {
                     X_opt = (*func.opt_problem_family)[k]->GetOptimumPoint();
                     mggsa.setF(func);
                 }
-                if (mggsa.solve_test(X_opt, count_trials, Stop::ACCURNUMBER)) {
-                    count_trials_vec[k] = count_trials;
+                if (mggsa.solve_test(X_opt, countIters, countTrials, countEvals)) {
+                    count_evals[k] = countEvals;
                 } else {
-                    count_trials_vec[k] = count_trials + 1;
+                    count_evals[k] = countEvals + 1;
                 }
             }
             for (int k = K[i][0]; k <= K[i][1]; k += K[i][2]) {
-                count_successful = (int)count_if(count_trials_vec.begin(), count_trials_vec.end(), [k](double elem){ return elem <= k; });
+                count_successful = (int)count_if(count_evals.begin(), count_evals.end(), [k](double elem){ return elem <= k; });
                 success_rate[i][j][k / K[i][2]] = (double)count_successful / count_func;
             }
             double end_time = clock();

@@ -38,11 +38,11 @@ private:
 
 public:
     mggsa_method(function<double(vector<double>, int)> _f, int _n = 2, int _m = 0, vector<double> _A = vector<double>(), 
-                 vector<double> _B = vector<double>(), double _r = 2.0, double _d = 0.01, int _den = 10, 
-                 int _key = 1, double _eps = 0.0001, int _Nmax = 1000, int _incr = 0)
-                 : optimization_method_constrained(_f, _n, _m, _A, _B, _eps, _Nmax), r(_r), d(_d), den(_den), key(_key), incr(_incr), 
-                 last_trials(1), last_trials_pos(1), M(0), I((size_t)m + 1), h_nu(0), calc_I((size_t)m + 1), 
-                 mu((size_t)m + 1), z_star((size_t)m + 1) {}
+                 vector<double> _B = vector<double>(), double _r = 2.0, double _d = 0.01, int _den = 10, int _key = 1,
+                 double _eps = 0.0001, int _maxIters = 1000, int _maxEvals = 1000, int _incr = 0)
+                 : optimization_method_constrained(_f, _n, _m, _A, _B, _eps, _maxIters, _maxEvals), r(_r), d(_d),
+                 den(_den), key(_key), incr(_incr), last_trials(1), last_trials_pos(1), M(0), I((size_t)m + 1),
+                 h_nu(0), calc_I((size_t)m + 1), mu((size_t)m + 1), z_star((size_t)m + 1) {}
     
     void setM(int _m);
     void setR(double _r) { r = _r; };
@@ -59,12 +59,12 @@ public:
     int getIncr() const { return incr; };
 
     void getPoints(vector<vector<double>> &points_vec);
-    int getCountPoints() const { return (int)trial_points.size() - 2; };
     void getLambda(vector<double> &mu_vec) const { mu_vec = mu; };
     
-    void solve(int &countTrials, vector<double> &X, TypeSolve type, Stop stop = Stop::ACCURACY);
-    void solve(int &countTrials, vector<double> &X, Stop stop = Stop::ACCURACY);
-    bool solve_test(vector<double> X_opt, int &count, Stop stop = Stop::ACCURACY);
+    void solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X, TypeSolve type);
+    void solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X) override; 
+
+    bool solve_test(vector<double> X_opt, int &countIters, int &countTrials, int &countEvals);
 };
 
 #endif // MGGSA_H

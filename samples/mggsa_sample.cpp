@@ -53,18 +53,19 @@ int main() {
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
     double eps = 0.01, r = 2.2, d = 0.0;
-    int count_trials, n = 2, den = 10, key = 1, Nmax = 1000;
+    int n = 2, den = 10, key = 1;
+    int countIters, countTrials, countEvals;
+    int maxIters = 100000, maxEvals = 100000;
     vector<double> X(n);
-    Stop stop = Stop::ACCURACY;
 
     vector<task_mggsa> task_array = { task_mggsa(f1, "f1", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
-                                                 vector<double>{4.0, 4.0}, vector<double>{}, eps, Nmax, r, d, den, key, stop),
+                                                 vector<double>{4.0, 4.0}, vector<double>{}, eps, maxIters, maxEvals, r, d, den, key),
                                       task_mggsa(f2, "f2", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
-                                                 vector<double>{1.0, 1.0}, vector<double>{}, eps, Nmax, r, d, den, key, stop),
+                                                 vector<double>{1.0, 1.0}, vector<double>{}, eps, maxIters, maxEvals, r, d, den, key),
                                       task_mggsa(f3, "f3", n, 1, vector<double>{-1.0, -1.0}, vector<double>{1.0, 1.0},
-                                                 vector<double>{0.5, 0.5}, vector<double>{}, eps, Nmax, r, d, den, key, stop),
+                                                 vector<double>{0.5, 0.5}, vector<double>{}, eps, maxIters, maxEvals, r, d, den, key),
                                       task_mggsa(f4, "f4", n, 1, vector<double>{0.0, 0.0}, vector<double>{3.0, 3.0},
-                                                 vector<double>{1.0, 1.0}, vector<double>{}, eps, Nmax, r, d, den, key, stop) };
+                                                 vector<double>{1.0, 1.0}, vector<double>{}, eps, maxIters, maxEvals, r, d, den, key) };
 
     mggsa_method mggsa(nullptr);
 
@@ -77,13 +78,14 @@ int main() {
             mggsa.setM(task_array[i].m);
             mggsa.setAB(task_array[i].A, task_array[i].B);
             mggsa.setEps(task_array[i].eps);
-            mggsa.setNmax(task_array[i].Nmax);
+            mggsa.setMaxIters(task_array[i].maxIters);
+            mggsa.setMaxEvals(task_array[i].maxEvals);
             mggsa.setR(task_array[i].r);
             mggsa.setD(task_array[i].d);
             mggsa.setDen(task_array[i].den);
             mggsa.setKey(task_array[i].key);
 
-            mggsa.solve(count_trials, X, task_array[i].stop);
+            mggsa.solve(countIters, countTrials, countEvals, X);
             mggsa.getLambda(mu);
 
             cout << "Function: " << task_array[i].name << endl;
@@ -98,7 +100,9 @@ int main() {
             cout << "Parameters for constructing the Peano curve:" << endl;
             cout << "m = " << task_array[i].den << " key = " << task_array[i].key << endl;
             cout << "Trials result:" << endl;
-            cout << "Number of trials = " << count_trials << endl;
+            cout << "Number of iters = " << countIters << endl;
+            cout << "Number of trials = " << countTrials << endl;
+            cout << "Number of evals = " << countEvals << endl;
             cout << "Estimation of the Lipschitz constant:" << endl;
             cout << "L(" << task_array[i].name << ") = " << mu[task_array[i].m] << endl;
             for (int j = 0; j < task_array[i].m; j++) {

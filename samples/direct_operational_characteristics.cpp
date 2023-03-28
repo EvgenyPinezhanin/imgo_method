@@ -18,7 +18,7 @@ using namespace std;
 
 // #define CALC
 
-const int family_number = 1; // 0 - Grishagin, 1 - GKLS,
+const int family_number = 3; // 0 - Grishagin, 1 - GKLS,
                              // 2 - Grishagin(constrained), 3 - GKLS(constrained),
                              // 4 - comparison Grishagin and GKLS, 5 - comparison Grishagin and GKLS (constrained)
 

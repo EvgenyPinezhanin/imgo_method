@@ -16,9 +16,9 @@
 
 using namespace std;
 
-#define CALC
+// #define CALC
 
-const int family_number = 5; // 0 - Grishagin, 1 - GKLS,
+const int family_number = 3; // 0 - Grishagin, 1 - GKLS,
                              // 2 - Grishagin(constrained), 3 - GKLS(constrained),
                              // 4 - comparison Grishagin and GKLS, 5 - comparison Grishagin and GKLS (constrained)
 
@@ -29,16 +29,22 @@ int main() {
     ofstream ofstr_opt("output_data/mggsa_operational_characteristics_opt.txt");
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
-    int count_func, count_successful, count_trials;
+    int count_func, count_successful;
+    int countIters, countTrials, countEvals;
 
     int start_time, end_time;
     int total_start_time, total_end_time;
     double work_time, total_work_time;
 
+    // vector<vector<int>> K{ {0, 700, 25},
+    //                        {0, 1500, 25},
+    //                        {0, 3000, 25},
+    //                        {0, 4500, 25} };
+    
     vector<vector<int>> K{ {0, 700, 25},
                            {0, 1500, 25},
-                           {0, 3000, 25},
-                           {0, 4500, 25} };
+                           {0, 5000, 25},
+                           {0, 7000, 25} };
 
     int den = 10, key = 1;
     double eps = 0.01, d = 0.0;
@@ -57,11 +63,11 @@ int main() {
     TGKLSProblemFamily GKLSProblems;
     TGKLSConstrainedProblemFamily GKLSConstrainedProblems;
 
-    vector<vector<int>> count_trials_vec(number_family);
-    count_trials_vec[0].resize(grishaginProblems.GetFamilySize(), 0);
-    count_trials_vec[1].resize(GKLSProblems.GetFamilySize(), 0);
-    count_trials_vec[2].resize(grishaginConstrainedProblems.GetFamilySize(), 0);
-    count_trials_vec[3].resize(GKLSConstrainedProblems.GetFamilySize(), 0);
+    vector<vector<int>> count_evals(number_family);
+    count_evals[0].resize(grishaginProblems.GetFamilySize(), 0);
+    count_evals[1].resize(GKLSProblems.GetFamilySize(), 0);
+    count_evals[2].resize(grishaginConstrainedProblems.GetFamilySize(), 0);
+    count_evals[3].resize(GKLSConstrainedProblems.GetFamilySize(), 0);
 
     vector<problem_family> problems{ problem_family("GrishaginProblemFamily", &grishaginProblems, type_constraned::NONCONSTR, "Grishagin"),
                                      problem_family("GKLSProblemFamily", &GKLSProblems, type_constraned::NONCONSTR, "GKLS"),
@@ -89,7 +95,9 @@ int main() {
             mggsa.setM(0);
         }
 
-        count_trials_vec.resize(problems[i].optProblemFamily->GetFamilySize());
+        mggsa.setMaxIters(K[i][1]);
+        mggsa.setMaxEvals(K[i][1]);
+        count_evals.resize(problems[i].optProblemFamily->GetFamilySize());
         count_func = problems[i].optProblemFamily->GetFamilySize();
         mggsa.setAB(A, B);
 
@@ -100,7 +108,6 @@ int main() {
             mggsa.setR(r_array[i][j]);
             start_time = clock();
             for (int k = 0; k < count_func; k++) {
-                count_trials = K[i][1];
                 if (problems[i].type == type_constraned::CONSTR) {
                     func_constr.current_func = k;
                     X_opt = (*func_constr.constr_opt_problem_family)[k]->GetOptimumPoint();
@@ -110,14 +117,14 @@ int main() {
                     X_opt = (*func.opt_problem_family)[k]->GetOptimumPoint();
                     mggsa.setF(func);
                 }
-                if (mggsa.solve_test(X_opt, count_trials, Stop::ACCURNUMBER)) {
-                    count_trials_vec[i][k] = count_trials;
+                if (mggsa.solve_test(X_opt, countIters, countTrials, countEvals)) {
+                    count_evals[i][k] = countEvals;
                 } else {
-                    count_trials_vec[i][k] = count_trials + 1;
+                    count_evals[i][k] = countEvals + 1;
                 }
             }
             for (int k = K[i][0]; k <= K[i][1]; k += K[i][2]) {
-                count_successful = (int)count_if(count_trials_vec[i].begin(), count_trials_vec[i].end(), [k](double elem){ return elem <= k; });
+                count_successful = (int)count_if(count_evals[i].begin(), count_evals[i].end(), [k](double elem){ return elem <= k; });
                 cout << "K = " << k << " success rate = " << (double)count_successful / count_func << endl;
                 ofstr << k << " " << (double)count_successful / count_func << endl;
             }

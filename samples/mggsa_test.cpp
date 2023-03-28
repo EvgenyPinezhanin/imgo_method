@@ -16,20 +16,20 @@ const int test_func_number = 0; // 0 - f1, 1 - f2
 
 double f1(vector<double> x, int j) {
     switch (j) {
-        case 1: return 0.01 * (pow((x[0] - 2.2), 2.0) + pow((x[1] - 1.2), 2.0) - 2.25);
-        case 2: return 100.0 * (1.0 - pow((x[0] - 2.0), 2.0) / 1.44 - pow(0.5 * x[1], 2.0));
+        case 1: return 0.01 * (pow((x[0] - 2.2), 2) + pow((x[1] - 1.2), 2) - 2.25);
+        case 2: return 100.0 * (1.0 - pow((x[0] - 2.0), 2) / 1.44 - pow(0.5 * x[1], 2));
         case 3: return 10.0 * (x[1] - 1.5 - 1.5 * sin(6.283 * (x[0] - 1.75)));
-        case 4: return -1.5 * x[0] * x[0] * exp(1.0 - x[0] * x[0] - 20.25 * pow((x[0] - x[1]), 2.0)) - 
-                       pow(0.5 * (x[0] - 1.0) * (x[1] - 1.0), 4.0) * exp(2.0 - pow(0.5 * (x[0] - 1.0), 4.0) - 
-                       pow(x[1] - 1.0, 4.0));
+        case 4: return -1.5 * x[0] * x[0] * exp(1.0 - x[0] * x[0] - 20.25 * pow((x[0] - x[1]), 2)) - 
+                       pow(0.5 * (x[0] - 1.0) * (x[1] - 1.0), 4) * exp(2.0 - pow(0.5 * (x[0] - 1.0), 4) - 
+                       pow(x[1] - 1.0, 4));
         default: return numeric_limits<double>::quiet_NaN();
     }
 }
 
-const double C[20] = {75.1963666677,-3.8112755343,0.1269366345,-0.0020567665,0.000010345,
-                      -6.8306567631,0.0302344793,-0.0012813448,0.0000352559,-0.0000002266,
-                      0.2564581253,-0.0034604030,0.0000135139,-28.1064434908,-0.0000052375,
-                      -0.0000000063,0.0000000007,0.0003405462,-0.0000016638,-2.8673112392 };
+const double C[20] = {75.1963666677, -3.8112755343, 0.1269366345, -0.0020567665, 0.000010345,
+                      -6.8306567631, 0.0302344793, -0.0012813448, 0.0000352559, -0.0000002266,
+                      0.2564581253, -0.0034604030, 0.0000135139, -28.1064434908, -0.0000052375,
+                      -0.0000000063, 0.0000000007, 0.0003405462, -0.0000016638, -2.8673112392 };
 
 double f2(vector<double> x, int j) {
     switch (j) {
@@ -53,14 +53,17 @@ int main() {
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
     double eps = 0.001, r = 2.2, d = 0.05;
-    int count_trials, n = 2, den = 10, key = 1, Nmax = 1000;
+    int n = 2, den = 10, key = 1;
+    int countIters, countTrials, countEvals;
+    int maxIters = 100000, maxEvals = 100000;
     vector<double> X(n);
-    Stop stop = Stop::ACCURACY;
 
     vector<task_mggsa> task_array = { task_mggsa(f1, "f1", n, 3, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
-                                                 vector<double>{0.942, 0.944}, vector<double>{}, eps, Nmax, r, d, 12, key, stop, true),
+                                                 vector<double>{0.942, 0.944}, vector<double>{}, eps, maxIters, maxEvals,
+                                                                                                      r, d, 12, key, true),
                                       task_mggsa(f2, "f2", n, 4, vector<double>{0.0, 0.0}, vector<double>{80.0, 80.0},
-                                                 vector<double>{77.489, 63.858}, vector<double>{}, eps, Nmax, 3.3, 0.01, den, key, stop, true) };
+                                                 vector<double>{77.489, 63.858}, vector<double>{}, eps, maxIters, maxEvals,
+                                                                                                  3.3, 0.01, den, key, true) };
 
     mggsa_method mggsa(nullptr);
 
@@ -73,13 +76,14 @@ int main() {
             mggsa.setM(task_array[i].m);
             mggsa.setAB(task_array[i].A, task_array[i].B);
             mggsa.setEps(task_array[i].eps);
-            mggsa.setNmax(task_array[i].Nmax);
+            mggsa.setMaxIters(task_array[i].maxIters);
+            mggsa.setMaxEvals(task_array[i].maxEvals);
             mggsa.setR(task_array[i].r);
             mggsa.setD(task_array[i].d);
             mggsa.setDen(task_array[i].den);
             mggsa.setKey(task_array[i].key);
 
-            mggsa.solve(count_trials, X, task_array[i].stop);
+            mggsa.solve(countIters, countTrials, countEvals, X);
             mggsa.getLambda(mu);
 
             cout << "Function: " << task_array[i].name << endl;
@@ -95,7 +99,9 @@ int main() {
             cout << "Parameters for constructing the Peano curve:" << endl;
             cout << "m = " << task_array[i].den << " key = " << task_array[i].key << endl;
             cout << "Trials result:" << endl;
-            cout << "Number of trials = " << count_trials << endl;
+            cout << "Number of iters = " << countIters << endl;
+            cout << "Number of trials = " << countTrials << endl;
+            cout << "Number of evals = " << countEvals << endl;
             cout << "Estimation of the Lipschitz constant:" << endl;
             cout << "L(" << task_array[i].name << ") = " << mu[task_array[i].m] << endl;
             for (int j = 0; j < task_array[i].m; j++) {

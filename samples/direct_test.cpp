@@ -27,11 +27,11 @@ double f1(int n, const double *X, int *undefined_flag, void *data) {
     for (int i = 0; i < 3; i++) {
         if (constr[i] > 0.0) is_constr = false;
     }
-    if (is_constr) *undefined_flag = 1;
+    if (!is_constr) *undefined_flag = 1;
 
-    return -1.5 * X[0] * X[0] * exp(1.0 - X[0] * X[0] - 20.25 * pow((X[0] - X[1]), 2.0)) - 
-            pow(0.5 * (X[0] - 1.0) * (X[1] - 1.0), 4.0) * exp(2.0 - pow(0.5 * (X[0] - 1.0), 4.0) - 
-            pow(X[1] - 1.0, 4.0));
+    return -1.5 * X[0] * X[0] * exp(1.0 - X[0] * X[0] - 20.25 * pow((X[0] - X[1]), 2)) -
+            pow(0.5 * (X[0] - 1.0) * (X[1] - 1.0), 4) * exp(2.0 - pow(0.5 * (X[0] - 1.0), 4) -
+            pow(X[1] - 1.0, 4));
 }
 
 const double C[20] = {75.1963666677,-3.8112755343,0.1269366345,-0.0020567665,0.000010345,
@@ -50,10 +50,10 @@ double f2(int n, const double *X, int *undefined_flag, void *data) {
     constr[1] = (0.1 * X[0] - 1.0) * (0.1 * X[0] - 1.0) - X[1];
     constr[2] = 8.0 * (X[0] - 40.0) - (X[1] - 30.0) * (X[1] - 55.0);
     constr[3] = X[1] + (X[0] - 35.0) * (X[0] - 30.0) / 125.0 - 80.0;
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
         if (constr[i] > 0.0) is_constr = false;
     }
-    if (is_constr) *undefined_flag = 1;
+    if (!is_constr) *undefined_flag = 1;
 
     return -(C[0] + C[1] * X[0] + C[2] * X[0] * X[0] + C[3] * pow(X[0], 3) + C[4] * pow(X[0], 4) + C[5] * X[1] +
              C[6] * X[0] * X[1] + C[7] * X[0] * X[0] * X[1] + C[8] * pow(X[0], 3) * X[1] + C[9] * pow(X[0], 4) * X[1] +
@@ -92,7 +92,7 @@ int main() {
     data_direct *data, data_tmp;
     for (int i = 0; i < task_array.size(); i++) {
         if (task_array[i].used) {
-            data = (static_cast<data_direct*>(task_array[i].f_data));
+            data = static_cast<data_direct*>(task_array[i].f_data);
             data->count_evals = 0;
             data->points.clear();
 

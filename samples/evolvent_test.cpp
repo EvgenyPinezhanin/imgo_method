@@ -27,10 +27,11 @@ int main() {
 
     vector<double> A{-1.0 / 2.0, -1.0 / 2.0}, B{1.0, 1.0}, X_opt{0.0, 0.0};
     double eps = 0.01, r = 2.0, d = 0.0;
-    int constr = 0, count_trials, Nmax = 1000;
-    int m = 10, n = 2, key = 2, incr = 10;
-    vector<double> X(n); 
-    Stop stop = Stop::ACCURACY;
+    int constr = 0;
+    int countIters, countTrials, countEvals;
+    int maxIters = 100000, maxEvals = 100000;
+    int m = 10, n = 2, key = 3, incr = 10;
+    vector<double> X(n);
 
     double k = (key != 3) ? 1.0 / (pow(2.0, n * m) - 1.0) :
                             1.0 / (pow(2.0, m * n) * (pow(2.0, n) - 1.0)) + 0.0000000001;
@@ -46,12 +47,12 @@ int main() {
     if (key == 3) m--;
     ofstr.close();
 
-    mggsa_method mggsa(f, n, constr, A, B, r, d, m, key, eps, Nmax, incr);
+    mggsa_method mggsa(f, n, constr, A, B, r, d, m, key, eps, maxIters, maxEvals, incr);
 
     vector<double> mu;
     vector<vector<double>> points;
 
-    mggsa.solve(count_trials, X, stop);
+    mggsa.solve(countIters, countTrials, countEvals, X);
     mggsa.getLambda(mu);
 
     cout << "Function: " << "x^2 + y^2 - cos(18.0 * x) - cos(18.0 * y)" << endl;
@@ -66,8 +67,9 @@ int main() {
     cout << "Parameters for constructing the Peano curve:" << endl;
     cout << "m = " << m << " key = " << key << " incr = " << incr << endl;
     cout << "Trials result:" << endl;
-    cout << "Number of trials = " << count_trials << endl;
-    cout << "Number of points = " << mggsa.getCountPoints() << endl;
+    cout << "Number of iters = " << countIters << endl;
+    cout << "Number of trials = " << countTrials << endl;
+    cout << "Number of evals = " << countEvals << endl;
     cout << "Estimation of the Lipschitz constant = " << mu[0] << endl;
     cout << "X = (" << X[0] << ", " << X[1] << ")" << endl;
     cout << "f(X) = " << f(X, constr + 1) << endl;

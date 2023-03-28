@@ -35,6 +35,7 @@ inline double search_min(vector<trial> &trials) {
 }
 
 trial gsa_method::newTrial(double x) {
+    countEvals++;
     return trial(x, f(x));
 }
 
@@ -86,40 +87,42 @@ double gsa_method::selectNewPoint(int &t) {
     return newPoint(t);
 }
 
-void gsa_method::solve(int &count, double &x, Stop stop) {
+void gsa_method::solve(int &countIters, int &countTrials, int &countEvals, double &x) {
     trial_points.clear();
+    this->countEvals = 0;
 
     trial_points.push_back(newTrial(A[0]));
-    trial_points.push_back(newTrial(B[0]));
-    count = 2;
+
+    last_trial = newTrial(B[0]);
+    last_trial_pos = 1;
+
+    trial_points.push_back(last_trial);
+    countTrials = 2;
+    countIters = 2;
 
     double x_k_1;
     int t = 1;
-    last_trial = newTrial(B[0]);
-    last_trial_pos = 1;
     while(true) {
-        count++;
+        countIters++;
 
         // Steps 2, 3, 4, 5, 6
         x_k_1 = selectNewPoint(t);
 
         // Trial
         last_trial = newTrial(x_k_1);
+        countTrials++;
 
         // Stop conditions
-        if (trial_points[t].x - trial_points[(size_t)t - 1].x <= eps) {
-            if (stop == Stop::ACCURACY || stop == Stop::ACCURNUMBER) break;
-        }
-        if (count >= Nmax) {
-            if (stop == Stop::NUMBER || stop == Stop::ACCURNUMBER) break;
-        }
+        if (trial_points[t].x - trial_points[(size_t)t - 1].x <= eps) break;
+        if (this->countEvals >= maxEvals || countIters >= maxIters) break;
 
         // Step 1
         last_trial_pos = insert_in_sorted(trial_points, last_trial);
     }
+    countEvals = this->countEvals;
     x = search_min(trial_points);
 }
 
-void gsa_method::solve(int &count, vector<double> &X, Stop stop) {
-    solve(count, X[0], stop);
+void gsa_method::solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X) {
+    solve(countIters, countTrials, countEvals, X[0]);
 }

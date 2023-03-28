@@ -25,8 +25,9 @@ private:
 
 public:
     gsa_method(function<double(double)> _f, double _a = 0.0, double _b = 10.0, double _r = 2.0, double _eps = 0.001, 
-        int _Nmax = 1000) : optimization_method_non_constrained(nullptr, 1, vector<double>{_a}, vector<double>{_b}, 
-        _eps, _Nmax), f(_f), r(_r), m(0), last_trial(0.0, 0.0), last_trial_pos(0) {}
+               int _max_iters = 1000, int _max_evals = 1000) : optimization_method_non_constrained(nullptr, 1,
+               vector<double>{_a}, vector<double>{_b}, _eps, _max_iters, _max_evals), f(_f), r(_r), m(0),
+               last_trial(0.0, 0.0), last_trial_pos(0) {}
     
     void setF(function<double(double)> _f) { f = _f; };
     void setA(double _a) { optimization_method::setA(vector<double>{_a}); };
@@ -41,8 +42,8 @@ public:
 
     double getLambda() const { return m; };
     
-    void solve(int &count, double &x, Stop stop = Stop::ACCURACY);
-    void solve(int &count, vector<double> &X, Stop stop = Stop::ACCURACY);
+    void solve(int &countIters, int &countTrials, int &countEvals, double &x);
+    void solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X) override;
 };
 
 #endif // GSA_H

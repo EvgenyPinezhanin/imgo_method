@@ -70,6 +70,7 @@ trial_constr mggsa_method::newTrial(double x) {
     vector<double> X(n);
     y(x, X);
     for (int j = 1; j <= m + 1; j++) {
+        countEvals++;
         if ((f(X, j) > 0) || (j == m + 1)) {
             tr.z = f(X, j);
             tr.nu = j;
@@ -334,7 +335,7 @@ void mggsa_method::getPoints(vector<vector<double>> &points_vec) {
     }
 }
 
-void mggsa_method::solve(int &countTrials, vector<double> &X, TypeSolve type, Stop stop) {
+void mggsa_method::solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X, TypeSolve type) {
 #if defined(TIME_TEST)
     ofstr_test.open("output_data/mggsa_time_test.txt");
     if (!ofstr_test.is_open()) cerr << "File opening error\n";
@@ -354,6 +355,7 @@ void mggsa_method::solve(int &countTrials, vector<double> &X, TypeSolve type, St
     }
     trial_points.clear();
     X.resize(n);
+    this->countEvals = 0;
 
     last_trials[0] = trial_constr{peano_a, -1.0, 0};
     trial_points.push_back(last_trials[0]);
@@ -369,6 +371,8 @@ void mggsa_method::solve(int &countTrials, vector<double> &X, TypeSolve type, St
 #endif
 
     last_trials[0] = newTrial(peano_random);
+    countIters = 1;
+    countTrials = 1;
 
 #if defined(TIME_TEST)
     end_time = clock();
@@ -406,12 +410,13 @@ void mggsa_method::solve(int &countTrials, vector<double> &X, TypeSolve type, St
 #endif
 
     M = last_trials[0].nu;
-    countTrials = 1;
 
     double x_k_1, h, delta_t;
     int t = 1;
     vector<double> P(n);
     while(true) {
+        countIters++;
+
     #if defined(TIME_TEST)
         time_count.push_back(count);
     #endif
@@ -460,6 +465,7 @@ void mggsa_method::solve(int &countTrials, vector<double> &X, TypeSolve type, St
         if (key != 3) {
             last_trials.resize(1);
             last_trials[0] = newTrial(x_k_1);
+            countTrials++;
         } else {
             x(P, h_nu);
             if (!check_density(h_nu[0])) break;
@@ -467,6 +473,7 @@ void mggsa_method::solve(int &countTrials, vector<double> &X, TypeSolve type, St
             for (int i = 0; i < h_nu.size(); i++) {
                 last_trials.push_back(newTrial(h_nu[i]));
             }
+            countTrials += h_nu.size();
 
         #if defined(DEBUG)
             for (int i = 0; i < h_nu.size(); i++) {
@@ -519,19 +526,15 @@ void mggsa_method::solve(int &countTrials, vector<double> &X, TypeSolve type, St
             M = last_trials[0].nu;
         }
 
-        countTrials++;
-
     #if defined(EPS)
         cout << pow(abs(trial_points[t].x - trial_points[t - 1].x), 1.0 / n) << endl;
     #endif
 
-        if (delta_t <= eps) {
-            if (stop == Stop::ACCURACY || stop == Stop::ACCURNUMBER) break;
-        }
-        if (countTrials >= Nmax) {
-            if (stop == Stop::NUMBER || stop == Stop::ACCURNUMBER) break;
-        }
+        // Stop conditions
+        if (delta_t <= eps) break;
+        if (this->countEvals >= maxEvals || countIters >= maxIters) break;
     }
+    countEvals = this->countEvals;
     y(search_min(trial_points, m), X);
 
 #if defined(TIME_TEST)
@@ -560,16 +563,17 @@ void mggsa_method::solve(int &countTrials, vector<double> &X, TypeSolve type, St
 #endif
 }
 
-void mggsa_method::solve(int &countTrials, vector<double> &X, Stop stop) {
-    solve(countTrials, X, TypeSolve::SOLVE, stop);
+void mggsa_method::solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X) {
+    solve(countIters, countTrials, countEvals, X, TypeSolve::SOLVE);
 }
 
-bool mggsa_method::solve_test(vector<double> X_opt, int &count, Stop stop) {
+bool mggsa_method::solve_test(vector<double> X_opt, int &countIters, int &countTrials, int &countEvals) {
     for (int nu = 0; nu < m + 1; nu++) {
         I[nu].clear();
         calc_I[nu] = false;
     }
     trial_points.clear();
+    this->countEvals = 0;
 
     last_trials[0] = trial_constr{peano_a, -1.0, 0};
     trial_points.push_back(last_trials[0]);
@@ -577,16 +581,20 @@ bool mggsa_method::solve_test(vector<double> X_opt, int &count, Stop stop) {
     trial_points.push_back(last_trials[0]);
 
     last_trials[0] = newTrial(peano_random);
+    countIters = 1;
+    countTrials = 1;
+
     insert_in_sorted(trial_points, last_trials[0]);
     last_trials_pos[0] = insert_in_sorted(I[(size_t)last_trials[0].nu - 1], last_trials[0]);
 
     M = last_trials[0].nu;
-    count = 1;
 
     double x_k_1, h;
     int t = 1;
     vector<double> P(n), X(n);
     while (true) {
+        countIters++;
+
         // Steps 3, 4, 5, 6, Pre-7
         x_k_1 = selectNewPoint(t);
         if (key == 3) {
@@ -598,6 +606,7 @@ bool mggsa_method::solve_test(vector<double> X_opt, int &count, Stop stop) {
         if (key != 3) {
             last_trials.resize(1);
             last_trials[0] = newTrial(x_k_1);
+            countTrials++;
         } else {
             x(P, h_nu);
             if (!check_density(h_nu[0])) return false;
@@ -605,6 +614,7 @@ bool mggsa_method::solve_test(vector<double> X_opt, int &count, Stop stop) {
             for (int i = 0; i < h_nu.size(); i++) {
                 last_trials.push_back(newTrial(h_nu[i]));
             }
+            countTrials += h_nu.size();
         }
 
         // Step 1
@@ -627,14 +637,15 @@ bool mggsa_method::solve_test(vector<double> X_opt, int &count, Stop stop) {
             M = last_trials[0].nu;
         }
 
-        count++;
-
         y(x_k_1, X);
+        // Stop conditions
         if (euclidean_distance(X, X_opt) <= eps) {
-            if (stop == Stop::ACCURACY || stop == Stop::ACCURNUMBER) return true;
+            countEvals = this->countEvals;
+            return true;
         }
-        if (count >= Nmax) {
-            if (stop == Stop::NUMBER || stop == Stop::ACCURNUMBER) return false;
+        if (this->countEvals >= maxEvals || countIters >= maxIters) {
+            countEvals = this->countEvals;
+            return false;
         }
     }
 }
