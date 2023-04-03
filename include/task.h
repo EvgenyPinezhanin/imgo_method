@@ -40,25 +40,26 @@ struct task_gsa : public task {
 
 struct task_imgo : public task {
     double (*f)(double, int);
-    int m;
+    int numberConstraints;
     double r, d;
 
-    task_imgo(double (*_f)(double, int), string _name, int _m, double _a, double _b, double _x_opt, vector<double> _L,
-              double _eps, int _maxIters, int _maxEvals, double _r, double _d, bool _used = true) : task(_name, 1,
-              vector<double>{_a}, vector<double>{_b}, vector<double>{_x_opt}, _L, _eps, _maxIters, _maxEvals, _used),
-              f(_f), m(_m), r(_r), d(_d) {};
+    task_imgo(double (*_f)(double, int), string _name, int _numberConstraints, double _a, double _b, double _x_opt,
+              vector<double> _L, double _eps, int _maxIters, int _maxEvals, double _r, double _d, bool _used = true)
+              : task(_name, 1, vector<double>{_a}, vector<double>{_b}, vector<double>{_x_opt}, _L, _eps, _maxIters,
+              _maxEvals, _used), f(_f), numberConstraints(_numberConstraints), r(_r), d(_d) {};
 };
 
 struct task_mggsa : public task {
     double (*f)(vector<double>, int);
-    int m;
+    int numberConstraints;
     double r, d;
     int den, key;
 
-    task_mggsa(double (*_f)(vector<double>, int), string _name, int _n, int _m, vector<double> _A, vector<double> _B, 
-               vector<double> _X_opt, vector<double> _L, double _eps, int _maxIters, int _maxEvals, double _r, double _d,
-               int _den, int _key, bool _used = true) : task(_name, _n, _A, _B, _X_opt, _L, _eps, _maxIters, _maxEvals,
-               _used), f(_f), m(_m), r(_r), d(_d), den(_den), key(_key) {};
+    task_mggsa(double (*_f)(vector<double>, int), string _name, int _n, int _numberConstraints, vector<double> _A,
+               vector<double> _B, vector<double> _X_opt, vector<double> _L, double _eps, int _maxIters, int _maxEvals,
+               double _r, double _d, int _den, int _key, bool _used = true) : task(_name, _n, _A, _B, _X_opt, _L, _eps,
+               _maxIters, _maxEvals, _used), f(_f), numberConstraints(_numberConstraints), r(_r), d(_d), den(_den),
+               key(_key) {};
 };
 
 enum class type_constraned { CONSTR, NONCONSTR };

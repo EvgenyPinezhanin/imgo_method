@@ -69,9 +69,9 @@ trial_constr mggsa_method::newTrial(double x) {
     trial_constr tr(x);
     vector<double> X(n);
     y(x, X);
-    for (int j = 1; j <= m + 1; j++) {
+    for (int j = 1; j <= numberConstraints + 1; j++) {
         countEvals++;
-        if ((f(X, j) > 0) || (j == m + 1)) {
+        if ((f(X, j) > 0) || (j == numberConstraints + 1)) {
             tr.z = f(X, j);
             tr.nu = j;
             break;
@@ -79,7 +79,8 @@ trial_constr mggsa_method::newTrial(double x) {
     }
 
 #if defined(DEBUG)
-    cout << "trial: x = " << x << " X = " << X[0] << " Y = " << X[1] << " z = " << f(X, m + 1) << " nu = " << tr.nu << endl;
+    cout << "trial: x = " << x << " X = " << X[0] << " Y = " << X[1] <<
+            " z = " << f(X, numberConstraints + 1) << " nu = " << tr.nu << endl;
 #endif
 
     return tr;
@@ -112,7 +113,7 @@ double mggsa_method::calc_h(double x_k_1) {
 
 bool mggsa_method::check_density(double h_j) {
     for (int i = 0; i < trial_points.size(); i++) {
-        if (abs(h_j - trial_points[i].x) <= 1e-14) return false; 
+        if (abs(h_j - trial_points[i].x) <= epsilon) return false; 
     }
     return true;
 }
@@ -187,7 +188,7 @@ double mggsa_method::selectNewPoint(int &t) {
     double mu_tmp;
     int nu_I = last_trials[0].nu - 1;
     size_t size_I = I[nu_I].size();
-    for (int nu = 0; nu < m + 1; nu++) {
+    for (int nu = 0; nu < numberConstraints + 1; nu++) {
         if (!calc_I[nu]) mu[nu] = 0.0;
     }
     for (int i = 0; i < last_trials.size(); i++) {
@@ -201,7 +202,7 @@ double mggsa_method::selectNewPoint(int &t) {
             }
         }
     }
-    for (int nu = 0; nu < m + 1; nu++) {
+    for (int nu = 0; nu < numberConstraints + 1; nu++) {
         if (abs(mu[nu]) <= epsilon) mu[nu] = 1.0;
     }
 
@@ -233,7 +234,7 @@ double mggsa_method::selectNewPoint(int &t) {
 
 #if defined(DEBUG)
     cout << "mu: ";
-    for (int nu = 0; nu < m + 1; nu++) {
+    for (int nu = 0; nu < numberConstraints + 1; nu++) {
         cout << mu[nu] << " ";
     }
     cout << endl;
@@ -244,7 +245,7 @@ double mggsa_method::selectNewPoint(int &t) {
 #endif
 
     // Step 4
-    for (int nu = 0; nu < m + 1; nu++) {
+    for (int nu = 0; nu < numberConstraints + 1; nu++) {
         if (I[nu].size() != 0) {
             if (nu + 1 != M) {
                 z_star[nu] = -mu[nu] * d;
@@ -267,7 +268,7 @@ double mggsa_method::selectNewPoint(int &t) {
 
 #if defined(DEBUG)
     cout << "z_star: ";
-    for (int nu = 0; nu < m + 1; nu++) {
+    for (int nu = 0; nu < numberConstraints + 1; nu++) {
         cout << z_star[nu] << " ";
     }
     cout << endl;
@@ -318,20 +319,20 @@ double mggsa_method::selectNewPoint(int &t) {
     return newPoint(t);
 }
 
-void mggsa_method::setM(int _m) {
-    optimization_method_constrained::setM(_m);
-    I.resize((size_t)m + 1);
-    calc_I.resize((size_t)m + 1);
-    mu.resize((size_t)m + 1);
-    z_star.resize((size_t)m + 1);
+void mggsa_method::setNumberConstraints(int _numberConstraints) {
+    optimization_method_constrained::setNumberConstraints(_numberConstraints);
+    I.resize((size_t)numberConstraints + 1);
+    calc_I.resize((size_t)numberConstraints + 1);
+    mu.resize((size_t)numberConstraints + 1);
+    z_star.resize((size_t)numberConstraints + 1);
 }
 
-void mggsa_method::getPoints(vector<vector<double>> &points_vec) {
-    points_vec.clear();
+void mggsa_method::getPoints(vector<vector<double>> &points) {
+    points.clear();
     vector<double> point(n);
     for (int i = 0; i < trial_points.size(); i++) {
         y(trial_points[i].x, point);
-        points_vec.push_back(point);
+        points.push_back(point);
     }
 }
 
@@ -339,77 +340,96 @@ void mggsa_method::solve(int &countIters, int &countTrials, int &countEvals, vec
 #if defined(TIME_TEST)
     ofstr_test.open("output_data/mggsa_time_test.txt");
     if (!ofstr_test.is_open()) cerr << "File opening error\n";
-    time_count.clear();
-    time_mu.clear();
-    time_z_star.clear();
-    time_R.clear();
-    time_trial.clear();
-    time_add_trial.clear();
-    time_add_I.clear();
-    time_P.clear();
+    if (type == TypeSolve::SOLVE) {
+        time_count.clear();
+        time_mu.clear();
+        time_z_star.clear();
+        time_R.clear();
+        time_trial.clear();
+        time_add_trial.clear();
+        time_add_I.clear();
+        time_P.clear();
+    }
 #endif
 
-    for (int nu = 0; nu < m + 1; nu++) {
-        I[nu].clear();
-        calc_I[nu] = false;
+    if (type == TypeSolve::SOLVE) {
+        for (int nu = 0; nu < numberConstraints + 1; nu++) {
+            I[nu].clear();
+            calc_I[nu] = false;
+        }
+        trial_points.clear();
+        this->countEvals = 0;
     }
-    trial_points.clear();
     X.resize(n);
-    this->countEvals = 0;
 
-    last_trials[0] = trial_constr{peano_a, -1.0, 0};
-    trial_points.push_back(last_trials[0]);
-    last_trials[0].x = peano_b;
-    trial_points.push_back(last_trials[0]);
+    if (type == TypeSolve::SOLVE) {
+        last_trials[0] = trial_constr{peano_a, -1.0, 0};
+        trial_points.push_back(last_trials[0]);
+        last_trials[0].x = peano_b;
+        trial_points.push_back(last_trials[0]);
+    }
 
 #if defined(DEBUG)
-    cout << "Trial number: " << 1 << endl;
+    if (type == TypeSolve::SOLVE)
+        cout << "Iter number: " << 1 << endl;
 #endif
 
 #if defined(TIME_TEST)
     start_time = clock();
 #endif
 
-    last_trials[0] = newTrial(peano_random);
-    countIters = 1;
-    countTrials = 1;
+    if (type == TypeSolve::SOLVE) {
+        last_trials[0] = newTrial(peano_random);
+        countIters = 1;
+        countTrials = 1;
+    }
 
 #if defined(TIME_TEST)
     end_time = clock();
 #endif
 
 #if defined(TIME_TEST)
-    time_count.push_back(0);
-    time_mu.push_back(0.0);
-    time_z_star.push_back(0.0);
-    time_R.push_back(0.0);
-    time_P.push_back(0.0);
-    time_trial.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
+    if (type == TypeSolve::SOLVE) {
+        time_count.push_back(0);
+        time_mu.push_back(0.0);
+        time_z_star.push_back(0.0);
+        time_R.push_back(0.0);
+        time_P.push_back(0.0);
+        time_trial.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
+    }
 #endif
 
 #if defined(TIME_TEST)
     start_time = clock();
 #endif
 
-    insert_in_sorted(trial_points, last_trials[0]);
+    if (type == TypeSolve::SOLVE) {
+        insert_in_sorted(trial_points, last_trials[0]);
+    }
 
 #if defined(TIME_TEST)
     end_time = clock();
-    time_add_trial.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
+    if (type == TypeSolve::SOLVE)
+        time_add_trial.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
 #endif
 
 #if defined(TIME_TEST)
     start_time = clock();
 #endif
 
-    last_trials_pos[0] = insert_in_sorted(I[(size_t)last_trials[0].nu - 1], last_trials[0]);
+    if (type == TypeSolve::SOLVE) {
+        last_trials_pos[0] = insert_in_sorted(I[(size_t)last_trials[0].nu - 1], last_trials[0]);
+    }
 
 #if defined(TIME_TEST)
     end_time = clock();
-    time_add_I.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
+    if (type == TypeSolve::SOLVE)
+        time_add_I.push_back((double)(end_time - start_time) / CLOCKS_PER_SEC);
 #endif
 
-    M = last_trials[0].nu;
+    if (type == TypeSolve::SOLVE) {
+        M = last_trials[0].nu;
+    }
 
     double x_k_1, h, delta_t;
     int t = 1;
@@ -418,11 +438,11 @@ void mggsa_method::solve(int &countIters, int &countTrials, int &countEvals, vec
         countIters++;
 
     #if defined(TIME_TEST)
-        time_count.push_back(count);
+        time_count.push_back(countIters);
     #endif
 
     #if defined(DEBUG)
-        cout << "Trial number: " << count + 1 << endl;
+        cout << "Iter number: " << countIters << endl;
     #endif
 
         // Steps 3, 4, 5, 6, Pre-7
@@ -535,11 +555,11 @@ void mggsa_method::solve(int &countIters, int &countTrials, int &countEvals, vec
         if (this->countEvals >= maxEvals || countIters >= maxIters) break;
     }
     countEvals = this->countEvals;
-    y(search_min(trial_points, m), X);
+    y(search_min(trial_points, numberConstraints), X);
 
 #if defined(TIME_TEST)
-    int k = (key == 3); 
-    for (int i = 0; i < count - 1; i++) {
+    int k = (key == 3);
+    for (int i = 0; i < countIters; i++) {
         ofstr_test << time_count[i] << " " << time_mu[i] << " " << time_z_star[i] << " "
                    << time_R[i] << " " << time_trial[i] << " "  << time_add_trial[i] << " " << time_add_I[i];
         if (k) ofstr_test << " " << time_P[i];
@@ -568,7 +588,7 @@ void mggsa_method::solve(int &countIters, int &countTrials, int &countEvals, vec
 }
 
 bool mggsa_method::solve_test(vector<double> X_opt, int &countIters, int &countTrials, int &countEvals) {
-    for (int nu = 0; nu < m + 1; nu++) {
+    for (int nu = 0; nu < numberConstraints + 1; nu++) {
         I[nu].clear();
         calc_I[nu] = false;
     }

@@ -138,7 +138,7 @@ int main() {
 void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single problem, int num_func,
                                                                      double r, int key, int m, int incr) {
     double accuracy, f_X_opt, f_X;                                                            
-    int constr, count_points, n;
+    int numberConstraints, count_points, n;
     int countIters, countTrials, countEvals;
     vector<double> A, B, X_opt, X, mu;
     functor_single func;
@@ -150,21 +150,21 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single
         func_constr.constr_opt_problem = static_cast<IConstrainedOptProblem*>(problem.optProblem);
         func_constr.constr_opt_problem->GetBounds(A, B);
         n = func_constr.constr_opt_problem->GetDimension();
-        constr = func_constr.constr_opt_problem->GetConstraintsNumber();
+        numberConstraints = func_constr.constr_opt_problem->GetConstraintsNumber();
         X_opt = func_constr.constr_opt_problem->GetOptimumPoint();
         mggsa.setF(func_constr);
-        f_X_opt = func_constr(X_opt, constr + 1);
+        f_X_opt = func_constr(X_opt, numberConstraints + 1);
     } else {
         func.opt_problem = static_cast<IOptProblem*>(problem.optProblem);
         func.opt_problem->GetBounds(A, B);
         n = func.opt_problem->GetDimension();
-        constr = 0;
+        numberConstraints = 0;
         X_opt = func.opt_problem->GetOptimumPoint();
         mggsa.setF(func);
         f_X_opt = func(X_opt, 1);
     }
 
-    mggsa.setM(constr);
+    mggsa.setNumberConstraints(numberConstraints);
     mggsa.setN(n);
     mggsa.setAB(A, B);
     mggsa.setKey(key);
@@ -176,7 +176,7 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single
     mggsa.getLambda(mu);
 
     if (problem.type == type_constraned::CONSTR) {
-        f_X = func_constr(X, constr + 1);
+        f_X = func_constr(X, numberConstraints + 1);
     } else {
         f_X = func(X, 1);
     }
@@ -190,7 +190,7 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single
 #if defined(OUTPUT_INFO)
     cout << "Function: " << problem.name << endl;
     cout << "Dimension = " << n << endl;
-    cout << "Number of constrained = " << constr << endl;
+    cout << "Number of constrained = " << numberConstraints << endl;
     cout << "[A; B] = [(" << A[0] << ", " << A[1] << "); (" <<
                              B[0] << ", " << B[1] << ")]"<< endl;
     cout << "X* = (" << X_opt[0] << ", " << X_opt[1] << ")" << endl;
@@ -202,8 +202,8 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single
     cout << "Number of trials = " << countTrials << endl;
     cout << "Number of evals = " << countEvals << endl;
     cout << "Estimation of the Lipschitz constant:" << endl;
-    cout << "L(f(x)) = " << mu[constr] << endl;
-    for (int j = 0; j < constr; j++) {
+    cout << "L(f(x)) = " << mu[numberConstraints] << endl;
+    for (int j = 0; j < numberConstraints; j++) {
         cout << "L(g" << j + 1 << ") = " << mu[j] << endl;
     }
     cout << "X = (" << X[0] << ", " << X[1] << ")" << endl;

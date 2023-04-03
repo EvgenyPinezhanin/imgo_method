@@ -75,7 +75,7 @@ int main() {
     }
 
     double eps = 0.01, r = 2.1, d = 0.0;
-    int constr = 0, key = 3;
+    int numberConstraints = 0, key = 3;
     int maxIters = 100000, maxEvals = 100000;
     vector<double> X_opt, A, B;
     for (int i = 0; i < n_min - 1; i++) {
@@ -84,7 +84,7 @@ int main() {
         B.push_back(1.0);
     }
     
-    mggsa_method mggsa(f_rastrigin, -1, constr, A, B, r, d, -1, key, eps, maxIters, maxEvals, -1);
+    mggsa_method mggsa(f_rastrigin, -1, numberConstraints, A, B, r, d, -1, key, eps, maxIters, maxEvals, -1);
 
     vector<double> mu, X;
     double accuracy;
@@ -102,7 +102,7 @@ int main() {
     #if defined(OUTPUT_INFO)
         cout << "Rastrigin function" << endl;
         cout << "Dimension = " << N << endl;
-        cout << "Number of constrained = " << constr << endl;
+        cout << "Number of constrained = " << numberConstraints << endl;
         cout << "[A; B] = [(";
         for (int j = 0; j < A.size() - 1; j++) {
             cout << A[j] << ", "; 
@@ -117,7 +117,7 @@ int main() {
             cout << X_opt[l] << ", ";
         }
         cout << X_opt[X_opt.size() - 1] << ")" << endl;
-        cout << "f(X*) = " << f_rastrigin(X_opt, constr + 1) << endl;
+        cout << "f(X*) = " << f_rastrigin(X_opt, numberConstraints + 1) << endl;
         cout << "Parameters for method:" << endl;
         cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
         cout << "Parameters for constructing the Peano curve:" << endl;
@@ -159,10 +159,11 @@ int main() {
                     cout << X[l] << ", ";
                 }
                 cout << X[X.size() - 1] << ")" << endl;
-                cout << "f(X) = " << f_rastrigin(X, constr + 1) << endl;
+                cout << "f(X) = " << f_rastrigin(X, numberConstraints + 1) << endl;
                 cout << "||X* - X|| = " << accuracy << endl;
 
-                cout << "|f(X*) - f(X)| = " << abs(f_rastrigin(X_opt, constr + 1) - f_rastrigin(X, constr + 1)) << endl;
+                cout << "|f(X*) - f(X)| = " << abs(f_rastrigin(X_opt, numberConstraints + 1) -
+                                                   f_rastrigin(X, numberConstraints + 1)) << endl;
                 cout << endl;
             #else
                 string str = "Rastrigin: n = " + to_string(i) + " m = " + to_string(j) + " incr = " + to_string(k) +

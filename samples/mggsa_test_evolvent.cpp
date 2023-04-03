@@ -27,7 +27,7 @@ int main() {
 
     vector<double> A{-1.0 / 2.0, -1.0 / 2.0}, B{1.0, 1.0}, X_opt{0.0, 0.0};
     double eps = 0.01, r = 2.0, d = 0.0;
-    int constr = 0;
+    int numberConstraints = 0;
     int countIters, countTrials, countEvals;
     int maxIters = 100000, maxEvals = 100000;
     int m = 10, n = 2, key = 3, incr = 10;
@@ -47,21 +47,21 @@ int main() {
     if (key == 3) m--;
     ofstr.close();
 
-    mggsa_method mggsa(f, n, constr, A, B, r, d, m, key, eps, maxIters, maxEvals, incr);
+    mggsa_method mggsa(f, n, numberConstraints, A, B, r, d, m, key, eps, maxIters, maxEvals, incr);
 
-    vector<double> mu;
+    vector<double> lambdas;
     vector<vector<double>> points;
 
     mggsa.solve(countIters, countTrials, countEvals, X);
-    mggsa.getLambda(mu);
+    mggsa.getLambda(lambdas);
 
     cout << "Function: " << "x^2 + y^2 - cos(18.0 * x) - cos(18.0 * y)" << endl;
     cout << "Dimension = " << n << endl;
-    cout << "Number of constrained = " << constr << endl;
+    cout << "Number of constraints = " << numberConstraints << endl;
     cout << "[A; B] = [(" << A[0] << ", " << A[1] << "); (" << 
                              B[0] << ", " << B[1] << ")]"<< endl;
     cout << "X* = (" << X_opt[0] << ", " << X_opt[1] << ")" << endl;
-    cout << "f(X*) = " << f(X_opt, constr + 1) << endl;
+    cout << "f(X*) = " << f(X_opt, numberConstraints + 1) << endl;
     cout << "Parameters for method:" << endl;
     cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
     cout << "Parameters for constructing the Peano curve:" << endl;
@@ -70,27 +70,27 @@ int main() {
     cout << "Number of iters = " << countIters << endl;
     cout << "Number of trials = " << countTrials << endl;
     cout << "Number of evals = " << countEvals << endl;
-    cout << "Estimation of the Lipschitz constant = " << mu[0] << endl;
+    cout << "Estimation of the Lipschitz constant = " << lambdas[0] << endl;
     cout << "X = (" << X[0] << ", " << X[1] << ")" << endl;
-    cout << "f(X) = " << f(X, constr + 1) << endl;
+    cout << "f(X) = " << f(X, numberConstraints + 1) << endl;
     cout << "||X* - X|| = " << sqrt((X_opt[0] - X[0]) * (X_opt[0] - X[0]) + 
                                     (X_opt[1] - X[1]) * (X_opt[1] - X[1])) << endl;
-    cout << "|f(X*) - f(X)| = " << abs(f(X_opt, constr + 1) - f(X, constr + 1)) << endl;
+    cout << "|f(X*) - f(X)| = " << abs(f(X_opt, numberConstraints + 1) - f(X, numberConstraints + 1)) << endl;
     cout << endl;
 
-    ofstr_points << X_opt[0] << " " << X_opt[1] << " " << f(X_opt, constr + 1) << endl;
+    ofstr_points << X_opt[0] << " " << X_opt[1] << " " << f(X_opt, numberConstraints + 1) << endl;
     ofstr_points << endl << endl;
-    ofstr_points << X[0] << " " << X[1] << " " << f(X, constr + 1) << endl;
+    ofstr_points << X[0] << " " << X[1] << " " << f(X, numberConstraints + 1) << endl;
     ofstr_points << endl << endl;
     mggsa.getPoints(points);
     for (int j = 0; j < points.size(); j++) {
-        ofstr_points << points[j][0] << " " << points[j][1] << " " << f(points[j], constr + 1) << endl;
+        ofstr_points << points[j][0] << " " << points[j][1] << " " << f(points[j], numberConstraints + 1) << endl;
     }
     ofstr_points.close();
 
     // Plotting the function(works with gnuplot)
     int error;
-#if defined(__linux__)
+#if defined( __linux__ )
     setenv("QT_QPA_PLATFORM", "xcb", false);
     error = system("chmod +x scripts/evolvent_test.gp");
     if (error != 0) {

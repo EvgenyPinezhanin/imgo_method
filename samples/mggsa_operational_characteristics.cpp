@@ -87,12 +87,12 @@ int main() {
             func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
             (*func_constr.constr_opt_problem_family)[0]->GetBounds(A, B);
             mggsa.setN((*func_constr.constr_opt_problem_family)[0]->GetDimension());
-            mggsa.setM((*func_constr.constr_opt_problem_family)[0]->GetConstraintsNumber());
+            mggsa.setNumberConstraints((*func_constr.constr_opt_problem_family)[0]->GetConstraintsNumber());
         } else {
             func.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
             (*func.opt_problem_family)[0]->GetBounds(A, B);
             mggsa.setN((*func.opt_problem_family)[0]->GetDimension());
-            mggsa.setM(0);
+            mggsa.setNumberConstraints(0);
         }
 
         mggsa.setMaxIters(K[i][1]);

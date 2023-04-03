@@ -67,13 +67,13 @@ int main() {
 
     mggsa_method mggsa(nullptr);
 
-    vector<double> mu;
+    vector<double> lambdas;
     vector<vector<double>> points;
     for (int i = 0; i < task_array.size(); i++) {
         if (task_array[i].used) {
             mggsa.setF(task_array[i].f);
             mggsa.setN(task_array[i].n);
-            mggsa.setM(task_array[i].m);
+            mggsa.setNumberConstraints(task_array[i].numberConstraints);
             mggsa.setAB(task_array[i].A, task_array[i].B);
             mggsa.setEps(task_array[i].eps);
             mggsa.setMaxIters(task_array[i].maxIters);
@@ -84,18 +84,17 @@ int main() {
             mggsa.setKey(task_array[i].key);
 
             mggsa.solve(countIters, countTrials, countEvals, X);
-            mggsa.getLambda(mu);
+            mggsa.getLambda(lambdas);
 
             cout << "Function: " << task_array[i].name << endl;
             cout << "Dimension = " << task_array[i].n << endl;
-            cout << "Number of constrained = " << task_array[i].m << endl;
+            cout << "Number of constraints = " << task_array[i].numberConstraints << endl;
             cout << "[A; B] = [(" << task_array[i].A[0] << ", " << task_array[i].A[1] << "); (" << 
                                      task_array[i].B[0] << ", " << task_array[i].B[1] << ")]"<< endl;
             cout << "X* = (" << task_array[i].X_opt[0] << ", " << task_array[i].X_opt[1] << ")" << endl;
-            cout << "f(X*) = " << task_array[i].f(task_array[i].X_opt, task_array[i].m + 1) << endl;
+            cout << "f(X*) = " << task_array[i].f(task_array[i].X_opt, task_array[i].numberConstraints + 1) << endl;
             cout << "Parameters for method:" << endl;
-            cout << "eps = " << task_array[i].eps << " r = " << task_array[i].r << 
-                    " d = " << task_array[i].d << endl;
+            cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
             cout << "Parameters for constructing the Peano curve:" << endl;
             cout << "m = " << task_array[i].den << " key = " << task_array[i].key << endl;
             cout << "Trials result:" << endl;
@@ -103,28 +102,28 @@ int main() {
             cout << "Number of trials = " << countTrials << endl;
             cout << "Number of evals = " << countEvals << endl;
             cout << "Estimation of the Lipschitz constant:" << endl;
-            cout << "L(" << task_array[i].name << ") = " << mu[task_array[i].m] << endl;
-            for (int j = 0; j < task_array[i].m; j++) {
-                cout << "L(g" << j + 1 << ") = " << mu[j] << endl;
+            cout << "L(" << task_array[i].name << ") = " << lambdas[task_array[i].numberConstraints] << endl;
+            for (int j = 0; j < task_array[i].numberConstraints; j++) {
+                cout << "L(g" << j + 1 << ") = " << lambdas[j] << endl;
             }
             cout << "X = (" << X[0] << ", " << X[1] << ")" << endl;
-            cout << "f(X) = " << task_array[i].f(X, task_array[i].m + 1) << endl;
+            cout << "f(X) = " << task_array[i].f(X, task_array[i].numberConstraints + 1) << endl;
             cout << "||X* - X|| = " << sqrt((task_array[i].X_opt[0] - X[0]) * (task_array[i].X_opt[0] - X[0]) + 
                                             (task_array[i].X_opt[1] - X[1]) * (task_array[i].X_opt[1] - X[1])) << endl;
-            cout << "|f(X*) - f(X)| = " << abs(task_array[i].f(task_array[i].X_opt, task_array[i].m + 1) - 
-                                               task_array[i].f(X, task_array[i].m + 1)) << endl;
+            cout << "|f(X*) - f(X)| = " << abs(task_array[i].f(task_array[i].X_opt, task_array[i].numberConstraints + 1) - 
+                                               task_array[i].f(X, task_array[i].numberConstraints + 1)) << endl;
             cout << endl;
 
             // Saving points for plotting
             ofstr << task_array[i].X_opt[0] << " " << task_array[i].X_opt[1] << " " << 
-                     task_array[i].f(task_array[i].X_opt, task_array[i].m + 1) << endl;
+                     task_array[i].f(task_array[i].X_opt, task_array[i].numberConstraints + 1) << endl;
             ofstr << endl << endl;
-            ofstr << X[0] << " " << X[1] << " " << task_array[i].f(X, task_array[i].m + 1) << endl;
+            ofstr << X[0] << " " << X[1] << " " << task_array[i].f(X, task_array[i].numberConstraints + 1) << endl;
             ofstr << endl << endl;
             mggsa.getPoints(points);
             for (int j = 0; j < points.size(); j++) {
                 ofstr << points[j][0] << " " << points[j][1] << " " << 
-                         task_array[i].f(points[j], task_array[i].m + 1) << endl;
+                         task_array[i].f(points[j], task_array[i].numberConstraints + 1) << endl;
             }
             ofstr << endl << endl;
         }

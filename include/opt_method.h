@@ -17,7 +17,7 @@ protected:
 
 public:
     optimization_method(int _n, const vector<double> &_A, const vector<double> &_B, double _eps, int _maxIters, int _maxEvals) 
-        : n(_n), A(_A), B(_B), eps(_eps), maxIters(_maxIters), maxEvals(_maxEvals), countEvals(0) {}
+                        : n(_n), A(_A), B(_B), eps(_eps), maxIters(_maxIters), maxEvals(_maxEvals), countEvals(0) {}
 
     void setN(int _n) { n = _n; };
     void setMaxIters(int _maxIters) { maxIters = _maxIters; };
@@ -62,7 +62,7 @@ public:
 
     function<double(vector<double>)> getF() const { return f; };
 
-    void getTrialPoints(vector<trial> &trial_vec) const { trial_vec = trial_points; };
+    void getTrialPoints(vector<trial> &trial_points) const { trial_points = this->trial_points; };
 };
 
 struct trial_constr {
@@ -75,7 +75,7 @@ struct trial_constr {
 class optimization_method_constrained : public optimization_method {
 protected:
     function<double(vector<double>, int)> f; // target function
-    int m; // number of constraints
+    int numberConstraints; // number of constraints
 
     vector<trial_constr> trial_points;
 
@@ -84,17 +84,18 @@ protected:
     virtual double selectNewPoint(int &t) = 0;
 
 public:
-    optimization_method_constrained(function<double(vector<double>, int)> _f, int _n, int _m, const vector<double> &_A, 
-                                    const vector<double> &_B, double _eps, int _max_iters, int _max_evals)
-                                    : optimization_method(_n, _A, _B, _eps, _max_iters, _max_evals), f(_f), m(_m) {}
+    optimization_method_constrained(function<double(vector<double>, int)> _f, int _n, int _numberConstarints,
+                                    const vector<double> &_A, const vector<double> &_B, double _eps, int _max_iters,
+                                    int _max_evals) : optimization_method(_n, _A, _B, _eps, _max_iters, _max_evals),
+                                    f(_f), numberConstraints(_numberConstarints) {}
 
     void setF(function<double(vector<double>, int)> _f) { f = _f; };
-    void setM(int _m) { m = _m; };
+    void setNumberConstraints(int _numberConstraints) { numberConstraints = _numberConstraints; };
 
     function<double(vector<double>, int)> getF() const { return f; };
-    int getM() const { return m; };
+    int getNumberConstraints() const { return numberConstraints; };
 
-    void getTrialPoints(vector<trial_constr> &trial_vec) const { trial_vec = trial_points; };
+    void getTrialPoints(vector<trial_constr> &trial_points) const { trial_points = this->trial_points; };
 };
 
 #endif // OPT_METHOD_H

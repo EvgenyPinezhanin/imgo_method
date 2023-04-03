@@ -22,7 +22,7 @@
 
 using namespace std;
 
-#define CALC
+// #define CALC
 
 const int type = 0; // 0 - count trials, 1 - count points, 2 - c_points / c_trials
 const int family_number = 2; // 0 - Grishagin, 1 - GKLS,
@@ -92,12 +92,12 @@ int main() {
                 func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
                 (*func_constr.constr_opt_problem_family)[0]->GetBounds(A, B);
                 mggsa.setN((*func_constr.constr_opt_problem_family)[0]->GetDimension());
-                mggsa.setM((*func_constr.constr_opt_problem_family)[0]->GetConstraintsNumber());
+                mggsa.setNumberConstraints((*func_constr.constr_opt_problem_family)[0]->GetConstraintsNumber());
             } else {
                 func.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
                 (*func.opt_problem_family)[0]->GetBounds(A, B);
                 mggsa.setN((*func.opt_problem_family)[0]->GetDimension());
-                mggsa.setM(0);
+                mggsa.setNumberConstraints(0);
             }
 
             vector<int> count_iters_vec(problems[i].optProblemFamily->GetFamilySize());

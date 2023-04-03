@@ -35,9 +35,9 @@ inline double search_min(vector<trial_constr> &trials, int m) {
 
 trial_constr imgo_method::newTrial(double x) {
     trial_constr tr(x);
-    for (int j = 1; j <= m + 1; j++) {
+    for (int j = 1; j <= numberConstraints + 1; j++) {
         countEvals++;
-        if ((f(x, j) > 0) || (j == m + 1)) {
+        if ((f(x, j) > 0) || (j == numberConstraints + 1)) {
             tr.z = f(x, j);
             tr.nu = j;
             break;
@@ -60,7 +60,7 @@ double imgo_method::selectNewPoint(int &t) {
     // with optimization(const)
     int nu_I = last_trial.nu - 1;
     size_t size_I = I[nu_I].size();
-    for (int nu = 0; nu < m + 1; nu++) {
+    for (int nu = 0; nu < numberConstraints + 1; nu++) {
         if (!calc_I[nu]) mu[nu] = 0.0;
     }
     if (I[nu_I].size() >= 3) {
@@ -81,7 +81,7 @@ double imgo_method::selectNewPoint(int &t) {
         mu[nu_I] = max({ mu[nu_I], abs(I[nu_I][1].z - I[nu_I][0].z) / pow(I[nu_I][1].x - I[nu_I][0].x, 1.0 / n) });
     }
     if (abs(mu[nu_I]) > epsilon) calc_I[nu_I] = true;
-    for (int nu = 0; nu < m + 1; nu++) {
+    for (int nu = 0; nu < numberConstraints + 1; nu++) {
         if (abs(mu[nu]) <= epsilon) mu[nu] = 1.0;
     }
 
@@ -125,7 +125,7 @@ double imgo_method::selectNewPoint(int &t) {
     // }
 
     // Step 4
-    for (int nu = 0; nu < m + 1; nu++) {
+    for (int nu = 0; nu < numberConstraints + 1; nu++) {
         if (I[nu].size() != 0) {
             z_star[nu] = I[nu][0].z;
             size_I = I[nu].size();
@@ -134,7 +134,7 @@ double imgo_method::selectNewPoint(int &t) {
                     z_star[nu] = I[nu][i].z;
                 }
             }
-            if (z_star[nu] <= 0.0 && nu != m) {
+            if (z_star[nu] <= 0.0 && nu != numberConstraints) {
                 z_star[nu] = -mu[nu] * d;
             }
         }
@@ -171,12 +171,12 @@ double imgo_method::selectNewPoint(int &t) {
     return newPoint(t);
 }
 
-void imgo_method::setM(int _m) {
-    optimization_method_constrained::setM(_m);
-    I.resize((size_t)m + 1);
-    calc_I.resize((size_t)m + 1);
-    mu.resize((size_t)m + 1);
-    z_star.resize((size_t)m + 1);
+void imgo_method::setNumberConstraints(int _numberConstraints) {
+    optimization_method_constrained::setNumberConstraints(_numberConstraints);
+    I.resize((size_t)numberConstraints + 1);
+    calc_I.resize((size_t)numberConstraints + 1);
+    mu.resize((size_t)numberConstraints + 1);
+    z_star.resize((size_t)numberConstraints + 1);
 }
 
 void imgo_method::solve(int &countIters, int &countTrials, int &countEvals, double &x) {
@@ -217,7 +217,7 @@ void imgo_method::solve(int &countIters, int &countTrials, int &countEvals, doub
         if (this->countEvals >= maxEvals || countIters >= maxIters) break;
     }
     countEvals = this->countEvals;
-    x = search_min(trial_points, m);
+    x = search_min(trial_points, numberConstraints);
 }
 
 void imgo_method::solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X) {
@@ -225,7 +225,7 @@ void imgo_method::solve(int &countIters, int &countTrials, int &countEvals, vect
 }
 
 bool imgo_method::solve_test(double x_opt, int &countIters, int &countTrials, int &countEvals) {
-    for (int nu = 0; nu < m + 1; nu++) {
+    for (int nu = 0; nu < numberConstraints + 1; nu++) {
         I[nu].clear();
         calc_I[nu] = false;
     }

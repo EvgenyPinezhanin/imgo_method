@@ -57,12 +57,12 @@ int main() {
 
     imgo_method imgo(nullptr);
 
-    vector<double> mu;
+    vector<double> lambdas;
     vector<trial_constr> trials;
     for (int i = 0; i < task_array.size(); i++) {
         if (task_array[i].used) {
             imgo.setF(task_array[i].f);
-            imgo.setM(task_array[i].m);
+            imgo.setNumberConstraints(task_array[i].numberConstraints);
             imgo.setAB(task_array[i].A[0], task_array[i].B[0]);
             imgo.setEps(task_array[i].eps);
             imgo.setMaxIters(task_array[i].maxIters);
@@ -71,18 +71,19 @@ int main() {
             imgo.setD(task_array[i].d);
 
             imgo.solve(countIters, countTrials, countEvals, x);
-            imgo.getLambda(mu);
+            imgo.getLambda(lambdas);
 
             cout << "Function: " << task_array[i].name << endl;
-            cout << "Number of constrained = " << task_array[i].m << endl;
+            cout << "Number of constraints = " << task_array[i].numberConstraints << endl;
             cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
             cout << "Lipschitz constant:" << endl;
-            cout << "L*(" << task_array[i].name << ") = " << task_array[i].L[task_array[i].m] << endl;
-            for (int j = 0; j < task_array[i].m; j++) {
+            cout << "L*(" << task_array[i].name << ") = " << task_array[i].L[task_array[i].numberConstraints] << endl;
+            for (int j = 0; j < task_array[i].numberConstraints; j++) {
                 cout << "L*(g" << j + 1 << ") = " << task_array[i].L[j] << endl;
             }
             cout << "X* = " << setprecision(8) << task_array[i].X_opt[0] << endl;
-            cout << "f(X*) = " << setprecision(8) << task_array[i].f(task_array[i].X_opt[0], task_array[i].m + 1) << endl;
+            cout << "f(X*) = " << setprecision(8) << task_array[i].f(task_array[i].X_opt[0], 
+                                                                     task_array[i].numberConstraints + 1) << endl;
             cout << "Parameters for method:" << endl;
             cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
             cout << "Trials result:" << endl;
@@ -90,21 +91,24 @@ int main() {
             cout << "Number of trials = " << countTrials << endl;
             cout << "Number of evals = " << countEvals << endl;
             cout << "Estimation of the Lipschitz constant:" << endl;
-            cout << "L(" << task_array[i].name << ") = " << mu[task_array[i].m] << endl;
-            for (int j = 0; j < task_array[i].m; j++) {
-                cout << "L(g" << j + 1 << ") = " << mu[j] << endl;
+            cout << "L(" << task_array[i].name << ") = " << lambdas[task_array[i].numberConstraints] << endl;
+            for (int j = 0; j < task_array[i].numberConstraints; j++) {
+                cout << "L(g" << j + 1 << ") = " << lambdas[j] << endl;
             }
             cout << "X = " << setprecision(8) << x << endl;
-            cout << "f(X) = " << setprecision(8) << task_array[i].f(x, task_array[i].m + 1) << endl;
+            cout << "f(X) = " << setprecision(8) << task_array[i].f(x, task_array[i].numberConstraints + 1) << endl;
             cout << "|X* - X| = " << setprecision(8) << abs(task_array[i].X_opt[0] - x) << endl;
-            cout << "|f(X*) - f(X)| = " << setprecision(8) << abs(task_array[i].f(task_array[i].X_opt[0], task_array[i].m + 1) - 
-                                                              task_array[i].f(x, task_array[i].m + 1)) << endl;
+            cout << "|f(X*) - f(X)| = " << setprecision(8) << abs(task_array[i].f(task_array[i].X_opt[0], 
+                                                                  task_array[i].numberConstraints + 1) - 
+                                                                  task_array[i].f(x, task_array[i].numberConstraints + 1))
+                                                                                                                   << endl;
             cout << endl;
 
             // Saving points for plotting
-            ofstr << task_array[i].X_opt[0] << " " << task_array[i].f(task_array[i].X_opt[0], task_array[i].m + 1) << endl;
+            ofstr << task_array[i].X_opt[0] << " " << task_array[i].f(task_array[i].X_opt[0], 
+                                                                      task_array[i].numberConstraints + 1) << endl;
             ofstr << endl << endl;
-            ofstr << x << " " << task_array[i].f(x, task_array[i].m + 1) << endl;
+            ofstr << x << " " << task_array[i].f(x, task_array[i].numberConstraints + 1) << endl;
             ofstr << endl << endl;
             imgo.getTrialPoints(trials);
             for (int j = 0; j < trials.size(); j++) {
@@ -118,7 +122,7 @@ int main() {
     ofstr_opt << "array functions[" << task_array.size() << "]" << endl;
     for (int i = 0; i < task_array.size(); i++) {
         ofstr_opt << "functions[" << i + 1 << "] = \"f" << i + 1 << "(x) title \\\"f(x)\\\"";
-        for (int j = 0; j < task_array[i].m; j++) {
+        for (int j = 0; j < task_array[i].numberConstraints; j++) {
             ofstr_opt << ", g" << i + 1 << "_" << j + 1 << "(x) title \\\"g" << j + 1 <<"(x)\\\"";
         }
         ofstr_opt << "\""<< endl;
