@@ -1,7 +1,7 @@
 #! /usr/bin/gnuplot
 
-datafile = "output_data/evolvent_test_points.txt"
-peanofile = "output_data/evolvent_test.txt"
+datafile = "output_data/mggsa_test_evolvent_points.txt"
+peanofile = "output_data/mggsa_evolvent_test.txt"
 
 graph_type(n) = (n == 2) ? "with lines" : ""
 

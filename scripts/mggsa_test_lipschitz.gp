@@ -1,8 +1,8 @@
 #! /usr/bin/gnuplot
 
-datafile = "output_data/lipschitz_test.txt"
+datafile = "output_data/mggsa_test_lipschitz.txt"
 
-load "output_data/lipschitz_test_opt.txt"
+load "output_data/mggsa_test_lipschitz_opt.txt"
 
 set linetype 1 lc rgb "#0000FF" lw 5 pt 1 dt 1
 set linetype 2 lc rgb "#0020FF" lw 5 pt 1 dt 2

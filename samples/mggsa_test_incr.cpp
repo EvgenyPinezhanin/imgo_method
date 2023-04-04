@@ -55,10 +55,10 @@ const int m_min = 8, m_max = 10;
 const int chunk = 2;
 
 int main() {
-    ofstream ofstr_opt("output_data/incr_test_opt.txt");
+    ofstream ofstr_opt("output_data/mggsa_test_incr_opt.txt");
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 #if defined(CALC)
-    ofstream ofstr("output_data/incr_test.txt");
+    ofstream ofstr("output_data/mggsa_test_incr.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
     vector<vector<vector<double>>> accuracy_vec(n_count);
@@ -202,14 +202,14 @@ int main() {
     int error;
 #if defined(__linux__)
     setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/incr_test.gp");
+    error = system("chmod +x scripts/mggsa_test_incr.gp");
     if (error != 0) {
         cerr << "Error chmod" << endl;
     }
 #endif
 
     char str[100];
-    sprintf(str, "gnuplot -c scripts/incr_test.gp %d %d %d %d %d %d", type, n_type, n_min, n_max, m_min, m_max);
+    sprintf(str, "gnuplot -c scripts/mggsa_test_incr.gp %d %d %d %d %d %d", type, n_type, n_min, n_max, m_min, m_max);
     error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << endl;

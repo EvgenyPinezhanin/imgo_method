@@ -31,7 +31,7 @@ const int key_min = 1, key_max = 3;
 const int chunk = 4;
 
 int main() {
-    ofstream ofstr_opt("output_data/lipschitz_test_opt.txt");
+    ofstream ofstr_opt("output_data/mggsa_test_lipschitz_opt.txt");
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
     
     const int count_func = 4;
@@ -47,7 +47,7 @@ int main() {
                                      problem_single("GKLSConstrained", &gklsConstrainedProblem, type_constraned::CONSTR) };
 
 #if defined(CALC)
-    ofstream ofstr("output_data/lipschitz_test.txt");
+    ofstream ofstr("output_data/mggsa_test_lipschitz.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
     double eps = 0.01, d = 0.0, r = 2.0;
@@ -119,14 +119,15 @@ int main() {
     int error;
 #if defined(__linux__)
     setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/lipschitz_test.gp");
+    error = system("chmod +x scripts/mggsa_test_lipschitz.gp");
     if (error != 0) {
         cerr << "Error chmod" << endl;
     }
 #endif
 
     char str[100];
-    sprintf(str, "gnuplot -c scripts/lipschitz_test.gp %d %d %d %d %d %d %d", type, key_min, key_max, m_min, m_max, incr_min, incr_max);
+    sprintf(str, "gnuplot -c scripts/mggsa_test_lipschitz.gp %d %d %d %d %d %d %d", type, key_min, key_max,
+                                                                           m_min, m_max, incr_min, incr_max);
     error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << endl;

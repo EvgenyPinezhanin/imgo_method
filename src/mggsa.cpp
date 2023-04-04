@@ -338,7 +338,7 @@ void mggsa_method::getPoints(vector<vector<double>> &points) {
 
 void mggsa_method::solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X, TypeSolve type) {
 #if defined(TIME_TEST)
-    ofstr_test.open("output_data/mggsa_time_test.txt");
+    ofstr_test.open("output_data/mggsa_test_time.txt");
     if (!ofstr_test.is_open()) cerr << "File opening error\n";
     if (type == TypeSolve::SOLVE) {
         time_count.clear();
@@ -570,12 +570,12 @@ void mggsa_method::solve(int &countIters, int &countTrials, int &countEvals, vec
     // Plotting the functions of time(works with gnuplot)
     int error;
     setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/time_test.gp");
+    error = system("chmod +x scripts/mggsa_test_time.gp");
     if (error != 0) {
         cerr << "Error chmod" << endl;
     }
     char str[100];
-    sprintf(str, "gnuplot -c scripts/time_test.gp %d", k);
+    sprintf(str, "gnuplot -c scripts/mggsa_test_time.gp %d", k);
     error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << endl;

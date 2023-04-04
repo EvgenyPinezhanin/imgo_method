@@ -20,9 +20,9 @@ double f(vector<double> x, int j) {
 }
 
 int main() {
-    ofstream ofstr("output_data/evolvent_test.txt");
+    ofstream ofstr("output_data/mggsa_test_evolvent.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
-    ofstream ofstr_points("output_data/evolvent_test_points.txt");
+    ofstream ofstr_points("output_data/mggsa_test_evolvent_points.txt");
     if (!ofstr_points.is_open()) cerr << "File opening error\n";
 
     vector<double> A{-1.0 / 2.0, -1.0 / 2.0}, B{1.0, 1.0}, X_opt{0.0, 0.0};
@@ -92,14 +92,14 @@ int main() {
     int error;
 #if defined( __linux__ )
     setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/evolvent_test.gp");
+    error = system("chmod +x scripts/mggsa_test_evolvent.gp");
     if (error != 0) {
         cerr << "Error chmod" << endl;
     }
 #endif
 
     char str[100];
-    sprintf(str, "gnuplot -c scripts/evolvent_test.gp %d", key);
+    sprintf(str, "gnuplot -c scripts/mggsa_test_evolvent.gp %d", key);
     error = system(str);
     if (error != 0) {
         cerr << "Error gnuplot" << endl;
