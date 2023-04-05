@@ -71,7 +71,7 @@ int main() {
     data_direct f_data;
     int n = 2;
     int max_feval = 1000, max_iter = 1000;
-    double magic_eps = 1.0e-4, magic_eps_abs = 1.0e-4;
+    double magic_eps = 1.0e-4;
     double method_accuracy = 1.0e-5;
     double volume_reltol = method_accuracy / sqrt(n);
     double sigma_reltol = 0.0;
@@ -80,11 +80,11 @@ int main() {
     double minf;
 
     vector<task_direct> task_array = { task_direct("f1", f1, &f_data, n, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
-                                                   vector<double>{0.942, 0.944}, max_feval, max_iter, magic_eps, magic_eps_abs,
-                                                   volume_reltol, sigma_reltol, nullptr, algorithm),
+                                                   vector<double>{0.942, 0.944}, max_feval, max_iter, magic_eps, volume_reltol,
+                                                   sigma_reltol, nullptr, algorithm),
                                        task_direct("f2", f2, &f_data, n, vector<double>{0.0, 0.0}, vector<double>{80.0, 80.0},
-                                                   vector<double>{77.489, 63.858}, max_feval, max_iter, magic_eps, magic_eps_abs,
-                                                   volume_reltol, sigma_reltol, nullptr, algorithm) };
+                                                   vector<double>{77.489, 63.858}, max_feval, max_iter, magic_eps, volume_reltol,
+                                                   sigma_reltol, nullptr, algorithm) };
 
     direct_method direct;
 
@@ -103,7 +103,6 @@ int main() {
             direct.setMaxFeval(task_array[i].max_feval);
             direct.setMaxIter(task_array[i].max_iter);
             direct.setMagicEps(task_array[i].magic_eps);
-            direct.setMagicEpsAbs(task_array[i].magic_eps_abs);
             direct.setVolumeReltol(task_array[i].volume_reltol);
             direct.setSigmaReltol(task_array[i].sigma_reltol);
             direct.setLogfile(task_array[i].logfile);
@@ -120,7 +119,7 @@ int main() {
                                                   &flag_tmp, &data_tmp) << endl;
             cout << "Parameters for method:" << endl;
             cout << "max_feval = " << task_array[i].max_feval << " max_iter = " << task_array[i].max_iter << endl;
-            cout << "magic_eps = " << task_array[i].magic_eps << " magic_eps_abs = " << task_array[i].magic_eps_abs << endl;
+            cout << "magic_eps = " << task_array[i].magic_eps << endl;
             cout << "volume_reltol = " << task_array[i].volume_reltol << " sigma_reltol = " << task_array[i].sigma_reltol << endl;
             cout << "Type of algorithm: " << ((task_array[i].algorithm == DIRECT_ORIGINAL) ? "DIRECT_ORIGINAL" : "DIRECT_GABLONSKY") << endl;
             cout << "Trials result:" << endl;
