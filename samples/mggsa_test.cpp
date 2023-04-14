@@ -54,7 +54,7 @@ int main() {
 
     double eps = 0.001, r = 2.2, d = 0.05;
     int n = 2, den = 10, key = 1;
-    int countIters, countTrials, countEvals;
+    int countIters, countEvals;
     int maxIters = 100000, maxEvals = 100000;
     vector<double> X(n);
 
@@ -83,7 +83,7 @@ int main() {
             mggsa.setDen(task_array[i].den);
             mggsa.setKey(task_array[i].key);
 
-            mggsa.solve(countIters, countTrials, countEvals, X);
+            mggsa.solve(countIters, countEvals, X);
             mggsa.getLambda(lambdas);
 
             cout << "Function: " << task_array[i].name << endl;
@@ -98,8 +98,7 @@ int main() {
             cout << "Parameters for constructing the Peano curve:" << endl;
             cout << "m = " << task_array[i].den << " key = " << task_array[i].key << endl;
             cout << "Trials result:" << endl;
-            cout << "Number of iters = " << countIters << endl;
-            cout << "Number of trials = " << countTrials << endl;
+            cout << "Number of trials = " << countIters << endl;
             cout << "Number of evals = " << countEvals << endl;
             cout << "Estimation of the Lipschitz constant:" << endl;
             cout << "L(" << task_array[i].name << ") = " << lambdas[task_array[i].numberConstraints] << endl;

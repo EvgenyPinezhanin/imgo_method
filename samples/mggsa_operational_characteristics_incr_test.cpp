@@ -62,15 +62,15 @@ int main() {
 
     int den = 10, key = 3;
     double eps = 0.01;
-    int maxIters = 30000, maxEvals = 1000000;
+    int maxIters = 30000, maxEvals = 100000;
 
-    vector<vector<vector<int>>> max_count_iters(number_family), max_count_trials(number_family);
+    vector<vector<vector<int>>> maxNumberIters(number_family), maxNumberTrialPoints(number_family);
     for (int i = 0; i < number_family; i++) {
-        max_count_iters[i].resize(r_array[i].size());
-        max_count_trials[i].resize(r_array[i].size());
+        maxNumberIters[i].resize(r_array[i].size());
+        maxNumberTrialPoints[i].resize(r_array[i].size());
         for (int j = 0; j < r_array[i].size(); j++) {
-            max_count_iters[i][j].resize(incr_array.size());
-            max_count_trials[i][j].resize(incr_array.size());
+            maxNumberIters[i][j].resize(incr_array.size());
+            maxNumberTrialPoints[i][j].resize(incr_array.size());
         }
     }
 
@@ -80,7 +80,7 @@ int main() {
 
     int total_start_time = clock();
 #pragma omp parallel for schedule(static, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
-        shared(number_family, problems, d_array, r_array, r_size, incr_array, max_count_iters, max_count_trials) \
+        shared(number_family, problems, d_array, r_array, r_size, incr_array, maxNumberIters, maxNumberTrialPoints) \
         firstprivate(mggsa)
     for (int i = 0; i < number_family; i++) {
         for (int j = 0; j < r_size; j++) {
@@ -109,7 +109,7 @@ int main() {
 
             vector<double> X_opt; 
             int index;
-            int countIters, countTrials, countEvals;
+            int countIters, countEvals;
             string str_input;
             double start_time, end_time, work_time;
 
@@ -127,26 +127,26 @@ int main() {
                         X_opt = (*func.opt_problem_family)[l]->GetOptimumPoint();
                         mggsa.setF(func);
                     }
-                    if (mggsa.solve_test(X_opt, countIters, countTrials, countEvals)) {
+                    if (mggsa.solve_test(X_opt, countIters, countEvals)) {
                         count_iters_vec[l] = countIters;
                     } else {
                         count_iters_vec[l] = countIters + 1;
                     }
-                    count_trials_vec[l] = countTrials;
+                    count_trials_vec[l] = mggsa.getNumberTrialPoints();
                 }
                 end_time = omp_get_wtime();
                 work_time = end_time - start_time;
 
                 auto iter = max_element(count_iters_vec.begin(), count_iters_vec.end());
-                max_count_iters[i][j][k] = *iter;
+                maxNumberIters[i][j][k] = *iter;
                 for (int l = 0; l < count_iters_vec.size(); l++) {
                     if (*iter == count_iters_vec[l]) index = l;
                 }
-                max_count_trials[i][j][k] = count_trials_vec[index];
+                maxNumberTrialPoints[i][j][k] = count_trials_vec[index];
 
                 str_input = problems[i].name + " r = " + to_string(r_array[i][j]) + " incr = " + to_string(incr_array[k]) + 
-                            " count iters = " + to_string(max_count_iters[i][j][k]) + " count trials = " + 
-                            to_string(max_count_trials[i][j][k]) + " time: " + to_string(work_time) + " t_num: " +
+                            " count iters = " + to_string(maxNumberIters[i][j][k]) + " count trials = " + 
+                            to_string(maxNumberTrialPoints[i][j][k]) + " time: " + to_string(work_time) + " t_num: " +
                             to_string(omp_get_thread_num()) + "\n";
                 cout << str_input;
             }
@@ -159,7 +159,7 @@ int main() {
     for (int i = 0; i < number_family; i++) {
         for (int j = 0; j < r_array[i].size(); j++) {
             for (int k = 0; k < incr_array.size(); k++) {
-                ofstr << incr_array[k] << " " << max_count_iters[i][j][k] << " " << max_count_trials[i][j][k] << endl;
+                ofstr << incr_array[k] << " " << maxNumberIters[i][j][k] << " " << maxNumberTrialPoints[i][j][k] << endl;
             }
             ofstr << endl << endl;
         }

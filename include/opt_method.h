@@ -34,7 +34,7 @@ public:
     vector<double> getA() { return A; };
     vector<double> getB() { return B; };
 
-    virtual void solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X) = 0;
+    virtual void solve(int &countIters, int &countEvals, vector<double> &X) = 0;
 };
 
 struct trial {
@@ -63,6 +63,7 @@ public:
     function<double(vector<double>)> getF() const { return f; };
 
     void getTrialPoints(vector<trial> &trial_points) const { trial_points = this->trial_points; };
+    int getNumberTrialPoints() const { return trial_points.size(); };
 };
 
 struct trial_constr {
@@ -96,6 +97,7 @@ public:
     int getNumberConstraints() const { return numberConstraints; };
 
     void getTrialPoints(vector<trial_constr> &trial_points) const { trial_points = this->trial_points; };
+    int getNumberTrialPoints() const { return trial_points.size(); };
 };
 
 #endif // OPT_METHOD_H

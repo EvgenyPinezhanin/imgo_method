@@ -48,7 +48,7 @@ int main() {
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
     double x, eps = 0.001, r = 3.0, d = 0.0;
-    int countIters, countTrials, countEvals;
+    int countIters, countEvals;
     int maxIters = 100000, maxEvals = 100000;
 
     vector<task_imgo> task_array = { task_imgo(f1, "f1(x)", 0, -4.0, 4.0, -M_PI / 2.0, vector<double>{1.0}, eps, maxIters, maxEvals, r, d),
@@ -70,7 +70,7 @@ int main() {
             imgo.setR(task_array[i].r);
             imgo.setD(task_array[i].d);
 
-            imgo.solve(countIters, countTrials, countEvals, x);
+            imgo.solve(countIters, countEvals, x);
             imgo.getLambda(lambdas);
 
             cout << "Function: " << task_array[i].name << endl;
@@ -87,8 +87,7 @@ int main() {
             cout << "Parameters for method:" << endl;
             cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
             cout << "Trials result:" << endl;
-            cout << "Number of iters = " << countIters << endl;
-            cout << "Number of trials = " << countTrials << endl;
+            cout << "Number of trials = " << countIters << endl;
             cout << "Number of evals = " << countEvals << endl;
             cout << "Estimation of the Lipschitz constant:" << endl;
             cout << "L(" << task_array[i].name << ") = " << lambdas[task_array[i].numberConstraints] << endl;

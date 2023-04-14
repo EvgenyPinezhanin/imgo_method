@@ -48,7 +48,7 @@ const int n_type = 2; // n_min ... n_max
 
 const int n_min = 2, n_max = 3;
 const int n_count = n_max - n_min + 1;
-const int incr_array[n_count][2] = { {1, 60},
+const int incrArray[n_count][2] = { {1, 60},
                                      {1, 100} };
 const int m_min = 8, m_max = 10;
 
@@ -61,16 +61,16 @@ int main() {
     ofstream ofstr("output_data/mggsa_test_incr.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
-    vector<vector<vector<double>>> accuracy_vec(n_count);
-    vector<vector<vector<int>>> count_iters_vec(n_count), count_trials_vec(n_count);
+    vector<vector<vector<double>>> accuracyArray(n_count);
+    vector<vector<vector<int>>> numberItersArray(n_count), numberTrialPointsArray(n_count);
     for (int i = n_min; i <= n_max; i++) {
-        accuracy_vec[i - n_min].resize(m_max - m_min + 1);
-        count_iters_vec[i - n_min].resize(m_max - m_min + 1);
-        count_trials_vec[i - n_min].resize(m_max - m_min + 1);
+        accuracyArray[i - n_min].resize(m_max - m_min + 1);
+        numberItersArray[i - n_min].resize(m_max - m_min + 1);
+        numberTrialPointsArray[i - n_min].resize(m_max - m_min + 1);
         for (int j = m_min; j <= m_max; j++) {
-            accuracy_vec[i - n_min][j - m_min].resize(incr_array[i - n_min][1] - incr_array[i - n_min][0] + 1);
-            count_iters_vec[i - n_min][j - m_min].resize(incr_array[i - n_min][1] - incr_array[i - n_min][0] + 1);
-            count_trials_vec[i - n_min][j - m_min].resize(incr_array[i - n_min][1] - incr_array[i - n_min][0] + 1);
+            accuracyArray[i - n_min][j - m_min].resize(incrArray[i - n_min][1] - incrArray[i - n_min][0] + 1);
+            numberItersArray[i - n_min][j - m_min].resize(incrArray[i - n_min][1] - incrArray[i - n_min][0] + 1);
+            numberTrialPointsArray[i - n_min][j - m_min].resize(incrArray[i - n_min][1] - incrArray[i - n_min][0] + 1);
         }
     }
 
@@ -83,12 +83,12 @@ int main() {
         A.push_back(-1.0 / 2.0);
         B.push_back(1.0);
     }
-    
+
     mggsa_method mggsa(f_rastrigin, -1, numberConstraints, A, B, r, d, -1, key, eps, maxIters, maxEvals, -1);
 
     vector<double> mu, X;
     double accuracy;
-    int countIters, countTrials, countEvals;
+    int countIters, countEvals;
 
     int total_start_time = clock();
     for (int i = n_min; i <= n_max; i++) {
@@ -126,22 +126,22 @@ int main() {
     #endif
 
     #pragma omp parallel for schedule(dynamic, chunk) proc_bind(spread) num_threads(omp_get_num_procs()) collapse(2) \
-            shared(incr_array, accuracy_vec, count_trials_vec, count_points_vec) firstprivate(mggsa) \
+            shared(incrArray, accuracyArray, numberItersArray, numberTrialPointsArray) firstprivate(mggsa) \
             private(mu, X, accuracy, countIters, countTrials, countEvals)
         for (int j = m_min; j <= m_max; j++) {
-            for (int k = incr_array[i - n_min][0]; k <= incr_array[i - n_min][1]; k++) {
+            for (int k = incrArray[i - n_min][0]; k <= incrArray[i - n_min][1]; k++) {
                 double start_time = omp_get_wtime();
 
                 mggsa.setDen(j);
                 mggsa.setIncr(k);
  
-                mggsa.solve(countIters, countTrials, countEvals, X);
+                mggsa.solve(countIters, countEvals, X);
                 mggsa.getLambda(mu);
  
                 accuracy = euclidean_distance(X_opt, X);
-                accuracy_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = accuracy;
-                count_iters_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = countIters;
-                count_trials_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] = countTrials;
+                accuracyArray[i - n_min][j - m_min][k - incrArray[i - n_min][0]] = accuracy;
+                numberItersArray[i - n_min][j - m_min][k - incrArray[i - n_min][0]] = countIters;
+                numberTrialPointsArray[i - n_min][j - m_min][k - incrArray[i - n_min][0]] = mggsa.getNumberTrialPoints();
 
                 double end_time = omp_get_wtime();
                 double work_time = end_time - start_time;
@@ -150,8 +150,7 @@ int main() {
                 cout << "Parameters for constructing the Peano curve:" << endl;
                 cout << "m = " << j << " incr = " << k << endl;
                 cout << "Trials result:" << endl;
-                cout << "Number of iters = " << countIters << endl;
-                cout << "Number of trials = " << countTrials << endl;
+                cout << "Number of trials = " << countIters << endl;
                 cout << "Number of evals = " << countEvals << endl;
                 cout << "Estimation of the Lipschitz constant = " << mu[0] << endl;
                 cout << "X = (";
@@ -179,10 +178,10 @@ int main() {
 
     for (int i = n_min; i <= n_max; i++) {
         for (int j = m_min; j <= m_max; j++) {
-            for (int k = incr_array[i - n_min][0]; k <= incr_array[i - n_min][1]; k++) {
-                ofstr << k << " " << count_iters_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]]
-                                  << " " << count_trials_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] 
-                                  << " " << accuracy_vec[i - n_min][j - m_min][k - incr_array[i - n_min][0]] << endl;
+            for (int k = incrArray[i - n_min][0]; k <= incrArray[i - n_min][1]; k++) {
+                ofstr << k << " " << numberItersArray[i - n_min][j - m_min][k - incrArray[i - n_min][0]]
+                           << " " << numberTrialPointsArray[i - n_min][j - m_min][k - incrArray[i - n_min][0]] 
+                           << " " << accuracyArray[i - n_min][j - m_min][k - incrArray[i - n_min][0]] << endl;
             }
             ofstr << endl << endl;
         }
@@ -194,8 +193,8 @@ int main() {
     ofstr_opt << "array I_MIN[" << n_count << "]" << endl;
     ofstr_opt << "array I_MAX[" << n_count << "]" << endl;
     for (int i = 0; i < n_count; i++) {
-        ofstr_opt << "I_MIN[" << i + 1 << "] = " << incr_array[i][0] << endl;
-        ofstr_opt << "I_MAX[" << i + 1 << "] = " << incr_array[i][1] << endl;
+        ofstr_opt << "I_MIN[" << i + 1 << "] = " << incrArray[i][0] << endl;
+        ofstr_opt << "I_MAX[" << i + 1 << "] = " << incrArray[i][1] << endl;
     }
     ofstr_opt.close();
 

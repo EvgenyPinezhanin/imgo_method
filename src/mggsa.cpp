@@ -336,7 +336,7 @@ void mggsa_method::getPoints(vector<vector<double>> &points) {
     }
 }
 
-void mggsa_method::solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X, TypeSolve type) {
+void mggsa_method::solve(int &countIters, int &countEvals, vector<double> &X, TypeSolve type) {
 #if defined(TIME_TEST)
     ofstr_test.open("output_data/mggsa_test_time.txt");
     if (!ofstr_test.is_open()) cerr << "File opening error\n";
@@ -361,6 +361,7 @@ void mggsa_method::solve(int &countIters, int &countTrials, int &countEvals, vec
         this->countEvals = 0;
     }
     X.resize(n);
+    coincide_x = false;
 
     if (type == TypeSolve::SOLVE) {
         last_trials[0] = trial_constr{peano_a, -1.0, 0};
@@ -381,7 +382,6 @@ void mggsa_method::solve(int &countIters, int &countTrials, int &countEvals, vec
     if (type == TypeSolve::SOLVE) {
         last_trials[0] = newTrial(peano_random);
         countIters = 1;
-        countTrials = 1;
     }
 
 #if defined(TIME_TEST)
@@ -485,15 +485,18 @@ void mggsa_method::solve(int &countIters, int &countTrials, int &countEvals, vec
         if (key != 3) {
             last_trials.resize(1);
             last_trials[0] = newTrial(x_k_1);
-            countTrials++;
         } else {
             x(P, h_nu);
-            if (!check_density(h_nu[0])) break;
-            last_trials.clear();
-            for (int i = 0; i < h_nu.size(); i++) {
-                last_trials.push_back(newTrial(h_nu[i]));
+            if (!check_density(h_nu[0])) {
+                coincide_x = true;
+                break;
             }
-            countTrials += h_nu.size();
+            last_trials.clear();
+            trial_constr trial = newTrial(h_nu[0]);
+            for (int i = 0; i < h_nu.size(); i++) {
+                trial.x = h_nu[i];
+                last_trials.push_back(trial);
+            }
 
         #if defined(DEBUG)
             for (int i = 0; i < h_nu.size(); i++) {
@@ -583,17 +586,18 @@ void mggsa_method::solve(int &countIters, int &countTrials, int &countEvals, vec
 #endif
 }
 
-void mggsa_method::solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X) {
-    solve(countIters, countTrials, countEvals, X, TypeSolve::SOLVE);
+void mggsa_method::solve(int &countIters, int &countEvals, vector<double> &X) {
+    solve(countIters, countEvals, X, TypeSolve::SOLVE);
 }
 
-bool mggsa_method::solve_test(vector<double> X_opt, int &countIters, int &countTrials, int &countEvals) {
+bool mggsa_method::solve_test(vector<double> X_opt, int &countIters, int &countEvals) {
     for (int nu = 0; nu < numberConstraints + 1; nu++) {
         I[nu].clear();
         calc_I[nu] = false;
     }
     trial_points.clear();
     this->countEvals = 0;
+    coincide_x = false;
 
     last_trials[0] = trial_constr{peano_a, -1.0, 0};
     trial_points.push_back(last_trials[0]);
@@ -602,7 +606,6 @@ bool mggsa_method::solve_test(vector<double> X_opt, int &countIters, int &countT
 
     last_trials[0] = newTrial(peano_random);
     countIters = 1;
-    countTrials = 1;
 
     insert_in_sorted(trial_points, last_trials[0]);
     last_trials_pos[0] = insert_in_sorted(I[(size_t)last_trials[0].nu - 1], last_trials[0]);
@@ -626,15 +629,18 @@ bool mggsa_method::solve_test(vector<double> X_opt, int &countIters, int &countT
         if (key != 3) {
             last_trials.resize(1);
             last_trials[0] = newTrial(x_k_1);
-            countTrials++;
         } else {
             x(P, h_nu);
-            if (!check_density(h_nu[0])) return false;
-            last_trials.clear();
-            for (int i = 0; i < h_nu.size(); i++) {
-                last_trials.push_back(newTrial(h_nu[i]));
+            if (!check_density(h_nu[0])) {
+                coincide_x = true;
+                return false;
             }
-            countTrials += h_nu.size();
+            last_trials.clear();
+            trial_constr trial = newTrial(h_nu[0]);
+            for (int i = 0; i < h_nu.size(); i++) {
+                trial.x = h_nu[i];
+                last_trials.push_back(trial);
+            }
         }
 
         // Step 1

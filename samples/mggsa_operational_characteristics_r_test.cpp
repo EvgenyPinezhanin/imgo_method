@@ -22,7 +22,7 @@
 
 using namespace std;
 
-// #define CALC
+#define CALC
 
 const int type = 1; // 0 - P_max, 1 - count_trials, 2 - count points, 3 - c_points / c_trials
 const int family_number = 3; // 0 - Grishagin, 1 - GKLS,
@@ -51,9 +51,7 @@ int main() {
                                      problem_family("GKLSProblemConstrainedFamily", &GKLSConstrainedProblems,
                                                     type_constraned::CONSTR, "GKLSConstrained") };
 
-    // vector<int> K{ 700, 1200, 2500, 4500 };
-
-    vector<int> K{ 700, 1500, 5000, 7000 };
+    vector<int> K{ 700, 1200, 2500, 4500 };
 
     vector<double> r_min{1.0, 1.0, 1.0, 1.0};
     vector<double> r_max{5.0, 5.0, 5.0, 5.0};
@@ -154,7 +152,7 @@ int main() {
             mggsa.setMaxIters(maxIters[i]);
 
             vector<double> X_opt;
-            int countIters, countTrials, countEvals;
+            int countIters, countEvals;
             double start_time = omp_get_wtime();
             for (int l = 0; l < number_functions; l++) {
                 if (problems[i].type == type_constraned::CONSTR) {
@@ -166,12 +164,12 @@ int main() {
                     X_opt = (*func.opt_problem_family)[l]->GetOptimumPoint();
                     mggsa.setF(func);
                 }
-                if (mggsa.solve_test(X_opt, countIters, countTrials, countEvals)) {
+                if (mggsa.solve_test(X_opt, countIters, countEvals)) {
                     count_iters_vec[l] = countIters;
                 } else {
                     count_iters_vec[l] = countIters + 1;
                 }
-                count_trials_vec[l] = countTrials;
+                count_trials_vec[l] = mggsa.getNumberTrialPoints();
             }
             iters_data[i][j][k] = count_iters_vec;
             trials_data[i][j][k] = count_trials_vec;

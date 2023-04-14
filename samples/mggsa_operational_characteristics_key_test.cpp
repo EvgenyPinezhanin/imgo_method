@@ -20,7 +20,7 @@
 
 using namespace std;
 
-#define CALC
+// #define CALC
 
 const int family_number = 2; // 0 - Grishagin, 1 - GKLS,
                              // 2 - Grishagin(constrained), 3 - GKLS(constrained)
@@ -36,18 +36,15 @@ int main() {
     ofstream ofstr_opt("output_data/mggsa_operational_characteristics_key_test_opt.txt");
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
-    // vector<vector<int>> K{ {0, 700, 25},
-    //                        {0, 1200, 25},
-    //                        {0, 2200, 25},
-    //                        {0, 4500, 25} };
-
     vector<vector<int>> K{ {0, 700, 25},
-                           {0, 1500, 25},
-                           {0, 5000, 25},
-                           {0, 7000, 25} };
+                           {0, 1200, 25},
+                           {0, 2200, 25},
+                           {0, 4500, 25} };
+
 
     int den = 10, incr = 30;
     double eps = 0.01;
+    int maxIters = 100000, maxEvals = 100000;
     vector<vector<double>> r_array{ {3.0, 2.4, 1.6, 1.0},
                                     {4.2, 3.8, 2.0, 1.0},
                                     {3.5, 2.6, 1.8, 1.0},
@@ -77,7 +74,7 @@ int main() {
                                      problem_family("GKLSProblemConstrainedFamily", &gklsConstrainedProblems, 
                                                     type_constraned::CONSTR, "GKLSConstrained") };
 
-    mggsa_method mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, -1, eps, -1, -1, incr);
+    mggsa_method mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, -1, eps, maxIters, maxEvals, incr);
 
     int total_start_time = clock();
 #pragma omp parallel for schedule(static, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
@@ -102,7 +99,6 @@ int main() {
             }
             
             mggsa.setMaxIters(K[i][1]);
-            mggsa.setMaxEvals(K[i][1]);
             mggsa.setAB(A, B);
             mggsa.setD(d_array[i]);
             mggsa.setKey(key_array[j]);
@@ -112,7 +108,7 @@ int main() {
             int count_func = problems[i].optProblemFamily->GetFamilySize();
             vector<double> X_opt;
             int count_successful;
-            int countIters, countTrials, countEvals;
+            int countIters, countEvals;
 
             double start_time = omp_get_wtime();
             for (int k = 0; k < count_func; k++) {
@@ -125,7 +121,7 @@ int main() {
                     X_opt = (*func.opt_problem_family)[k]->GetOptimumPoint();
                     mggsa.setF(func);
                 }
-                if (mggsa.solve_test(X_opt, countIters, countTrials, countEvals)) {
+                if (mggsa.solve_test(X_opt, countIters, countEvals)) {
                     count_evals[k] = countEvals;
                 } else {
                     count_evals[k] = countEvals + 1;

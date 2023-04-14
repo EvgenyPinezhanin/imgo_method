@@ -179,7 +179,7 @@ void imgo_method::setNumberConstraints(int _numberConstraints) {
     z_star.resize((size_t)numberConstraints + 1);
 }
 
-void imgo_method::solve(int &countIters, int &countTrials, int &countEvals, double &x) {
+void imgo_method::solve(int &countIters, int &countEvals, double &x) {
     for (int i = 0; i < I.size(); i++) {
         I[i].clear();
         calc_I[i] = false;
@@ -194,7 +194,6 @@ void imgo_method::solve(int &countIters, int &countTrials, int &countEvals, doub
     trial_points.push_back(last_trial);
     last_trial_pos = insert_in_sorted(I[(size_t)last_trial.nu - 1], last_trial);
     countIters = 2;
-    countTrials = 2;
 
     double x_k_1;
     int t = 1;
@@ -204,7 +203,6 @@ void imgo_method::solve(int &countIters, int &countTrials, int &countEvals, doub
         // Steps 3, 4, 5, 6, 7
         x_k_1 = selectNewPoint(t);
         last_trial = newTrial(x_k_1);
-        countTrials++;
 
         // Step 1
         insert_in_sorted(trial_points, last_trial);
@@ -220,11 +218,11 @@ void imgo_method::solve(int &countIters, int &countTrials, int &countEvals, doub
     x = search_min(trial_points, numberConstraints);
 }
 
-void imgo_method::solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X) {
-    solve(countIters, countTrials, countEvals, X[0]);
+void imgo_method::solve(int &countIters, int &countEvals, vector<double> &X) {
+    solve(countIters, countEvals, X[0]);
 }
 
-bool imgo_method::solve_test(double x_opt, int &countIters, int &countTrials, int &countEvals) {
+bool imgo_method::solve_test(double x_opt, int &countIters, int &countEvals) {
     for (int nu = 0; nu < numberConstraints + 1; nu++) {
         I[nu].clear();
         calc_I[nu] = false;
@@ -239,7 +237,6 @@ bool imgo_method::solve_test(double x_opt, int &countIters, int &countTrials, in
     trial_points.push_back(last_trial);
     last_trial_pos = insert_in_sorted(I[(size_t)last_trial.nu - 1], last_trial);
     countIters = 2;
-    countTrials = 2;
 
     double x_k_1;
     int t = 1;

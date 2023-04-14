@@ -30,25 +30,20 @@ int main() {
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
     int count_func, count_successful;
-    int countIters, countTrials, countEvals;
+    int countIters, countEvals;
 
     int start_time, end_time;
     int total_start_time, total_end_time;
     double work_time, total_work_time;
 
-    // vector<vector<int>> K{ {0, 700, 25},
-    //                        {0, 1500, 25},
-    //                        {0, 3000, 25},
-    //                        {0, 4500, 25} };
-    
     vector<vector<int>> K{ {0, 700, 25},
                            {0, 1500, 25},
-                           {0, 5000, 25},
-                           {0, 7000, 25} };
+                           {0, 3000, 25},
+                           {0, 4500, 25} };
 
     int den = 10, key = 1;
     double eps = 0.01, d = 0.0;
-    int Nmax = 5000;
+    int maxIters = 100000, maxEvals = 100000;
 
     vector<double> A, B, X_opt;
     vector<vector<double>> r_array{ {2.7, 3.0, 3.3},
@@ -76,7 +71,7 @@ int main() {
                                      problem_family("GKLSProblemConstrainedFamily", &GKLSConstrainedProblems, 
                                                     type_constraned::CONSTR, "GKLSConstrained") };
 
-    mggsa_method mggsa(nullptr, -1, -1, A, B, -1.0, d, den, key, eps, Nmax);
+    mggsa_method mggsa(nullptr, -1, -1, A, B, -1.0, d, den, key, eps, maxIters, maxEvals);
 
     functor_family func;
     functor_family_constr func_constr;
@@ -96,7 +91,6 @@ int main() {
         }
 
         mggsa.setMaxIters(K[i][1]);
-        mggsa.setMaxEvals(K[i][1]);
         count_evals.resize(problems[i].optProblemFamily->GetFamilySize());
         count_func = problems[i].optProblemFamily->GetFamilySize();
         mggsa.setAB(A, B);
@@ -117,10 +111,10 @@ int main() {
                     X_opt = (*func.opt_problem_family)[k]->GetOptimumPoint();
                     mggsa.setF(func);
                 }
-                if (mggsa.solve_test(X_opt, countIters, countTrials, countEvals)) {
-                    count_evals[i][k] = countEvals;
+                if (mggsa.solve_test(X_opt, countIters, countEvals)) {
+                    count_evals[i][k] = countIters;
                 } else {
-                    count_evals[i][k] = countEvals + 1;
+                    count_evals[i][k] = countIters + 1;
                 }
             }
             for (int k = K[i][0]; k <= K[i][1]; k += K[i][2]) {

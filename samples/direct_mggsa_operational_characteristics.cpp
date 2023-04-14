@@ -93,25 +93,26 @@ int main() {
 
     vector<vector<int>> K{ {0, 700, 25},
                            {0, 1500, 25},
-                           {0, 5000, 25},
-                           {0, 7000, 25} };
+                           {0, 3000, 25},
+                           {0, 4500, 25} };
 
     double eps = 0.01;
 
     // Parameters of DIRECT
     data_direct_oper_character f_data;
     int max_iter = 10000;
-    double magic_eps = 1.0e-4, magic_eps_abs = 1.0e-4;
+    double magic_eps = 1.0e-4;
     double volume_reltol = 0.0;
     double sigma_reltol  = 0.0;
     vector<direct_algorithm> algorithms{ DIRECT_ORIGINAL, DIRECT_GABLONSKY };
 
-    direct_method direct(f, &f_data, -1, vector<double>{}, vector<double>{}, -1, max_iter, magic_eps, magic_eps_abs,
+    direct_method direct(f, &f_data, -1, vector<double>{}, vector<double>{}, -1, max_iter, magic_eps,
                                                                volume_reltol, sigma_reltol, nullptr, DIRECT_ORIGINAL);
     f_data.eps = eps;
 
     // Parameters of mggsa
     int den = 10, incr = 30;
+    int maxEvals = 100000;
     vector<vector<double>> r_array{ {3.0, 2.4, 1.6, 1.0},
                                     {4.2, 3.8, 2.0, 1.0},
                                     {3.5, 2.6, 1.8, 1.0},
@@ -119,7 +120,7 @@ int main() {
     vector<int> key_array{1, 3, 3, 3};
     vector<double> d_array{0.0, 0.0, 0.01, 0.01};
 
-    mggsa_method mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, -1, eps, -1, -1, incr);
+    mggsa_method mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, -1, eps, -1, maxEvals, incr);
 
     int r_size = r_array[0].size();
     vector<vector<vector<double>>> success_rate(number_family);
@@ -231,17 +232,16 @@ int main() {
             }
             
             mggsa.setMaxIters(K[i][1]);
-            mggsa.setMaxEvals(K[i][1]);
             mggsa.setAB(A, B);
             mggsa.setD(d_array[i]);
             mggsa.setKey(key_array[j]);
             mggsa.setR(r_array[i][j]);
 
-            vector<int> count_evals(problems[i].optProblemFamily->GetFamilySize());
+            vector<int> count_iters(problems[i].optProblemFamily->GetFamilySize());
             int count_func = problems[i].optProblemFamily->GetFamilySize();
             vector<double> X_opt;
             int count_successful;
-            int countIters, countTrials, countEvals;
+            int countIters, countEvals;
 
             double start_time = omp_get_wtime();
             for (int k = 0; k < count_func; k++) {
@@ -254,14 +254,14 @@ int main() {
                     X_opt = (*func.opt_problem_family)[k]->GetOptimumPoint();
                     mggsa.setF(func);
                 }
-                if (mggsa.solve_test(X_opt, countIters, countTrials, countEvals)) {
-                    count_evals[k] = countEvals;
+                if (mggsa.solve_test(X_opt, countIters, countEvals)) {
+                    count_iters[k] = countIters;
                 } else {
-                    count_evals[k] = countEvals + 1;
+                    count_iters[k] = countIters + 1;
                 }
             }
             for (int k = K[i][0]; k <= K[i][1]; k += K[i][2]) {
-                count_successful = (int)count_if(count_evals.begin(), count_evals.end(), [k](double elem){ return elem <= k; });
+                count_successful = (int)count_if(count_iters.begin(), count_iters.end(), [k](double elem){ return elem <= k; });
                 success_rate[i][j + 2][k / K[i][2]] = (double)count_successful / count_func;
             }
             double end_time = clock();

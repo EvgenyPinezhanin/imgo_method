@@ -87,7 +87,7 @@ double gsa_method::selectNewPoint(int &t) {
     return newPoint(t);
 }
 
-void gsa_method::solve(int &countIters, int &countTrials, int &countEvals, double &x) {
+void gsa_method::solve(int &countIters, int &countEvals, double &x) {
     trial_points.clear();
     this->countEvals = 0;
 
@@ -97,7 +97,6 @@ void gsa_method::solve(int &countIters, int &countTrials, int &countEvals, doubl
     last_trial_pos = 1;
 
     trial_points.push_back(last_trial);
-    countTrials = 2;
     countIters = 2;
 
     double x_k_1;
@@ -110,7 +109,6 @@ void gsa_method::solve(int &countIters, int &countTrials, int &countEvals, doubl
 
         // Trial
         last_trial = newTrial(x_k_1);
-        countTrials++;
 
         // Stop conditions
         if (trial_points[t].x - trial_points[(size_t)t - 1].x <= eps) break;
@@ -123,6 +121,6 @@ void gsa_method::solve(int &countIters, int &countTrials, int &countEvals, doubl
     x = search_min(trial_points);
 }
 
-void gsa_method::solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X) {
-    solve(countIters, countTrials, countEvals, X[0]);
+void gsa_method::solve(int &countIters, int &countEvals, vector<double> &X) {
+    solve(countIters, countEvals, X[0]);
 }

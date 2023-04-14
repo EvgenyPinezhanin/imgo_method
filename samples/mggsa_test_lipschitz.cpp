@@ -139,8 +139,8 @@ int main() {
 void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single problem, int num_func,
                                                                      double r, int key, int m, int incr) {
     double accuracy, f_X_opt, f_X;                                                            
-    int numberConstraints, count_points, n;
-    int countIters, countTrials, countEvals;
+    int numberConstraints, n;
+    int countIters, countEvals;
     vector<double> A, B, X_opt, X, mu;
     functor_single func;
     functor_single_constr func_constr;
@@ -173,7 +173,7 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single
     mggsa.setIncr(incr);
     mggsa.setR(r);
 
-    mggsa.solve(countIters, countTrials, countEvals, X);
+    mggsa.solve(countIters, countEvals, X);
     mggsa.getLambda(mu);
 
     if (problem.type == type_constraned::CONSTR) {
@@ -199,8 +199,7 @@ void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single
     cout << "Parameters for constructing the Peano curve:" << endl;
     cout << "m = " << m << " key = " << key << " incr = " << incr << endl;
     cout << "Trials result:" << endl;
-    cout << "Number of iters = " << countIters << endl;
-    cout << "Number of trials = " << countTrials << endl;
+    cout << "Number of trials = " << countIters << endl;
     cout << "Number of evals = " << countEvals << endl;
     cout << "Estimation of the Lipschitz constant:" << endl;
     cout << "L(f(x)) = " << mu[numberConstraints] << endl;

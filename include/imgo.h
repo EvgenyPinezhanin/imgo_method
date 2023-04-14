@@ -50,10 +50,10 @@ public:
 
     void getLambda(vector<double> &lambdas) const { lambdas = mu; };
 
-    void solve(int &countIters, int &countTrials, int &countEvals, double &x);
-    void solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X) override;
+    void solve(int &countIters, int &countEvals, double &x);
+    void solve(int &countIters, int &countEvals, vector<double> &X) override;
     
-    bool solve_test(double x_opt, int &countIters, int &countTrials, int &countEvals);
+    bool solve_test(double x_opt, int &countIters, int &countEvals);
 };
 
 #endif // IMGO_H

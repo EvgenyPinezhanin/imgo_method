@@ -28,10 +28,10 @@ int main() {
     vector<double> A{-0.5, -0.5}, B{1.0, 1.0}, X_opt{0.0, 0.0};
     double eps = 0.01, r = 2.0, d = 0.0;
     int constr = 0;
-    int countIters, countTrials, countEvals;
+    int countIters, countEvals;
     int maxIters = 100000, maxEvals = 100000;
     int n = 2, key = 3, incr = 10;
-    vector<int> den{ 8, 10, 12, 14, 16 };
+    vector<int> den{ 2, 4, 8, 10, 12, 14, 16 };
     vector<double> X;
 
     mggsa_method mggsa(f, n, constr, A, B, r, d, -1, key, eps, maxIters, maxEvals, incr);
@@ -56,17 +56,16 @@ int main() {
         mggsa.setDen(den[i]);
 
         if (i == 0) {
-            mggsa.solve(countIters, countTrials, countEvals, X);
+            mggsa.solve(countIters, countEvals, X);
         } else {
-            mggsa.solve(countIters, countTrials, countEvals, X, TypeSolve::RESOLVE);
+            mggsa.solve(countIters, countEvals, X, TypeSolve::RESOLVE);
         }
         mggsa.getLambda(mu);
 
         cout << "Parameters for constructing the Peano curve:" << endl;
         cout << "m = " << den[i] << " key = " << key << " incr = " << incr << endl;
         cout << "Trials result:" << endl;
-        cout << "Number of iters = " << countIters << endl;
-        cout << "Number of trials = " << countTrials << endl;
+        cout << "Number of trials = " << countIters << endl;
         cout << "Number of evals = " << countEvals << endl;
         cout << "Estimation of the Lipschitz constant = " << mu[0] << endl;
         cout << "X = (" << X[0] << ", " << X[1] << ")" << endl;

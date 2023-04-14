@@ -42,8 +42,8 @@ public:
 
     double getLambda() const { return m; };
     
-    void solve(int &countIters, int &countTrials, int &countEvals, double &x);
-    void solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X) override;
+    void solve(int &countIters, int &countEvals, double &x);
+    void solve(int &countIters, int &countEvals, vector<double> &X) override;
 };
 
 #endif // GSA_H

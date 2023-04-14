@@ -120,7 +120,7 @@ int main() {
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
     double x, eps = 0.001, r = 2.0; // > 1
-    int countIters, countTrials, countEvals;
+    int countIters, countEvals;
     int maxIters = 100000, maxEvals = 100000;
 
     vector<task_gsa> task_array = { task_gsa(f1, "f1(x)", -1.5, 11.0, 10.0, 13870.0, eps, maxIters, maxEvals, r),
@@ -156,7 +156,7 @@ int main() {
             gsa.setMaxEvals(task_array[i].maxEvals);
             gsa.setR(task_array[i].r);
 
-            gsa.solve(countIters, countTrials, countEvals, x);
+            gsa.solve(countIters, countEvals, x);
 
             cout << "Function: " << task_array[i].name << endl;
             cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
@@ -166,8 +166,7 @@ int main() {
             cout << "Parameters for method:" << endl;
             cout << "eps = " << eps << " r = " << r << endl;
             cout << "Trials result:" << endl;
-            cout << "Number of iters = " << countIters << endl;
-            cout << "Number of trials = " << countTrials << endl;
+            cout << "Number of trials = " << countIters << endl;
             cout << "Number of evals = " << countEvals << endl;
             cout << "Estimation of the Lipschitz constant = " << gsa.getLambda() << endl;
             cout << "X = " << setprecision(8) << x << endl;

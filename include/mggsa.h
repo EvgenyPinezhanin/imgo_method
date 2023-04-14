@@ -27,6 +27,8 @@ private:
 
     int M;
 
+    bool coincide_x;
+
     trial_constr newTrial(double x) override;
     double newPoint(int t) override;
     double selectNewPoint(int &t) override;
@@ -42,8 +44,9 @@ public:
                  double _d = 0.01, int _den = 10, int _key = 1, double _eps = 0.0001, int _maxIters = 1000,
                  int _maxEvals = 1000, int _incr = 0) : optimization_method_constrained(_f, _n, _numberConstraints,
                  _A, _B, _eps, _maxIters, _maxEvals), r(_r), d(_d), den(_den), key(_key), incr(_incr), last_trials(1),
-                 last_trials_pos(1), M(0), I((size_t)numberConstraints + 1), h_nu(0), calc_I((size_t)numberConstraints + 1),
-                 mu((size_t)numberConstraints + 1), z_star((size_t)numberConstraints + 1) {}
+                 last_trials_pos(1), M(0), coincide_x(false), I((size_t)numberConstraints + 1), h_nu(0),
+                 calc_I((size_t)numberConstraints + 1), mu((size_t)numberConstraints + 1),
+                 z_star((size_t)numberConstraints + 1) {}
     
     void setNumberConstraints(int _numberConstraints);
     void setR(double _r) { r = _r; };
@@ -61,10 +64,10 @@ public:
     void getPoints(vector<vector<double>> &points);
     void getLambda(vector<double> &lambdas) const { lambdas = mu; };
     
-    void solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X, TypeSolve type);
-    void solve(int &countIters, int &countTrials, int &countEvals, vector<double> &X) override;
+    void solve(int &countIters, int &countEvals, vector<double> &X, TypeSolve type);
+    void solve(int &countIters, int &countEvals, vector<double> &X) override;
 
-    bool solve_test(vector<double> X_opt, int &countIters, int &countTrials, int &countEvals);
+    bool solve_test(vector<double> X_opt, int &countIters, int &countEvals);
 };
 
 #endif // MGGSA_H

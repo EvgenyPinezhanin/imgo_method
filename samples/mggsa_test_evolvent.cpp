@@ -28,7 +28,7 @@ int main() {
     vector<double> A{-1.0 / 2.0, -1.0 / 2.0}, B{1.0, 1.0}, X_opt{0.0, 0.0};
     double eps = 0.01, r = 2.0, d = 0.0;
     int numberConstraints = 0;
-    int countIters, countTrials, countEvals;
+    int countIters, countEvals;
     int maxIters = 100000, maxEvals = 100000;
     int m = 10, n = 2, key = 3, incr = 10;
     vector<double> X(n);
@@ -52,7 +52,7 @@ int main() {
     vector<double> lambdas;
     vector<vector<double>> points;
 
-    mggsa.solve(countIters, countTrials, countEvals, X);
+    mggsa.solve(countIters, countEvals, X);
     mggsa.getLambda(lambdas);
 
     cout << "Function: " << "x^2 + y^2 - cos(18.0 * x) - cos(18.0 * y)" << endl;
@@ -67,8 +67,7 @@ int main() {
     cout << "Parameters for constructing the Peano curve:" << endl;
     cout << "m = " << m << " key = " << key << " incr = " << incr << endl;
     cout << "Trials result:" << endl;
-    cout << "Number of iters = " << countIters << endl;
-    cout << "Number of trials = " << countTrials << endl;
+    cout << "Number of trials = " << countIters << endl;
     cout << "Number of evals = " << countEvals << endl;
     cout << "Estimation of the Lipschitz constant = " << lambdas[0] << endl;
     cout << "X = (" << X[0] << ", " << X[1] << ")" << endl;

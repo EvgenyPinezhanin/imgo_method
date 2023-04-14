@@ -26,7 +26,7 @@ int main() {
     if (!ofstr_opt.is_open()) cerr << "File opening error\n";
 
     int count_func, count_successful;
-    int countIters, countTrials, countEvals;
+    int countIters, countEvals;
 
     int K0 = 0, Kmax = 500, Kstep = 10;
 
@@ -35,6 +35,7 @@ int main() {
                                     {3.1, 3.4, 3.7} };
     double eps = 0.0001, d = 0.0;
     int m = 0;
+    int maxIters = 100000, maxEvals = 100000;
 
     const int number_family = 2;
     THillProblemFamily hillProblems;
@@ -47,7 +48,7 @@ int main() {
     vector<problem_family> problems{ problem_family("HillProblemFamily", &hillProblems, type_constraned::NONCONSTR, "Hill"),
                                      problem_family("ShekelProblemFamily", &shekelProblems, type_constraned::NONCONSTR, "Shekel") };
 
-    imgo_method imgo(nullptr, m, 0.0, 0.0, -1.0, d, eps);
+    imgo_method imgo(nullptr, m, 0.0, 0.0, -1.0, d, eps, maxIters, maxEvals);
 
     functor_family functor;
     for (int i = 0; i < number_family; i++) {
@@ -63,13 +64,12 @@ int main() {
                 functor.current_func = k;
                 imgo.setF(function<double(double, int)>(functor));
                 imgo.setMaxIters(Kmax);
-                imgo.setMaxEvals(Kmax);
                 (*functor.opt_problem_family)[k]->GetBounds(A, B);
                 imgo.setAB(A[0], B[0]);
-                if (imgo.solve_test((*functor.opt_problem_family)[k]->GetOptimumPoint()[0], countIters, countTrials, countEvals)) {
-                    count_evals[i][k] = countEvals;
+                if (imgo.solve_test((*functor.opt_problem_family)[k]->GetOptimumPoint()[0], countIters, countEvals)) {
+                    count_evals[i][k] = countIters;
                 } else {
-                    count_evals[i][k] = countEvals + 1;
+                    count_evals[i][k] = countIters + 1;
                 }
             }
             for (int k = K0; k <= Kmax; k += Kstep) {
