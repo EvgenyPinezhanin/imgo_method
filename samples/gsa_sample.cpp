@@ -1,11 +1,7 @@
-#if defined( _MSC_VER )
-    #define _CRT_SECURE_NO_WARNINGS
-#endif
-
 #include <iostream>
 #include <fstream>
-#include <iomanip>
 #include <vector>
+
 #if defined( _MSC_VER )
     #define _USE_MATH_DEFINES
     #include <math.h>
@@ -15,10 +11,11 @@
 
 #include <gsa.h>
 #include <task.h>
+#include <output_results.h>
 
 using namespace std;
 
-const int sample_func_number = 3; // 0 - f1, 1 - f2, 2 - f3, 3 - f4
+const int functionNumber = 3; // 0 - f1, 1 - f2, 2 - f3, 3 - f4
 
 double f1(double x) {
     return -4.0 * x + 1.0;
@@ -44,76 +41,45 @@ int main() {
     ofstream ofstr("output_data/gsa_sample.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
-    double x, eps = 0.0001, r = 2.0;
-    int countIters, countEvals;
-    int maxIters = 100000, maxEvals = 100000;
+    double eps = 0.0001, r = 2.0;
+    int maxTrials = 100000, maxFevals = 100000;
 
-    vector<task_gsa> task_array = { task_gsa(f1, "f1(x) = -4.0 * x + 1.0", 3.0, 4.0, 4.0, 4.0, eps, maxIters, maxEvals, r),
-                                    task_gsa(f2, "f2(x) = 5.0 * x * x + 3.0 * x - 1.0", -2.0, 2.0, -0.3, 23.0, eps, maxIters, maxEvals, r),
-                                    task_gsa(f3, "f3(x) = x * sin(x)", 0.0, 20.0, 17.336, 18.955, eps , maxIters, maxEvals, 2.1),
-                                    task_gsa(f4, "f4(x) = x * sin(1 / x)", -0.4, -0.05, -0.2225, 6.0 * M_PI, eps, maxIters, maxEvals, r) };
+    vector<TaskGsa> taskArray = { TaskGsa(f1, "f1(x) = -4.0 * x + 1.0", 3.0, 4.0, 4.0, 4.0, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f2, "f2(x) = 5.0 * x * x + 3.0 * x - 1.0", -2.0, 2.0, -0.3, 23.0, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f3, "f3(x) = x * sin(x)", 0.0, 20.0, 17.336, 18.955, eps , maxTrials, maxFevals, 2.1),
+                                  TaskGsa(f4, "f4(x) = x * sin(1 / x)", -0.4, -0.05, -0.2225, 6.0 * M_PI, eps, maxTrials, maxFevals, r) };
 
-    gsa_method gsa(nullptr);
+    GsaMethod gsa;
 
-    vector<trial> trials;
-    for (int i = 0; i < task_array.size(); i++) {
-        if (task_array[i].used) {
-            gsa.setF(task_array[i].f);
-            gsa.setAB(task_array[i].A[0], task_array[i].B[0]);
-            gsa.setEps(task_array[i].eps);
-            gsa.setMaxIters(task_array[i].maxIters);
-            gsa.setMaxEvals(task_array[i].maxEvals);
-            gsa.setR(task_array[i].r);
+    double x;
+    int numberTrials, numberFevals;
+    vector<Trial> trials;
 
-            gsa.solve(countIters, countEvals, x);
+    for (int i = 0; i < taskArray.size(); i++) {
+        if (taskArray[i].used) {
+            gsa.setF(taskArray[i].f);
+            gsa.setAB(taskArray[i].A[0], taskArray[i].B[0]);
+            gsa.setEps(taskArray[i].eps);
+            gsa.setMaxTrials(taskArray[i].maxTrials);
+            gsa.setMaxFevals(taskArray[i].maxFevals);
+            gsa.setR(taskArray[i].r);
 
-            cout << "Function: " << task_array[i].name << endl;
-            cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
-            cout << "Lipschitz constant = " << task_array[i].L[0] << endl;
-            cout << "X* = " << setprecision(8) << task_array[i].X_opt[0] << endl;
-            cout << "f(X*) = " << setprecision(8) << task_array[i].f(task_array[i].X_opt[0]) << endl;
-            cout << "Parameters for method:" << endl;
-            cout << "eps = " << eps << " r = " << r << endl;
-            cout << "Trials result:" << endl;
-            cout << "Number of trials = " << countIters << endl;
-            cout << "Number of evals = " << countEvals << endl;
-            cout << "Estimation of the Lipschitz constant = " << gsa.getLambda() << endl;
-            cout << "X = " << setprecision(8) << x << endl;
-            cout << "f(X) = " << setprecision(8) << task_array[i].f(x) << endl;
-            cout << "|X* - X| = " << setprecision(8) << abs(task_array[i].X_opt[0] - x) << endl;
-            cout << "|f(X*) - f(X)| = " << setprecision(8) << abs(task_array[i].f(task_array[i].X_opt[0]) - task_array[i].f(x)) << endl;
-            cout << endl;
+            gsa.solve(numberTrials, numberFevals, x);
 
-            // Saving points for plotting
-            ofstr << task_array[i].X_opt[0] << " " << task_array[i].f(task_array[i].X_opt[0]) << endl;
-            ofstr << endl << endl;
-            ofstr << x << " " << task_array[i].f(x) << endl;
-            ofstr << endl << endl;
+            printResultGsa(taskArray[i].name, taskArray[i].A[0], taskArray[i].B[0], taskArray[i].L[0], taskArray[i].XOpt[0],
+                           taskArray[i].f(taskArray[i].XOpt[0]), taskArray[i].maxTrials, taskArray[i].maxFevals, taskArray[i].eps,
+                           taskArray[i].r, numberTrials, numberFevals, gsa.getLambda(), x, taskArray[i].f(x));
+
+            addPointGnuplot(ofstr, taskArray[i].XOpt[0], taskArray[i].f(taskArray[i].XOpt[0]));
+            addPointGnuplot(ofstr, x, taskArray[i].f(x));
+
             gsa.getTrialPoints(trials);
-            for (int j = 0; j < trials.size(); j++) {
-                ofstr << trials[j].x << " " << trials[j].z << endl;
-            }
-            ofstr << endl << endl;
+            addPointsGnuplot(ofstr, trials);
         }
     }
     ofstr.close();
 
-    // Plotting the function(works with gnuplot)
-    int error;
-#if defined(__linux__)
-    setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/gsa_sample.gp");
-    if (error != 0) {
-        cerr << "Error chmod" << endl;
-    }
-#endif
-
-    char str[100];
-    sprintf(str, "gnuplot -c scripts/gsa_sample.gp %d", sample_func_number);
-    error = system(str);
-    if (error != 0) {
-        cerr << "Error gnuplot" << endl;
-    }
+    drawGraphGnuplot("scripts/gsa_sample.gp", functionNumber);
 
 #if defined( _MSC_VER )
     cin.get();

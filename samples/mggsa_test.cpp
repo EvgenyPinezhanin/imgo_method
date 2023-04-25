@@ -9,18 +9,19 @@
 
 #include <mggsa.h>
 #include <task.h>
+#include <output_results.h>
 
 using namespace std;
 
-const int test_func_number = 0; // 0 - f1, 1 - f2
+const int functionNumber = 0; // 0 - f1, 1 - f2
 
 double f1(vector<double> x, int j) {
     switch (j) {
         case 1: return 0.01 * (pow((x[0] - 2.2), 2) + pow((x[1] - 1.2), 2) - 2.25);
         case 2: return 100.0 * (1.0 - pow((x[0] - 2.0), 2) / 1.44 - pow(0.5 * x[1], 2));
         case 3: return 10.0 * (x[1] - 1.5 - 1.5 * sin(6.283 * (x[0] - 1.75)));
-        case 4: return -1.5 * x[0] * x[0] * exp(1.0 - x[0] * x[0] - 20.25 * pow((x[0] - x[1]), 2)) - 
-                       pow(0.5 * (x[0] - 1.0) * (x[1] - 1.0), 4) * exp(2.0 - pow(0.5 * (x[0] - 1.0), 4) - 
+        case 4: return -1.5 * x[0] * x[0] * exp(1.0 - x[0] * x[0] - 20.25 * pow((x[0] - x[1]), 2)) -
+                       pow(0.5 * (x[0] - 1.0) * (x[1] - 1.0), 4) * exp(2.0 - pow(0.5 * (x[0] - 1.0), 4) -
                        pow(x[1] - 1.0, 4));
         default: return numeric_limits<double>::quiet_NaN();
     }
@@ -49,115 +50,74 @@ double f2(vector<double> x, int j) {
 int main() {
     ofstream ofstr("output_data/mggsa_test.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
-    ofstream ofstr_opt("output_data/mggsa_test_opt.txt");
-    if (!ofstr_opt.is_open()) cerr << "File opening error\n";
+    ofstream ofstrOpt("output_data/mggsa_test_opt.txt");
+    if (!ofstrOpt.is_open()) cerr << "File opening error\n";
 
     double eps = 0.001, r = 2.2, d = 0.05;
     int n = 2, den = 10, key = 1;
-    int countIters, countEvals;
-    int maxIters = 100000, maxEvals = 100000;
-    vector<double> X(n);
+    int maxTrials = 100000, maxFevals = 100000;
 
-    vector<task_mggsa> task_array = { task_mggsa(f1, "f1", n, 3, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
-                                                 vector<double>{0.942, 0.944}, vector<double>{}, eps, maxIters, maxEvals,
-                                                                                                      r, d, 12, key, true),
-                                      task_mggsa(f2, "f2", n, 4, vector<double>{0.0, 0.0}, vector<double>{80.0, 80.0},
-                                                 vector<double>{77.489, 63.858}, vector<double>{}, eps, maxIters, maxEvals,
-                                                                                                  3.3, 0.01, den, key, true) };
+    vector<TaskMggsa> taskArray = { TaskMggsa(f1, "f1", n, 3, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
+                                               vector<double>{0.942, 0.944}, vector<double>{}, eps, maxTrials, maxFevals,
+                                               r, d, 12, key, -1, true),
+                                     TaskMggsa(f2, "f2", n, 4, vector<double>{0.0, 0.0}, vector<double>{80.0, 80.0},
+                                               vector<double>{77.489, 63.858}, vector<double>{}, eps, maxTrials, maxFevals,
+                                               3.3, 0.01, den, key, -1, true) };
 
-    mggsa_method mggsa(nullptr);
+    MggsaMethod mggsa(nullptr);
 
-    vector<double> lambdas;
+    vector<double> X, lambdas;
     vector<vector<double>> points;
-    for (int i = 0; i < task_array.size(); i++) {
-        if (task_array[i].used) {
-            mggsa.setF(task_array[i].f);
-            mggsa.setN(task_array[i].n);
-            mggsa.setNumberConstraints(task_array[i].numberConstraints);
-            mggsa.setAB(task_array[i].A, task_array[i].B);
-            mggsa.setEps(task_array[i].eps);
-            mggsa.setMaxIters(task_array[i].maxIters);
-            mggsa.setMaxEvals(task_array[i].maxEvals);
-            mggsa.setR(task_array[i].r);
-            mggsa.setD(task_array[i].d);
-            mggsa.setDen(task_array[i].den);
-            mggsa.setKey(task_array[i].key);
+    vector<TrialConstrained> trials;
+    int numberTrials, numberFevals;
 
-            mggsa.solve(countIters, countEvals, X);
+    for (int i = 0; i < taskArray.size(); i++) {
+        if (taskArray[i].used) {
+            mggsa.setF(taskArray[i].f);
+            mggsa.setN(taskArray[i].n);
+            mggsa.setNumberConstraints(taskArray[i].numberConstraints);
+            mggsa.setAB(taskArray[i].A, taskArray[i].B);
+            mggsa.setEps(taskArray[i].eps);
+            mggsa.setMaxTrials(taskArray[i].maxTrials);
+            mggsa.setMaxFevals(taskArray[i].maxFevals);
+            mggsa.setR(taskArray[i].r);
+            mggsa.setD(taskArray[i].d);
+            mggsa.setDen(taskArray[i].den);
+            mggsa.setKey(taskArray[i].key);
+
+            mggsa.solve(numberTrials, numberFevals, X);
             mggsa.getLambda(lambdas);
 
-            cout << "Function: " << task_array[i].name << endl;
-            cout << "Dimension = " << task_array[i].n << endl;
-            cout << "Number of constraints = " << task_array[i].numberConstraints << endl;
-            cout << "[A; B] = [(" << task_array[i].A[0] << ", " << task_array[i].A[1] << "); (" << 
-                                     task_array[i].B[0] << ", " << task_array[i].B[1] << ")]"<< endl;
-            cout << "X* = (" << task_array[i].X_opt[0] << ", " << task_array[i].X_opt[1] << ")" << endl;
-            cout << "f(X*) = " << task_array[i].f(task_array[i].X_opt, task_array[i].numberConstraints + 1) << endl;
-            cout << "Parameters for method:" << endl;
-            cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
-            cout << "Parameters for constructing the Peano curve:" << endl;
-            cout << "m = " << task_array[i].den << " key = " << task_array[i].key << endl;
-            cout << "Trials result:" << endl;
-            cout << "Number of trials = " << countIters << endl;
-            cout << "Number of evals = " << countEvals << endl;
-            cout << "Estimation of the Lipschitz constant:" << endl;
-            cout << "L(" << task_array[i].name << ") = " << lambdas[task_array[i].numberConstraints] << endl;
-            for (int j = 0; j < task_array[i].numberConstraints; j++) {
-                cout << "L(g" << j + 1 << ") = " << lambdas[j] << endl;
-            }
-            cout << "X = (" << X[0] << ", " << X[1] << ")" << endl;
-            cout << "f(X) = " << task_array[i].f(X, task_array[i].numberConstraints + 1) << endl;
-            cout << "||X* - X|| = " << sqrt((task_array[i].X_opt[0] - X[0]) * (task_array[i].X_opt[0] - X[0]) + 
-                                            (task_array[i].X_opt[1] - X[1]) * (task_array[i].X_opt[1] - X[1])) << endl;
-            cout << "|f(X*) - f(X)| = " << abs(task_array[i].f(task_array[i].X_opt, task_array[i].numberConstraints + 1) - 
-                                               task_array[i].f(X, task_array[i].numberConstraints + 1)) << endl;
-            cout << endl;
+            printResultMggsa(taskArray[i].name, taskArray[i].n, taskArray[i].numberConstraints, taskArray[i].A, taskArray[i].B,
+                             taskArray[i].L, taskArray[i].XOpt, taskArray[i].f(taskArray[i].XOpt, taskArray[i].numberConstraints + 1),
+                             taskArray[i].maxTrials, taskArray[i].maxFevals, taskArray[i].eps, taskArray[i].r, taskArray[i].d,
+                             taskArray[i].den, taskArray[i].key, taskArray[i].incr, numberTrials, numberFevals, lambdas, X,
+                             taskArray[i].f(X, taskArray[i].numberConstraints + 1));
 
-            // Saving points for plotting
-            ofstr << task_array[i].X_opt[0] << " " << task_array[i].X_opt[1] << " " << 
-                     task_array[i].f(task_array[i].X_opt, task_array[i].numberConstraints + 1) << endl;
-            ofstr << endl << endl;
-            ofstr << X[0] << " " << X[1] << " " << task_array[i].f(X, task_array[i].numberConstraints + 1) << endl;
-            ofstr << endl << endl;
+            addPointGnuplot(ofstr, taskArray[i].XOpt, taskArray[i].f(taskArray[i].XOpt, taskArray[i].numberConstraints + 1));
+            addPointGnuplot(ofstr, X, taskArray[i].f(X, taskArray[i].numberConstraints + 1));
+
             mggsa.getPoints(points);
-            for (int j = 0; j < points.size(); j++) {
-                ofstr << points[j][0] << " " << points[j][1] << " " << 
-                         task_array[i].f(points[j], task_array[i].numberConstraints + 1) << endl;
-            }
-            ofstr << endl << endl;
+            mggsa.getTrialPoints(trials);
+            addPointsGnuplot(ofstr, points, trials);
         }
     }
     ofstr.close();
 
-    size_t size = task_array.size();
-    ofstr_opt << "array AX[" << size << "]" << endl;
-    ofstr_opt << "array AY[" << size << "]" << endl;
-    ofstr_opt << "array BX[" << size << "]" << endl;
-    ofstr_opt << "array BY[" << size << "]" << endl;
-    for (int i = 0; i < size; i++) {
-        ofstr_opt << "AX[" << i + 1 << "] = " << task_array[i].A[0] << endl;
-        ofstr_opt << "BX[" << i + 1 << "] = " << task_array[i].B[0] << endl;
-        ofstr_opt << "AY[" << i + 1 << "] = " << task_array[i].A[1] << endl;
-        ofstr_opt << "BY[" << i + 1 << "] = " << task_array[i].B[1] << endl;
+    size_t sizeTaskArray = taskArray.size();
+    string arraysName[] = { "AX", "BX", "AY", "BY" };
+    for (int i = 0; i < 4; i++) {
+        initArrayGnuplot(ofstrOpt, arraysName[i], sizeTaskArray);
     }
-    ofstr_opt.close();
+    for (int i = 0; i < sizeTaskArray; i++) {
+        for (int j = 0; j < 2; j++) {
+            setValueInArrayGnuplot(ofstrOpt, arraysName[2 * j], i + 1, taskArray[i].A[j], false);
+            setValueInArrayGnuplot(ofstrOpt, arraysName[2 * j + 1], i + 1, taskArray[i].B[j], false);
+        }
+    }
+    ofstrOpt.close();
 
-    // Plotting the function(works with gnuplot)
-    int error;
-#if defined(__linux__)
-    setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/mggsa_test.gp");
-    if (error != 0) {
-        cerr << "Error chmod" << endl;
-    }
-#endif
-
-    char str[100];
-    sprintf(str, "gnuplot -c scripts/mggsa_test.gp %d", test_func_number);
-    error = system(str);
-    if (error != 0) {
-        cerr << "Error gnuplot" << endl;
-    }
+    drawGraphGnuplot("scripts/mggsa_test.gp", functionNumber);
 
 #if defined(_MSC_VER)
     cin.get();

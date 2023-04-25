@@ -1,11 +1,7 @@
-#if defined( _MSC_VER )
-    #define _CRT_SECURE_NO_WARNINGS
-#endif
-
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <iomanip>
+
 #if defined( _MSC_VER )
     #define _USE_MATH_DEFINES
     #include <math.h>
@@ -15,10 +11,11 @@
 
 #include <gsa.h>
 #include <task.h>
+#include <output_results.h>
 
 using namespace std;
 
-const int test_func_number = 15; // 0 - f1, 1 - f2, 2 - f3, 3 - f4, ...
+const int functionNumber = 15; // 0 - f1, 1 - f2, 2 - f3, 3 - f4, ...
 
 double f1(double x) {
     return -(-1.0 / 6.0 * pow(x, 6) + 52.0 / 25.0 * pow(x, 5) - 39.0 / 80.0 * pow(x, 4) - 
@@ -119,92 +116,61 @@ int main() {
     ofstream ofstr("output_data/gsa_test.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
-    double x, eps = 0.001, r = 2.0; // > 1
-    int countIters, countEvals;
-    int maxIters = 100000, maxEvals = 100000;
+    double eps = 0.001, r = 2.0;
+    int maxTrials = 100000, maxFevals = 100000;
 
-    vector<task_gsa> task_array = { task_gsa(f1, "f1(x)", -1.5, 11.0, 10.0, 13870.0, eps, maxIters, maxEvals, r),
-                                    task_gsa(f2, "f2(x)", 2.7, 7.5, 5.145735, 4.29, eps, maxIters, maxEvals, r),
-                                    task_gsa(f3, "f3(x)", -10.0, 10.0, -0.49139, 67.0, eps, maxIters, maxEvals, r),
-                                    task_gsa(f4, "f4(x)", 1.9, 3.9, 2.868, 3.0, eps, maxIters, maxEvals, r),
-                                    task_gsa(f5, "f5(x)", 0.0, 1.2, 0.96609, 36.0, eps, maxIters, maxEvals, r),
-                                    task_gsa(f6, "f6(x)", -10.0, 10.0, 0.67956, 2.5, eps, maxIters, maxEvals, r),
-                                    task_gsa(f7, "f7(x)", 2.7, 7.5, 5.19978, 6.0, eps, maxIters, maxEvals, r),
-                                    task_gsa(f8, "f8(x)", -10.0, 10.0, 5.48286, 67.0, eps, maxIters, maxEvals, r),
-                                    task_gsa(f9, "f9(x)", 3.1, 20.4, 17.039, 1.7, eps, maxIters, maxEvals, r),
-                                    task_gsa(f10, "f10(x)", 0.0, 10.0, 7.9787, 11.0, eps, maxIters, maxEvals, r),
-                                    task_gsa(f11, "f11(x)", -1.57, 6.28, 2.094, 3.0, eps, maxIters, maxEvals, r),
-                                    task_gsa(f12, "f12(x)", 0.0, 6.28, 4.712, 2.2, eps, maxIters, maxEvals, r),
-                                    task_gsa(f13, "f13(x)", 0.001, 0.99, 0.7071, 8.5, eps, maxIters, maxEvals, r),
-                                    task_gsa(f14, "f14(x)", 0.0, 4.0, 0.224885, 6.5, eps, maxIters, maxEvals, r),
-                                    task_gsa(f15, "f15(x)", -5.0, 5.0, 2.4142, 6.5, eps, maxIters, maxEvals, r),
-                                    task_gsa(f16, "f16(x)", -3.0, 3.0, 3.0, 85.0, eps, maxIters, maxEvals, r),
-                                    task_gsa(f17, "f17(x)", -4.0, 4.0, -3.0, 2520.0, eps, maxIters, maxEvals, r),
-                                    task_gsa(f18, "f18(x)", 0.0, 6.0, 2.0, 4.0, eps, maxIters, maxEvals, r),
-                                    task_gsa(f19, "f19(x)", 0.0, 6.5, 5.87287, 4.0, eps, maxIters, maxEvals, r),
-                                    task_gsa(f20, "f20(x)", -10.0, 10.0, 1.195137, 1.3, eps, maxIters, maxEvals, r) };
+    vector<TaskGsa> taskArray = { TaskGsa(f1, "f1(x)", -1.5, 11.0, 10.0, 13870.0, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f2, "f2(x)", 2.7, 7.5, 5.145735, 4.29, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f3, "f3(x)", -10.0, 10.0, -0.49139, 67.0, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f4, "f4(x)", 1.9, 3.9, 2.868, 3.0, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f5, "f5(x)", 0.0, 1.2, 0.96609, 36.0, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f6, "f6(x)", -10.0, 10.0, 0.67956, 2.5, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f7, "f7(x)", 2.7, 7.5, 5.19978, 6.0, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f8, "f8(x)", -10.0, 10.0, 5.48286, 67.0, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f9, "f9(x)", 3.1, 20.4, 17.039, 1.7, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f10, "f10(x)", 0.0, 10.0, 7.9787, 11.0, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f11, "f11(x)", -1.57, 6.28, 2.094, 3.0, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f12, "f12(x)", 0.0, 6.28, 4.712, 2.2, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f13, "f13(x)", 0.001, 0.99, 0.7071, 8.5, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f14, "f14(x)", 0.0, 4.0, 0.224885, 6.5, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f15, "f15(x)", -5.0, 5.0, 2.4142, 6.5, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f16, "f16(x)", -3.0, 3.0, 3.0, 85.0, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f17, "f17(x)", -4.0, 4.0, -3.0, 2520.0, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f18, "f18(x)", 0.0, 6.0, 2.0, 4.0, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f19, "f19(x)", 0.0, 6.5, 5.87287, 4.0, eps, maxTrials, maxFevals, r),
+                                  TaskGsa(f20, "f20(x)", -10.0, 10.0, 1.195137, 1.3, eps, maxTrials, maxFevals, r) };
 
-    gsa_method gsa(nullptr);
+    GsaMethod gsa;
 
-    vector<trial> trials;
-    for (int i = 0; i < task_array.size(); i++) {
-        if (task_array[i].used) {
-            gsa.setF(task_array[i].f);
-            gsa.setAB(task_array[i].A[0], task_array[i].B[0]);
-            gsa.setEps(task_array[i].eps);
-            gsa.setMaxIters(task_array[i].maxIters);
-            gsa.setMaxEvals(task_array[i].maxEvals);
-            gsa.setR(task_array[i].r);
+    double x;
+    int numberTrials, numberFevals;
+    vector<Trial> trials;
 
-            gsa.solve(countIters, countEvals, x);
+    for (int i = 0; i < taskArray.size(); i++) {
+        if (taskArray[i].used) {
+            gsa.setF(taskArray[i].f);
+            gsa.setAB(taskArray[i].A[0], taskArray[i].B[0]);
+            gsa.setEps(taskArray[i].eps);
+            gsa.setMaxTrials(taskArray[i].maxTrials);
+            gsa.setMaxFevals(taskArray[i].maxFevals);
+            gsa.setR(taskArray[i].r);
 
-            cout << "Function: " << task_array[i].name << endl;
-            cout << "[a; b] = [" << task_array[i].A[0] << "; " << task_array[i].B[0] << "]"<< endl;
-            cout << "Lipschitz constant = " << task_array[i].L[0] << endl;
-            cout << "X* = " << setprecision(8) << task_array[i].X_opt[0] << endl;
-            cout << "f(X*) = " << setprecision(8) << task_array[i].f(task_array[i].X_opt[0]) << endl;
-            cout << "Parameters for method:" << endl;
-            cout << "eps = " << eps << " r = " << r << endl;
-            cout << "Trials result:" << endl;
-            cout << "Number of trials = " << countIters << endl;
-            cout << "Number of evals = " << countEvals << endl;
-            cout << "Estimation of the Lipschitz constant = " << gsa.getLambda() << endl;
-            cout << "X = " << setprecision(8) << x << endl;
-            cout << "f(X) = " << setprecision(8) << task_array[i].f(x) << endl;
-            cout << "|X* - X| = " << setprecision(8) << abs(task_array[i].X_opt[0] - x) << endl;
-            cout << "|f(X*) - f(X)| = " << setprecision(8) << abs(task_array[i].f(task_array[i].X_opt[0]) - task_array[i].f(x)) << endl;
-            cout << endl;
+            gsa.solve(numberTrials, numberFevals, x);
 
-            // Saving points for plotting
-            ofstr << task_array[i].X_opt[0] << " " << task_array[i].f(task_array[i].X_opt[0]) << endl;
-            ofstr << endl << endl;
-            ofstr << x << " " << task_array[i].f(x) << endl;
-            ofstr << endl << endl;
+            printResultGsa(taskArray[i].name, taskArray[i].A[0], taskArray[i].B[0], taskArray[i].L[0], taskArray[i].XOpt[0],
+                           taskArray[i].f(taskArray[i].XOpt[0]), taskArray[i].maxTrials, taskArray[i].maxFevals, taskArray[i].eps,
+                           taskArray[i].r, numberTrials, numberFevals, gsa.getLambda(), x, taskArray[i].f(x));
+
+            addPointGnuplot(ofstr, taskArray[i].XOpt[0], taskArray[i].f(taskArray[i].XOpt[0]));
+            addPointGnuplot(ofstr, x, taskArray[i].f(x));
+
             gsa.getTrialPoints(trials);
-            for (int j = 0; j < trials.size(); j++) {
-                ofstr << trials[j].x << " " << trials[j].z << endl;
-            }
-            ofstr << endl << endl;
+            addPointsGnuplot(ofstr, trials);
         }
     }
     ofstr.close();
 
-    // Plotting the function(works with gnuplot)
-    int error;
-#if defined(__linux__)
-    setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/gsa_test.gp");
-    if (error != 0) {
-        cerr << "Error chmod" << endl;
-    }
-#endif
-
-    char str[100];
-    sprintf(str, "gnuplot -c scripts/gsa_test.gp %d", test_func_number);
-    error = system(str);
-    if (error != 0) {
-        cerr << "Error gnuplot" << endl;
-    }
+    drawGraphGnuplot("scripts/gsa_test.gp", functionNumber);
 
 #if defined( _MSC_VER )
     cin.get();

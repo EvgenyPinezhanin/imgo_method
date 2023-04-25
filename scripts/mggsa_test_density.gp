@@ -45,8 +45,8 @@ set yrange [-0.5:1.0]
 set title "Density test" font "Helvetica Bold, 20"
 
 splot f(x, y) title "φ(x, y)" lt 11 nosurface, \
-      for [i = 1:@ARG1] datafile index 2 * (@ARG1 - i + 1) lt i title "trial points(m = ".Den[@ARG1 - i + 1].")" nocontours, \
-      for [i = 1:@ARG1] datafile index 2 * (@ARG1 - i + 1) - 1 lt i + 5 title "X(m = ".Den[@ARG1 - i + 1].")" nocontours, \
+      for [i = 1:@ARG1] datafile index 2 * (@ARG1 - i + 1) lt i title "trial points(m = ".den[@ARG1 - i + 1].")" nocontours, \
+      for [i = 1:@ARG1] datafile index 2 * (@ARG1 - i + 1) - 1 lt i + 5 title "X(m = ".den[@ARG1 - i + 1].")" nocontours, \
       datafile index 0 lt 12 title "X*" nocontours
 
 bind all "alt-End" "exit gnuplot"

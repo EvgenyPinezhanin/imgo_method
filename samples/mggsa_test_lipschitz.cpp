@@ -10,98 +10,99 @@
 #include <mggsa.h>
 #include <map.h>
 #include <task.h>
+#include <output_results.h>
 
 using namespace std;
 
-using vector_4d = vector<vector<vector<vector<double>>>>;
+using vector4d = vector<vector<vector<vector<double>>>>;
 
 // #define CALC
 // #define OUTPUT_INFO
 
-void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single problem, int num_func,
-                                                                     double r, int key, int m, int incr);
+void calculation(MggsaMethod &mggsa, vector4d &lipschitzConst, ProblemSingle problem, int numberFunctions, int maxTrials,
+                 int maxFevals, double eps, double r, double d, int key, int den, int incr, const int incrMin, const int mMin,
+                 const int keyMin);
 
-const int type = 0; // 0 - grishagin, 1 - GKLS
-                    // 2 - constrained grisagin, 3 - constrained GKLS
-
-const int incr_min = 1, incr_max = 40;
-const int m_min = 8, m_max = 12;
-const int key_min = 1, key_max = 3;
-
-const int chunk = 4;
+const int type = 0; // 0 - grishagin, 1 - gkls
+                    // 2 - constrained grishagin, 3 - constrained GKLS
 
 int main() {
-    ofstream ofstr_opt("output_data/mggsa_test_lipschitz_opt.txt");
-    if (!ofstr_opt.is_open()) cerr << "File opening error\n";
-    
-    const int count_func = 4;
+    ofstream ofstrOpt("output_data/mggsa_test_lipschitz_opt.txt");
+    if (!ofstrOpt.is_open()) cerr << "File opening error\n";
+
+    const int chunk = 4;
+
+    const int numberFunctions = 4;
 
     TGrishaginProblem grishaginProblem;
     GrishaginConstrainedProblem grishaginConstrainedProblem;
     TGKLSProblem gklsProblem;
     TGKLSConstrainedProblem gklsConstrainedProblem;
 
-    vector<problem_single> problems{ problem_single("Grishagin", &grishaginProblem, type_constraned::NONCONSTR),
-                                     problem_single("GKLS", &gklsProblem, type_constraned::NONCONSTR),
-                                     problem_single("GrishaginConstrained", &grishaginConstrainedProblem, type_constraned::CONSTR),
-                                     problem_single("GKLSConstrained", &gklsConstrainedProblem, type_constraned::CONSTR) };
+    vector<ProblemSingle> problems{ ProblemSingle("Grishagin", &grishaginProblem, TypeConstrants::NoConstraints),
+                                    ProblemSingle("GKLS", &gklsProblem, TypeConstrants::NoConstraints),
+                                    ProblemSingle("GrishaginConstrained", &grishaginConstrainedProblem, TypeConstrants::Constraints),
+                                    ProblemSingle("GKLSConstrained", &gklsConstrainedProblem, TypeConstrants::Constraints) };
+
+    const int incrMin = 1, incrMax = 40;
+    const int mMin = 8, mMax = 12;
+    const int keyMin = 1, keyMax = 3;
+
+    vector<double> r{ 2.8, 3.5, 2.8, 2.8 };
 
 #if defined(CALC)
     ofstream ofstr("output_data/mggsa_test_lipschitz.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
-    double eps = 0.01, d = 0.0, r = 2.0;
-    int maxIters = 100000, maxEvals = 100000;
-    vector<double> r_vec{2.8, 3.5, 2.8, 2.8};
+    double eps = 0.01, d = 0.0;
+    int maxTrials = 100000, maxFevals = 100000;
 
-    mggsa_method mggsa(nullptr, -1, -1, vector<double>(), vector<double>(), r, d, -1, -1, eps, maxIters, maxEvals, -1);
+    MggsaMethod mggsa(nullptr, -1, -1, vector<double>(), vector<double>(), -1.0, d, -1, -1, eps, maxTrials, maxFevals, -1);
 
-    vector_4d lipschitz_const(count_func);
-    for (int i = 0; i < count_func; i++) {
-        lipschitz_const[i].resize(key_max - key_min + 1);
-        for (int j = 0; j < key_max - key_min + 1; j++) {
-            lipschitz_const[i][j].resize(m_max - m_min + 1);
-            for (int k = 0; k < m_max - m_min + 1; k++) {
-                lipschitz_const[i][j][k].resize(incr_max - incr_min + 1);
+    vector4d lipschitzConst(numberFunctions);
+    for (int i = 0; i < numberFunctions; i++) {
+        lipschitzConst[i].resize(keyMax - keyMin + 1);
+        for (int j = 0; j < keyMax - keyMin + 1; j++) {
+            lipschitzConst[i][j].resize(mMax - mMin + 1);
+            for (int k = 0; k < mMax - mMin + 1; k++) {
+                lipschitzConst[i][j][k].resize(incrMax - incrMin + 1);
             }
         }
     }
 
-    cout << "Parameters for method:" << endl;
-    cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
-
-    int total_start_time = clock();
+    double totalStartTime = omp_get_wtime();
 #pragma omp parallel for schedule(dynamic, chunk) proc_bind(spread) num_threads(omp_get_num_procs()) collapse(4) \
-        shared(count_func, key_min, key_max, m_min, m_max, incr_min, incr_max, problems, r_vec, lipschitz_const) \
+        shared(numberFunctions, keyMin, keyMax, mMin, mMax, incrMin, incrMax, problems, r, lipschitzConst) \
         firstprivate(mggsa)
-    for (int i = 0; i < count_func; i++) {
-        for (int j = key_min; j <= key_max; j++) {
-            for (int k = m_min; k <= m_max; k++) {
-                for (int l = incr_min; l <= incr_max; l++) {
-                    if (j != key_max) {
-                        if (l == incr_min) {
-                            calculation(mggsa, lipschitz_const, problems[i], i, r_vec[i], j, k, l);
-                            for (int m = incr_min + 1; m <= incr_max; m++) {
-                                lipschitz_const[i][j - key_min][k - m_min][m - incr_min] = 
-                                    lipschitz_const[i][j - key_min][k - m_min][0];
+    for (int i = 0; i < numberFunctions; i++) {
+        for (int j = keyMin; j <= keyMax; j++) {
+            for (int k = mMin; k <= mMax; k++) {
+                for (int l = incrMin; l <= incrMax; l++) {
+                    if (j != keyMax) {
+                        if (l == incrMin) {
+                            calculation(mggsa, lipschitzConst, problems[i], i, maxTrials, maxFevals, eps, r[i],
+                                        d, j, k, l, incrMin, mMin, keyMin);
+                            for (int m = incrMin + 1; m <= incrMax; m++) {
+                                lipschitzConst[i][j - keyMin][k - mMin][m - incrMin] = lipschitzConst[i][j - keyMin][k - mMin][0];
                             }
                         }
                     } else {
-                        calculation(mggsa, lipschitz_const, problems[i], i, r_vec[i], j, k, l);
+                        calculation(mggsa, lipschitzConst, problems[i], i, maxTrials, maxFevals, eps, r[i],
+                                    d, j, k, l, incrMin, mMin, keyMin);
                     }
                 }
             }
         }
     }
-    int total_end_time = clock();
-    double total_work_time = (double)(total_end_time - total_start_time) / CLOCKS_PER_SEC;
-    cout << "Total time: " << total_work_time << endl;
+    double totalEndTime = omp_get_wtime();
+    double totalWorkTime = totalEndTime - totalStartTime;
+    cout << "Total time: " << totalWorkTime << endl;
 
-    for (int i = 0; i < count_func; i++) {
-        for (int j = key_min; j <= key_max; j++) {
-            for (int k = m_min; k <= m_max; k++) {
-                for (int l = incr_min; l <= incr_max; l++) {
-                    ofstr << l << " " << lipschitz_const[i][j - key_min][k - m_min][l - incr_min] << endl;
+    for (int i = 0; i < numberFunctions; i++) {
+        for (int j = keyMin; j <= keyMax; j++) {
+            for (int k = mMin; k <= mMax; k++) {
+                for (int l = incrMin; l <= incrMax; l++) {
+                    ofstr << l << " " << lipschitzConst[i][j - keyMin][k - mMin][l - incrMin] << endl;
                 }
                 ofstr << endl << endl;
             }
@@ -110,110 +111,76 @@ int main() {
     ofstr.close();
 #endif
 
-    ofstr_opt << "array Name[" << count_func << "]" << endl;
-    for (int i = 0; i < count_func; i++) {
-        ofstr_opt << "Name[" << i + 1 << "] = \"" << problems[i].name << "\"" << endl;
+    initArrayGnuplot(ofstrOpt, "familyNames", numberFunctions);
+    for (int i = 0; i < numberFunctions; i++) {
+        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, "\"" + problems[i].name + "\"");
     }
-    ofstr_opt.close();
+    ofstrOpt.close();
 
-    int error;
-#if defined(__linux__)
-    setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/mggsa_test_lipschitz.gp");
-    if (error != 0) {
-        cerr << "Error chmod" << endl;
-    }
-#endif
-
-    char str[100];
-    sprintf(str, "gnuplot -c scripts/mggsa_test_lipschitz.gp %d %d %d %d %d %d %d", type, key_min, key_max,
-                                                                           m_min, m_max, incr_min, incr_max);
-    error = system(str);
-    if (error != 0) {
-        cerr << "Error gnuplot" << endl;
-    }
+    vector<int> args{ type, keyMin, keyMax, mMin, mMax, incrMin, incrMax };
+    drawGraphGnuplot("scripts/mggsa_test_lipschitz.gp", args);
 
     return 0;
 }
 
-void calculation(mggsa_method &mggsa, vector_4d &lipschitz_const, problem_single problem, int num_func,
-                                                                     double r, int key, int m, int incr) {
-    double accuracy, f_X_opt, f_X;                                                            
+void calculation(MggsaMethod &mggsa, vector4d &lipschitzConst, ProblemSingle problem, int numberFunctions, int maxTrials,
+                 int maxFevals, double eps, double r, double d, int key, int den, int incr, const int incrMin, const int mMin,
+                 const int keyMin) {
+    double accuracy, fXOpt, fX;
     int numberConstraints, n;
-    int countIters, countEvals;
-    vector<double> A, B, X_opt, X, mu;
-    functor_single func;
-    functor_single_constr func_constr;
+    int numberTrials, numberFevals;
+    vector<double> A, B, XOpt, X, lambdas;
+    FunctorSingle functor;
+    FunctorSingleConstrained functorConstrained;
 
-    double start_time = omp_get_wtime();
+    double startTime = omp_get_wtime();
 
-    if (problem.type == type_constraned::CONSTR) {
-        func_constr.constr_opt_problem = static_cast<IConstrainedOptProblem*>(problem.optProblem);
-        func_constr.constr_opt_problem->GetBounds(A, B);
-        n = func_constr.constr_opt_problem->GetDimension();
-        numberConstraints = func_constr.constr_opt_problem->GetConstraintsNumber();
-        X_opt = func_constr.constr_opt_problem->GetOptimumPoint();
-        mggsa.setF(func_constr);
-        f_X_opt = func_constr(X_opt, numberConstraints + 1);
+    if (problem.type == TypeConstrants::Constraints) {
+        functorConstrained.constrainedOptProblem = static_cast<IConstrainedOptProblem*>(problem.optProblem);
+        functorConstrained.constrainedOptProblem->GetBounds(A, B);
+        n = functorConstrained.constrainedOptProblem->GetDimension();
+        numberConstraints = functorConstrained.constrainedOptProblem->GetConstraintsNumber();
+        XOpt = functorConstrained.constrainedOptProblem->GetOptimumPoint();
+        mggsa.setF(functorConstrained);
+        fXOpt = functorConstrained(XOpt, numberConstraints + 1);
     } else {
-        func.opt_problem = static_cast<IOptProblem*>(problem.optProblem);
-        func.opt_problem->GetBounds(A, B);
-        n = func.opt_problem->GetDimension();
+        functor.optProblem = static_cast<IOptProblem*>(problem.optProblem);
+        functor.optProblem->GetBounds(A, B);
+        n = functor.optProblem->GetDimension();
         numberConstraints = 0;
-        X_opt = func.opt_problem->GetOptimumPoint();
-        mggsa.setF(func);
-        f_X_opt = func(X_opt, 1);
+        XOpt = functor.optProblem->GetOptimumPoint();
+        mggsa.setF(functor);
+        fXOpt = functor(XOpt, 1);
     }
 
     mggsa.setNumberConstraints(numberConstraints);
     mggsa.setN(n);
     mggsa.setAB(A, B);
     mggsa.setKey(key);
-    mggsa.setDen(m);
+    mggsa.setDen(den);
     mggsa.setIncr(incr);
     mggsa.setR(r);
 
-    mggsa.solve(countIters, countEvals, X);
-    mggsa.getLambda(mu);
+    mggsa.solve(numberTrials, numberFevals, X);
+    mggsa.getLambda(lambdas);
 
-    if (problem.type == type_constraned::CONSTR) {
-        f_X = func_constr(X, numberConstraints + 1);
+    if (problem.type == TypeConstrants::Constraints) {
+        fX = functorConstrained(X, numberConstraints + 1);
     } else {
-        f_X = func(X, 1);
+        fX = functor(X, 1);
     }
-    lipschitz_const[num_func][(size_t)key - key_min][(size_t)m - m_min][(size_t)incr - incr_min] = mu[0];
-    accuracy = sqrt((X_opt[0] - X[0]) * (X_opt[0] - X[0]) + 
-                    (X_opt[1] - X[1]) * (X_opt[1] - X[1]));
+    lipschitzConst[numberFunctions][(size_t)key - keyMin][(size_t)den - mMin][(size_t)incr - incrMin] = lambdas[0];
+    accuracy = sqrt((XOpt[0] - X[0]) * (XOpt[0] - X[0]) + (XOpt[1] - X[1]) * (XOpt[1] - X[1]));
 
-    double end_time = omp_get_wtime();
-    double work_time = end_time - start_time;
+    double endTime = omp_get_wtime();
+    double workTime = endTime - startTime;
 
 #if defined(OUTPUT_INFO)
-    cout << "Function: " << problem.name << endl;
-    cout << "Dimension = " << n << endl;
-    cout << "Number of constrained = " << numberConstraints << endl;
-    cout << "[A; B] = [(" << A[0] << ", " << A[1] << "); (" <<
-                             B[0] << ", " << B[1] << ")]"<< endl;
-    cout << "X* = (" << X_opt[0] << ", " << X_opt[1] << ")" << endl;
-    cout << "f(X*) = " << f_X_opt << endl;
-    cout << "Parameters for constructing the Peano curve:" << endl;
-    cout << "m = " << m << " key = " << key << " incr = " << incr << endl;
-    cout << "Trials result:" << endl;
-    cout << "Number of trials = " << countIters << endl;
-    cout << "Number of evals = " << countEvals << endl;
-    cout << "Estimation of the Lipschitz constant:" << endl;
-    cout << "L(f(x)) = " << mu[numberConstraints] << endl;
-    for (int j = 0; j < numberConstraints; j++) {
-        cout << "L(g" << j + 1 << ") = " << mu[j] << endl;
-    }
-    cout << "X = (" << X[0] << ", " << X[1] << ")" << endl;
-    cout << "f(X) = " << f_X << endl;
-    cout << "||X* - X|| = " << accuracy << endl;
-    cout << "|f(X*) - f(X)| = " << abs(f_X_opt - f_X) << endl;
-    cout << endl;
+    printResultMggsa("Rastrigin function", n, numberConstraints, A, B, vector<double>(), XOpt, fXOpt, maxTrials,
+                     maxFevals, eps, r, d, den, key, incr, numberTrials, numberFevals, lambdas, X, fX);
 #else
-    string str_output = problem.name + " key = " + to_string(key) + " m = " + to_string(m) + " incr = " + to_string(incr) +
-                        " time: " + to_string(work_time) + " t_num = " + to_string(omp_get_thread_num()) + "\n";
+    string str_output = problem.name + " key = " + to_string(key) + " m = " + to_string(den) + " incr = " + to_string(incr) +
+                        " time: " + to_string(workTime) + " t_num = " + to_string(omp_get_thread_num()) + "\n";
     cout << str_output;
 #endif
 }

@@ -22,12 +22,12 @@ set tics font ", 13"
 set key font ", 15"
 
 if (ARG1 == 0 || ARG1 == 1) {
-    set title "Operational characteristics on a family of tasks ".Name[ARG1 + 1] font "Helvetica Bold, 25"
-    plot for [i = 1:3] datafile index ARG1 * 3 + i - 1 using 1:2 with lines lt i title "r = ".R[ARG1 * 3 + i]
+    set title "Operational characteristics on a family of tasks ".familyNames[ARG1 + 1] font "Helvetica Bold, 25"
+    plot for [i = 1:3] datafile index ARG1 * 3 + i - 1 using 1:2 with lines lt i title "r = ".r[ARG1 * 3 + i]
 }
 if (ARG1 == 2) {
     set title "Comparison of operational characteristics for the Hill and Shekel families" font "Helvetica Bold, 20"
-    plot for [i = 1:6] datafile index i - 1 using 1:2 with lines lt i title "r = ".R[i]."(".Name[(i - 1) / 3 + 1].")"
+    plot for [i = 1:6] datafile index i - 1 using 1:2 with lines lt i title "r = ".r[i]."(".familyNames[(i - 1) / 3 + 1].")"
 }
 
 bind all "alt-End" "exit gnuplot"

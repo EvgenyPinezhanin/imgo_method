@@ -13,25 +13,29 @@ set linetype 5 lc rgb "#0080FF" lw 1 pt 1 dt 5
 set linetype cycle 5
 
 set xlabel "increment"
-set xrange [I_MIN[ARG2 - ARG3 + 1]:I_MAX[ARG2 - ARG3 + 1]]
+set xrange [incrMin[ARG2 - ARG3 + 1]:incrMax[ARG2 - ARG3 + 1]]
 
 set title 'Increment test for Rastrigin function(N = '.ARG2.')' font "Helvetica Bold, 20"
 
 if (ARG1 == 0) {
     set ylabel "trials"
-    plot for [i = ARG5:ARG6] datafile index (ARG2 - ARG3) * (ARG6 - ARG5 + 1) + i - ARG5 using 1:2 with lines lt i - ARG5 + 1 title sprintf("m = %d", i)
+    plot for [i = ARG5:ARG6] datafile index (ARG2 - ARG3) * (ARG6 - ARG5 + 1) + i - ARG5 \
+         using 1:2 with lines lt i - ARG5 + 1 title sprintf("m = %d", i)
 }
 if (ARG1 == 1) {
-    set ylabel "points"
-    plot for [i = ARG5:ARG6] datafile index (ARG2 - ARG3) * (ARG6 - ARG5 + 1) + i - ARG5 using 1:3 with lines lt i - ARG5 + 1 title sprintf("m = %d", i)
+    set ylabel "point trials"
+    plot for [i = ARG5:ARG6] datafile index (ARG2 - ARG3) * (ARG6 - ARG5 + 1) + i - ARG5 \
+         using 1:3 with lines lt i - ARG5 + 1 title sprintf("m = %d", i)
 }
 if (ARG1 == 2) {
     set ylabel "accuracy"
-    plot for [i = ARG5:ARG6] datafile index (ARG2 - ARG3) * (ARG6 - ARG5 + 1) + i - ARG5 using 1:4 with lines lt i - ARG5 + 1 title sprintf("m = %d", i)
+    plot for [i = ARG5:ARG6] datafile index (ARG2 - ARG3) * (ARG6 - ARG5 + 1) + i - ARG5 \
+         using 1:4 with lines lt i - ARG5 + 1 title sprintf("m = %d", i)
 }
 if (ARG1 == 3) {
-    set ylabel "points / trials"
-    plot for [i = ARG5:ARG6] datafile index (ARG2 - ARG3) * (ARG6 - ARG5 + 1) + i - ARG5 using 1:($3 / $2) with lines lt i - ARG5 + 1 title sprintf("m = %d", i)
+    set ylabel "point trials / trials"
+    plot for [i = ARG5:ARG6] datafile index (ARG2 - ARG3) * (ARG6 - ARG5 + 1) + i - ARG5 \
+         using 1:($3 / $2) with lines lt i - ARG5 + 1 title sprintf("m = %d", i)
 }
 
 bind all "alt-End" "exit gnuplot"

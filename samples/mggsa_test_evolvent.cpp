@@ -9,8 +9,11 @@
 
 #include <mggsa.h>
 #include <map.h>
+#include <output_results.h>
 
 using namespace std;
+
+const int key = 3;
 
 double f(vector<double> x, int j) {
     switch (j) {
@@ -22,87 +25,55 @@ double f(vector<double> x, int j) {
 int main() {
     ofstream ofstr("output_data/mggsa_test_evolvent.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
-    ofstream ofstr_points("output_data/mggsa_test_evolvent_points.txt");
-    if (!ofstr_points.is_open()) cerr << "File opening error\n";
+    ofstream ofstrPoints("output_data/mggsa_test_evolvent_points.txt");
+    if (!ofstrPoints.is_open()) cerr << "File opening error\n";
 
-    vector<double> A{-1.0 / 2.0, -1.0 / 2.0}, B{1.0, 1.0}, X_opt{0.0, 0.0};
+    vector<double> A{ -0.5, -0.5 }, B{ 1.0, 1.0 };
     double eps = 0.01, r = 2.0, d = 0.0;
     int numberConstraints = 0;
-    int countIters, countEvals;
-    int maxIters = 100000, maxEvals = 100000;
-    int m = 10, n = 2, key = 3, incr = 10;
-    vector<double> X(n);
+    int maxTrials = 100000, maxFevals = 100000;
+    int den = 10, n = 2, incr = 10;
 
-    double k = (key != 3) ? 1.0 / (pow(2.0, n * m) - 1.0) :
-                            1.0 / (pow(2.0, m * n) * (pow(2.0, n) - 1.0)) + 0.0000000001;
-    if (key == 3) m++;
+    MggsaMethod mggsa(f, n, numberConstraints, A, B, r, d, den, key, eps, maxTrials, maxFevals, incr);
+
+    vector<double> X_map(n);
+    double k = (key != 3) ? 1.0 / (pow(2.0, n * den) - 1.0) :
+                            1.0 / (pow(2.0, den * n) * (pow(2.0, n) - 1.0)) + 0.0000000001;
+    if (key == 3) den++;
     for (double i = 0.0; i <= 1.0; i += k) {
-        mapd(i, m, X.data(), n, key);
-        ofstr << X[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " " 
-              << X[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
+        mapd(i, den, X_map.data(), n, key);
+        ofstr << X_map[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " " 
+              << X_map[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
     }
-    mapd(1.0, m, X.data(), n, key);
-    ofstr << X[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " "
-          << X[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
-    if (key == 3) m--;
+    mapd(1.0, den, X_map.data(), n, key);
+    ofstr << X_map[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " "
+          << X_map[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
+    if (key == 3) den--;
     ofstr.close();
 
-    mggsa_method mggsa(f, n, numberConstraints, A, B, r, d, m, key, eps, maxIters, maxEvals, incr);
-
+    vector<double> XOpt{ 0.0, 0.0 }, X;
+    int numberTrials, numberFevals;
     vector<double> lambdas;
     vector<vector<double>> points;
+    vector<TrialConstrained> trials;
 
-    mggsa.solve(countIters, countEvals, X);
+    mggsa.solve(numberTrials, numberFevals, X);
     mggsa.getLambda(lambdas);
 
-    cout << "Function: " << "x^2 + y^2 - cos(18.0 * x) - cos(18.0 * y)" << endl;
-    cout << "Dimension = " << n << endl;
-    cout << "Number of constraints = " << numberConstraints << endl;
-    cout << "[A; B] = [(" << A[0] << ", " << A[1] << "); (" << 
-                             B[0] << ", " << B[1] << ")]"<< endl;
-    cout << "X* = (" << X_opt[0] << ", " << X_opt[1] << ")" << endl;
-    cout << "f(X*) = " << f(X_opt, numberConstraints + 1) << endl;
-    cout << "Parameters for method:" << endl;
-    cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
-    cout << "Parameters for constructing the Peano curve:" << endl;
-    cout << "m = " << m << " key = " << key << " incr = " << incr << endl;
-    cout << "Trials result:" << endl;
-    cout << "Number of trials = " << countIters << endl;
-    cout << "Number of evals = " << countEvals << endl;
-    cout << "Estimation of the Lipschitz constant = " << lambdas[0] << endl;
-    cout << "X = (" << X[0] << ", " << X[1] << ")" << endl;
-    cout << "f(X) = " << f(X, numberConstraints + 1) << endl;
-    cout << "||X* - X|| = " << sqrt((X_opt[0] - X[0]) * (X_opt[0] - X[0]) + 
-                                    (X_opt[1] - X[1]) * (X_opt[1] - X[1])) << endl;
-    cout << "|f(X*) - f(X)| = " << abs(f(X_opt, numberConstraints + 1) - f(X, numberConstraints + 1)) << endl;
-    cout << endl;
+    printResultMggsa("x^2 + y^2 - cos(18.0 * x) - cos(18.0 * y)", n, numberConstraints, A, B, vector<double>(), XOpt,
+                     f(XOpt, numberConstraints + 1), maxTrials, maxFevals, eps, r, d, den, key, incr, numberTrials,
+                     numberFevals, lambdas, X, f(X, numberConstraints + 1));
 
-    ofstr_points << X_opt[0] << " " << X_opt[1] << " " << f(X_opt, numberConstraints + 1) << endl;
-    ofstr_points << endl << endl;
-    ofstr_points << X[0] << " " << X[1] << " " << f(X, numberConstraints + 1) << endl;
-    ofstr_points << endl << endl;
+    addPointGnuplot(ofstrPoints, XOpt, f(XOpt, numberConstraints + 1));
+    addPointGnuplot(ofstrPoints, X, f(X, numberConstraints + 1));
+
     mggsa.getPoints(points);
-    for (int j = 0; j < points.size(); j++) {
-        ofstr_points << points[j][0] << " " << points[j][1] << " " << f(points[j], numberConstraints + 1) << endl;
-    }
-    ofstr_points.close();
+    mggsa.getTrialPoints(trials);
+    addPointsGnuplot(ofstrPoints, points, trials);
 
-    // Plotting the function(works with gnuplot)
-    int error;
-#if defined( __linux__ )
-    setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/mggsa_test_evolvent.gp");
-    if (error != 0) {
-        cerr << "Error chmod" << endl;
-    }
-#endif
+    ofstrPoints.close();
 
-    char str[100];
-    sprintf(str, "gnuplot -c scripts/mggsa_test_evolvent.gp %d", key);
-    error = system(str);
-    if (error != 0) {
-        cerr << "Error gnuplot" << endl;
-    }
+    drawGraphGnuplot("scripts/mggsa_test_evolvent.gp", key);
 
 #if defined( _MSC_VER )
     cin.get();

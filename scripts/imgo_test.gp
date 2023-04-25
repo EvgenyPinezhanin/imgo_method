@@ -48,19 +48,17 @@ g10_1(x) = 2.0 * exp(-2.0 / pi * x) * sin(4.0 * x)
 g10_2(x) = -f10_a(x) ** 2 * (-f10_a(x) ** 2 + 5.0 * f10_a(x) - 6.0) / (f10_a(x) ** 2 + 1.0) - 1.0 / 2.0
 g10_3(x) = sin(x) ** 3 + cos(2.0 * x) ** 3 - 3.0 / 10.0
 
-title_name(n) = sprintf("Graph of the test function №%d", n)
+titleName(n) = sprintf("Graph of the test function №%d", n)
 
 set grid
-
 set samples 600
-
 set xlabel "x"
 set ylabel "y"
 
 ind = 3 * ARG1
 function = functions[ARG1 + 1]
 
-set title title_name(ARG1 + 1) font "Helvetica Bold, 20"
+set title titleName(ARG1 + 1) font "Helvetica Bold, 20"
 
 plot @function, \
      trialfile index ind + 2 ls 5 lc rgb "green" title "trials", \

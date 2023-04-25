@@ -15,23 +15,21 @@
 #include <omp.h>
 #include <mggsa.h>
 #include <map.h>
+#include <output_results.h>
 
 using namespace std;
 
-// #define CALC
-// #define OUTPUT_INFO
-
-double euclidean_distance(vector<double> val1, vector<double> val2) {
+double euclideanDistance(vector<double> X, vector<double> Y) {
     double res = 0.0;
-    size_t size = val1.size();
-    for (int i = 0; i < size; i++) {
-        res += (val1[i] - val2[i]) * (val1[i] - val2[i]);
+    size_t dimension = X.size();
+    for (int i = 0; i < dimension; i++) {
+        res += (X[i] - Y[i]) * (X[i] - Y[i]);
     }
     return sqrt(res);
 }
 
 int N;
-double f_rastrigin(vector<double> x, int j) {
+double fRastrigin(vector<double> x, int j) {
     double sum = 0.0;
     for (int i = 0; i < N; i++) {
         sum += x[i] * x[i] - 10.0 * cos(2.0 * M_PI * x[i]);
@@ -42,146 +40,112 @@ double f_rastrigin(vector<double> x, int j) {
     }
 }
 
-const int type = 3; // 0 - count trials, 1 - count points,
-                    // 2 - accuracy, 3 - c_points / c_trials
-const int n_type = 2; // n_min ... n_max
+#define CALC
+// #define OUTPUT_INFO
 
-const int n_min = 2, n_max = 3;
-const int n_count = n_max - n_min + 1;
-const int incrArray[n_count][2] = { {1, 60},
-                                     {1, 100} };
-const int m_min = 8, m_max = 10;
-
-const int chunk = 2;
+const int type = 3; // 0 - number trials, 1 - number trial points,
+                    // 2 - accuracy, 3 - number trial points / number trials
+const int nType = 2; // nMin ... nMax
 
 int main() {
-    ofstream ofstr_opt("output_data/mggsa_test_incr_opt.txt");
-    if (!ofstr_opt.is_open()) cerr << "File opening error\n";
+    ofstream ofstrOpt("output_data/mggsa_test_incr_opt.txt");
+    if (!ofstrOpt.is_open()) cerr << "File opening error\n";
+
+    const int nMin = 2, nMax = 3;
+    const int numberN = nMax - nMin + 1;
+    const int incrArray[numberN][2] = { {1, 60},
+                                        {1, 100} };
+    const int mMin = 8, mMax = 10;
+
 #if defined(CALC)
     ofstream ofstr("output_data/mggsa_test_incr.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
-    vector<vector<vector<double>>> accuracyArray(n_count);
-    vector<vector<vector<int>>> numberItersArray(n_count), numberTrialPointsArray(n_count);
-    for (int i = n_min; i <= n_max; i++) {
-        accuracyArray[i - n_min].resize(m_max - m_min + 1);
-        numberItersArray[i - n_min].resize(m_max - m_min + 1);
-        numberTrialPointsArray[i - n_min].resize(m_max - m_min + 1);
-        for (int j = m_min; j <= m_max; j++) {
-            accuracyArray[i - n_min][j - m_min].resize(incrArray[i - n_min][1] - incrArray[i - n_min][0] + 1);
-            numberItersArray[i - n_min][j - m_min].resize(incrArray[i - n_min][1] - incrArray[i - n_min][0] + 1);
-            numberTrialPointsArray[i - n_min][j - m_min].resize(incrArray[i - n_min][1] - incrArray[i - n_min][0] + 1);
-        }
-    }
+    const int chunk = 2;
 
     double eps = 0.01, r = 2.1, d = 0.0;
     int numberConstraints = 0, key = 3;
-    int maxIters = 100000, maxEvals = 100000;
-    vector<double> X_opt, A, B;
-    for (int i = 0; i < n_min - 1; i++) {
-        X_opt.push_back(0.0);
-        A.push_back(-1.0 / 2.0);
+    int maxTrials = 100000, maxFevals = 100000;
+
+    vector<double> XOpt, A, B;
+    for (int i = 0; i < nMin - 1; i++) {
+        XOpt.push_back(0.0);
+        A.push_back(-0.5);
         B.push_back(1.0);
     }
 
-    mggsa_method mggsa(f_rastrigin, -1, numberConstraints, A, B, r, d, -1, key, eps, maxIters, maxEvals, -1);
+    MggsaMethod mggsa(fRastrigin, -1, numberConstraints, A, B, r, d, -1, key, eps, maxTrials, maxFevals, -1);
 
-    vector<double> mu, X;
+    vector<vector<vector<double>>> accuracyArray(numberN);
+    vector<vector<vector<int>>> numberTrialsArray(numberN), numberTrialPointsArray(numberN);
+    for (int i = nMin; i <= nMax; i++) {
+        accuracyArray[i - nMin].resize(mMax - mMin + 1);
+        numberTrialsArray[i - nMin].resize(mMax - mMin + 1);
+        numberTrialPointsArray[i - nMin].resize(mMax - mMin + 1);
+        for (int j = mMin; j <= mMax; j++) {
+            accuracyArray[i - nMin][j - mMin].resize(incrArray[i - nMin][1] - incrArray[i - nMin][0] + 1);
+            numberTrialsArray[i - nMin][j - mMin].resize(incrArray[i - nMin][1] - incrArray[i - nMin][0] + 1);
+            numberTrialPointsArray[i - nMin][j - mMin].resize(incrArray[i - nMin][1] - incrArray[i - nMin][0] + 1);
+        }
+    }
+
+    vector<double> lambdas, X;
+    int numberTrials, numberFevals;
     double accuracy;
-    int countIters, countEvals;
 
-    int total_start_time = clock();
-    for (int i = n_min; i <= n_max; i++) {
+    double totalStartTime = omp_get_wtime();
+    for (int i = nMin; i <= nMax; i++) {
         N = i;
         mggsa.setN(N);
-        X_opt.push_back(0.0);
-        A.push_back(-1.0 / 2.0);
+        XOpt.push_back(0.0);
+        A.push_back(-0.5);
         B.push_back(1.0);
         mggsa.setAB(A, B);
 
-    #if defined(OUTPUT_INFO)
-        cout << "Rastrigin function" << endl;
-        cout << "Dimension = " << N << endl;
-        cout << "Number of constrained = " << numberConstraints << endl;
-        cout << "[A; B] = [(";
-        for (int j = 0; j < A.size() - 1; j++) {
-            cout << A[j] << ", "; 
-        }
-        cout << A[A.size() - 1] << "); (" << endl;
-        for (int j = 0; j < B.size() - 1; j++) {
-            cout << B[j] << ", "; 
-        }
-        cout << B[B.size() - 1] << ")]" << endl;
-        cout << "X* = (";
-        for (int l = 0; l < X_opt.size() - 1; l++) {
-            cout << X_opt[l] << ", ";
-        }
-        cout << X_opt[X_opt.size() - 1] << ")" << endl;
-        cout << "f(X*) = " << f_rastrigin(X_opt, numberConstraints + 1) << endl;
-        cout << "Parameters for method:" << endl;
-        cout << "eps = " << eps << " r = " << r << " d = " << d << endl;
-        cout << "Parameters for constructing the Peano curve:" << endl;
-        cout << "key = " << key << endl;
-        cout << endl;
-    #endif
-
     #pragma omp parallel for schedule(dynamic, chunk) proc_bind(spread) num_threads(omp_get_num_procs()) collapse(2) \
-            shared(incrArray, accuracyArray, numberItersArray, numberTrialPointsArray) firstprivate(mggsa) \
-            private(mu, X, accuracy, countIters, countTrials, countEvals)
-        for (int j = m_min; j <= m_max; j++) {
-            for (int k = incrArray[i - n_min][0]; k <= incrArray[i - n_min][1]; k++) {
-                double start_time = omp_get_wtime();
+            shared(accuracyArray, numberTrialsArray, numberTrialPointsArray) \
+            firstprivate(mggsa, nMin, mMin, incrArray) \
+            private(lambdas, X, XOpt, accuracy, numberTrials, numberFevals)
+        for (int j = mMin; j <= mMax; j++) {
+            for (int k = incrArray[i - nMin][0]; k <= incrArray[i - nMin][1]; k++) {
+                double startTime = omp_get_wtime();
 
                 mggsa.setDen(j);
                 mggsa.setIncr(k);
  
-                mggsa.solve(countIters, countEvals, X);
-                mggsa.getLambda(mu);
+                mggsa.solve(numberTrials, numberFevals, X);
+                mggsa.getLambda(lambdas);
  
-                accuracy = euclidean_distance(X_opt, X);
-                accuracyArray[i - n_min][j - m_min][k - incrArray[i - n_min][0]] = accuracy;
-                numberItersArray[i - n_min][j - m_min][k - incrArray[i - n_min][0]] = countIters;
-                numberTrialPointsArray[i - n_min][j - m_min][k - incrArray[i - n_min][0]] = mggsa.getNumberTrialPoints();
+                accuracy = euclideanDistance(XOpt, X);
+                accuracyArray[i - nMin][j - mMin][k - incrArray[i - nMin][0]] = accuracy;
+                numberTrialsArray[i - nMin][j - mMin][k - incrArray[i - nMin][0]] = numberTrials;
+                numberTrialPointsArray[i - nMin][j - mMin][k - incrArray[i - nMin][0]] = mggsa.getNumberTrialPoints();
 
-                double end_time = omp_get_wtime();
-                double work_time = end_time - start_time;
+                double endTime = omp_get_wtime();
+                double workTime = endTime - startTime;
 
             #if defined(OUTPUT_INFO)
-                cout << "Parameters for constructing the Peano curve:" << endl;
-                cout << "m = " << j << " incr = " << k << endl;
-                cout << "Trials result:" << endl;
-                cout << "Number of trials = " << countIters << endl;
-                cout << "Number of evals = " << countEvals << endl;
-                cout << "Estimation of the Lipschitz constant = " << mu[0] << endl;
-                cout << "X = (";
-                for (int l = 0; l < X.size() - 1; l++) {
-                    cout << X[l] << ", ";
-                }
-                cout << X[X.size() - 1] << ")" << endl;
-                cout << "f(X) = " << f_rastrigin(X, numberConstraints + 1) << endl;
-                cout << "||X* - X|| = " << accuracy << endl;
-
-                cout << "|f(X*) - f(X)| = " << abs(f_rastrigin(X_opt, numberConstraints + 1) -
-                                                   f_rastrigin(X, numberConstraints + 1)) << endl;
-                cout << endl;
+                printResultMggsa("Rastrigin function", N, numberConstraints, A, B, vector<double>(), XOpt,
+                                 fRastrigin(XOpt, numberConstraints + 1), maxTrials, maxFevals, eps, r, d, j, key, k,
+                                 numberTrials, numberFevals, lambdas, X, fRastrigin(X, numberConstraints + 1));
             #else
-                string str = "Rastrigin: n = " + to_string(i) + " m = " + to_string(j) + " incr = " + to_string(k) +
-                             " time: " + to_string(work_time) + " t_num = " + to_string(omp_get_thread_num()) + "\n";
-                cout << str;
+                string strOutput = "Rastrigin: n = " + to_string(i) + " m = " + to_string(j) + " incr = " + to_string(k) +
+                                    " time: " + to_string(workTime) + " thread number = " + to_string(omp_get_thread_num()) + "\n";
+                cout << strOutput;
             #endif
             }
         }
     }
-    int total_end_time = clock();
-    double total_work_time = (double)(total_end_time - total_start_time) / CLOCKS_PER_SEC;
-    cout << "Total time: " << total_work_time << endl;
+    double totalEndTime = omp_get_wtime();
+    double totalWorkTime = totalEndTime - totalStartTime;
+    cout << "Total time: " << totalWorkTime << endl;
 
-    for (int i = n_min; i <= n_max; i++) {
-        for (int j = m_min; j <= m_max; j++) {
-            for (int k = incrArray[i - n_min][0]; k <= incrArray[i - n_min][1]; k++) {
-                ofstr << k << " " << numberItersArray[i - n_min][j - m_min][k - incrArray[i - n_min][0]]
-                           << " " << numberTrialPointsArray[i - n_min][j - m_min][k - incrArray[i - n_min][0]] 
-                           << " " << accuracyArray[i - n_min][j - m_min][k - incrArray[i - n_min][0]] << endl;
+    for (int i = nMin; i <= nMax; i++) {
+        for (int j = mMin; j <= mMax; j++) {
+            for (int k = incrArray[i - nMin][0]; k <= incrArray[i - nMin][1]; k++) {
+                ofstr << k << " " << numberTrialsArray[i - nMin][j - mMin][k - incrArray[i - nMin][0]]
+                           << " " << numberTrialPointsArray[i - nMin][j - mMin][k - incrArray[i - nMin][0]] 
+                           << " " << accuracyArray[i - nMin][j - mMin][k - incrArray[i - nMin][0]] << endl;
             }
             ofstr << endl << endl;
         }
@@ -190,29 +154,19 @@ int main() {
     ofstr.close();
 #endif
 
-    ofstr_opt << "array I_MIN[" << n_count << "]" << endl;
-    ofstr_opt << "array I_MAX[" << n_count << "]" << endl;
-    for (int i = 0; i < n_count; i++) {
-        ofstr_opt << "I_MIN[" << i + 1 << "] = " << incrArray[i][0] << endl;
-        ofstr_opt << "I_MAX[" << i + 1 << "] = " << incrArray[i][1] << endl;
+    string arraysName[] = { "incrMin", "incrMax" };
+    for (int i = 0; i < numberN; i++) {
+        initArrayGnuplot(ofstrOpt, arraysName[i], numberN);
     }
-    ofstr_opt.close();
+    for (int i = 0; i < numberN; i++) {
+        for (int j = 0; j < 2; j++) {
+            setValueInArrayGnuplot(ofstrOpt, arraysName[j], i + 1, to_string(incrArray[i][j]));
+        }
+    }
+    ofstrOpt.close();
 
-    int error;
-#if defined(__linux__)
-    setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/mggsa_test_incr.gp");
-    if (error != 0) {
-        cerr << "Error chmod" << endl;
-    }
-#endif
-
-    char str[100];
-    sprintf(str, "gnuplot -c scripts/mggsa_test_incr.gp %d %d %d %d %d %d", type, n_type, n_min, n_max, m_min, m_max);
-    error = system(str);
-    if (error != 0) {
-        cerr << "Error gnuplot" << endl;
-    }
+    vector<int> args{ type, nType, nMin, nMax, mMin, mMax };
+    drawGraphGnuplot("scripts/mggsa_test_incr.gp", args);
 
     return 0;
 }

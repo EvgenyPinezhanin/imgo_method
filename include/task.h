@@ -1,92 +1,92 @@
-#ifndef TASK_H
-#define TASK_H
+#ifndef TASK_H_
+#define TASK_H_
 
 #include <cstdio>
 #include <string>
 #include <vector>
 #include <limits>
 
-#include <opt_method.h>
+#include <optimization_method.h>
+#include <direct_method.h>
 #include <IGeneralOptProblem.hpp>
 #include <IGeneralOptProblemFamily.hpp>
 #include <IOptProblemFamily.hpp>
 #include <IConstrainedOptProblemFamily.hpp>
-#include <direct_method.h>
 
 using namespace std;
 
-struct task {
+struct Task {
     string name;
     int n;
-    vector<double> A, B, X_opt, L;
+    vector<double> A, B, XOpt, L;
     double eps;
-    int maxIters, maxEvals;
+    int maxTrials, maxFevals;
 
     bool used;
 
-    task(string _name, int _n, vector<double> _A, vector<double> _B, vector<double> _X_opt, vector<double> _L, 
-         double _eps, int _maxIters, int _maxEvals, bool _used = true) : name(_name), n(_n), A(_A), B(_B), X_opt(_X_opt), 
-         L(_L), eps(_eps), maxIters(_maxIters), maxEvals(_maxEvals), used(_used) {};
+    Task(string _name, int _n, vector<double> _A, vector<double> _B, vector<double> _XOpt, vector<double> _L, double _eps,
+         int _maxTrials, int _maxFevals, bool _used = true) : name(_name), n(_n), A(_A), B(_B), XOpt(_XOpt), 
+         L(_L), eps(_eps), maxTrials(_maxTrials), maxFevals(_maxFevals), used(_used) {};
 };
 
-struct task_gsa : public task {
+struct TaskGsa : public Task {
     double (*f)(double);
     double r;
 
-    task_gsa(double (*_f)(double), string _name, double _a, double _b, double _x_opt, double _L, double _eps, int _maxIters, 
-             int _maxEvals, double _r, bool _used = true) : task(_name, 1, vector<double>{_a}, vector<double>{_b}, 
-             vector<double>{_x_opt}, vector<double>{_L}, _eps, _maxIters, _maxEvals, _used), f(_f), r(_r) {};
+    TaskGsa(double (*_f)(double), string _name, double _a, double _b, double _xOpt, double _L, double _eps, int _maxTrials, 
+            int _maxFevals, double _r, bool _used = true) : Task(_name, 1, vector<double>{_a}, vector<double>{_b}, 
+            vector<double>{_xOpt}, vector<double>{_L}, _eps, _maxTrials, _maxFevals, _used), f(_f), r(_r) {};
 };
 
-struct task_imgo : public task {
+struct TaskImgo : public Task {
     double (*f)(double, int);
     int numberConstraints;
     double r, d;
 
-    task_imgo(double (*_f)(double, int), string _name, int _numberConstraints, double _a, double _b, double _x_opt,
-              vector<double> _L, double _eps, int _maxIters, int _maxEvals, double _r, double _d, bool _used = true)
-              : task(_name, 1, vector<double>{_a}, vector<double>{_b}, vector<double>{_x_opt}, _L, _eps, _maxIters,
-              _maxEvals, _used), f(_f), numberConstraints(_numberConstraints), r(_r), d(_d) {};
+    TaskImgo(double (*_f)(double, int), string _name, int _numberConstraints, double _a, double _b, double _xOpt,
+             vector<double> _L, double _eps, int _maxTrials, int _maxFevals, double _r, double _d, bool _used = true)
+             : Task(_name, 1, vector<double>{_a}, vector<double>{_b}, vector<double>{_xOpt}, _L, _eps, _maxTrials,
+             _maxFevals, _used), f(_f), numberConstraints(_numberConstraints), r(_r), d(_d) {};
 };
 
-struct task_mggsa : public task {
+struct TaskMggsa : public Task {
     double (*f)(vector<double>, int);
     int numberConstraints;
     double r, d;
-    int den, key;
+    int den, key, incr;
 
-    task_mggsa(double (*_f)(vector<double>, int), string _name, int _n, int _numberConstraints, vector<double> _A,
-               vector<double> _B, vector<double> _X_opt, vector<double> _L, double _eps, int _maxIters, int _maxEvals,
-               double _r, double _d, int _den, int _key, bool _used = true) : task(_name, _n, _A, _B, _X_opt, _L, _eps,
-               _maxIters, _maxEvals, _used), f(_f), numberConstraints(_numberConstraints), r(_r), d(_d), den(_den),
-               key(_key) {};
+    TaskMggsa(double (*_f)(vector<double>, int), string _name, int _n, int _numberConstraints, vector<double> _A,
+              vector<double> _B, vector<double> _XOpt, vector<double> _L, double _eps, int _maxTrials, int _maxFevals,
+              double _r, double _d, int _den, int _key, int _incr, bool _used = true) : Task(_name, _n, _A, _B, _XOpt, _L, _eps,
+              _maxTrials, _maxFevals, _used), f(_f), numberConstraints(_numberConstraints), r(_r), d(_d), den(_den),
+              key(_key), incr(_incr) {};
 };
 
-enum class type_constraned { CONSTR, NONCONSTR };
+enum class TypeConstrants { Constraints, NoConstraints };
 
-struct problem {
+struct Problem {
     string name;
-    type_constraned type;
-    string short_name;
+    TypeConstrants type;
+    string shortName;
 
     bool used;
 
-    problem(string _name, type_constraned _type, string _short_name = "", bool _used = true) 
-            : name(_name), short_name(_short_name), type(_type), used(_used) {};
+    Problem(string _name, TypeConstrants _type, string _shortName = "", bool _used = true) 
+            : name(_name), shortName(_shortName), type(_type), used(_used) {};
 };
 
-struct problem_single : public problem {
+struct ProblemSingle : public Problem {
     IGeneralOptProblem *optProblem;
 
-    problem_single(string _name, IGeneralOptProblem *_optProblem, type_constraned _type, string _short_name = "", bool _used = true) 
-                   : problem(_name, _type, _short_name, used), optProblem(_optProblem) {};
+    ProblemSingle(string _name, IGeneralOptProblem *_optProblem, TypeConstrants _type, string _shortName = "", bool _used = true) 
+                  : Problem(_name, _type, _shortName, used), optProblem(_optProblem) {};
 };
 
-struct problem_family : public problem {
+struct ProblemFamily : public Problem {
     IGeneralOptProblemFamily *optProblemFamily;
 
-    problem_family(string _name, IGeneralOptProblemFamily *_optProblemFamily, type_constraned _type, string _short_name = "", bool _used = true) 
-                   : problem(_name, _type, _short_name, used), optProblemFamily(_optProblemFamily) {};
+    ProblemFamily(string _name, IGeneralOptProblemFamily *_optProblemFamily, TypeConstrants _type, string _shortName = "", bool _used = true) 
+                  : Problem(_name, _type, _shortName, used), optProblemFamily(_optProblemFamily) {};
 };
 
 class Functor {
@@ -97,148 +97,146 @@ public:
     virtual double operator() (vector<double> x, int j) = 0; 
 };
 
-class functor_single : public Functor {
+class FunctorSingle : public Functor {
 public:
-    IOptProblem *opt_problem;
+    IOptProblem *optProblem;
 
-    functor_single(IOptProblem *_opt_problem = nullptr) 
-                   : Functor(), opt_problem(_opt_problem) {};
+    FunctorSingle(IOptProblem *_optProblem = nullptr) : Functor(), optProblem(_optProblem) {};
 
     double operator() (double x, int j) override {
         switch (j) {
-            case 1: return opt_problem->ComputeFunction(vector<double>{x});
+            case 1: return optProblem->ComputeFunction(vector<double>{ x });
             default: return numeric_limits<double>::quiet_NaN();
         }
     }
 
     double operator() (vector<double> x, int j) override {
         switch (j) {
-            case 1: return opt_problem->ComputeFunction(x);
+            case 1: return optProblem->ComputeFunction(x);
             default: return numeric_limits<double>::quiet_NaN();
         }
     }
 };
 
-class functor_single_constr : public Functor {
+class FunctorSingleConstrained : public Functor {
 public:
-    IConstrainedOptProblem *constr_opt_problem;
+    IConstrainedOptProblem *constrainedOptProblem;
 
-    functor_single_constr(IConstrainedOptProblem *_constr_opt_problem = nullptr) 
-        : Functor(), constr_opt_problem(_constr_opt_problem) {}
+    FunctorSingleConstrained(IConstrainedOptProblem *_constrainedOptProblem = nullptr) 
+                             : Functor(), constrainedOptProblem(_constrainedOptProblem) {}
 
     double operator() (double x, int j) override {
-        int constr = constr_opt_problem->GetConstraintsNumber();
-        if (j >= 1 && j <= constr) {
-            return constr_opt_problem->ComputeConstraint(j - 1, vector<double>{x});
-        } else if (j == constr + 1) {
-            return constr_opt_problem->ComputeFunction(vector<double>{x});
+        int numberConstraints = constrainedOptProblem->GetConstraintsNumber();
+        if (j >= 1 && j <= numberConstraints) {
+            return constrainedOptProblem->ComputeConstraint(j - 1, vector<double>{ x });
+        } else if (j == numberConstraints + 1) {
+            return constrainedOptProblem->ComputeFunction(vector<double>{ x });
         } else {
             return numeric_limits<double>::quiet_NaN();
         }
     }
 
     double operator() (vector<double> x, int j) override {
-        int constr = constr_opt_problem->GetConstraintsNumber();
-        if (j >= 1 && j <= constr) {
-            return constr_opt_problem->ComputeConstraint(j - 1, x);
-        } else if (j == constr + 1) {
-            return constr_opt_problem->ComputeFunction(x);
+        int numberConstraints = constrainedOptProblem->GetConstraintsNumber();
+        if (j >= 1 && j <= numberConstraints) {
+            return constrainedOptProblem->ComputeConstraint(j - 1, x);
+        } else if (j == numberConstraints + 1) {
+            return constrainedOptProblem->ComputeFunction(x);
         } else {
             return numeric_limits<double>::quiet_NaN();
         }
     }
 };
 
-class functor_family : public Functor {
+class FunctorFamily : public Functor {
 public:
-    IOptProblemFamily *opt_problem_family;
-    int current_func;
+    IOptProblemFamily *optProblemFamily;
+    int currentFunction;
 
-    functor_family(IOptProblemFamily *_opt_problem_family = nullptr) 
-        : Functor(), opt_problem_family(_opt_problem_family), current_func(0) {};
+    FunctorFamily(IOptProblemFamily *_optProblemFamily = nullptr) 
+                  : Functor(), optProblemFamily(_optProblemFamily), currentFunction(0) {};
 
     double operator() (double x, int j) override {
         switch (j) {
-            case 1: return (*opt_problem_family)[current_func]->ComputeFunction(vector<double>{x});
+            case 1: return (*optProblemFamily)[currentFunction]->ComputeFunction(vector<double>{ x });
             default: return numeric_limits<double>::quiet_NaN();
         }
     }
 
     double operator() (vector<double> x, int j) override {
         switch (j) {
-            case 1: return (*opt_problem_family)[current_func]->ComputeFunction(x);
+            case 1: return (*optProblemFamily)[currentFunction]->ComputeFunction(x);
             default: return numeric_limits<double>::quiet_NaN();
         }
     }
 };
 
-class functor_family_constr : public Functor {
+class FunctorFamilyConstrained : public Functor {
 public:
-    IConstrainedOptProblemFamily *constr_opt_problem_family;
-    int current_func;
+    IConstrainedOptProblemFamily *constrainedOptProblemFamily;
+    int currentFunction;
 
-    functor_family_constr(IConstrainedOptProblemFamily *_constr_opt_problem_family = nullptr) 
-        : Functor(), constr_opt_problem_family(_constr_opt_problem_family), current_func(0) {}
+    FunctorFamilyConstrained(IConstrainedOptProblemFamily *_constrainedOptProblemFamily = nullptr) : Functor(),
+                             constrainedOptProblemFamily(_constrainedOptProblemFamily), currentFunction(0) {}
 
     double operator() (double x, int j) {
-        int constr = (*constr_opt_problem_family)[current_func]->GetConstraintsNumber();
-        if (j >= 1 && j <= constr) {
-            return (*constr_opt_problem_family)[current_func]->ComputeConstraint(j - 1, vector<double>{x});
-        } else if (j == constr + 1) {
-            return (*constr_opt_problem_family)[current_func]->ComputeFunction(vector<double>{x});
+        int numberConstraints = (*constrainedOptProblemFamily)[currentFunction]->GetConstraintsNumber();
+        if (j >= 1 && j <= numberConstraints) {
+            return (*constrainedOptProblemFamily)[currentFunction]->ComputeConstraint(j - 1, vector<double>{ x });
+        } else if (j == numberConstraints + 1) {
+            return (*constrainedOptProblemFamily)[currentFunction]->ComputeFunction(vector<double>{ x });
         } else {
             return numeric_limits<double>::quiet_NaN();
         }
     }
 
     double operator() (vector<double> x, int j) {
-        int constr = (*constr_opt_problem_family)[current_func]->GetConstraintsNumber();
-        if (j >= 1 && j <= constr) {
-            return (*constr_opt_problem_family)[current_func]->ComputeConstraint(j - 1, x);
-        } else if (j == constr + 1) {
-            return (*constr_opt_problem_family)[current_func]->ComputeFunction(x);
+        int numberConstraints = (*constrainedOptProblemFamily)[currentFunction]->GetConstraintsNumber();
+        if (j >= 1 && j <= numberConstraints) {
+            return (*constrainedOptProblemFamily)[currentFunction]->ComputeConstraint(j - 1, x);
+        } else if (j == numberConstraints + 1) {
+            return (*constrainedOptProblemFamily)[currentFunction]->ComputeFunction(x);
         } else {
             return numeric_limits<double>::quiet_NaN();
         }
     }
 };
 
-struct data_direct {
-    int count_evals;
+struct DataDirect {
+    int numberFevals;
     vector<vector<double>> points;
 };
 
-struct data_direct_oper_character : public data_direct {
+struct DataDirectOperationalCharacteristics : public DataDirect {
     Functor *functor;
-    type_constraned type;
+    TypeConstrants type;
     bool converge;
-    int min_count_evals;
+    int minNumberFevals;
     double eps;
 };
 
-struct task_direct {
+struct TaskDirect {
     string name;
 
     direct_objective_func f;
-    void *f_data;
+    void *fData;
     int n;
-    vector<double> A, B, X_opt;
+    vector<double> A, B, XOpt;
 
-    int max_feval, max_iter;
-    double magic_eps;
-    double volume_reltol, sigma_reltol;
+    int maxFevals, maxIters;
+    double magicEps;
+    double volumeReltol, sigmaReltol;
 
     FILE *logfile;
     direct_algorithm algorithm;
 
     bool used;
 
-    task_direct(string _name, direct_objective_func _f, void *_f_data, int _n, vector<double> _A, vector<double> _B,
-                vector<double> _X_opt, int _max_feval, int _max_iter, double _magic_eps, double _volume_reltol,
-                double _sigma_reltol, FILE *_logfile, direct_algorithm _algorithm, bool _used = true) : name(_name),
-                f(_f), f_data(_f_data), n(_n), A(_A), B(_B), X_opt(_X_opt), max_feval(_max_feval), max_iter(_max_iter),
-                magic_eps(_magic_eps), volume_reltol(_volume_reltol), sigma_reltol(_sigma_reltol), logfile(_logfile),
-                algorithm(_algorithm), used(_used) {};
+    TaskDirect(string _name, direct_objective_func _f, void *_fData, int _n, vector<double> _A, vector<double> _B,
+               vector<double> _XOpt, int _maxFevals, int _maxIters, double _magicEps, double _volumeReltol, double _sigmaReltol,
+               FILE *_logfile, direct_algorithm _algorithm, bool _used = true) : name(_name), f(_f), fData(_fData), n(_n), A(_A),
+               B(_B), XOpt(_XOpt), maxFevals(_maxFevals), maxIters(_maxIters), magicEps(_magicEps), volumeReltol(_volumeReltol),
+               sigmaReltol(_sigmaReltol), logfile(_logfile), algorithm(_algorithm), used(_used) {};
 };
 
-#endif // TASK_H
+#endif // TASK_H_

@@ -1,8 +1,8 @@
 #! /usr/bin/gnuplot
 
-datafile="output_data/mggsa_operational_characteristics_incr_test.txt"
+datafile="output_data/mggsa_operational_characteristics_test_incr.txt"
 
-load "output_data/mggsa_operational_characteristics_incr_test_opt.txt"
+load "output_data/mggsa_operational_characteristics_test_incr_opt.txt"
 
 set linetype 1 lc rgb "red"
 set linetype 2 lc rgb "green"

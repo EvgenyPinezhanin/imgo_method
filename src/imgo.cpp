@@ -10,22 +10,23 @@
 
 const double epsilon = 1e-14;
 
-inline int insert_in_sorted(vector<trial_constr> &vec, trial_constr tr) {
-    vector<trial_constr>::iterator iter = vec.begin();
-    vector<trial_constr>::iterator iterEnd = vec.end();
+inline int insertInSorted(vector<TrialConstrained> &trials, TrialConstrained trial) {
+    vector<TrialConstrained>::iterator iter = trials.begin();
+    vector<TrialConstrained>::iterator iterEnd = trials.end();
     int pos = 0;
     while(true) {
-        if (iter == iterEnd || iter->x > tr.x) break;
+        if (iter == iterEnd || iter->x > trial.x) break;
         iter++; pos++;
     }
-    vec.insert(iter, tr);
+    trials.insert(iter, trial);
     return pos;
 }
 
-inline double search_min(vector<trial_constr> &trials, int m) {
+inline double searchMin(vector<TrialConstrained> &trials, int numberConstraints) {
     double z = numeric_limits<double>::infinity(), x = 0.0;
-    for (int i = 0; i < trials.size(); i++) {
-        if (trials[i].nu == m + 1 && trials[i].z < z) {
+    size_t sizeTrials = trials.size();
+    for (int i = 0; i < sizeTrials; i++) {
+        if (trials[i].nu == numberConstraints + 1 && trials[i].z < z) {
             z = trials[i].z;
             x = trials[i].x;
         }
@@ -33,89 +34,93 @@ inline double search_min(vector<trial_constr> &trials, int m) {
     return x;
 }
 
-trial_constr imgo_method::newTrial(double x) {
-    trial_constr tr(x);
+TrialConstrained ImgoMethod::newTrial(double x) {
+    TrialConstrained trial(x);
     for (int j = 1; j <= numberConstraints + 1; j++) {
-        countEvals++;
+        numberFevals++;
         if ((f(x, j) > 0) || (j == numberConstraints + 1)) {
-            tr.z = f(x, j);
-            tr.nu = j;
+            trial.z = f(x, j);
+            trial.nu = j;
             break;
         }
     }
-    return tr;
+    return trial;
 }
 
-double imgo_method::newPoint(int t) {
-    if (trial_points[t].nu != trial_points[(size_t)t - 1].nu) {
-        return (trial_points[t].x + trial_points[(size_t)t - 1].x) / 2.0;
+double ImgoMethod::newPoint(int t) {
+    if (trialPoints[t].nu != trialPoints[(size_t)t - 1].nu) {
+        return (trialPoints[t].x + trialPoints[(size_t)t - 1].x) / 2.0;
     } else {
-        return (trial_points[t].x + trial_points[(size_t)t - 1].x) / 2.0 - 
-               (trial_points[t].z - trial_points[(size_t)t - 1].z) / (2.0 * r * mu[(size_t)trial_points[t].nu - 1]);
+        return (trialPoints[t].x + trialPoints[(size_t)t - 1].x) / 2.0 - 
+               (trialPoints[t].z - trialPoints[(size_t)t - 1].z) / (2.0 * r * mu[(size_t)trialPoints[t].nu - 1]);
     }
 }
 
-double imgo_method::selectNewPoint(int &t) {
+double ImgoMethod::selectNewPoint(int &t) {
+    int nuLastTrial;
+    size_t sizeI;
+    double muTmp;
+
     // Step 3
     // with optimization(const)
-    int nu_I = last_trial.nu - 1;
-    size_t size_I = I[nu_I].size();
+    nuLastTrial = lastTrial.nu - 1;
+    sizeI = I[nuLastTrial].size();
     for (int nu = 0; nu < numberConstraints + 1; nu++) {
-        if (!calc_I[nu]) mu[nu] = 0.0;
+        if (!calcI[nu]) mu[nu] = 0.0;
     }
-    if (I[nu_I].size() >= 3) {
-        if (last_trial_pos == 0) {
-            mu[nu_I] = max({ mu[nu_I], abs(I[nu_I][1].z - I[nu_I][0].z) / pow(I[nu_I][1].x - I[nu_I][0].x, 1.0 / n) });  
-        } else if (last_trial_pos == I[nu_I].size() - 1) {
-            mu[nu_I] = max({ mu[nu_I],
-                             abs(I[nu_I][size_I - 1].z - I[nu_I][size_I - 2].z) / 
-                             pow(I[nu_I][size_I - 1].x - I[nu_I][size_I - 2].x, 1.0 / n) });
+    if (I[nuLastTrial].size() >= 3) {
+        if (lastTrialPos == 0) {
+            mu[nuLastTrial] = max({ mu[nuLastTrial], abs(I[nuLastTrial][1].z - I[nuLastTrial][0].z) /
+                                                     pow(I[nuLastTrial][1].x - I[nuLastTrial][0].x, 1.0 / n) });  
+        } else if (lastTrialPos == I[nuLastTrial].size() - 1) {
+            mu[nuLastTrial] = max({ mu[nuLastTrial],
+                                    abs(I[nuLastTrial][sizeI - 1].z - I[nuLastTrial][sizeI - 2].z) / 
+                                    pow(I[nuLastTrial][sizeI - 1].x - I[nuLastTrial][sizeI - 2].x, 1.0 / n) });
         } else {
-            mu[nu_I] = max({ mu[nu_I],
-                             abs(I[nu_I][last_trial_pos].z - I[nu_I][(size_t)last_trial_pos - 1].z) / 
-                             pow(I[nu_I][last_trial_pos].x - I[nu_I][(size_t)last_trial_pos - 1].x, 1.0 / n),
-                             abs(I[nu_I][(size_t)last_trial_pos + 1].z - I[nu_I][last_trial_pos].z) / 
-                             pow(I[nu_I][(size_t)last_trial_pos + 1].x - I[nu_I][last_trial_pos].x, 1.0 / n) });
+            mu[nuLastTrial] = max({ mu[nuLastTrial],
+                                    abs(I[nuLastTrial][lastTrialPos].z - I[nuLastTrial][(size_t)lastTrialPos - 1].z) / 
+                                    pow(I[nuLastTrial][lastTrialPos].x - I[nuLastTrial][(size_t)lastTrialPos - 1].x, 1.0 / n),
+                                    abs(I[nuLastTrial][(size_t)lastTrialPos + 1].z - I[nuLastTrial][lastTrialPos].z) / 
+                                    pow(I[nuLastTrial][(size_t)lastTrialPos + 1].x - I[nuLastTrial][lastTrialPos].x, 1.0 / n) });
         }
-    } else if (I[nu_I].size() == 2) {
-        mu[nu_I] = max({ mu[nu_I], abs(I[nu_I][1].z - I[nu_I][0].z) / pow(I[nu_I][1].x - I[nu_I][0].x, 1.0 / n) });
+    } else if (I[nuLastTrial].size() == 2) {
+        mu[nuLastTrial] = max({ mu[nuLastTrial], abs(I[nuLastTrial][1].z - I[nuLastTrial][0].z) /
+                                                 pow(I[nuLastTrial][1].x - I[nuLastTrial][0].x, 1.0 / n) });
     }
-    if (abs(mu[nu_I]) > epsilon) calc_I[nu_I] = true;
+    if (abs(mu[nuLastTrial]) > epsilon) calcI[nuLastTrial] = true;
     for (int nu = 0; nu < numberConstraints + 1; nu++) {
         if (abs(mu[nu]) <= epsilon) mu[nu] = 1.0;
     }
 
     // with optimization(linear)
-    // double mu_tmp;
-    // int nu_I = last_trial.nu - 1;
-    // size_t size_I = I[nu_I].size();
-    // for (int nu = 0; nu < m + 1; nu++) {
-    //     if (!calc_I[nu]) mu[nu] = 0.0;
+    // nuLastTrial = lastTrial.nu - 1;
+    // sizeI = I[nuLastTrial].size();
+    // for (int nu = 0; nu < numberConstraints + 1; nu++) {
+    //     if (!calcI[nuLastTrial]) mu[nu] = 0.0;
     // }
-    // for (int i = 1; i < size_I; i++) {
-    //     mu_tmp = abs(I[nu_I][i].z - I[nu_I][(size_t)i - 1].z) / (I[nu_I][i].x - I[nu_I][(size_t)i - 1].x);
-    //     if (mu_tmp > mu[nu_I]) {
-    //         mu[nu_I] = mu_tmp;
-    //         if (abs(mu[nu_I]) > epsilon) calc_I[nu_I] = true;
+    // for (int i = 1; i < sizeI; i++) {
+    //     muTmp = abs(I[nuLastTrial][i].z - I[nuLastTrial][(size_t)i - 1].z) /
+    //                (I[nuLastTrial][i].x - I[nuLastTrial][(size_t)i - 1].x);
+    //     if (muTmp > mu[nuLastTrial]) {
+    //         mu[nuLastTrial] = muTmp;
+    //         if (abs(mu[nuLastTrial]) > epsilon) calcI[nuLastTrial] = true;
     //     }
     // }
-    // for (int nu = 0; nu < m + 1; nu++) {
+    // for (int nu = 0; nu < numberConstraints + 1; nu++) {
     //     if (abs(mu[nu]) <= epsilon) mu[nu] = 1.0;
     // }
 
     // without optimization
-    // double mu_tmp;
-    // size_t size_I;
-    // for (int nu = 0; nu < m + 1; nu++) {
+    // for (int nu = 0; nu < numberConstraints + 1; nu++) {
     //     mu[nu] = 0.0;
     // }
-    // for (int nu = 0; nu < m + 1; nu++) {
-    //     size_I = I[nu].size();
-    //     for (int i = 1; i < size_I; i++) {
+    // for (int nu = 0; nu < numberConstraints + 1; nu++) {
+    //     sizeI = I[nu].size();
+    //     for (int i = 1; i < sizeI; i++) {
     //         for (int j = 0; j < i; j++) {
-    //             mu_tmp = abs(I[nu][i].z - I[nu][j].z) / (I[nu][i].x - I[nu][j].x);
-    //             if (mu_tmp > mu[nu]) {
-    //                 mu[nu] = mu_tmp;
+    //             muTmp = abs(I[nu][i].z - I[nu][j].z) / (I[nu][i].x - I[nu][j].x);
+    //             if (muTmp > mu[nu]) {
+    //                 mu[nu] = muTmp;
     //             }
     //         }
     //     }
@@ -127,39 +132,39 @@ double imgo_method::selectNewPoint(int &t) {
     // Step 4
     for (int nu = 0; nu < numberConstraints + 1; nu++) {
         if (I[nu].size() != 0) {
-            z_star[nu] = I[nu][0].z;
-            size_I = I[nu].size();
-            for (int i = 1; i < size_I; i++) {
-                if (I[nu][i].z < z_star[nu]) {
-                    z_star[nu] = I[nu][i].z;
+            zStar[nu] = I[nu][0].z;
+            sizeI = I[nu].size();
+            for (int i = 1; i < sizeI; i++) {
+                if (I[nu][i].z < zStar[nu]) {
+                    zStar[nu] = I[nu][i].z;
                 }
             }
-            if (z_star[nu] <= 0.0 && nu != numberConstraints) {
-                z_star[nu] = -mu[nu] * d;
+            if (zStar[nu] <= 0.0 && nu != numberConstraints) {
+                zStar[nu] = -mu[nu] * d;
             }
         }
     }
 
     // Steps 5, 6
     double R = -numeric_limits<double>::infinity(), Rtmp = 0.0;
-    double mu_v, z_star_v, d_x;
+    double muV, zStarV, dx;
 
-    size_t size_tr_pt = trial_points.size();
-    for (size_t i = 1; i < size_tr_pt; i++) {
-        d_x = trial_points[i].x - trial_points[i - 1].x;
-        if (trial_points[i].nu == trial_points[i - 1].nu) {
-            mu_v = mu[(size_t)trial_points[i].nu - 1];
-            z_star_v = z_star[(size_t)trial_points[i].nu - 1];
-            Rtmp = d_x + pow(trial_points[i].z - trial_points[i - 1].z, 2) / (r * r * mu_v * mu_v * d_x) -
-                   2.0 * (trial_points[i].z + trial_points[i - 1].z - 2.0 * z_star_v) / (r * mu_v);
-        } else if (trial_points[i - 1].nu < trial_points[i].nu) {
-            mu_v = mu[(size_t)trial_points[i].nu - 1];
-            z_star_v = z_star[(size_t)trial_points[i].nu - 1];
-            Rtmp = 2.0 * d_x  - 4.0 * (trial_points[i].z - z_star_v) / (r * mu_v);
+    size_t sizeTrialPoints = trialPoints.size();
+    for (size_t i = 1; i < sizeTrialPoints; i++) {
+        dx = trialPoints[i].x - trialPoints[i - 1].x;
+        if (trialPoints[i].nu == trialPoints[i - 1].nu) {
+            muV = mu[(size_t)trialPoints[i].nu - 1];
+            zStarV = zStar[(size_t)trialPoints[i].nu - 1];
+            Rtmp = dx + pow(trialPoints[i].z - trialPoints[i - 1].z, 2) / (r * r * muV * muV * dx) -
+                   2.0 * (trialPoints[i].z + trialPoints[i - 1].z - 2.0 * zStarV) / (r * muV);
+        } else if (trialPoints[i - 1].nu < trialPoints[i].nu) {
+            muV = mu[(size_t)trialPoints[i].nu - 1];
+            zStarV = zStar[(size_t)trialPoints[i].nu - 1];
+            Rtmp = 2.0 * dx - 4.0 * (trialPoints[i].z - zStarV) / (r * muV);
         } else  {
-            mu_v = mu[(size_t)trial_points[i - 1].nu - 1];
-            z_star_v = z_star[(size_t)trial_points[i - 1].nu - 1];
-            Rtmp = 2.0 * d_x  - 4.0 * (trial_points[i - 1].z - z_star_v) / (r * mu_v);
+            muV = mu[(size_t)trialPoints[i - 1].nu - 1];
+            zStarV = zStar[(size_t)trialPoints[i - 1].nu - 1];
+            Rtmp = 2.0 * dx - 4.0 * (trialPoints[i - 1].z - zStarV) / (r * muV);
         }
         if (Rtmp > R) {
             R = Rtmp;
@@ -171,95 +176,95 @@ double imgo_method::selectNewPoint(int &t) {
     return newPoint(t);
 }
 
-void imgo_method::setNumberConstraints(int _numberConstraints) {
-    optimization_method_constrained::setNumberConstraints(_numberConstraints);
+void ImgoMethod::setNumberConstraints(int _numberConstraints) {
+    OptimizationMethodConstrained::setNumberConstraints(_numberConstraints);
     I.resize((size_t)numberConstraints + 1);
-    calc_I.resize((size_t)numberConstraints + 1);
+    calcI.resize((size_t)numberConstraints + 1);
     mu.resize((size_t)numberConstraints + 1);
-    z_star.resize((size_t)numberConstraints + 1);
+    zStar.resize((size_t)numberConstraints + 1);
 }
 
-void imgo_method::solve(int &countIters, int &countEvals, double &x) {
+void ImgoMethod::solve(int &numberTrials, int &numberFevals, double &x) {
     for (int i = 0; i < I.size(); i++) {
         I[i].clear();
-        calc_I[i] = false;
+        calcI[i] = false;
     }
-    trial_points.clear();
-    this->countEvals = 0;
+    trialPoints.clear();
+    this->numberFevals = 0;
 
-    last_trial = newTrial(A[0]);
-    trial_points.push_back(last_trial);
-    insert_in_sorted(I[(size_t)last_trial.nu - 1], last_trial);
-    last_trial = newTrial(B[0]);
-    trial_points.push_back(last_trial);
-    last_trial_pos = insert_in_sorted(I[(size_t)last_trial.nu - 1], last_trial);
-    countIters = 2;
+    lastTrial = newTrial(A[0]);
+    trialPoints.push_back(lastTrial);
+    insertInSorted(I[(size_t)lastTrial.nu - 1], lastTrial);
+    lastTrial = newTrial(B[0]);
+    trialPoints.push_back(lastTrial);
+    lastTrialPos = insertInSorted(I[(size_t)lastTrial.nu - 1], lastTrial);
+    numberTrials = 2;
 
-    double x_k_1;
+    double xNew;
     int t = 1;
     while(true) {
-        countIters++;
+        numberTrials++;
 
         // Steps 3, 4, 5, 6, 7
-        x_k_1 = selectNewPoint(t);
-        last_trial = newTrial(x_k_1);
+        xNew = selectNewPoint(t);
+        lastTrial = newTrial(xNew);
 
         // Step 1
-        insert_in_sorted(trial_points, last_trial);
+        insertInSorted(trialPoints, lastTrial);
 
         // Step 2
-        last_trial_pos = insert_in_sorted(I[(size_t)last_trial.nu - 1], last_trial);
+        lastTrialPos = insertInSorted(I[(size_t)lastTrial.nu - 1], lastTrial);
 
         // Stop conditions
-        if (trial_points[t].x - trial_points[(size_t)t - 1].x <= eps) break;
-        if (this->countEvals >= maxEvals || countIters >= maxIters) break;
+        if (trialPoints[t].x - trialPoints[(size_t)t - 1].x <= eps) break;
+        if (this->numberFevals >= maxFevals || numberTrials >= maxTrials) break;
     }
-    countEvals = this->countEvals;
-    x = search_min(trial_points, numberConstraints);
+    numberFevals = this->numberFevals;
+    x = searchMin(trialPoints, numberConstraints);
 }
 
-void imgo_method::solve(int &countIters, int &countEvals, vector<double> &X) {
-    solve(countIters, countEvals, X[0]);
+void ImgoMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X) {
+    solve(numberTrials, numberFevals, X[0]);
 }
 
-bool imgo_method::solve_test(double x_opt, int &countIters, int &countEvals) {
+bool ImgoMethod::solveTest(double xOpt, int &numberTrials, int &numberFevals) {
     for (int nu = 0; nu < numberConstraints + 1; nu++) {
         I[nu].clear();
-        calc_I[nu] = false;
+        calcI[nu] = false;
     }
-    trial_points.clear();
-    this->countEvals = 0;
+    trialPoints.clear();
+    this->numberFevals = 0;
 
-    last_trial = newTrial(A[0]);
-    trial_points.push_back(last_trial);
-    insert_in_sorted(I[(size_t)last_trial.nu - 1], last_trial);
-    last_trial = newTrial(B[0]);
-    trial_points.push_back(last_trial);
-    last_trial_pos = insert_in_sorted(I[(size_t)last_trial.nu - 1], last_trial);
-    countIters = 2;
+    lastTrial = newTrial(A[0]);
+    trialPoints.push_back(lastTrial);
+    insertInSorted(I[(size_t)lastTrial.nu - 1], lastTrial);
+    lastTrial = newTrial(B[0]);
+    trialPoints.push_back(lastTrial);
+    lastTrialPos = insertInSorted(I[(size_t)lastTrial.nu - 1], lastTrial);
+    numberTrials = 2;
 
-    double x_k_1;
+    double xNew;
     int t = 1;
     while (true) {
-        countIters++;
+        numberTrials++;
 
         // Steps 3, 4, 5, 6, 7
-        x_k_1 = selectNewPoint(t);
-        last_trial = newTrial(x_k_1);
+        xNew = selectNewPoint(t);
+        lastTrial = newTrial(xNew);
 
         // Step 1
-        insert_in_sorted(trial_points, last_trial);
+        insertInSorted(trialPoints, lastTrial);
 
         // Step 2
-        last_trial_pos = insert_in_sorted(I[(size_t)last_trial.nu - 1], last_trial);
+        lastTrialPos = insertInSorted(I[(size_t)lastTrial.nu - 1], lastTrial);
 
         // Stop conditions
-        if (abs(x_k_1 - x_opt) <= eps) {
-            countEvals = this->countEvals;
+        if (abs(xNew - xOpt) <= eps) {
+            numberFevals = this->numberFevals;
             return true;
         }
-        if (this->countEvals >= maxEvals || countIters >= maxIters) {
-            countEvals = this->countEvals;
+        if (this->numberFevals >= maxFevals || numberTrials >= maxTrials) {
+            numberFevals = this->numberFevals;
             return false;
         }
     }

@@ -13,17 +13,16 @@ f3(x) = 5.0 * x ** 2 + 3.0 * x - 1.0
 g3_1(x) = x ** 2 - 0.05
 g3_2(x) = -x + 0.1
 
-title_name(n) = sprintf("Graph of the sample function №%d", n)
+titleName(n) = sprintf("Graph of the sample function №%d", n)
 
 set grid
-
 set xlabel "x"
 set ylabel "y"
 
 ind = 3 * ARG1
 function = functions[ARG1 + 1]
 
-set title title_name(ARG1 + 1) font "Helvetica Bold, 20"
+set title titleName(ARG1 + 1) font "Helvetica Bold, 20"
 
 plot @function, \
      trialfile index ind + 2 ls 5 lc rgb "green" title "trials", \

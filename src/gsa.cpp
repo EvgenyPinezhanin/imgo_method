@@ -11,21 +11,22 @@
 
 const double epsilon = 1e-14;
 
-inline int insert_in_sorted(vector<trial> &vec, trial tr) {
-    vector<trial>::iterator iter = vec.begin();
-    vector<trial>::iterator iterEnd = vec.end();
+inline int insertInSorted(vector<Trial> &trials, Trial trial) {
+    vector<Trial>::iterator iter = trials.begin();
+    vector<Trial>::iterator iterEnd = trials.end();
     int pos = 0;
     while(true) {
-        if (iter == iterEnd || iter->x > tr.x) break;
+        if (iter == iterEnd || iter->x > trial.x) break;
         iter++; pos++;
     }
-    vec.insert(iter, tr);
+    trials.insert(iter, trial);
     return pos;
 }
 
-inline double search_min(vector<trial> &trials) {
+inline double searchMin(vector<Trial> &trials) {
     double z = numeric_limits<double>::infinity(), x = 0.0;
-    for (int i = 0; i < trials.size(); i++) {
+    size_t sizeTrials = trials.size();
+    for (int i = 0; i < sizeTrials; i++) {
         if (trials[i].z < z) {
             z = trials[i].z;
             x = trials[i].x;
@@ -34,36 +35,37 @@ inline double search_min(vector<trial> &trials) {
     return x;
 }
 
-trial gsa_method::newTrial(double x) {
-    countEvals++;
-    return trial(x, f(x));
+Trial GsaMethod::newTrial(double x) {
+    numberFevals++;
+    return Trial(x, f(x));
 }
 
-double gsa_method::newPoint(int t) {
-    return (trial_points[t].x + trial_points[(size_t)t - 1].x) / 2 - (trial_points[t].z - trial_points[(size_t)t - 1].z) / (2 * m);
+double GsaMethod::newPoint(int t) {
+    return (trialPoints[t].x + trialPoints[(size_t)t - 1].x) / 2 - (trialPoints[t].z - trialPoints[(size_t)t - 1].z) / (2 * m);
 }
 
-double gsa_method::selectNewPoint(int &t) {
+double GsaMethod::selectNewPoint(int &t) {
     static double M = -1.0;
+    size_t sizeTrialPoints;
 
     // Step 2
     // with optimization(const)
-    if (last_trial.x == B[0]) {
-        M = abs((trial_points[1].z - trial_points[0].z) / (trial_points[1].x - trial_points[0].x));
+    if (lastTrial.x == B[0]) {
+        M = abs((trialPoints[1].z - trialPoints[0].z) / (trialPoints[1].x - trialPoints[0].x));
     } else {
-        M = max({M, abs((last_trial.z - trial_points[(size_t)last_trial_pos - 1].z) / 
-                        (last_trial.x - trial_points[(size_t)last_trial_pos - 1].x)), 
-                    abs((trial_points[(size_t)last_trial_pos + 1].z - last_trial.z) / 
-                        (trial_points[(size_t)last_trial_pos + 1].x - last_trial.x))});
+        M = max({ M, abs((lastTrial.z - trialPoints[(size_t)lastTrialPos - 1].z) / 
+                         (lastTrial.x - trialPoints[(size_t)lastTrialPos - 1].x)), 
+                     abs((trialPoints[(size_t)lastTrialPos + 1].z - lastTrial.z) / 
+                         (trialPoints[(size_t)lastTrialPos + 1].x - lastTrial.x)) });
     }
 
     // without optimization
-    // double M_tmp;
-    // size_t size = trial_points.size();
+    // double Mtmp;
+    // sizeTrialPoints = trialPoints.size();
     // M = 0.0;
-    // for (int i = 1; i < size; i++) {
-    //     M_tmp = abs(trial_points[i].z - trial_points[(size_t)i - 1].z) / (trial_points[i].x - trial_points[(size_t)i - 1].x);
-    //     if (M_tmp > M) M = M_tmp;
+    // for (int i = 1; i < sizeTrialPoints; i++) {
+    //     Mtmp = abs(trialPoints[i].z - trialPoints[(size_t)i - 1].z) / (trialPoints[i].x - trialPoints[(size_t)i - 1].x);
+    //     if (MTmp > M) M = Mtmp;
     // }
 
     // Step 3
@@ -71,12 +73,12 @@ double gsa_method::selectNewPoint(int &t) {
 
     // Steps 4, 5
     double R = -numeric_limits<double>::infinity(), Rtmp = 0.0;
-    double d_x;
+    double dx;
     
-    size_t size_tr_pt = trial_points.size();
-    for (size_t i = 1; i < size_tr_pt; i++) {
-        d_x = trial_points[i].x - trial_points[i - 1].x;
-        Rtmp = m * d_x + pow(trial_points[i].z - trial_points[i - 1].z, 2) / (m * d_x) - 2 * (trial_points[i].z + trial_points[i - 1].z);
+    sizeTrialPoints = trialPoints.size();
+    for (size_t i = 1; i < sizeTrialPoints; i++) {
+        dx = trialPoints[i].x - trialPoints[i - 1].x;
+        Rtmp = m * dx + pow(trialPoints[i].z - trialPoints[i - 1].z, 2) / (m * dx) - 2 * (trialPoints[i].z + trialPoints[i - 1].z);
         if (Rtmp > R) {
             R = Rtmp;
             t = (int)i;
@@ -87,40 +89,40 @@ double gsa_method::selectNewPoint(int &t) {
     return newPoint(t);
 }
 
-void gsa_method::solve(int &countIters, int &countEvals, double &x) {
-    trial_points.clear();
-    this->countEvals = 0;
+void GsaMethod::solve(int &numberIters, int &numberFevals, double &x) {
+    trialPoints.clear();
+    this->numberFevals = 0;
 
-    trial_points.push_back(newTrial(A[0]));
+    trialPoints.push_back(newTrial(A[0]));
 
-    last_trial = newTrial(B[0]);
-    last_trial_pos = 1;
+    lastTrial = newTrial(B[0]);
+    lastTrialPos = 1;
 
-    trial_points.push_back(last_trial);
-    countIters = 2;
+    trialPoints.push_back(lastTrial);
+    numberIters = 2;
 
-    double x_k_1;
+    double xNew;
     int t = 1;
     while(true) {
-        countIters++;
+        numberIters++;
 
         // Steps 2, 3, 4, 5, 6
-        x_k_1 = selectNewPoint(t);
+        xNew = selectNewPoint(t);
 
         // Trial
-        last_trial = newTrial(x_k_1);
+        lastTrial = newTrial(xNew);
 
         // Stop conditions
-        if (trial_points[t].x - trial_points[(size_t)t - 1].x <= eps) break;
-        if (this->countEvals >= maxEvals || countIters >= maxIters) break;
+        if (trialPoints[t].x - trialPoints[(size_t)t - 1].x <= eps) break;
+        if (this->numberFevals >= maxFevals || numberIters >= maxTrials) break;
 
         // Step 1
-        last_trial_pos = insert_in_sorted(trial_points, last_trial);
+        lastTrialPos = insertInSorted(trialPoints, lastTrial);
     }
-    countEvals = this->countEvals;
-    x = search_min(trial_points);
+    numberFevals = this->numberFevals;
+    x = searchMin(trialPoints);
 }
 
-void gsa_method::solve(int &countIters, int &countEvals, vector<double> &X) {
-    solve(countIters, countEvals, X[0]);
+void GsaMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X) {
+    solve(numberTrials, numberFevals, X[0]);
 }

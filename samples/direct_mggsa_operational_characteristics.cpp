@@ -10,7 +10,6 @@
 #include <ctime>
 #include <algorithm>
 
-#include <omp.h>
 #include <Grishagin/GrishaginProblemFamily.hpp>
 #include <Grishagin/GrishaginConstrainedProblemFamily.hpp>
 #include <GKLS/GKLSProblemFamily.hpp>
@@ -18,55 +17,56 @@
 #include <direct_method.h>
 #include <mggsa.h>
 #include <task.h>
+#include <output_results.h>
+#include <omp.h>
 
 using namespace std;
 
-// #define CALC_DIRECT
-// #define CALC_MGGSA
+#define CALC_DIRECT
+#define CALC_MGGSA
 
-const int family_number = 3; // 0 - Grishagin, 1 - GKLS,
-                             // 2 - Grishagin(constrained), 3 - GKLS(constrained),
+const int familyNumber = 3; // 0 - Grishagin, 1 - GKLS,
+                            // 2 - Grishagin(constrained), 3 - GKLS(constrained),
 
-double f(int n, const double *X, int *undefined_flag, void *data) {
-    data_direct_oper_character *f_data = static_cast<data_direct_oper_character*>(data);
-    f_data->count_evals++;
-    vector<double> point(n), opt_point(n);
+double f(int n, const double *X, int *undefinedFlag, void *data) {
+    DataDirectOperationalCharacteristics *fData = static_cast<DataDirectOperationalCharacteristics*>(data);
+    fData->numberFevals++;
+    vector<double> point(n), optPoint(n);
     for (int i = 0; i < n; i++) {
         point[i] = X[i];
     }
-    f_data->points.push_back(point);
+    fData->points.push_back(point);
 
     double f;
-    if (f_data->type == type_constraned::CONSTR) {
-        functor_family_constr *problem = static_cast<functor_family_constr*>(f_data->functor);
+    if (fData->type == TypeConstrants::Constraints) {
+        FunctorFamilyConstrained *problem = static_cast<FunctorFamilyConstrained*>(fData->functor);
 
-        opt_point = (*problem->constr_opt_problem_family)[problem->current_func]->GetOptimumPoint();
+        optPoint = (*problem->constrainedOptProblemFamily)[problem->currentFunction]->GetOptimumPoint();
 
-        bool is_constr = true;
-        int constr = (*problem->constr_opt_problem_family)[problem->current_func]->GetConstraintsNumber();
-        for (int i = 0; i < constr; i++) {
-            if ((*problem)(point, i) > 0.0) is_constr = false;
+        bool constrained = true;
+        int constraints = (*problem->constrainedOptProblemFamily)[problem->currentFunction]->GetConstraintsNumber();
+        for (int i = 0; i < constraints; i++) {
+            if ((*problem)(point, i) > 0.0) constrained = false;
         }
-        if (is_constr) *undefined_flag = 1;
+        if (constrained) *undefinedFlag = 1;
 
-        f = (*problem)(point, constr + 1);
+        f = (*problem)(point, constraints + 1);
     } else {
-        functor_family *problem = static_cast<functor_family*>(f_data->functor);
+        FunctorFamily *problem = static_cast<FunctorFamily*>(fData->functor);
 
-        opt_point = (*problem->opt_problem_family)[problem->current_func]->GetOptimumPoint();
+        optPoint = (*problem->optProblemFamily)[problem->currentFunction]->GetOptimumPoint();
 
         f = (*problem)(point, 1);
     }
 
-    if (!f_data->converge) {
-        double dist = 0.0;
-        size_t size = point.size();
-        for (int i = 0; i < size; i++) {
-            dist += (point[i] - opt_point[i]) * (point[i] - opt_point[i]);
+    if (!fData->converge) {
+        double distance = 0.0;
+        for (int i = 0; i < n; i++) {
+            distance += (point[i] - optPoint[i]) * (point[i] - optPoint[i]);
         }
-        if (dist <= f_data->eps) {
-            f_data->converge = true;
-            f_data->min_count_evals = f_data->count_evals;
+        if (distance <= fData->eps) {
+            fData->converge = true;
+            fData->minNumberFevals = fData->numberFevals;
         }
     }
 
@@ -74,249 +74,234 @@ double f(int n, const double *X, int *undefined_flag, void *data) {
 }
 
 int main() {
-    ofstream ofstr_opt("output_data/direct_operational_characteristics_opt.txt");
-    if (!ofstr_opt.is_open()) cerr << "File opening error\n";
+    ofstream ofstrOpt("output_data/direct_operational_characteristics_opt.txt");
+    if (!ofstrOpt.is_open()) cerr << "File opening error\n";
     
-    const int number_family = 4;
+    const int numberFamily = 4;
 
     TGrishaginProblemFamily grishaginProblems;
     TGrishaginConstrainedProblemFamily grishaginConstrainedProblems;
     TGKLSProblemFamily gklsProblems;
     TGKLSConstrainedProblemFamily gklsConstrainedProblems;
 
-    vector<problem_family> problems{ problem_family("GrishaginProblemFamily", &grishaginProblems, type_constraned::NONCONSTR, "Grishagin"),
-                                     problem_family("GKLSProblemFamily", &gklsProblems, type_constraned::NONCONSTR, "GKLS"),
-                                     problem_family("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
-                                                    type_constraned::CONSTR, "GrishaginConstrained"),
-                                     problem_family("GKLSProblemConstrainedFamily", &gklsConstrainedProblems, 
-                                                    type_constraned::CONSTR, "GKLSConstrained") };
+    vector<ProblemFamily> problems{ ProblemFamily("GrishaginProblemFamily", &grishaginProblems, TypeConstrants::NoConstraints, "Grishagin"),
+                                    ProblemFamily("GKLSProblemFamily", &gklsProblems, TypeConstrants::NoConstraints, "GKLS"),
+                                    ProblemFamily("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
+                                                  TypeConstrants::Constraints, "GrishaginConstrained"),
+                                    ProblemFamily("GKLSProblemConstrainedFamily", &gklsConstrainedProblems, 
+                                                  TypeConstrants::Constraints, "GKLSConstrained") };
 
-    vector<vector<int>> K{ {0, 700, 25},
-                           {0, 1500, 25},
-                           {0, 3000, 25},
-                           {0, 4500, 25} };
+    vector<vector<int>> K{ { 0, 700, 25 },
+                           { 0, 1500, 25 },
+                           { 0, 3000, 25 },
+                           { 0, 4500, 25 } };
 
     double eps = 0.01;
+    DataDirectOperationalCharacteristics fData;
+    fData.eps = eps;
 
     // Parameters of DIRECT
-    data_direct_oper_character f_data;
-    int max_iter = 10000;
-    double magic_eps = 1.0e-4;
-    double volume_reltol = 0.0;
-    double sigma_reltol  = 0.0;
+    int maxIters = 10000;
+    double magicEps = 1.0e-4;
+    double volumeReltol = 0.0;
+    double sigmaReltol  = 0.0;
     vector<direct_algorithm> algorithms{ DIRECT_ORIGINAL, DIRECT_GABLONSKY };
 
-    direct_method direct(f, &f_data, -1, vector<double>{}, vector<double>{}, -1, max_iter, magic_eps,
-                                                               volume_reltol, sigma_reltol, nullptr, DIRECT_ORIGINAL);
-    f_data.eps = eps;
+    DirectMethod direct(f, &fData, -1, vector<double>{}, vector<double>{}, -1, maxIters, magicEps,
+                        volumeReltol, sigmaReltol, nullptr, DIRECT_ORIGINAL);
 
     // Parameters of mggsa
     int den = 10, incr = 30;
-    int maxEvals = 100000;
-    vector<vector<double>> r_array{ {3.0, 2.4, 1.6, 1.0},
-                                    {4.2, 3.8, 2.0, 1.0},
-                                    {3.5, 2.6, 1.8, 1.0},
-                                    {4.7, 3.0, 2.0, 1.0} };
-    vector<int> key_array{1, 3, 3, 3};
-    vector<double> d_array{0.0, 0.0, 0.01, 0.01};
+    int maxFevals = 100000;
+    vector<vector<double>> r{ { 3.0, 2.4, 1.6, 1.0 },
+                              { 4.2, 3.8, 2.0, 1.0 },
+                              { 3.5, 2.6, 1.8, 1.0 },
+                              { 4.7, 3.0, 2.0, 1.0 } };
+    vector<int> key{ 1, 3, 3, 3 };
+    vector<double> d{ 0.0, 0.0, 0.01, 0.01 };
 
-    mggsa_method mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, -1, eps, -1, maxEvals, incr);
+    MggsaMethod mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, -1, eps, -1, maxFevals, incr);
 
-    int r_size = r_array[0].size();
-    vector<vector<vector<double>>> success_rate(number_family);
-    for (int i = 0; i < number_family; i++) {
-        success_rate[i].resize(r_size + 2);
-        for (int j = 0; j < r_size + 2; j++) {
-            success_rate[i][j].resize((K[i][1] - K[i][0]) / K[i][2] + 1);
+    int sizeR = r[0].size();
+    vector<vector<vector<double>>> successRate(numberFamily);
+    for (int i = 0; i < numberFamily; i++) {
+        successRate[i].resize(sizeR + 2);
+        for (int j = 0; j < sizeR + 2; j++) {
+            successRate[i][j].resize((K[i][1] - K[i][0]) / K[i][2] + 1);
         }
     }
 
-    int total_start_time = clock();
+    double totalStartTime = omp_get_wtime();
 #if defined(CALC_DIRECT)
-    ofstream ofstr_direct("output_data/direct_mggsa_operational_characteristics_direct.txt");
-    if (!ofstr_direct.is_open()) cerr << "File opening error\n";
+    ofstream ofstrDirect("output_data/direct_mggsa_operational_characteristics_direct.txt");
+    if (!ofstrDirect.is_open()) cerr << "File opening error\n";
 
-    for (int i = 0; i < number_family; i++) {
+    for (int i = 0; i < numberFamily; i++) {
         for (int j = 0; j < algorithms.size(); j++) {
             vector<double> A, B;
-            functor_family func;
-            functor_family_constr func_constr;
+            FunctorFamily functor;
+            FunctorFamilyConstrained functorConstrained;
 
-            if (problems[i].type == type_constraned::CONSTR) {
-                func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
-                (*func_constr.constr_opt_problem_family)[0]->GetBounds(A, B);
-                direct.setN((*func_constr.constr_opt_problem_family)[0]->GetDimension());
-                f_data.functor = &func_constr;
-                f_data.type = type_constraned::CONSTR;
+            if (problems[i].type == TypeConstrants::Constraints) {
+                functorConstrained.constrainedOptProblemFamily = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
+                (*functorConstrained.constrainedOptProblemFamily)[0]->GetBounds(A, B);
+                direct.setN((*functorConstrained.constrainedOptProblemFamily)[0]->GetDimension());
+                fData.functor = &functorConstrained;
+                fData.type = TypeConstrants::Constraints;
             } else {
-                func.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
-                (*func.opt_problem_family)[0]->GetBounds(A, B);
-                direct.setN((*func.opt_problem_family)[0]->GetDimension());
-                f_data.functor = &func;
-                f_data.type = type_constraned::NONCONSTR;
+                functor.optProblemFamily = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
+                (*functor.optProblemFamily)[0]->GetBounds(A, B);
+                direct.setN((*functor.optProblemFamily)[0]->GetDimension());
+                fData.functor = &functor;
+                fData.type = TypeConstrants::NoConstraints;
             }
+
             direct.setAB(A, B);
-            direct.setMaxFeval(K[i][1]);
+            direct.setMaxFevals(K[i][1]);
             direct.setAlghorithm(algorithms[j]);
 
-            int count_func = problems[i].optProblemFamily->GetFamilySize();
-            vector<int> count_evals(count_func);
-            int count_successful;
+            int numberFunctions = problems[i].optProblemFamily->GetFamilySize();
+            vector<int> numberFevals(numberFunctions);
+            int numberSuccessful;
 
-            int start_time = clock();
-            for (int k = 0; k < count_func; k++) {
-                f_data.count_evals = 0;
-                f_data.converge = false;
+            double startTime = omp_get_wtime();
+            for (int k = 0; k < numberFunctions; k++) {
+                fData.numberFevals = 0;
+                fData.converge = false;
 
-                if (problems[i].type == type_constraned::CONSTR) {
-                    func_constr.current_func = k;
+                if (problems[i].type == TypeConstrants::Constraints) {
+                    functorConstrained.currentFunction = k;
                 } else {
-                    func.current_func = k;
+                    functor.currentFunction = k;
                 }
-                direct.solve_test();
+                direct.solveTest();
 
-                if (f_data.converge) {
-                    count_evals[k] = f_data.min_count_evals;
+                if (fData.converge) {
+                    numberFevals[k] = fData.minNumberFevals;
                 } else {
-                    count_evals[k] = K[i][1] + 1;
+                    numberFevals[k] = K[i][1] + 1;
                 }
             }
             for (int k = K[i][0]; k <= K[i][1]; k += K[i][2]) {
-                count_successful = (int)count_if(count_evals.begin(), count_evals.end(), [k](double elem){ return elem <= k; });
-                success_rate[i][j][k / K[i][2]] = (double)count_successful / count_func;
+                numberSuccessful = (int)count_if(numberFevals.begin(), numberFevals.end(), [k] (double elem) { return elem <= k; });
+                successRate[i][j][k / K[i][2]] = (double)numberSuccessful / numberFunctions;
             }
-            int end_time = clock();
-            double work_time = ((double)end_time - start_time) / CLOCKS_PER_SEC;
+            double endTime = omp_get_wtime();
+            double workTime = endTime - startTime;
 
-            string type_direct = (algorithms[j] == DIRECT_ORIGINAL) ? "ORIGINAL" : "GABLONSKY";
-            string str_input = "DIRECT " + type_direct + " " + problems[i].name + " time: " + to_string(work_time) + "\n";
-            cout << str_input;
+            string typeDirect = (algorithms[j] == DIRECT_ORIGINAL) ? "ORIGINAL" : "GABLONSKY";
+            string strOutput = "DIRECT " + typeDirect + " " + problems[i].name + " time: " + to_string(workTime) + "\n";
+            cout << strOutput;
         }
     }
-    for (int i = 0; i < number_family; i++) {
+    for (int i = 0; i < numberFamily; i++) {
         for (int j = 0; j < 2; j++) {
             for (int k = K[i][0]; k <= K[i][1]; k += K[i][2]) {
-                ofstr_direct << k << " " << success_rate[i][j][k / K[i][2]] << endl;
+                ofstrDirect << k << " " << successRate[i][j][k / K[i][2]] << endl;
             }
-            ofstr_direct << endl << endl;
+            ofstrDirect << endl << endl;
         }
     }
-    ofstr_direct.close();
+    ofstrDirect.close();
 #endif
 
 #if defined(CALC_MGGSA)
-    ofstream ofstr_mggsa("output_data/direct_mggsa_operational_characteristics_mggsa.txt");
-    if (!ofstr_mggsa.is_open()) cerr << "File opening error\n";
+    ofstream ofstrMggsa("output_data/direct_mggsa_operational_characteristics_mggsa.txt");
+    if (!ofstrMggsa.is_open()) cerr << "File opening error\n";
 
-    const int chunk_mggsa = 2;
+    const int chunkMggsa = 2;
 
-#pragma omp parallel for schedule(static, chunk_mggsa) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
-        shared(number_family, problems, r_array, r_size, success_rate, K) \
-        firstprivate(mggsa, key_array, d_array)
-    for (int i = 0; i < number_family; i++) {
-        for (int j = 0; j < r_size; j++) {
+#pragma omp parallel for schedule(static, chunkMggsa) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
+        shared(numberFamily, problems, r, sizeR, successRate, K) \
+        firstprivate(mggsa, key, d)
+    for (int i = 0; i < numberFamily; i++) {
+        for (int j = 0; j < sizeR; j++) {
             vector<double> A, B;
-            functor_family func;
-            functor_family_constr func_constr;
+            FunctorFamily functor;
+            FunctorFamilyConstrained functorConstrained;
 
-            if (problems[i].type == type_constraned::CONSTR) {
-                func_constr.constr_opt_problem_family = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
-                (*func_constr.constr_opt_problem_family)[0]->GetBounds(A, B);
-                mggsa.setN((*func_constr.constr_opt_problem_family)[0]->GetDimension());
-                mggsa.setNumberConstraints((*func_constr.constr_opt_problem_family)[0]->GetConstraintsNumber());
+            if (problems[i].type == TypeConstrants::Constraints) {
+                functorConstrained.constrainedOptProblemFamily = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
+                (*functorConstrained.constrainedOptProblemFamily)[0]->GetBounds(A, B);
+                mggsa.setN((*functorConstrained.constrainedOptProblemFamily)[0]->GetDimension());
+                mggsa.setNumberConstraints((*functorConstrained.constrainedOptProblemFamily)[0]->GetConstraintsNumber());
             } else {
-                func.opt_problem_family = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
-                (*func.opt_problem_family)[0]->GetBounds(A, B);
-                mggsa.setN((*func.opt_problem_family)[0]->GetDimension());
+                functor.optProblemFamily = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
+                (*functor.optProblemFamily)[0]->GetBounds(A, B);
+                mggsa.setN((*functor.optProblemFamily)[0]->GetDimension());
                 mggsa.setNumberConstraints(0);
             }
-            
-            mggsa.setMaxIters(K[i][1]);
+
+            mggsa.setMaxTrials(K[i][1]);
             mggsa.setAB(A, B);
-            mggsa.setD(d_array[i]);
-            mggsa.setKey(key_array[j]);
-            mggsa.setR(r_array[i][j]);
+            mggsa.setD(d[i]);
+            mggsa.setKey(key[j]);
+            mggsa.setR(r[i][j]);
 
-            vector<int> count_iters(problems[i].optProblemFamily->GetFamilySize());
-            int count_func = problems[i].optProblemFamily->GetFamilySize();
-            vector<double> X_opt;
-            int count_successful;
-            int countIters, countEvals;
+            int numberFunctions = problems[i].optProblemFamily->GetFamilySize();
+            vector<int> numberTrialsArray(numberFunctions);
+            int numberSuccessful, numberTrials, numberFevals;
+            vector<double> XOpt;
 
-            double start_time = omp_get_wtime();
-            for (int k = 0; k < count_func; k++) {
-                if (problems[i].type == type_constraned::CONSTR) {
-                    func_constr.current_func = k;
-                    X_opt = (*func_constr.constr_opt_problem_family)[k]->GetOptimumPoint();
-                    mggsa.setF(func_constr);
+            double startTime = omp_get_wtime();
+            for (int k = 0; k < numberFunctions; k++) {
+                if (problems[i].type == TypeConstrants::Constraints) {
+                    functorConstrained.currentFunction = k;
+                    XOpt = (*functorConstrained.constrainedOptProblemFamily)[k]->GetOptimumPoint();
+                    mggsa.setF(functorConstrained);
                 } else {
-                    func.current_func = k;
-                    X_opt = (*func.opt_problem_family)[k]->GetOptimumPoint();
-                    mggsa.setF(func);
+                    functor.currentFunction = k;
+                    XOpt = (*functor.optProblemFamily)[k]->GetOptimumPoint();
+                    mggsa.setF(functor);
                 }
-                if (mggsa.solve_test(X_opt, countIters, countEvals)) {
-                    count_iters[k] = countIters;
+                if (mggsa.solveTest(XOpt, numberTrials, numberFevals)) {
+                    numberTrialsArray[k] = numberTrials;
                 } else {
-                    count_iters[k] = countIters + 1;
+                    numberTrialsArray[k] = numberTrials + 1;
                 }
             }
             for (int k = K[i][0]; k <= K[i][1]; k += K[i][2]) {
-                count_successful = (int)count_if(count_iters.begin(), count_iters.end(), [k](double elem){ return elem <= k; });
-                success_rate[i][j + 2][k / K[i][2]] = (double)count_successful / count_func;
+                numberSuccessful = (int)count_if(numberTrialsArray.begin(), numberTrialsArray.end(), [k](double elem){ return elem <= k; });
+                successRate[i][j + 2][k / K[i][2]] = (double)numberSuccessful / numberFunctions;
             }
-            double end_time = clock();
-            double work_time = ((double)end_time - start_time) / CLOCKS_PER_SEC;
+            double endTime = omp_get_wtime();
+            double workTime = endTime - startTime;
 
-            string str_input = "MGGSA: " + problems[i].name + " r = " + to_string(r_array[i][j]) + " key = " + to_string(key_array[j]) + 
-                               " time: " + to_string(work_time) + " t_num: " + to_string(omp_get_thread_num()) + "\n";
-            cout << str_input;
+            string strOutput = "MGGSA: " + problems[i].name + " r = " + to_string(r[i][j]) + " key = " + to_string(key[j]) + 
+                               " time: " + to_string(workTime) + " t_num: " + to_string(omp_get_thread_num()) + "\n";
+            cout << strOutput;
         }
     }
 
-    for (int i = 0; i < number_family; i++) {
-        for (int j = 2; j < r_size + 2; j++) {
+    for (int i = 0; i < numberFamily; i++) {
+        for (int j = 2; j < sizeR + 2; j++) {
             for (int k = K[i][0]; k <= K[i][1]; k += K[i][2]) {
-                ofstr_mggsa << k << " " << success_rate[i][j][k / K[i][2]] << endl;
+                ofstrMggsa << k << " " << successRate[i][j][k / K[i][2]] << endl;
             }
-            ofstr_mggsa << endl << endl;
+            ofstrMggsa << endl << endl;
         }
     }
-    ofstr_mggsa.close();
+    ofstrMggsa.close();
 #endif
-    int total_end_time = clock();
-    double total_work_time = ((double)total_end_time - total_start_time) / CLOCKS_PER_SEC;
-    cout << "Total time: " << total_work_time << endl;
+    double totalEndTime = omp_get_wtime();
+    double totalWorkTime = totalEndTime - totalStartTime;
+    cout << "Total time: " << totalWorkTime << endl;
 
-    int size = (int)key_array.size();
-    ofstr_opt << "count_key = " << size << endl;
-    ofstr_opt << "array Name[" << number_family << "]" << endl;
-    ofstr_opt << "array R[" << size * number_family << "]" << endl;
-    ofstr_opt << "array Key[" << size << "]" << endl;
-    for (int i = 0; i < number_family; i++) {
-        ofstr_opt << "Name[" << i + 1 << "]=\"" << problems[i].short_name << "\"" << endl;
-        ofstr_opt << "Key[" << i + 1 << "]=\"" << key_array[i] << "\"" << endl;
-        for (int j = 0; j < r_array[i].size(); j++) {
-            ofstr_opt << "R[" << (i * size) + j + 1 << "]=\"" << r_array[i][j] << "\"" << endl; 
+    int sizeKey = key.size();
+    setVariableGnuplot(ofstrOpt, "numberKey", to_string(sizeKey));
+    initArrayGnuplot(ofstrOpt, "familyNames", numberFamily);
+    initArrayGnuplot(ofstrOpt, "r", sizeKey * numberFamily);
+    initArrayGnuplot(ofstrOpt, "key", sizeKey);
+    for (int i = 0; i < numberFamily; i++) {
+        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, "\"" + problems[i].shortName + "\"");
+        setValueInArrayGnuplot(ofstrOpt, "key", i + 1, to_string(key[i]));
+        for (int j = 0; j < r[i].size(); j++) {
+            setValueInArrayGnuplot(ofstrOpt, "r", (i * sizeKey) + j + 1, "\"" + to_string(r[i][j]) + "\"");
         }
     }
-    ofstr_opt.close();
+    ofstrOpt.close();
 
-    // Plotting operational characteristics(works with gnuplot)
-    int error;
-#if defined(__linux__)
-    setenv("QT_QPA_PLATFORM", "xcb", false);
-    error = system("chmod +x scripts/direct_mggsa_operational_characteristics.gp");
-    if (error != 0) {
-        cerr << "Error chmod" << endl;
-    }
-#endif
-
-    char str[100];
-    sprintf(str, "gnuplot -c scripts/direct_mggsa_operational_characteristics.gp %d", family_number);
-    error = system(str);
-    if (error != 0) {
-        cerr << "Error gnuplot" << endl;
-    }
+    drawGraphGnuplot("scripts/direct_mggsa_operational_characteristics.gp", familyNumber);
 
 #if defined(_MSC_VER)
     cin.get();
