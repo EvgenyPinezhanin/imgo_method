@@ -8,9 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <ctime>
 #include <algorithm>
-#include <functional>
 
 #include <Grishagin/GrishaginProblemFamily.hpp>
 #include <Grishagin/GrishaginConstrainedProblemFamily.hpp>
@@ -23,7 +21,7 @@
 
 using namespace std;
 
-#define CALC
+// #define CALC
 
 const int familyNumber = 2; // 0 - Grishagin, 1 - GKLS,
                              // 2 - Grishagin(constrained), 3 - GKLS(constrained)
@@ -77,7 +75,7 @@ int main() {
 
     MggsaMethod mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, -1, key, eps, -1, maxFevals, incr);
 
-#pragma omp parallel for schedule(static, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
+#pragma omp parallel for schedule(dynamic, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
         shared(numberFamily, r, den, d, successRate) \
         firstprivate(problems, K, mggsa)
     for (int i = 0; i < numberFamily; i++) {
@@ -179,19 +177,19 @@ int main() {
     setVariableGnuplot(ofstrOpt, "sizeDen", to_string(sizeDen));
     initArrayGnuplot(ofstrOpt, "familyNames", numberFamily);
     for (int i = 0; i < numberFamily; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, "\"" + problems[i].shortName + "\"");
+        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
     }
     initArrayGnuplot(ofstrOpt, "den", sizeDen);
     for (int i = 0; i < sizeDen; i++) {
         if (i < 4) {
-            setValueInArrayGnuplot(ofstrOpt, "den", i + 1, "\"dynamic(start den = " + to_string(den[i]) + ")\"");
+            setValueInArrayGnuplot(ofstrOpt, "den", i + 1, "dynamic(start den = " + to_string(den[i]) + ")");
         } else {
-            setValueInArrayGnuplot(ofstrOpt, "den", i + 1, "\"" + to_string(den[i]) + "\"");
+            setValueInArrayGnuplot(ofstrOpt, "den", i + 1, den[i]);
         }
     }
     ofstrOpt.close();
 
-    drawGraphGnuplot("scripts/mggsa_operational_characteristics_density_test.gp", familyNumber);
+    drawGraphGnuplot("scripts/mggsa_operational_characteristics_test_density.gp", familyNumber);
 
 #if defined(_MSC_VER)
     cin.get();

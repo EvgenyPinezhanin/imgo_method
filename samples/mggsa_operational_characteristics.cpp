@@ -4,7 +4,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <ctime>
 #include <algorithm>
 
 #include <Grishagin/GrishaginProblemFamily.hpp>
@@ -20,7 +19,7 @@ using namespace std;
 
 // #define CALC
 
-const int familyNumber = 3; // 0 - Grishagin, 1 - GKLS,
+const int familyNumber = 0; // 0 - Grishagin, 1 - GKLS,
                             // 2 - Grishagin(constrained), 3 - GKLS(constrained),
                             // 4 - comparison Grishagin and GKLS, 5 - comparison Grishagin and GKLS (constrained)
 
@@ -131,9 +130,9 @@ int main() {
     initArrayGnuplot(ofstrOpt, "familyNames", numberFamily);
     initArrayGnuplot(ofstrOpt, "r", r.size() * 3);
     for (int i = 0; i < numberFamily; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, "\"" + problems[i].shortName + "\"");
+        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
         for (int j = 0; j < r[i].size(); j++) {
-            setValueInArrayGnuplot(ofstrOpt, "r", (i * 3) + j + 1, "\"" + to_string(r[i][j]) + "\"");
+            setValueInArrayGnuplot(ofstrOpt, "r", (i * 3) + j + 1, r[i][j]);
         }
     }
     ofstrOpt.close();

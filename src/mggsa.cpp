@@ -107,10 +107,7 @@ double MggsaMethod::newPoint(int t) {
 
 double MggsaMethod::calcH(double xNew) {
     double d = 1.0 / (pow(2.0, den * n) * (pow(2.0, n) - 1.0));
-    double h = 0.0;
-    while (xNew - h > d) {
-        h += d;
-    }
+    double h = floor(xNew / d) * d;
     return h;
 }
 

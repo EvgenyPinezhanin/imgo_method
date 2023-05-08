@@ -2,7 +2,6 @@
 #include <fstream>
 #include <vector>
 
-#include <omp.h>
 #include <Grishagin/grishagin_function.hpp>
 #include <Grishagin/GrishaginConstrainedProblem.hpp>
 #include <GKLS/GKLSProblem.hpp>
@@ -11,6 +10,7 @@
 #include <map.h>
 #include <task.h>
 #include <output_results.h>
+#include <omp.h>
 
 using namespace std;
 
@@ -73,7 +73,7 @@ int main() {
     double totalStartTime = omp_get_wtime();
 #pragma omp parallel for schedule(dynamic, chunk) proc_bind(spread) num_threads(omp_get_num_procs()) collapse(4) \
         shared(numberFunctions, keyMin, keyMax, mMin, mMax, incrMin, incrMax, problems, r, lipschitzConst) \
-        firstprivate(mggsa)
+        firstprivate(mggsa, eps, d, maxTrials, maxFevals)
     for (int i = 0; i < numberFunctions; i++) {
         for (int j = keyMin; j <= keyMax; j++) {
             for (int k = mMin; k <= mMax; k++) {
@@ -113,7 +113,7 @@ int main() {
 
     initArrayGnuplot(ofstrOpt, "familyNames", numberFunctions);
     for (int i = 0; i < numberFunctions; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, "\"" + problems[i].name + "\"");
+        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
     }
     ofstrOpt.close();
 
@@ -179,8 +179,8 @@ void calculation(MggsaMethod &mggsa, vector4d &lipschitzConst, ProblemSingle pro
     printResultMggsa("Rastrigin function", n, numberConstraints, A, B, vector<double>(), XOpt, fXOpt, maxTrials,
                      maxFevals, eps, r, d, den, key, incr, numberTrials, numberFevals, lambdas, X, fX);
 #else
-    string str_output = problem.name + " key = " + to_string(key) + " m = " + to_string(den) + " incr = " + to_string(incr) +
-                        " time: " + to_string(workTime) + " t_num = " + to_string(omp_get_thread_num()) + "\n";
-    cout << str_output;
+    string strOutput = problem.name + " key = " + to_string(key) + " m = " + to_string(den) + " incr = " + to_string(incr) +
+                        " time: " + to_string(workTime) + " thread number = " + to_string(omp_get_thread_num()) + "\n";
+    cout << strOutput;
 #endif
 }

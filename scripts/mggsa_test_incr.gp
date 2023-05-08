@@ -1,6 +1,6 @@
 #! /usr/bin/gnuplot
 
-datafile = "output_data/mggsa_test.txt"
+datafile = "output_data/mggsa_test_incr.txt"
 
 load "output_data/mggsa_test_incr_opt.txt"
 

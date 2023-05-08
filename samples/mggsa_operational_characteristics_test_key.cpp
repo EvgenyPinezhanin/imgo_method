@@ -23,7 +23,7 @@ using namespace std;
 
 // #define CALC
 
-const int familyNumber = 2; // 0 - Grishagin, 1 - GKLS,
+const int familyNumber = 0; // 0 - Grishagin, 1 - GKLS,
                             // 2 - Grishagin(constrained), 3 - GKLS(constrained)
 
 int main() {
@@ -46,10 +46,10 @@ int main() {
                                     ProblemFamily("GKLSProblemConstrainedFamily", &gklsConstrainedProblems, 
                                                   TypeConstrants::Constraints, "GKLSConstrained") };
 
-    vector<vector<int>> K{ {0, 700, 25},
-                           {0, 1200, 25},
-                           {0, 2200, 25},
-                           {0, 4500, 25} };
+    vector<vector<int>> K{ { 0, 700, 25 },
+                           { 0, 1200, 25 },
+                           { 0, 2200, 25 },
+                           { 0, 4500, 25 } };
 
     vector<vector<double>> r{ { 3.0, 2.4, 1.6, 1.0 },
                               { 4.2, 3.8, 2.0, 1.0 },
@@ -62,11 +62,11 @@ int main() {
     ofstream ofstr("output_data/mggsa_operational_characteristics_test_key.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
-    int den = 10, incr = 30;
+    int den = 11, incr = 30;
     double eps = 0.01;
-    int maxTrials = 100000, maxFevals = 100000;
+    int maxFevals = 100000;
 
-    MggsaMethod mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, -1, eps, maxTrials, maxFevals, incr);
+    MggsaMethod mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, -1, eps, -1, maxFevals, incr);
 
     int sizeR = r[0].size();
     vector<vector<vector<double>>> successRate(numberFamily);
@@ -78,9 +78,9 @@ int main() {
     }
 
     double totalStartTime = omp_get_wtime();
-#pragma omp parallel for schedule(static, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
-        shared(numberFamily, problems, r, sizeR, successRate) \
-        firstprivate(mggsa, key, d)
+#pragma omp parallel for schedule(dynamic, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
+        shared(numberFamily, problems, r, key, d, sizeR, successRate) \
+        firstprivate(mggsa)
     for (int i = 0; i < numberFamily; i++) {
         for (int j = 0; j < sizeR; j++) {
             vector<double> A, B;
@@ -124,7 +124,7 @@ int main() {
                 if (mggsa.solveTest(XOpt, numberTrials, numberFevals)) {
                     numberTrialsArray[k] = numberFevals;
                 } else {
-                    numberTrialsArray[k] = numberFevals + 1;
+                    numberTrialsArray[k] = K[i][1] + 1;
                 }
             }
 
@@ -161,10 +161,10 @@ int main() {
     initArrayGnuplot(ofstrOpt, "r", sizeKey * numberFamily);
     initArrayGnuplot(ofstrOpt, "key", sizeKey);
     for (int i = 0; i < numberFamily; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, "\"" + problems[i].shortName + "\"");
-        setValueInArrayGnuplot(ofstrOpt, "key", i + 1, to_string(key[i]));
+        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
+        setValueInArrayGnuplot(ofstrOpt, "key", i + 1, key[i], false);
         for (int j = 0; j < r[i].size(); j++) {
-            setValueInArrayGnuplot(ofstrOpt, "r", (i * sizeKey) + j + 1, "\"" + to_string(r[i][j]) + "\"");
+            setValueInArrayGnuplot(ofstrOpt, "r", (i * sizeKey) + j + 1, r[i][j]);
         }
     }
     ofstrOpt.close();

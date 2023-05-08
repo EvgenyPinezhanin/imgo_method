@@ -74,7 +74,7 @@ splot @functionF title "φ(x, y)" nosurface, \
       @functionG lc rgb "orange" title "g(x, y)" nocontours, \
       trialfile index ind + 2 ls 5 lc rgb "green" title "trial points" nocontours, \
       trialfile index ind + 1 ls 5 lc rgb "blue" title "X" nocontours, \
-      trialfile index ind ls 5 lc rgb "red" title "X*" nocontours, \
+      trialfile index ind ls 5 lc rgb "red" title "X*" nocontours # , \
       # @functionF with labels notitle nosurface
 
 bind all "alt-End" "exit gnuplot"

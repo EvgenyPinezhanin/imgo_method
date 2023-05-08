@@ -12,14 +12,14 @@
     #include <cmath>
 #endif
 
-#include <omp.h>
 #include <mggsa.h>
 #include <map.h>
 #include <output_results.h>
+#include <omp.h>
 
 using namespace std;
 
-double euclideanDistance(vector<double> X, vector<double> Y) {
+double euclideanDistance(const vector<double> &X, const vector<double> &Y) {
     double res = 0.0;
     size_t dimension = X.size();
     for (int i = 0; i < dimension; i++) {
@@ -28,24 +28,12 @@ double euclideanDistance(vector<double> X, vector<double> Y) {
     return sqrt(res);
 }
 
-int N;
-double fRastrigin(vector<double> x, int j) {
-    double sum = 0.0;
-    for (int i = 0; i < N; i++) {
-        sum += x[i] * x[i] - 10.0 * cos(2.0 * M_PI * x[i]);
-    }
-    switch (j) {
-        case 1: return 10.0 * N + sum;
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-}
-
 #define CALC
 // #define OUTPUT_INFO
 
-const int type = 3; // 0 - number trials, 1 - number trial points,
+const int type = 2; // 0 - number trials, 1 - number trial points,
                     // 2 - accuracy, 3 - number trial points / number trials
-const int nType = 2; // nMin ... nMax
+const int nType = 3; // nMin ... nMax
 
 int main() {
     ofstream ofstrOpt("output_data/mggsa_test_incr_opt.txt");
@@ -61,7 +49,7 @@ int main() {
     ofstream ofstr("output_data/mggsa_test_incr.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
-    const int chunk = 2;
+    const int chunk = 10;
 
     double eps = 0.01, r = 2.1, d = 0.0;
     int numberConstraints = 0, key = 3;
@@ -70,11 +58,13 @@ int main() {
     vector<double> XOpt, A, B;
     for (int i = 0; i < nMin - 1; i++) {
         XOpt.push_back(0.0);
+        // A.push_back(-5.12);
+        // B.push_back(5.12);
         A.push_back(-0.5);
         B.push_back(1.0);
     }
 
-    MggsaMethod mggsa(fRastrigin, -1, numberConstraints, A, B, r, d, -1, key, eps, maxTrials, maxFevals, -1);
+    MggsaMethod mggsa(nullptr, -1, numberConstraints, A, B, r, d, -1, key, eps, maxTrials, maxFevals, -1);
 
     vector<vector<vector<double>>> accuracyArray(numberN);
     vector<vector<vector<int>>> numberTrialsArray(numberN), numberTrialPointsArray(numberN);
@@ -95,8 +85,7 @@ int main() {
 
     double totalStartTime = omp_get_wtime();
     for (int i = nMin; i <= nMax; i++) {
-        N = i;
-        mggsa.setN(N);
+        mggsa.setN(i);
         XOpt.push_back(0.0);
         A.push_back(-0.5);
         B.push_back(1.0);
@@ -112,6 +101,16 @@ int main() {
 
                 mggsa.setDen(j);
                 mggsa.setIncr(k);
+                mggsa.setF([n = i] (vector<double> x, int j) -> double {
+                                double sum = 0.0;
+                                for (int i = 0; i < n; i++) {
+                                    sum += x[i] * x[i] - 10.0 * cos(2.0 * M_PI * x[i]);
+                                }
+                                switch (j) {
+                                    case 1: return 10.0 * n + sum;
+                                    default: return numeric_limits<double>::quiet_NaN();
+                                }
+                            });
  
                 mggsa.solve(numberTrials, numberFevals, X);
                 mggsa.getLambda(lambdas);
@@ -130,7 +129,9 @@ int main() {
                                  numberTrials, numberFevals, lambdas, X, fRastrigin(X, numberConstraints + 1));
             #else
                 string strOutput = "Rastrigin: n = " + to_string(i) + " m = " + to_string(j) + " incr = " + to_string(k) +
-                                    " time: " + to_string(workTime) + " thread number = " + to_string(omp_get_thread_num()) + "\n";
+                                   " number of trials = " + to_string(numberTrials) + " number of trial points = " +
+                                   to_string(mggsa.getNumberTrialPoints()) + " time: " + to_string(workTime) + " thread number = " +
+                                   to_string(omp_get_thread_num()) + "\n";
                 cout << strOutput;
             #endif
             }

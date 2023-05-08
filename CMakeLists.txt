@@ -39,6 +39,14 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E make_directory
   ${OUT_DIR}/output_data
 )
+
+# GPROF
+SET(GPROF FALSE)
+if (GPROF)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+  SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
+endif()
   
 # GCGEN
 add_subdirectory(GCGen)

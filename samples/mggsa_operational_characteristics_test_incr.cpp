@@ -8,9 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <ctime>
 #include <algorithm>
-#include <functional>
 
 #include <Grishagin/GrishaginProblemFamily.hpp>
 #include <Grishagin/GrishaginConstrainedProblemFamily.hpp>
@@ -23,10 +21,11 @@
 
 using namespace std;
 
-#define CALC
+// #define CALC
 
-const int type = 0; // 0 - count trials, 1 - count points, 2 - c_points / c_trials
-const int familyNumber = 2; // 0 - Grishagin, 1 - GKLS,
+const int type = 2; // 0 - number trials, 1 - number trial points, 
+                    // 2 - number trial points / number trials
+const int familyNumber = 1; // 0 - Grishagin, 1 - GKLS,
                             // 2 - Grishagin(constrained), 3 - GKLS(constrained)
 
 int main() {
@@ -109,7 +108,6 @@ int main() {
 
             vector<double> XOpt;
             int index, numberTrials, numberFevals;
-            string strOutput;
             double startTime, endTime, workTime;
 
             for (int k = 0; k < incr.size(); k++) {
@@ -143,10 +141,10 @@ int main() {
                 }
                 maxNumberTrialPoints[i][j][k] = numberTrialPointsArray[index];
 
-                strOutput = problems[i].name + " r = " + to_string(r[i][j]) + " incr = " + to_string(incr[k]) + 
-                            " count trials = " + to_string(maxNumberTrials[i][j][k]) + " count trial points = " + 
-                            to_string(maxNumberTrialPoints[i][j][k]) + " time: " + to_string(workTime) + " t_num: " +
-                            to_string(omp_get_thread_num()) + "\n";
+                string strOutput = problems[i].name + " r = " + to_string(r[i][j]) + " incr = " + to_string(incr[k]) + 
+                                   " count trials = " + to_string(maxNumberTrials[i][j][k]) + " count trial points = " + 
+                                   to_string(maxNumberTrialPoints[i][j][k]) + " time: " + to_string(workTime) + " t_num: " +
+                                   to_string(omp_get_thread_num()) + "\n";
                 cout << strOutput;
             }
         }
@@ -168,19 +166,19 @@ int main() {
 #endif
 
     size_t sizeIncr = incr.size();
-    setVariableGnuplot(ofstrOpt, "numberKey", to_string(sizeIncr));
+    setVariableGnuplot(ofstrOpt, "numberKey", sizeIncr, false);
     initArrayGnuplot(ofstrOpt, "familyNames", numberFamily);
     initArrayGnuplot(ofstrOpt, "r", sizeIncr * numberFamily);
     for (int i = 0; i < numberFamily; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, "\"" + problems[i].shortName + "\"");
+        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
         for (int j = 0; j < r[i].size(); j++) {
-            setValueInArrayGnuplot(ofstrOpt, "r", (i * sizeIncr) + j + 1, "\"" + to_string(r[i][j]) + "\"");
+            setValueInArrayGnuplot(ofstrOpt, "r", (i * sizeIncr) + j + 1, r[i][j]);
         }
     }
     ofstrOpt.close();
 
     vector<int> args{type, familyNumber};
-    drawGraphGnuplot("scripts/mggsa_operational_characteristics_incr_test.gp", args);
+    drawGraphGnuplot("scripts/mggsa_operational_characteristics_test_incr.gp", args);
 
 #if defined(_MSC_VER)
     cin.get();

@@ -40,10 +40,10 @@ set xlabel "increment"
 set ylabel "Lipschitz constant"
 set xrange [ARG6:ARG7]
 
-set title 'Lipschitz test for the function '.Name[ARG1 + 1] font "Helvetica Bold, 20"
+set title 'Lipschitz test for the function '.familyNames[ARG1 + 1] font "Helvetica Bold, 20"
 
-plot for [i = ARG2:ARG3] for [j = ARG4:ARG5] datafile index (ARG5 - ARG4 + 1) * (i - 1) + j - ARG4 using 1:2 with lines \
-     lt 9 * (i - 1) + j - ARG4 + 1 title sprintf("key = %d, m = %d", i, j)
+plot for [i = ARG2:ARG3] for [j = ARG4:ARG5] datafile index (ARG5 - ARG4 + 1) * (i - 1) + j - ARG4 \
+     using 1:2 with lines lt 9 * (i - 1) + j - ARG4 + 1 title sprintf("key = %d, m = %d", i, j)
 
 bind all "alt-End" "exit gnuplot"
 pause mouse close

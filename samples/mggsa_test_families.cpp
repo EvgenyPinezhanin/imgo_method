@@ -7,45 +7,19 @@
 #include <vector>
 #include <cmath>
 
+#include <Grishagin/grishagin_function.hpp>
+#include <Grishagin/GrishaginConstrainedProblem.hpp>
+#include <GKLS/GKLSProblem.hpp>
+#include <GKLS/GKLSConstrainedProblem.hpp>
 #include <mggsa.h>
 #include <task.h>
 #include <output_results.h>
+#include <omp.h>
 
 using namespace std;
 
-const int functionNumber = 0; // 0 - f1, 1 - f2
-
-double f1(vector<double> x, int j) {
-    switch (j) {
-        case 1: return 0.01 * (pow((x[0] - 2.2), 2) + pow((x[1] - 1.2), 2) - 2.25);
-        case 2: return 100.0 * (1.0 - pow((x[0] - 2.0), 2) / 1.44 - pow(0.5 * x[1], 2));
-        case 3: return 10.0 * (x[1] - 1.5 - 1.5 * sin(6.283 * (x[0] - 1.75)));
-        case 4: return -1.5 * x[0] * x[0] * exp(1.0 - x[0] * x[0] - 20.25 * pow((x[0] - x[1]), 2)) -
-                       pow(0.5 * (x[0] - 1.0) * (x[1] - 1.0), 4) * exp(2.0 - pow(0.5 * (x[0] - 1.0), 4) -
-                       pow(x[1] - 1.0, 4));
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-}
-
-const double C[20] = {75.1963666677, -3.8112755343, 0.1269366345, -0.0020567665, 0.000010345,
-                      -6.8306567631, 0.0302344793, -0.0012813448, 0.0000352559, -0.0000002266,
-                      0.2564581253, -0.0034604030, 0.0000135139, -28.1064434908, -0.0000052375,
-                      -0.0000000063, 0.0000000007, 0.0003405462, -0.0000016638, -2.8673112392 };
-
-double f2(vector<double> x, int j) {
-    switch (j) {
-        case 1: return 450.0 - x[0] * x[1];
-        case 2: return (0.1 * x[0] - 1.0) * (0.1 * x[0] - 1.0) - x[1];
-        case 3: return 8.0 * (x[0] - 40.0) - (x[1] - 30.0) * (x[1] - 55.0);
-        case 4: return x[1] + (x[0] - 35.0) * (x[0] - 30.0) / 125.0 - 80.0;
-        case 5: return -(C[0] + C[1] * x[0] + C[2] * x[0] * x[0] + C[3] * pow(x[0], 3) + C[4] * pow(x[0], 4) + C[5] * x[1] +
-                         C[6] * x[0] * x[1] + C[7] * x[0] * x[0] * x[1] + C[8] * pow(x[0], 3) * x[1] + C[9] * pow(x[0], 4) * x[1] +
-                         C[10] * x[1] * x[1] + C[11] * pow(x[1], 3) + C[12] * pow(x[1], 4) + C[13] / (x[1] + 1) + C[14] * x[0] * x[0] * x[1] * x[1] +
-                         C[15] * pow(x[0], 3) * x[1] * x[1] + C[16] * pow(x[0], 3) * pow(x[1], 3) + C[17] * x[0] * x[1] * x[1] +
-                         C[18] * x[0] * pow(x[1], 3) + C[19] * exp(0.0005 * x[0] * x[1]));
-        default: return numeric_limits<double>::quiet_NaN();
-    }
-}
+const int familyNumber = 0; // 0 - grishagin, 1 - gkls
+                            // 2 - constrained grishagin, 3 - constrained GKLS
 
 int main() {
     ofstream ofstr("output_data/mggsa_test.txt");
@@ -53,16 +27,27 @@ int main() {
     ofstream ofstrOpt("output_data/mggsa_test_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
 
+    const int chunk = 4;
+
+    const int numberFunctions = 4;
+
+    TGrishaginProblem grishaginProblem;
+    GrishaginConstrainedProblem grishaginConstrainedProblem;
+    TGKLSProblem gklsProblem;
+    TGKLSConstrainedProblem gklsConstrainedProblem;
+
+    vector<ProblemSingle> problems{ ProblemSingle("Grishagin", &grishaginProblem, TypeConstrants::NoConstraints),
+                                    ProblemSingle("GKLS", &gklsProblem, TypeConstrants::NoConstraints),
+                                    ProblemSingle("GrishaginConstrained", &grishaginConstrainedProblem, TypeConstrants::Constraints),
+                                    ProblemSingle("GKLSConstrained", &gklsConstrainedProblem, TypeConstrants::Constraints) };
+
+    const int incrMin = 1, incrMax = 40;
+    const int mMin = 8, mMax = 12;
+    const int keyMin = 1, keyMax = 3;
+
     double eps = 0.001, r = 2.2, d = 0.05;
     int n = 2, den = 10, key = 1;
     int maxTrials = 100000, maxFevals = 100000;
-
-    vector<TaskMggsa> taskArray = { TaskMggsa(f1, "f1", n, 3, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
-                                              vector<double>{0.942, 0.944}, vector<double>{}, eps, maxTrials, maxFevals,
-                                              r, d, 12, key, -1, true),
-                                    TaskMggsa(f2, "f2", n, 4, vector<double>{0.0, 0.0}, vector<double>{80.0, 80.0},
-                                              vector<double>{77.489, 63.858}, vector<double>{}, eps, maxTrials, maxFevals,
-                                              3.3, 0.01, den, key, -1, true) };
 
     MggsaMethod mggsa;
 
@@ -71,7 +56,7 @@ int main() {
     vector<TrialConstrained> trials;
     int numberTrials, numberFevals;
 
-    for (int i = 0; i < taskArray.size(); i++) {
+/*     for (int i = 0; i < taskArray.size(); i++) {
         if (taskArray[i].used) {
             mggsa.setF(taskArray[i].f);
             mggsa.setN(taskArray[i].n);
@@ -117,7 +102,7 @@ int main() {
     }
     ofstrOpt.close();
 
-    drawGraphGnuplot("scripts/mggsa_test.gp", functionNumber);
+    drawGraphGnuplot("scripts/mggsa_test.gp", functionNumber); */
 
 #if defined(_MSC_VER)
     cin.get();
