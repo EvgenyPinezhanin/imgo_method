@@ -32,37 +32,36 @@ int main() {
     double eps = 0.01, r = 2.0, d = 0.0;
     int numberConstraints = 0;
     int maxTrials = 100000, maxFevals = 100000;
-    int den = 10, n = 2, incr = 10;
+    int den = 8, n = 2, incr = 0;
 
     MggsaMethod mggsa(f, n, numberConstraints, A, B, r, d, den, key, eps, maxTrials, maxFevals, incr);
 
-    vector<double> X_map(n);
+    vector<double> XMap(n);
     double k = (key != 3) ? 1.0 / (pow(2.0, n * den) - 1.0) :
                             1.0 / (pow(2.0, den * n) * (pow(2.0, n) - 1.0)) + 0.0000000001;
     if (key == 3) den++;
     for (double i = 0.0; i <= 1.0; i += k) {
-        mapd(i, den, X_map.data(), n, key);
-        ofstr << X_map[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " " 
-              << X_map[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
+        mapd(i, den, XMap.data(), n, key);
+        ofstr << XMap[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " " 
+              << XMap[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
     }
-    mapd(1.0, den, X_map.data(), n, key);
-    ofstr << X_map[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " "
-          << X_map[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
+    mapd(1.0, den, XMap.data(), n, key);
+    ofstr << XMap[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " "
+          << XMap[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
     if (key == 3) den--;
     ofstr.close();
 
-    vector<double> XOpt{ 0.0, 0.0 }, X;
+    vector<double> XOpt{ 0.0, 0.0 }, X, L;
     int numberTrials, numberFevals;
-    vector<double> lambdas;
     vector<vector<double>> points;
     vector<TrialConstrained> trials;
 
     mggsa.solve(numberTrials, numberFevals, X);
-    mggsa.getLambda(lambdas);
+    mggsa.getL(L);
 
     printResultMggsa("x^2 + y^2 - cos(18.0 * x) - cos(18.0 * y)", n, numberConstraints, A, B, vector<double>(), XOpt,
                      f(XOpt, numberConstraints + 1), maxTrials, maxFevals, eps, r, d, den, key, incr, numberTrials,
-                     numberFevals, lambdas, X, f(X, numberConstraints + 1));
+                     numberFevals, L, X, f(X, numberConstraints + 1));
 
     addPointGnuplot(ofstrPoints, XOpt, f(XOpt, numberConstraints + 1));
     addPointGnuplot(ofstrPoints, X, f(X, numberConstraints + 1));

@@ -20,7 +20,7 @@ using namespace std;
 
 // #define CALC
 
-const int familyNumber = 3; // 0 - Grishagin, 1 - GKLS,
+const int familyNumber = 4; // 0 - Grishagin, 1 - GKLS,
                             // 2 - Grishagin(constrained), 3 - GKLS(constrained),
                             // 4 - comparison Grishagin and GKLS, 5 - comparison Grishagin and GKLS (constrained)
 
@@ -34,7 +34,7 @@ double f(int n, const double *X, int *undefinedFlag, void *data) {
     fData->points.push_back(point);
 
     double f;
-    if (fData->type == TypeConstrants::Constraints) {
+    if (fData->type == TypeConstraints::Constraints) {
         FunctorFamilyConstrained *problem = static_cast<FunctorFamilyConstrained*>(fData->functor);
 
         optPoint = (*problem->constrainedOptProblemFamily)[problem->currentFunction]->GetOptimumPoint();
@@ -80,21 +80,21 @@ int main() {
     TGKLSProblemFamily gklsProblems;
     TGKLSConstrainedProblemFamily gklsConstrainedProblems;
 
-    vector<ProblemFamily> problems{ ProblemFamily("GrishaginProblemFamily", &grishaginProblems, TypeConstrants::NoConstraints, "Grishagin"),
-                                    ProblemFamily("GKLSProblemFamily", &gklsProblems, TypeConstrants::NoConstraints, "GKLS"),
+    vector<ProblemFamily> problems{ ProblemFamily("GrishaginProblemFamily", &grishaginProblems, TypeConstraints::NoConstraints, "Grishagin"),
+                                    ProblemFamily("GKLSProblemFamily", &gklsProblems, TypeConstraints::NoConstraints, "GKLS"),
                                     ProblemFamily("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
-                                                    TypeConstrants::Constraints, "GrishaginConstrained"),
+                                                  TypeConstraints::Constraints, "GrishaginConstrained"),
                                     ProblemFamily("GKLSProblemConstrainedFamily", &gklsConstrainedProblems, 
-                                                    TypeConstrants::Constraints, "GKLSConstrained") };
+                                                  TypeConstraints::Constraints, "GKLSConstrained") };
 
 #if defined(CALC)
     ofstream ofstr("output_data/direct_operational_characteristics.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
-    vector<vector<int>> K{ { 0, 700, 25 },
-                           { 0, 1600, 25 },
-                           { 0, 500, 25 },
-                           { 0, 4000, 25 } };
+    vector<vector<int>> K{ { 0, 400,  25 },
+                           { 0, 2000, 25 },
+                           { 0, 500,  25 },
+                           { 0, 5000, 25 } };
 
     DataDirectOperationalCharacteristics fData;
 
@@ -122,18 +122,18 @@ int main() {
 
     double totalStartTime = omp_get_wtime();
     for (int i = 0; i < numberFamily; i++) {
-        if (problems[i].type == TypeConstrants::Constraints) {
+        if (problems[i].type == TypeConstraints::Constraints) {
             functorConstrained.constrainedOptProblemFamily = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
             (*functorConstrained.constrainedOptProblemFamily)[0]->GetBounds(A, B);
             direct.setN((*functorConstrained.constrainedOptProblemFamily)[0]->GetDimension());
             fData.functor = &functorConstrained;
-            fData.type = TypeConstrants::Constraints;
+            fData.type = TypeConstraints::Constraints;
         } else {
             functor.optProblemFamily = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
             (*functor.optProblemFamily)[0]->GetBounds(A, B);
             direct.setN((*functor.optProblemFamily)[0]->GetDimension());
             fData.functor = &functor;
-            fData.type = TypeConstrants::NoConstraints;
+            fData.type = TypeConstraints::NoConstraints;
         }
         direct.setAB(A, B);
         direct.setMaxFevals(K[i][1]);
@@ -150,7 +150,7 @@ int main() {
                 fData.numberFevals = 0;
                 fData.converge = false;
 
-                if (problems[i].type == TypeConstrants::Constraints) {
+                if (problems[i].type == TypeConstraints::Constraints) {
                     functorConstrained.currentFunction = k;
                 } else {
                     functor.currentFunction = k;
@@ -182,7 +182,7 @@ int main() {
 
     initArrayGnuplot(ofstrOpt, "familyNames", numberFamily);
     for (int i = 0; i < numberFamily; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, "\"" + problems[i].shortName + "\"");
+        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
     }
     ofstrOpt.close();
 

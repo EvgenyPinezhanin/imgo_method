@@ -1,7 +1,3 @@
-#if defined( _MSC_VER )
-    #define _CRT_SECURE_NO_WARNINGS    
-#endif
-
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -27,9 +23,9 @@ double f1(vector<double> x, int j) {
     }
 }
 
-const double C[20] = {75.1963666677, -3.8112755343, 0.1269366345, -0.0020567665, 0.000010345,
+const double C[20] = { 75.1963666677, -3.8112755343, 0.1269366345, -0.0020567665, 0.000010345,
                       -6.8306567631, 0.0302344793, -0.0012813448, 0.0000352559, -0.0000002266,
-                      0.2564581253, -0.0034604030, 0.0000135139, -28.1064434908, -0.0000052375,
+                       0.2564581253, -0.0034604030, 0.0000135139, -28.1064434908, -0.0000052375,
                       -0.0000000063, 0.0000000007, 0.0003405462, -0.0000016638, -2.8673112392 };
 
 double f2(vector<double> x, int j) {
@@ -66,7 +62,7 @@ int main() {
 
     MggsaMethod mggsa;
 
-    vector<double> X, lambdas;
+    vector<double> X, L;
     vector<vector<double>> points;
     vector<TrialConstrained> trials;
     int numberTrials, numberFevals;
@@ -86,12 +82,12 @@ int main() {
             mggsa.setKey(taskArray[i].key);
 
             mggsa.solve(numberTrials, numberFevals, X);
-            mggsa.getLambda(lambdas);
+            mggsa.getL(L);
 
             printResultMggsa(taskArray[i].name, taskArray[i].n, taskArray[i].numberConstraints, taskArray[i].A, taskArray[i].B,
                              taskArray[i].L, taskArray[i].XOpt, taskArray[i].f(taskArray[i].XOpt, taskArray[i].numberConstraints + 1),
                              taskArray[i].maxTrials, taskArray[i].maxFevals, taskArray[i].eps, taskArray[i].r, taskArray[i].d,
-                             taskArray[i].den, taskArray[i].key, taskArray[i].incr, numberTrials, numberFevals, lambdas, X,
+                             taskArray[i].den, taskArray[i].key, taskArray[i].incr, numberTrials, numberFevals, L, X,
                              taskArray[i].f(X, taskArray[i].numberConstraints + 1));
 
             addPointGnuplot(ofstr, taskArray[i].XOpt, taskArray[i].f(taskArray[i].XOpt, taskArray[i].numberConstraints + 1));

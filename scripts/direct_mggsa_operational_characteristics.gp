@@ -27,11 +27,11 @@ array AlghorithmDirect[2]
 AlghorithmDirect[1] = "ORIGINAL"
 AlghorithmDirect[2] = "GABLONSKY"
 
-ind = count_key * @ARG1
+ind = numberKey * @ARG1
 
-set title "Operational characteristics for DIRECT and mggsa on a family of tasks ".Name[ARG1 + 1] font "Helvetica Bold, 20"
+set title "Operational characteristics for DIRECT and mggsa on a family of tasks ".familyNames[ARG1 + 1] font "Helvetica Bold, 20"
 plot for [i = 1:2] datafile_direct index 2 * @ARG1 + i - 1 using 1:2 with lines lt i title "DIRECT ".AlghorithmDirect[i], \
-     for [i = 1:count_key] datafile_mggsa index ind + i - 1 using 1:2 with lines lt i + 2 title "MGGSA "."r = ".R[ind + i].", key = ".Key[i]
+     for [i = 1:numberKey] datafile_mggsa index ind + i - 1 using 1:2 with lines lt i + 2 title "MGGSA "."r = ".r[ind + i].", key = ".key[i]
 
 bind all "alt-End" "exit gnuplot"
 pause mouse close

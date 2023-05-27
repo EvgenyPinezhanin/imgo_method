@@ -146,7 +146,7 @@ double ImgoMethod::selectNewPoint(int &t) {
     }
 
     // Steps 5, 6
-    double R = -numeric_limits<double>::infinity(), Rtmp = 0.0;
+    double R = -numeric_limits<double>::infinity(), Rtmp;
     double muV, zStarV, dx;
 
     size_t sizeTrialPoints = trialPoints.size();
@@ -201,7 +201,7 @@ void ImgoMethod::solve(int &numberTrials, int &numberFevals, double &x) {
     numberTrials = 2;
 
     double xNew;
-    int t = 1;
+    int t;
     while(true) {
         numberTrials++;
 
@@ -244,7 +244,7 @@ bool ImgoMethod::solveTest(double xOpt, int &numberTrials, int &numberFevals) {
     numberTrials = 2;
 
     double xNew;
-    int t = 1;
+    int t;
     while (true) {
         numberTrials++;
 

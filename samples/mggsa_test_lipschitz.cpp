@@ -1,3 +1,9 @@
+#if defined( _MSC_VER )
+    #define PROC_BIND
+#else
+    #define PROC_BIND proc_bind(master)
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -23,14 +29,14 @@ void calculation(MggsaMethod &mggsa, vector4d &lipschitzConst, ProblemSingle pro
                  int maxFevals, double eps, double r, double d, int key, int den, int incr, const int incrMin, const int mMin,
                  const int keyMin);
 
-const int type = 0; // 0 - grishagin, 1 - gkls
-                    // 2 - constrained grishagin, 3 - constrained GKLS
+const int familyNumber = 3; // 0 - Grishagin, 1 - GKLS
+                            // 2 - Grishagin(constrained), 3 - GKLS(constrained)
 
 int main() {
     ofstream ofstrOpt("output_data/mggsa_test_lipschitz_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
 
-    const int chunk = 4;
+    const int chunk = 10;
 
     const int numberFunctions = 4;
 
@@ -39,16 +45,16 @@ int main() {
     TGKLSProblem gklsProblem;
     TGKLSConstrainedProblem gklsConstrainedProblem;
 
-    vector<ProblemSingle> problems{ ProblemSingle("Grishagin", &grishaginProblem, TypeConstrants::NoConstraints),
-                                    ProblemSingle("GKLS", &gklsProblem, TypeConstrants::NoConstraints),
-                                    ProblemSingle("GrishaginConstrained", &grishaginConstrainedProblem, TypeConstrants::Constraints),
-                                    ProblemSingle("GKLSConstrained", &gklsConstrainedProblem, TypeConstrants::Constraints) };
+    vector<ProblemSingle> problems{ ProblemSingle("Grishagin", &grishaginProblem, TypeConstraints::NoConstraints),
+                                    ProblemSingle("GKLS", &gklsProblem, TypeConstraints::NoConstraints),
+                                    ProblemSingle("GrishaginConstrained", &grishaginConstrainedProblem, TypeConstraints::Constraints),
+                                    ProblemSingle("GKLSConstrained", &gklsConstrainedProblem, TypeConstraints::Constraints) };
 
     const int incrMin = 1, incrMax = 40;
     const int mMin = 8, mMax = 12;
     const int keyMin = 1, keyMax = 3;
 
-    vector<double> r{ 2.8, 3.5, 2.8, 2.8 };
+    vector<double> r{ 3.0, 4.3, 3.0, 4.5 };
 
 #if defined(CALC)
     ofstream ofstr("output_data/mggsa_test_lipschitz.txt");
@@ -71,7 +77,7 @@ int main() {
     }
 
     double totalStartTime = omp_get_wtime();
-#pragma omp parallel for schedule(dynamic, chunk) proc_bind(spread) num_threads(omp_get_num_procs()) collapse(4) \
+#pragma omp parallel for schedule(dynamic, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(4) \
         shared(numberFunctions, keyMin, keyMax, mMin, mMax, incrMin, incrMax, problems, r, lipschitzConst) \
         firstprivate(mggsa, eps, d, maxTrials, maxFevals)
     for (int i = 0; i < numberFunctions; i++) {
@@ -113,11 +119,11 @@ int main() {
 
     initArrayGnuplot(ofstrOpt, "familyNames", numberFunctions);
     for (int i = 0; i < numberFunctions; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
+        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].name);
     }
     ofstrOpt.close();
 
-    vector<int> args{ type, keyMin, keyMax, mMin, mMax, incrMin, incrMax };
+    vector<int> args{ familyNumber, keyMin, keyMax, mMin, mMax, incrMin, incrMax };
     drawGraphGnuplot("scripts/mggsa_test_lipschitz.gp", args);
 
     return 0;
@@ -129,13 +135,13 @@ void calculation(MggsaMethod &mggsa, vector4d &lipschitzConst, ProblemSingle pro
     double accuracy, fXOpt, fX;
     int numberConstraints, n;
     int numberTrials, numberFevals;
-    vector<double> A, B, XOpt, X, lambdas;
+    vector<double> A, B, XOpt, X, L;
     FunctorSingle functor;
     FunctorSingleConstrained functorConstrained;
 
     double startTime = omp_get_wtime();
 
-    if (problem.type == TypeConstrants::Constraints) {
+    if (problem.type == TypeConstraints::Constraints) {
         functorConstrained.constrainedOptProblem = static_cast<IConstrainedOptProblem*>(problem.optProblem);
         functorConstrained.constrainedOptProblem->GetBounds(A, B);
         n = functorConstrained.constrainedOptProblem->GetDimension();
@@ -162,14 +168,14 @@ void calculation(MggsaMethod &mggsa, vector4d &lipschitzConst, ProblemSingle pro
     mggsa.setR(r);
 
     mggsa.solve(numberTrials, numberFevals, X);
-    mggsa.getLambda(lambdas);
+    mggsa.getL(L);
 
-    if (problem.type == TypeConstrants::Constraints) {
+    if (problem.type == TypeConstraints::Constraints) {
         fX = functorConstrained(X, numberConstraints + 1);
     } else {
         fX = functor(X, 1);
     }
-    lipschitzConst[numberFunctions][(size_t)key - keyMin][(size_t)den - mMin][(size_t)incr - incrMin] = lambdas[0];
+    lipschitzConst[numberFunctions][(size_t)key - keyMin][(size_t)den - mMin][(size_t)incr - incrMin] = L[0];
     accuracy = sqrt((XOpt[0] - X[0]) * (XOpt[0] - X[0]) + (XOpt[1] - X[1]) * (XOpt[1] - X[1]));
 
     double endTime = omp_get_wtime();
@@ -177,7 +183,7 @@ void calculation(MggsaMethod &mggsa, vector4d &lipschitzConst, ProblemSingle pro
 
 #if defined(OUTPUT_INFO)
     printResultMggsa("Rastrigin function", n, numberConstraints, A, B, vector<double>(), XOpt, fXOpt, maxTrials,
-                     maxFevals, eps, r, d, den, key, incr, numberTrials, numberFevals, lambdas, X, fX);
+                     maxFevals, eps, r, d, den, key, incr, numberTrials, numberFevals, L, X, fX);
 #else
     string strOutput = problem.name + " key = " + to_string(key) + " m = " + to_string(den) + " incr = " + to_string(incr) +
                         " time: " + to_string(workTime) + " thread number = " + to_string(omp_get_thread_num()) + "\n";

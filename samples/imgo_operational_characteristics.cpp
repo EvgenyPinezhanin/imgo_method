@@ -32,14 +32,14 @@ int main() {
     THillProblemFamily hillProblems;
     TShekelProblemFamily shekelProblems;
 
-    vector<ProblemFamily> problems{ ProblemFamily("HillProblemFamily", &hillProblems, TypeConstrants::NoConstraints, "Hill"),
-                                    ProblemFamily("ShekelProblemFamily", &shekelProblems, TypeConstrants::NoConstraints, "Shekel") };
+    vector<ProblemFamily> problems{ ProblemFamily("HillProblemFamily", &hillProblems, TypeConstraints::NoConstraints, "Hill"),
+                                    ProblemFamily("ShekelProblemFamily", &shekelProblems, TypeConstraints::NoConstraints, "Shekel") };
 
     double eps = 0.0001, d = 0.0;
-    int m = 0;
+    int numberConstraints = 0;
     int maxTrials = 100000, maxFevals = 100000;
 
-    ImgoMethod imgo(nullptr, m, 0.0, 0.0, -1.0, d, eps, maxTrials, maxFevals);
+    ImgoMethod imgo(nullptr, numberConstraints, 0.0, 0.0, -1.0, d, eps, maxTrials, maxFevals);
 
     vector<vector<double>> r{ {3.0, 3.2, 3.4},
                               {3.1, 3.4, 3.7} };

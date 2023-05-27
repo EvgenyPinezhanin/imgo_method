@@ -40,7 +40,7 @@ public:
     double getB() const { return B[0]; };
     double getR() const { return r; };
 
-    double getLambda() const { return m; };
+    double getL() const { return m; };
     
     void solve(int &numberTrials, int &numberFevals, double &x);
     void solve(int &numberTrials, int &numberFevals, vector<double> &X) override;

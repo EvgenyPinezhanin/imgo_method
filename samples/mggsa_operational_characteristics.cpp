@@ -17,7 +17,7 @@
 
 using namespace std;
 
-// #define CALC
+#define CALC
 
 const int familyNumber = 0; // 0 - Grishagin, 1 - GKLS,
                             // 2 - Grishagin(constrained), 3 - GKLS(constrained),
@@ -34,12 +34,12 @@ int main() {
     TGKLSProblemFamily gklsProblems;
     TGKLSConstrainedProblemFamily gklsConstrainedProblems;
 
-    vector<ProblemFamily> problems{ ProblemFamily("GrishaginProblemFamily", &grishaginProblems, TypeConstrants::NoConstraints, "Grishagin"),
-                                    ProblemFamily("GKLSProblemFamily", &gklsProblems, TypeConstrants::NoConstraints, "GKLS"),
+    vector<ProblemFamily> problems{ ProblemFamily("GrishaginProblemFamily", &grishaginProblems, TypeConstraints::NoConstraints, "Grishagin"),
+                                    ProblemFamily("GKLSProblemFamily", &gklsProblems, TypeConstraints::NoConstraints, "GKLS"),
                                     ProblemFamily("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
-                                                  TypeConstrants::Constraints, "GrishaginConstrained"),
+                                                  TypeConstraints::Constraints, "GrishaginConstrained"),
                                     ProblemFamily("GKLSProblemConstrainedFamily", &gklsConstrainedProblems, 
-                                                  TypeConstrants::Constraints, "GKLSConstrained") };
+                                                  TypeConstraints::Constraints, "GKLSConstrained") };
 
     vector<vector<double>> r{ { 2.7, 3.0, 3.3 },
                               { 4.0, 4.3, 4.6 },
@@ -71,7 +71,7 @@ int main() {
 
     double totalStartTime = omp_get_wtime();
     for (int i = 0; i < numberFamily; i++) {
-        if (problems[i].type == TypeConstrants::Constraints) {
+        if (problems[i].type == TypeConstraints::Constraints) {
             functorConstrained.constrainedOptProblemFamily = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
             (*functorConstrained.constrainedOptProblemFamily)[0]->GetBounds(A, B);
             mggsa.setN((*functorConstrained.constrainedOptProblemFamily)[0]->GetDimension());
@@ -95,7 +95,7 @@ int main() {
 
             startTime = omp_get_wtime();
             for (int k = 0; k < numberFunctions; k++) {
-                if (problems[i].type == TypeConstrants::Constraints) {
+                if (problems[i].type == TypeConstraints::Constraints) {
                     functorConstrained.currentFunction = k;
                     XOpt = (*functorConstrained.constrainedOptProblemFamily)[k]->GetOptimumPoint();
                     mggsa.setF(functorConstrained);

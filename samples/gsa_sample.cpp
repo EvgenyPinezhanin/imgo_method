@@ -68,7 +68,7 @@ int main() {
 
             printResultGsa(taskArray[i].name, taskArray[i].A[0], taskArray[i].B[0], taskArray[i].L[0], taskArray[i].XOpt[0],
                            taskArray[i].f(taskArray[i].XOpt[0]), taskArray[i].maxTrials, taskArray[i].maxFevals, taskArray[i].eps,
-                           taskArray[i].r, numberTrials, numberFevals, gsa.getLambda(), x, taskArray[i].f(x));
+                           taskArray[i].r, numberTrials, numberFevals, gsa.getL(), x, taskArray[i].f(x));
 
             addPointGnuplot(ofstr, taskArray[i].XOpt[0], taskArray[i].f(taskArray[i].XOpt[0]));
             addPointGnuplot(ofstr, x, taskArray[i].f(x));

@@ -63,7 +63,7 @@ public:
 
     bool getCoincideX() const { return coincideX; };
     void getPoints(vector<vector<double>> &points);
-    void getLambda(vector<double> &lambdas) const { lambdas = mu; };
+    void getL(vector<double> &L) const { L = mu; };
 
     void solve(int &numberTrials, int &numberFevals, vector<double> &X, TypeSolve type);
     void solve(int &numberTrials, int &numberFevals, vector<double> &X) override;

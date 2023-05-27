@@ -1,18 +1,14 @@
 #if defined( _MSC_VER )
-    #define _CRT_SECURE_NO_WARNINGS
     #define PROC_BIND
 #else
-    #define PROC_BIND proc_bind(spread)
+    #define PROC_BIND proc_bind(master)
 #endif
 
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <ctime>
 #include <algorithm>
-#include <functional>
 
-#include <omp.h>
 #include <Grishagin/GrishaginProblemFamily.hpp>
 #include <Grishagin/GrishaginConstrainedProblemFamily.hpp>
 #include <GKLS/GKLSProblemFamily.hpp>
@@ -20,21 +16,24 @@
 #include <mggsa.h>
 #include <task.h>
 #include <output_results.h>
+#include <omp.h>
 
 using namespace std;
 
 // #define CALC
 
-const int type = 1; // 0 - P_max, 1 - count_trials, 2 - count points, 3 - c_points / c_trials
-const int familyNumber = 3; // 0 - Grishagin, 1 - GKLS,
+const int type = 1; // 0 - P max, 1 - number of trials,
+                    // 2 - number of trial points,
+                    // 3 - number of trial points / number of trials
+const int familyNumber = 1; // 0 - Grishagin, 1 - GKLS,
                             // 2 - Grishagin(constrained), 3 - GKLS(constrained)
 
 int main() {
-    ofstream ofstr("output_data/mggsa_operational_characteristics_r_test.txt");
+    ofstream ofstr("output_data/mggsa_operational_characteristics_test_r.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
-    ofstream ofstrOpt("output_data/mggsa_operational_characteristics_r_test_opt.txt");
+    ofstream ofstrOpt("output_data/mggsa_operational_characteristics_test_r_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
-
+ 
     const int chunk = 10;
 
     const int numberFamily = 4;
@@ -44,16 +43,17 @@ int main() {
     TGKLSProblemFamily gklsProblems;
     TGKLSConstrainedProblemFamily gklsConstrainedProblems;
 
-    vector<ProblemFamily> problems{ ProblemFamily("GrishaginProblemFamily", &grishaginProblems, TypeConstrants::NoConstraints,
-                                                    "Grishagin"),
-                                    ProblemFamily("GKLSProblemFamily", &gklsProblems, TypeConstrants::NoConstraints, "GKLS"),
+    vector<ProblemFamily> problems{ ProblemFamily("GrishaginProblemFamily", &grishaginProblems, TypeConstraints::NoConstraints,
+                                                  "Grishagin"),
+                                    ProblemFamily("GKLSProblemFamily", &gklsProblems, TypeConstraints::NoConstraints, "GKLS"),
                                     ProblemFamily("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems,
-                                                    TypeConstrants::Constraints, "GrishaginConstrained"),
+                                                  TypeConstraints::Constraints, "GrishaginConstrained"),
                                     ProblemFamily("GKLSProblemConstrainedFamily", &gklsConstrainedProblems,
-                                                    TypeConstrants::Constraints, "GKLSConstrained") };
+                                                  TypeConstraints::Constraints, "GKLSConstrained") };
 
     vector<int> K{ 700, 1200, 2500, 4500 };
 
+    // vector<double> rMin{ 4.8, 4.8, 4.8, 4.8 };
     vector<double> rMin{ 1.0, 1.0, 1.0, 1.0 };
     vector<double> rMax{ 5.0, 5.0, 5.0, 5.0 };
     vector<double> step{ 0.05, 0.05, 0.01, 0.01 };
@@ -71,15 +71,19 @@ int main() {
     vector<int> maxTrials{ 10000, 15000, 25000, 30000 };
 
     int numberFunctions;
+    vector<vector<vector<vector<bool>>>> convergeData(numberFamily);
     vector<vector<vector<vector<int>>>> numberTrialsData(numberFamily), numberTrialPointsData(numberFamily);
     for (int i = 0; i < numberFamily; i++) {
         numberFunctions = problems[i].optProblemFamily->GetFamilySize();
+        convergeData[i].resize(sizeKey);
         numberTrialsData[i].resize(sizeKey);
         numberTrialPointsData[i].resize(sizeKey);
         for (int j = 0; j < sizeKey; j++) {
+            convergeData[i][j].resize(sizeR[i]);
             numberTrialsData[i][j].resize(sizeR[i]);
             numberTrialPointsData[i][j].resize(sizeR[i]);
             for (int k = 0; k < sizeR[i]; k++) {
+                convergeData[i][j][k].resize(numberFunctions);
                 numberTrialsData[i][j][k].resize(numberFunctions);
                 numberTrialPointsData[i][j][k].resize(numberFunctions);
             }
@@ -104,7 +108,7 @@ int main() {
     ofstream ofstrData("output_data/mggsa_operational_characteristics_test_r_data.txt");
     if (!ofstrData.is_open()) cerr << "File opening error\n";
 
-    int den = 10, incr = 20;
+    int den = 10, incr = 30;
     double eps = 0.01;
     int maxFevals = 1000000;
 
@@ -115,8 +119,8 @@ int main() {
         numberR += sizeR[i];
     }
 
-#pragma omp parallel for schedule(static, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
-        shared(numberR, d, r, P, numberTrialsData, numberTrialPointsData) \
+#pragma omp parallel for schedule(dynamic, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
+        shared(numberR, d, r, P, convergeData, numberTrialsData, numberTrialPointsData) \
         firstprivate(K, sizeR, key, problems, mggsa)
     for (int t = 0; t < numberR; t++) {
         for (int j = 0; j < sizeKey; j++) {
@@ -134,7 +138,7 @@ int main() {
             FunctorFamily functor;
             FunctorFamilyConstrained functorConstrained;
 
-            if (problems[i].type == TypeConstrants::Constraints) {
+            if (problems[i].type == TypeConstraints::Constraints) {
                 functorConstrained.constrainedOptProblemFamily = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
                 (*functorConstrained.constrainedOptProblemFamily)[0]->GetBounds(A, B);
                 mggsa.setN((*functorConstrained.constrainedOptProblemFamily)[0]->GetDimension());
@@ -155,11 +159,12 @@ int main() {
             vector<double> XOpt;
             int numberTrials, numberFevals;
             int numberFunctions = problems[i].optProblemFamily->GetFamilySize();
+            vector<bool> converge(numberFunctions);
             vector<int> numberTrialsArray(numberFunctions), numberTrialPointsArray(numberFunctions);
 
             double startTime = omp_get_wtime();
             for (int l = 0; l < numberFunctions; l++) {
-                if (problems[i].type == TypeConstrants::Constraints) {
+                if (problems[i].type == TypeConstraints::Constraints) {
                     functorConstrained.currentFunction = l;
                     XOpt = (*functorConstrained.constrainedOptProblemFamily)[l]->GetOptimumPoint();
                     mggsa.setF(functorConstrained);
@@ -168,14 +173,12 @@ int main() {
                     XOpt = (*functor.optProblemFamily)[l]->GetOptimumPoint();
                     mggsa.setF(functor);
                 }
-                if (mggsa.solveTest(XOpt, numberTrials, numberFevals)) {
-                    numberTrialsArray[l] = numberTrials;
-                } else {
-                    numberTrialsArray[l] = maxTrials[i] + 1;
-                }
+                converge[l] = mggsa.solveTest(XOpt, numberTrials, numberFevals);
+                numberTrialsArray[l] = numberTrials;
                 numberTrialPointsArray[l] = mggsa.getNumberTrialPoints();
             }
 
+            convergeData[i][j][k] = converge;
             numberTrialsData[i][j][k] = numberTrialsArray;
             numberTrialPointsData[i][j][k] = numberTrialPointsArray;
             double endTime = omp_get_wtime();
@@ -191,11 +194,9 @@ int main() {
         for (int j = 0; j < sizeKey; j++) {
             for (int k = 0; k < r[i].size(); k++) {
                 for (int l = 0; l < numberTrialsData[i][j][k].size(); l++) {
-                    ofstrData << numberTrialsData[i][j][k][l] << " ";
-                }
-                ofstrData << endl;
-                for (int l = 0; l < numberTrialPointsData[i][j][k].size(); l++) {
-                    ofstrData << numberTrialPointsData[i][j][k][l] << " ";
+                    ofstrData << numberTrialsData[i][j][k][l] << " " <<
+                                 numberTrialPointsData[i][j][k][l] << " " <<
+                                 convergeData[i][j][k][l] << " ";
                 }
                 ofstrData << endl;
             }
@@ -207,15 +208,16 @@ int main() {
     if (!ifstrData.is_open()) cerr << "File opening error\n";
 
     size_t sizeNumberTrialsData;
+    bool converge;
     for (int i = 0; i < numberFamily; i++) {
         for (int j = 0; j < sizeKey; j++) {
             for (int k = 0; k < r[i].size(); k++) {
                 sizeNumberTrialsData = numberTrialsData[i][j][k].size();
                 for (int l = 0; l < sizeNumberTrialsData; l++) {
-                    ifstrData >> numberTrialsData[i][j][k][l];
-                }
-                for (int l = 0; l < sizeNumberTrialsData; l++) {
-                    ifstrData >> numberTrialPointsData[i][j][k][l];
+                    ifstrData >> numberTrialsData[i][j][k][l] >>
+                                 numberTrialPointsData[i][j][k][l] >>
+                                 converge;
+                    convergeData[i][j][k][l] = converge;
                 }
             }
         }
@@ -226,24 +228,34 @@ int main() {
     double totalWorkTime = totalEndTime - totalStartTime;
     cout << "Total time: " << totalWorkTime << endl;
 
-    int numberSuccessful, maxStep, index;
+    int numberSuccessful, index, maxTmp;
 
     for (int i = 0; i < numberFamily; i++) {
         numberFunctions = problems[i].optProblemFamily->GetFamilySize();
-        maxStep = K[i];
 
         for (int j = 0; j < sizeKey; j++) {
             for (int k = 0; k < r[i].size(); k++) {
-                numberSuccessful = (int)count_if(numberTrialsData[i][j][k].begin(), numberTrialsData[i][j][k].end(),
-                                                 [maxStep] (double elem) { return elem <= maxStep; });
+                numberSuccessful = 0;
+                for (int l = 0; l < numberFunctions; l++) {
+                    if (numberTrialsData[i][j][k][l] < K[i] && convergeData[i][j][k][l]) numberSuccessful++; 
+                }
                 P[i][j][k] = (double)numberSuccessful / numberFunctions;
 
-                auto iter = max_element(numberTrialsData[i][j][k].begin(), numberTrialsData[i][j][k].end());
-                maxNumberTrialPoints[i][j][k] = *iter;
-                for (int l = 0; l < numberTrialsData[i][j][k].size(); l++) {
-                    if (*iter == numberTrialsData[i][j][k][l]) index = l;
+                index = -1;
+                maxTmp = -1;
+                for (int l = 0; l < numberFunctions; l++) {
+                    if (numberTrialsData[i][j][k][l] > maxTmp && convergeData[i][j][k][l]) {
+                        maxTmp = numberTrialsData[i][j][k][l];
+                        index = i;
+                    }
                 }
-                maxNumberTrialPoints[i][j][k] = numberTrialPointsData[i][j][k][index];
+                if (index != -1) {
+                    maxNumberTrials[i][j][k] = maxTmp;
+                    maxNumberTrialPoints[i][j][k] = numberTrialPointsData[i][j][k][index];
+                } else {
+                    maxNumberTrials[i][j][k] = 1;
+                    maxNumberTrialPoints[i][j][k] = 0;
+                }
             }
         }
     }
@@ -252,7 +264,8 @@ int main() {
         for (int j = 0; j < key.size(); j++) {
             for (int k = 0; k < r[i].size(); k++) {
                 ofstr << r[i][k] << " " << P[i][j][k] << " " <<
-                         maxNumberTrials[i][j][k] << " " << maxNumberTrialPoints[i][j][k] << endl;
+                         maxNumberTrials[i][j][k] << " " <<
+                         maxNumberTrialPoints[i][j][k] << "\n";
             }
             ofstr << endl << endl;
         }
@@ -263,8 +276,8 @@ int main() {
     initArrayGnuplot(ofstrOpt, "familyNames", numberFamily);
     initArrayGnuplot(ofstrOpt, "K", numberFamily);
     for (int i = 0; i < numberFamily; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, "\"" + problems[i].shortName + "\"");
-        setValueInArrayGnuplot(ofstrOpt, "K", i + 1, to_string(K[i]));
+        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
+        setValueInArrayGnuplot(ofstrOpt, "K", i + 1, K[i], false);
     }
     ofstrOpt.close();
 

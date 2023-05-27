@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <iomanip>
 #include <vector>
 #include <limits>
 #if defined( _MSC_VER )
@@ -52,14 +51,14 @@ int main() {
     int maxTrials = 100000, maxFevals = 100000;
 
     vector<TaskImgo> taskArray = { TaskImgo(f1, "f1(x)", 0, -4.0, 4.0, -M_PI / 2.0, vector<double>{ 1.0 }, eps, maxTrials, maxFevals, r, d),
-                                   TaskImgo(f2, "f2(x)", 1, 2.0, 8.0, 2.0 * M_PI, vector<double>{ 1.0 ,2.0 }, eps, maxTrials, maxFevals, r, d),
+                                   TaskImgo(f2, "f2(x)", 1, 2.0, 8.0, 2.0 * M_PI, vector<double>{ 1.0, 2.0 }, eps, maxTrials, maxFevals, r, d),
                                    TaskImgo(f3, "f3(x)", 2, -2.0, 2.0, 0.1, vector<double>{ 4.0, 1.0, 23.0 }, eps, maxTrials, maxFevals, r, d) };
 
-    ImgoMethod imgo(nullptr);
+    ImgoMethod imgo;
 
     double x;
     int numberTrials, numberFevals;
-    vector<double> lambdas;
+    vector<double> L;
     vector<TrialConstrained> trials;
 
     for (int i = 0; i < taskArray.size(); i++) {
@@ -74,12 +73,12 @@ int main() {
             imgo.setD(taskArray[i].d);
 
             imgo.solve(numberTrials, numberFevals, x);
-            imgo.getLambda(lambdas);
+            imgo.getL(L);
 
             printResultImgo(taskArray[i].name, taskArray[i].numberConstraints, taskArray[i].A[0], taskArray[i].B[0], taskArray[i].L,
                             taskArray[i].XOpt[0], taskArray[i].f(taskArray[i].XOpt[0], taskArray[i].numberConstraints + 1),
                             taskArray[i].maxTrials, taskArray[i].maxFevals, taskArray[i].eps, taskArray[i].r, taskArray[i].d,
-                            numberTrials, numberFevals, lambdas, x, taskArray[i].f(x, taskArray[i].numberConstraints + 1));
+                            numberTrials, numberFevals, L, x, taskArray[i].f(x, taskArray[i].numberConstraints + 1));
 
             addPointGnuplot(ofstr, taskArray[i].XOpt[0], taskArray[i].f(taskArray[i].XOpt[0], taskArray[i].numberConstraints + 1));
             addPointGnuplot(ofstr, x, taskArray[i].f(x, taskArray[i].numberConstraints + 1));

@@ -30,14 +30,14 @@ int main() {
     double eps = 0.01, r = 2.0, d = 0.0;
     int numberConstraints = 0;
     int maxTrials = 100000, maxFevals = 100000;
-    int n = 2, key = 3, incr = 10;
+    int n = 2, key = 3, incr = 0;
 
     MggsaMethod mggsa(f, n, numberConstraints, A, B, r, d, -1, key, eps, maxTrials, maxFevals, incr);
 
     vector<double> XOpt{ 0.0, 0.0 }, X;
-    vector<int> den{ 2, 4, 8, 10, 12 };
+    vector<int> den{ 4, 6, 8, 10, 12 };
     int numberTrials, numberFevals;
-    vector<double> lambdas;
+    vector<double> L;
     vector<vector<double>> points;
     vector<TrialConstrained> trials;
 
@@ -51,11 +51,11 @@ int main() {
         } else {
             mggsa.solve(numberTrials, numberFevals, X, TypeSolve::RESOLVE);
         }
-        mggsa.getLambda(lambdas);
+        mggsa.getL(L);
 
         printResultMggsa("x^2 + y^2 - cos(18.0 * x) - cos(18.0 * y)", n, numberConstraints, A, B, vector<double>(), XOpt,
                          f(XOpt, numberConstraints + 1), maxTrials, maxFevals, eps, r, d, den[i], key, -1, numberTrials,
-                         numberFevals, lambdas, X, f(X, numberConstraints + 1));
+                         numberFevals, L, X, f(X, numberConstraints + 1));
 
         addPointGnuplot(ofstr, X, f(X, numberConstraints + 1));
 

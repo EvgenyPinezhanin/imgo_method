@@ -19,21 +19,21 @@ set ylabel "P_s(k)" font ", 15"
 set tics font ", 11"
 set key font ", 15"
 
-array Alghorithm[2]
-Alghorithm[1] = "DIRECT ORIGINAL"
-Alghorithm[2] = "DIRECT GABLONSKY"
+array alghorithm[2]
+alghorithm[1] = "DIRECT ORIGINAL"
+alghorithm[2] = "DIRECT GABLONSKY"
 
 if (ARG1 < 4) {
-     set title "Operational characteristics for DIRECT on a family of tasks ".Name[ARG1 + 1] font "Helvetica Bold, 20"
-     plot for [i = 1:2] datafile index 2 * ARG1 + i - 1 using 1:2 with lines lt i title Alghorithm[i]
+     set title "Operational characteristics for DIRECT on a family of tasks ".familyNames[ARG1 + 1] font "Helvetica Bold, 20"
+     plot for [i = 1:2] datafile index 2 * ARG1 + i - 1 using 1:2 with lines lt i title alghorithm[i]
 }
 if (ARG1 == 4) {
      set title "Comparison of operational characteristics Grishagin and GKLS for DIRECT" font "Helvetica Bold, 20"
-     plot for [i = 1:4] datafile index i - 1 using 1:2 with lines lt i title Alghorithm[i % 2 + 1]."(".Name[(i - 1) / 2 + 1].")"
+     plot for [i = 1:4] datafile index i - 1 using 1:2 with lines lt i title alghorithm[i % 2 + 1]."(".familyNames[(i - 1) / 2 + 1].")"
 }
 if (ARG1 == 5) {
      set title "Comparison of operational characteristics Grishagin and GKLS(constrained) for DIRECT" font "Helvetica Bold, 20"
-     plot for [i = 5:8] datafile index i - 1 using 1:2 with lines lt i - 4 title Alghorithm[i % 2 + 1]."(".Name[(i - 1) / 2 + 1].")"
+     plot for [i = 5:8] datafile index i - 1 using 1:2 with lines lt i - 4 title alghorithm[i % 2 + 1]."(".familyNames[(i - 1) / 2 + 1].")"
 }
 
 bind all "alt-End" "exit gnuplot"

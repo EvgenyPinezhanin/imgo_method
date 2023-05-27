@@ -27,16 +27,18 @@ void printResultDirect(string taskName, int dimension, const vector<double> &A, 
                        direct_algorithm algorithm, int numberFevals, const vector<double> &X, double fX);
 
 void addPointGnuplot(ofstream &ofstr, double x, double f);
+void addPointGnuplot(ofstream &ofstr, const vector<double> &X, double f);
+void addPointGnuplot(ofstream &ofstr, const vector<double> &X);
+
 void addPointGnuplot(ofstream &ofstr, Trial trial);
 
-void addPointGnuplot(ofstream &ofstr, const vector<double> &X, double f);
+void addPointsGnuplot(ofstream &ofstr, const vector<double> &X, const vector<double> &f);
+void addPointsGnuplot(ofstream &ofstr, const vector<vector<double>> &X, const vector<double> &f);
+void addPointsGnuplot(ofstream &ofstr, const vector<vector<double>> &X);
 
-void addPointsGnuplot(ofstream &ofstr, const vector<double> &X, vector<double> f);
-void addPointsGnuplot(ofstream &ofstr, vector<Trial> trials);
-void addPointsGnuplot(ofstream &ofstr, vector<TrialConstrained> trials);
-
-void addPointsGnuplot(ofstream &ofstr, vector<vector<double>> X, vector<double> f);
-void addPointsGnuplot(ofstream &ofstr, vector<vector<double>> X, vector<TrialConstrained> trials);
+void addPointsGnuplot(ofstream &ofstr, const vector<Trial> &trials);
+void addPointsGnuplot(ofstream &ofstr, const vector<TrialConstrained> &trials);
+void addPointsGnuplot(ofstream &ofstr, const vector<vector<double>> &X, const vector<TrialConstrained> &trials);
 
 template<typename T>
 void setVariableGnuplot(ofstream &ofstr, string nameVariable, T value, bool stringExpression = true) {
@@ -53,6 +55,6 @@ void setValueInArrayGnuplot(ofstream &ofstr, string nameArray, int index, T valu
 
 void drawGraphGnuplot(string nameScript);
 void drawGraphGnuplot(string nameScript, int arg);
-void drawGraphGnuplot(string nameScript, vector<int> args);
+void drawGraphGnuplot(string nameScript, const vector<int> &args);
 
 #endif // OUTPUT_RESULTS_H_

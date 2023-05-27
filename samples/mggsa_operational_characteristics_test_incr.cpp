@@ -2,7 +2,7 @@
     #define _CRT_SECURE_NO_WARNINGS
     #define PROC_BIND
 #else
-    #define PROC_BIND proc_bind(spread)
+    #define PROC_BIND proc_bind(master)
 #endif
 
 #include <iostream>
@@ -23,9 +23,9 @@ using namespace std;
 
 // #define CALC
 
-const int type = 2; // 0 - number trials, 1 - number trial points, 
-                    // 2 - number trial points / number trials
-const int familyNumber = 1; // 0 - Grishagin, 1 - GKLS,
+const int type = 2; // 0 - number of trials, 1 - number of trial points, 
+                    // 2 - number of trial points / number of trials
+const int familyNumber = 3; // 0 - Grishagin, 1 - GKLS,
                             // 2 - Grishagin(constrained), 3 - GKLS(constrained)
 
 int main() {
@@ -41,17 +41,17 @@ int main() {
     TGrishaginConstrainedProblemFamily grishaginConstrainedProblems;
     TGKLSConstrainedProblemFamily gklsConstrainedProblems;
 
-    vector<ProblemFamily> problems{ ProblemFamily("GrishaginProblemFamily", &grishaginProblems, TypeConstrants::NoConstraints, "Grishagin"),
-                                    ProblemFamily("GKLSProblemFamily", &gklsProblems, TypeConstrants::NoConstraints, "GKLS"),
+    vector<ProblemFamily> problems{ ProblemFamily("GrishaginProblemFamily", &grishaginProblems, TypeConstraints::NoConstraints, "Grishagin"),
+                                    ProblemFamily("GKLSProblemFamily", &gklsProblems, TypeConstraints::NoConstraints, "GKLS"),
                                     ProblemFamily("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
-                                                  TypeConstrants::Constraints, "GrishaginConstrained"),
+                                                  TypeConstraints::Constraints, "GrishaginConstrained"),
                                     ProblemFamily("GKLSProblemConstrainedFamily", &gklsConstrainedProblems, 
-                                                  TypeConstrants::Constraints, "GKLSConstrained") };
+                                                  TypeConstraints::Constraints, "GKLSConstrained") };
 
-    vector<vector<double>> r{ { 3.0, 2.4, 1.6, 1.0 },
-                              { 4.2, 3.8, 2.0, 1.0 },
-                              { 3.5, 2.6, 1.8, 1.0 },
-                              { 4.7, 3.0, 2.0, 1.0 } };
+    vector<vector<double>> r{ { 3.0, 2.8, 2.6, 2.4 },
+                              { 4.3, 4.1, 3.9, 3.7 },
+                              { 3.0, 2.6, 2.2, 1.8 },
+                              { 4.5, 4.1, 3.7, 3.3 } };
     vector<int> incr{ 0, 20, 40, 60 };
     vector<double> d{ 0.0, 0.0, 0.01, 0.01 };
 
@@ -78,7 +78,7 @@ int main() {
     int sizeR = r[0].size();
 
     double totalStartTime = omp_get_wtime();
-#pragma omp parallel for schedule(static, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
+#pragma omp parallel for schedule(dynamic, chunk) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
         shared(numberFamily, problems, d, r, sizeR, incr, maxNumberTrials, maxNumberTrialPoints) \
         firstprivate(mggsa)
     for (int i = 0; i < numberFamily; i++) {
@@ -87,7 +87,7 @@ int main() {
             FunctorFamily functor;
             FunctorFamilyConstrained functorConstrained;
 
-            if (problems[i].type == TypeConstrants::Constraints) {
+            if (problems[i].type == TypeConstraints::Constraints) {
                 functorConstrained.constrainedOptProblemFamily = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
                 (*functorConstrained.constrainedOptProblemFamily)[0]->GetBounds(A, B);
                 mggsa.setN((*functorConstrained.constrainedOptProblemFamily)[0]->GetDimension());
@@ -99,15 +99,15 @@ int main() {
                 mggsa.setNumberConstraints(0);
             }
 
-            vector<int> numberTrialsArray(problems[i].optProblemFamily->GetFamilySize());
-            vector<int> numberTrialPointsArray(problems[i].optProblemFamily->GetFamilySize());
-            int numberFunctions = problems[i].optProblemFamily->GetFamilySize();
             mggsa.setAB(A, B);
             mggsa.setD(d[i]);
             mggsa.setR(r[i][j]);
 
+            int numberFunctions = problems[i].optProblemFamily->GetFamilySize();
+            vector<bool> converge(numberFunctions);
+            vector<int> numberTrialsArray(numberFunctions), numberTrialPointsArray(numberFunctions);
             vector<double> XOpt;
-            int index, numberTrials, numberFevals;
+            int numberTrials, numberFevals;
             double startTime, endTime, workTime;
 
             for (int k = 0; k < incr.size(); k++) {
@@ -115,7 +115,7 @@ int main() {
 
                 startTime = omp_get_wtime();
                 for (int l = 0; l < numberFunctions; l++) {
-                    if (problems[i].type == TypeConstrants::Constraints) {
+                    if (problems[i].type == TypeConstraints::Constraints) {
                         functorConstrained.currentFunction = l;
                         XOpt = (*functorConstrained.constrainedOptProblemFamily)[l]->GetOptimumPoint();
                         mggsa.setF(functorConstrained);
@@ -124,26 +124,31 @@ int main() {
                         XOpt = (*functor.optProblemFamily)[l]->GetOptimumPoint();
                         mggsa.setF(functor);
                     }
-                    if (mggsa.solveTest(XOpt, numberTrials, numberFevals)) {
-                        numberTrialsArray[l] = numberTrials;
-                    } else {
-                        numberTrialsArray[l] = maxTrials + 1;
-                    }
+                    converge[l] = mggsa.solveTest(XOpt, numberTrials, numberFevals);
+                    numberTrialsArray[l] = numberTrials;
                     numberTrialPointsArray[l] = mggsa.getNumberTrialPoints();
                 }
                 endTime = omp_get_wtime();
                 workTime = endTime - startTime;
 
-                auto iter = max_element(numberTrialsArray.begin(), numberTrialsArray.end());
-                maxNumberTrials[i][j][k] = *iter;
-                for (int l = 0; l < numberTrialsArray.size(); l++) {
-                    if (*iter == numberTrialsArray[l]) index = l;
+                int maxTmp = -1, index = -1;
+                for (int i = 0; i < numberFunctions; i++) {
+                    if (numberTrialsArray[i] > maxTmp && converge[i]) {
+                        maxTmp = numberTrialsArray[i];
+                        index = i;
+                    }
                 }
-                maxNumberTrialPoints[i][j][k] = numberTrialPointsArray[index];
+                if (index != -1) {
+                    maxNumberTrials[i][j][k] = maxTmp;
+                    maxNumberTrialPoints[i][j][k] = numberTrialPointsArray[index];
+                } else {
+                    maxNumberTrials[i][j][k] = 1;
+                    maxNumberTrialPoints[i][j][k] = 0;
+                }
 
                 string strOutput = problems[i].name + " r = " + to_string(r[i][j]) + " incr = " + to_string(incr[k]) + 
-                                   " count trials = " + to_string(maxNumberTrials[i][j][k]) + " count trial points = " + 
-                                   to_string(maxNumberTrialPoints[i][j][k]) + " time: " + to_string(workTime) + " t_num: " +
+                                   " number of trials = " + to_string(maxNumberTrials[i][j][k]) + " number of trial points = " + 
+                                   to_string(maxNumberTrialPoints[i][j][k]) + " time: " + to_string(workTime) + " thread number: " +
                                    to_string(omp_get_thread_num()) + "\n";
                 cout << strOutput;
             }

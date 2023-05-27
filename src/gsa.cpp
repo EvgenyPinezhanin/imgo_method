@@ -72,8 +72,7 @@ double GsaMethod::selectNewPoint(int &t) {
     m = (abs(M) <= epsilon) ? 1.0 : r * M;
 
     // Steps 4, 5
-    double R = -numeric_limits<double>::infinity(), Rtmp = 0.0;
-    double dx;
+    double R = -numeric_limits<double>::infinity(), Rtmp, dx;
     
     sizeTrialPoints = trialPoints.size();
     for (size_t i = 1; i < sizeTrialPoints; i++) {
@@ -102,7 +101,7 @@ void GsaMethod::solve(int &numberIters, int &numberFevals, double &x) {
     numberIters = 2;
 
     double xNew;
-    int t = 1;
+    int t;
     while(true) {
         numberIters++;
 

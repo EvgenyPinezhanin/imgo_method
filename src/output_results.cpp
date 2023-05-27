@@ -182,11 +182,6 @@ void addPointGnuplot(ofstream &ofstr, double x, double f) {
     ofstr << "\n" << endl;
 }
 
-void addPointGnuplot(ofstream &ofstr, Trial trial) {
-    ofstr << trial.x << " " << trial.z << "\n";
-    ofstr << "\n" << endl;
-}
-
 void addPointGnuplot(ofstream &ofstr, const vector<double> &X, double f) {
     size_t dimensionX = X.size();
     for (int i = 0; i < dimensionX; i++) {
@@ -196,7 +191,21 @@ void addPointGnuplot(ofstream &ofstr, const vector<double> &X, double f) {
     ofstr << "\n" << endl;
 }
 
-void addPointsGnuplot(ofstream &ofstr, const vector<double> &X, vector<double> f) {
+void addPointGnuplot(ofstream &ofstr, const vector<double> &X) {
+    size_t dimensionX = X.size();
+    for (int i = 0; i < dimensionX - 1; i++) {
+        ofstr << X[i] << " ";
+    }
+    ofstr << X[dimensionX - 1] << "\n";
+    ofstr << "\n" << endl;
+}
+
+void addPointGnuplot(ofstream &ofstr, Trial trial) {
+    ofstr << trial.x << " " << trial.z << "\n";
+    ofstr << "\n" << endl;
+}
+
+void addPointsGnuplot(ofstream &ofstr, const vector<double> &X, const vector<double> &f) {
     size_t numberPoints = X.size();
     for (int i = 0; i < numberPoints; i++) {
         ofstr << X[i] << " " << f[i] << "\n";
@@ -204,23 +213,7 @@ void addPointsGnuplot(ofstream &ofstr, const vector<double> &X, vector<double> f
     ofstr << "\n" << endl;
 }
 
-void addPointsGnuplot(ofstream &ofstr, vector<Trial> trials) {
-    size_t numberPoints = trials.size();
-    for (int i = 0; i < numberPoints; i++) {
-        ofstr << trials[i].x << " " << trials[i].z << "\n";
-    }
-    ofstr << "\n" << endl;
-}
-
-void addPointsGnuplot(ofstream &ofstr, vector<TrialConstrained> trials) {
-    size_t numberPoints = trials.size();
-    for (int i = 0; i < numberPoints; i++) {
-        ofstr << trials[i].x << " " << trials[i].z << "\n";
-    }
-    ofstr << "\n" << endl;
-}
-
-void addPointsGnuplot(ofstream &ofstr, vector<vector<double>> X, vector<double> f) {
+void addPointsGnuplot(ofstream &ofstr, const vector<vector<double>> &X, const vector<double> &f) {
     size_t sizeX = X.size(), dimensionX = X[0].size();
     for (int i = 0; i < sizeX; i++) {
         for (int j = 0; j < dimensionX; j++) {
@@ -231,7 +224,34 @@ void addPointsGnuplot(ofstream &ofstr, vector<vector<double>> X, vector<double> 
     ofstr << "\n" << endl;
 }
 
-void addPointsGnuplot(ofstream &ofstr, vector<vector<double>> X, vector<TrialConstrained> trials) {
+void addPointsGnuplot(ofstream &ofstr, const vector<vector<double>> &X) {
+    size_t sizeX = X.size(), dimensionX = X[0].size();
+    for (int i = 0; i < sizeX; i++) {
+        for (int j = 0; j < dimensionX - 1; j++) {
+            ofstr << X[i][j] << " ";
+        }
+        ofstr << X[i][dimensionX - 1] << "\n";
+    }
+    ofstr << "\n" << endl;
+}
+
+void addPointsGnuplot(ofstream &ofstr, const vector<Trial> &trials) {
+    size_t numberPoints = trials.size();
+    for (int i = 0; i < numberPoints; i++) {
+        ofstr << trials[i].x << " " << trials[i].z << "\n";
+    }
+    ofstr << "\n" << endl;
+}
+
+void addPointsGnuplot(ofstream &ofstr, const vector<TrialConstrained> &trials) {
+    size_t numberPoints = trials.size();
+    for (int i = 0; i < numberPoints; i++) {
+        ofstr << trials[i].x << " " << trials[i].z << "\n";
+    }
+    ofstr << "\n" << endl;
+}
+
+void addPointsGnuplot(ofstream &ofstr, const vector<vector<double>> &X, const vector<TrialConstrained> &trials) {
     size_t sizeX = X.size(), dimensionX = X[0].size();
     for (int i = 0; i < sizeX; i++) {
         for (int j = 0; j < dimensionX; j++) {
@@ -258,20 +278,20 @@ void drawGraphGnuplot(string nameScript, int arg) {
     drawGraphGnuplot(nameScript, vector<int>{ arg });
 }
 
-void drawGraphGnuplot(string nameScript, vector<int> args) {
-    string input_string;
+void drawGraphGnuplot(string nameScript, const vector<int> &args) {
+    string inputString;
 
 #if defined(__linux__)
     setenv("QT_QPA_PLATFORM", "xcb", false);
-    input_string = "chmod +x " + nameScript;
-    if (system(input_string.c_str()))
+    inputString = "chmod +x " + nameScript;
+    if (system(inputString.c_str()))
         cerr << "Error chmod" << endl;
 #endif
 
-    input_string = "gnuplot -c " + nameScript;
+    inputString = "gnuplot -c " + nameScript;
     for (int i = 0; i < args.size(); i++) {
-        input_string += " " + to_string(args[i]);
+        inputString += " " + to_string(args[i]);
     }
-    if (system(input_string.c_str()))
+    if (system(inputString.c_str()))
         cerr << "Error gnuplot" << endl;
 }

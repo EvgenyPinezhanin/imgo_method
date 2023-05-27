@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <iomanip>
 #include <vector>
 #include <limits>
 #if defined( _MSC_VER )
@@ -169,10 +168,10 @@ int main() {
                                    TaskImgo(f10, "f10(x)", 3, 0.0, 2.0 * M_PI, 4.2250023, vector<double>{ 3.170468, 4.329008, 7.999984, 12.442132 },
                                             eps, maxTrials, maxFevals, r, d) };
 
-    ImgoMethod imgo(nullptr);
+    ImgoMethod imgo;
 
     double x;
-    vector<double> lambdas;
+    vector<double> L;
     int numberTrials, numberFevals;
     vector<TrialConstrained> trials;
 
@@ -188,12 +187,12 @@ int main() {
             imgo.setD(taskArray[i].d);
 
             imgo.solve(numberTrials, numberFevals, x);
-            imgo.getLambda(lambdas);
+            imgo.getL(L);
 
             printResultImgo(taskArray[i].name, taskArray[i].numberConstraints, taskArray[i].A[0], taskArray[i].B[0], taskArray[i].L,
                             taskArray[i].XOpt[0], taskArray[i].f(taskArray[i].XOpt[0], taskArray[i].numberConstraints + 1),
                             taskArray[i].maxTrials, taskArray[i].maxFevals, taskArray[i].eps, taskArray[i].r, taskArray[i].d,
-                            numberTrials, numberFevals, lambdas, x, taskArray[i].f(x, taskArray[i].numberConstraints + 1));
+                            numberTrials, numberFevals, L, x, taskArray[i].f(x, taskArray[i].numberConstraints + 1));
 
             addPointGnuplot(ofstr, taskArray[i].XOpt[0], taskArray[i].f(taskArray[i].XOpt[0], taskArray[i].numberConstraints + 1));
             addPointGnuplot(ofstr, x, taskArray[i].f(x, taskArray[i].numberConstraints + 1));

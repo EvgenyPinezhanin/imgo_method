@@ -2,7 +2,7 @@
     #define _CRT_SECURE_NO_WARNINGS
     #define PROC_BIND
 #else
-    #define PROC_BIND proc_bind(spread)
+    #define PROC_BIND proc_bind(master)
 #endif
 
 #include <iostream>
@@ -22,10 +22,10 @@
 
 using namespace std;
 
-#define CALC_DIRECT
-#define CALC_MGGSA
+// #define CALC_DIRECT
+// #define CALC_MGGSA
 
-const int familyNumber = 3; // 0 - Grishagin, 1 - GKLS,
+const int familyNumber = 0; // 0 - Grishagin, 1 - GKLS,
                             // 2 - Grishagin(constrained), 3 - GKLS(constrained),
 
 double f(int n, const double *X, int *undefinedFlag, void *data) {
@@ -38,7 +38,7 @@ double f(int n, const double *X, int *undefinedFlag, void *data) {
     fData->points.push_back(point);
 
     double f;
-    if (fData->type == TypeConstrants::Constraints) {
+    if (fData->type == TypeConstraints::Constraints) {
         FunctorFamilyConstrained *problem = static_cast<FunctorFamilyConstrained*>(fData->functor);
 
         optPoint = (*problem->constrainedOptProblemFamily)[problem->currentFunction]->GetOptimumPoint();
@@ -58,6 +58,7 @@ double f(int n, const double *X, int *undefinedFlag, void *data) {
 
         f = (*problem)(point, 1);
     }
+    fData->f.push_back(f);
 
     if (!fData->converge) {
         double distance = 0.0;
@@ -84,21 +85,20 @@ int main() {
     TGKLSProblemFamily gklsProblems;
     TGKLSConstrainedProblemFamily gklsConstrainedProblems;
 
-    vector<ProblemFamily> problems{ ProblemFamily("GrishaginProblemFamily", &grishaginProblems, TypeConstrants::NoConstraints, "Grishagin"),
-                                    ProblemFamily("GKLSProblemFamily", &gklsProblems, TypeConstrants::NoConstraints, "GKLS"),
+    vector<ProblemFamily> problems{ ProblemFamily("GrishaginProblemFamily", &grishaginProblems, TypeConstraints::NoConstraints, "Grishagin"),
+                                    ProblemFamily("GKLSProblemFamily", &gklsProblems, TypeConstraints::NoConstraints, "GKLS"),
                                     ProblemFamily("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
-                                                  TypeConstrants::Constraints, "GrishaginConstrained"),
+                                                  TypeConstraints::Constraints, "GrishaginConstrained"),
                                     ProblemFamily("GKLSProblemConstrainedFamily", &gklsConstrainedProblems, 
-                                                  TypeConstrants::Constraints, "GKLSConstrained") };
+                                                  TypeConstraints::Constraints, "GKLSConstrained") };
 
-    vector<vector<int>> K{ { 0, 700, 25 },
+    vector<vector<int>> K{ { 0, 700,  25 },
                            { 0, 1500, 25 },
                            { 0, 3000, 25 },
                            { 0, 4500, 25 } };
 
     double eps = 0.01;
-    DataDirectOperationalCharacteristics fData;
-    fData.eps = eps;
+    DataDirectOperationalCharacteristics fData(nullptr, TypeConstraints::NoConstraints, eps);
 
     // Parameters of DIRECT
     int maxIters = 10000;
@@ -113,10 +113,10 @@ int main() {
     // Parameters of mggsa
     int den = 10, incr = 30;
     int maxFevals = 100000;
-    vector<vector<double>> r{ { 3.0, 2.4, 1.6, 1.0 },
-                              { 4.2, 3.8, 2.0, 1.0 },
-                              { 3.5, 2.6, 1.8, 1.0 },
-                              { 4.7, 3.0, 2.0, 1.0 } };
+    vector<vector<double>> r{ { 3.0, 2.8, 2.6, 2.4 },
+                              { 4.3, 4.1, 3.9, 3.7 },
+                              { 3.0, 2.6, 2.2, 1.8 },
+                              { 4.5, 4.1, 3.7, 3.3 } };
     vector<int> key{ 1, 3, 3, 3 };
     vector<double> d{ 0.0, 0.0, 0.01, 0.01 };
 
@@ -142,18 +142,18 @@ int main() {
             FunctorFamily functor;
             FunctorFamilyConstrained functorConstrained;
 
-            if (problems[i].type == TypeConstrants::Constraints) {
+            if (problems[i].type == TypeConstraints::Constraints) {
                 functorConstrained.constrainedOptProblemFamily = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
                 (*functorConstrained.constrainedOptProblemFamily)[0]->GetBounds(A, B);
                 direct.setN((*functorConstrained.constrainedOptProblemFamily)[0]->GetDimension());
                 fData.functor = &functorConstrained;
-                fData.type = TypeConstrants::Constraints;
+                fData.type = TypeConstraints::Constraints;
             } else {
                 functor.optProblemFamily = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
                 (*functor.optProblemFamily)[0]->GetBounds(A, B);
                 direct.setN((*functor.optProblemFamily)[0]->GetDimension());
                 fData.functor = &functor;
-                fData.type = TypeConstrants::NoConstraints;
+                fData.type = TypeConstraints::NoConstraints;
             }
 
             direct.setAB(A, B);
@@ -169,7 +169,7 @@ int main() {
                 fData.numberFevals = 0;
                 fData.converge = false;
 
-                if (problems[i].type == TypeConstrants::Constraints) {
+                if (problems[i].type == TypeConstraints::Constraints) {
                     functorConstrained.currentFunction = k;
                 } else {
                     functor.currentFunction = k;
@@ -220,7 +220,7 @@ int main() {
             FunctorFamily functor;
             FunctorFamilyConstrained functorConstrained;
 
-            if (problems[i].type == TypeConstrants::Constraints) {
+            if (problems[i].type == TypeConstraints::Constraints) {
                 functorConstrained.constrainedOptProblemFamily = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
                 (*functorConstrained.constrainedOptProblemFamily)[0]->GetBounds(A, B);
                 mggsa.setN((*functorConstrained.constrainedOptProblemFamily)[0]->GetDimension());
@@ -245,7 +245,7 @@ int main() {
 
             double startTime = omp_get_wtime();
             for (int k = 0; k < numberFunctions; k++) {
-                if (problems[i].type == TypeConstrants::Constraints) {
+                if (problems[i].type == TypeConstraints::Constraints) {
                     functorConstrained.currentFunction = k;
                     XOpt = (*functorConstrained.constrainedOptProblemFamily)[k]->GetOptimumPoint();
                     mggsa.setF(functorConstrained);
@@ -257,7 +257,7 @@ int main() {
                 if (mggsa.solveTest(XOpt, numberTrials, numberFevals)) {
                     numberTrialsArray[k] = numberTrials;
                 } else {
-                    numberTrialsArray[k] = numberTrials + 1;
+                    numberTrialsArray[k] = K[i][1] + 1;
                 }
             }
             for (int k = K[i][0]; k <= K[i][1]; k += K[i][2]) {
@@ -268,7 +268,7 @@ int main() {
             double workTime = endTime - startTime;
 
             string strOutput = "MGGSA: " + problems[i].name + " r = " + to_string(r[i][j]) + " key = " + to_string(key[j]) + 
-                               " time: " + to_string(workTime) + " t_num: " + to_string(omp_get_thread_num()) + "\n";
+                               " time: " + to_string(workTime) + " thread num: " + to_string(omp_get_thread_num()) + "\n";
             cout << strOutput;
         }
     }
@@ -293,17 +293,17 @@ int main() {
     initArrayGnuplot(ofstrOpt, "r", sizeKey * numberFamily);
     initArrayGnuplot(ofstrOpt, "key", sizeKey);
     for (int i = 0; i < numberFamily; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, "\"" + problems[i].shortName + "\"");
-        setValueInArrayGnuplot(ofstrOpt, "key", i + 1, to_string(key[i]));
+        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
+        setValueInArrayGnuplot(ofstrOpt, "key", i + 1, key[i], false);
         for (int j = 0; j < r[i].size(); j++) {
-            setValueInArrayGnuplot(ofstrOpt, "r", (i * sizeKey) + j + 1, "\"" + to_string(r[i][j]) + "\"");
+            setValueInArrayGnuplot(ofstrOpt, "r", (i * sizeKey) + j + 1, r[i][j]);
         }
     }
     ofstrOpt.close();
 
     drawGraphGnuplot("scripts/direct_mggsa_operational_characteristics.gp", familyNumber);
 
-#if defined(_MSC_VER)
+#if defined( _MSC_VER )
     cin.get();
 #endif
 

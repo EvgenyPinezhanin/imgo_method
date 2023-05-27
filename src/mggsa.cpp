@@ -285,7 +285,7 @@ double MggsaMethod::selectNewPoint(int &t) {
 #endif
 
     // Steps 5, 6
-    double R = -numeric_limits<double>::infinity(), Rtmp = 0.0;
+    double R = -numeric_limits<double>::infinity(), Rtmp;
     double muV, zStarV, dx;
 
     size_t sizeTrialPoints = trialPoints.size();
@@ -339,6 +339,7 @@ void MggsaMethod::getPoints(vector<vector<double>> &points) {
     size_t sizeTrialPoints = trialPoints.size();
     for (int i = 0; i < trialPoints.size(); i++) {
         y(trialPoints[i].x, point);
+        point.push_back(trialPoints[i].z);
         points.push_back(point);
     }
 }
@@ -441,7 +442,7 @@ void MggsaMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X,
     }
 
     double xNew, h, deltaT;
-    int t = 1;
+    int t;
     vector<double> P(n);
     while(true) {
     #if defined(TIME_TEST)
@@ -613,7 +614,7 @@ bool MggsaMethod::solveTest(vector<double> XOpt, int &numberTrials, int &numberF
     coincideX = false;
 
     double xNew, h;
-    int t = 1;
+    int t;
     vector<double> P(n), X(n);
     while (true) {
         // Steps 3, 4, 5, 6, Pre-7
@@ -630,6 +631,7 @@ bool MggsaMethod::solveTest(vector<double> XOpt, int &numberTrials, int &numberF
             x(P, hNu);
             if (!checkDensity(hNu[0])) {
                 coincideX = true;
+                numberFevals = this->numberFevals;
                 return false;
             }
             lastTrials.clear();

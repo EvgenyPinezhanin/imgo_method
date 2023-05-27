@@ -5,8 +5,6 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <cstdlib>
-#include <cmath>
 #include <limits>
 
 #include <mggsa.h>
@@ -66,9 +64,9 @@ int main() {
                                     TaskMggsa(f4, "f4", n, 1, vector<double>{0.0, 0.0}, vector<double>{3.0, 3.0},
                                               vector<double>{1.0, 1.0}, vector<double>{}, eps, maxTrials, maxFevals, r, d, den, key, -1) };
 
-    MggsaMethod mggsa(nullptr);
+    MggsaMethod mggsa;
 
-    vector<double> X, lambdas;
+    vector<double> X, L;
     vector<vector<double>> points;
     vector<TrialConstrained> trials;
     int numberTrials, numberFevals;
@@ -88,12 +86,12 @@ int main() {
             mggsa.setKey(taskArray[i].key);
 
             mggsa.solve(numberTrials, numberFevals, X);
-            mggsa.getLambda(lambdas);
+            mggsa.getL(L);
 
             printResultMggsa(taskArray[i].name, taskArray[i].n, taskArray[i].numberConstraints, taskArray[i].A, taskArray[i].B,
                              taskArray[i].L, taskArray[i].XOpt, taskArray[i].f(taskArray[i].XOpt, taskArray[i].numberConstraints + 1),
                              taskArray[i].maxTrials, taskArray[i].maxFevals, taskArray[i].eps, taskArray[i].r, taskArray[i].d,
-                             taskArray[i].den, taskArray[i].key, taskArray[i].incr, numberTrials, numberFevals, lambdas, X,
+                             taskArray[i].den, taskArray[i].key, taskArray[i].incr, numberTrials, numberFevals, L, X,
                              taskArray[i].f(X, taskArray[i].numberConstraints + 1));
 
             addPointGnuplot(ofstr, taskArray[i].XOpt, taskArray[i].f(taskArray[i].XOpt, taskArray[i].numberConstraints + 1));

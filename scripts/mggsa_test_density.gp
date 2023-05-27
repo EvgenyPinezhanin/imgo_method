@@ -4,17 +4,17 @@ datafile = "output_data/mggsa_test_density.txt"
 
 load "output_data/mggsa_test_density_opt.txt"
 
-set linetype 1 lc rgb "salmon" pt 5 
+set linetype 1 lc rgb "dark-yellow" pt 5 
 set linetype 2 lc rgb "cyan" pt 5 
 set linetype 3 lc rgb "blue" pt 5 
 set linetype 4 lc rgb "orange" pt 5
 set linetype 5 lc rgb "green" pt 5
 
-set linetype 6 lc rgb "salmon" pt 2 ps 2
-set linetype 7 lc rgb "cyan" pt 2 ps 2
-set linetype 8 lc rgb "blue" pt 2 ps 2
-set linetype 9 lc rgb "orange" pt 2 ps 2
-set linetype 10 lc rgb "green" pt 2 ps 2
+set linetype 6 lc rgb "dark-yellow" pt 3 ps 2
+set linetype 7 lc rgb "cyan" pt 3 ps 2
+set linetype 8 lc rgb "blue" pt 3 ps 2
+set linetype 9 lc rgb "orange" pt 3 ps 2
+set linetype 10 lc rgb "green" pt 3 ps 2
 
 set linetype 11 lc rgb "dark-violet" lw 1
 set linetype 12 lc rgb "red" pt 5

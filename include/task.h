@@ -62,30 +62,30 @@ struct TaskMggsa : public Task {
               key(_key), incr(_incr) {};
 };
 
-enum class TypeConstrants { Constraints, NoConstraints };
+enum class TypeConstraints { Constraints, NoConstraints };
 
 struct Problem {
     string name;
-    TypeConstrants type;
+    TypeConstraints type;
     string shortName;
 
     bool used;
 
-    Problem(string _name, TypeConstrants _type, string _shortName = "", bool _used = true) 
+    Problem(string _name, TypeConstraints _type, string _shortName = "", bool _used = true) 
             : name(_name), shortName(_shortName), type(_type), used(_used) {};
 };
 
 struct ProblemSingle : public Problem {
     IGeneralOptProblem *optProblem;
 
-    ProblemSingle(string _name, IGeneralOptProblem *_optProblem, TypeConstrants _type, string _shortName = "", bool _used = true) 
+    ProblemSingle(string _name, IGeneralOptProblem *_optProblem, TypeConstraints _type, string _shortName = "", bool _used = true) 
                   : Problem(_name, _type, _shortName, used), optProblem(_optProblem) {};
 };
 
 struct ProblemFamily : public Problem {
     IGeneralOptProblemFamily *optProblemFamily;
 
-    ProblemFamily(string _name, IGeneralOptProblemFamily *_optProblemFamily, TypeConstrants _type, string _shortName = "", bool _used = true) 
+    ProblemFamily(string _name, IGeneralOptProblemFamily *_optProblemFamily, TypeConstraints _type, string _shortName = "", bool _used = true) 
                   : Problem(_name, _type, _shortName, used), optProblemFamily(_optProblemFamily) {};
 };
 
@@ -205,14 +205,20 @@ public:
 struct DataDirect {
     int numberFevals;
     vector<vector<double>> points;
+    vector<double> f;
+
+    DataDirect() : numberFevals(0), points(0), f(0) {};
 };
 
 struct DataDirectOperationalCharacteristics : public DataDirect {
     Functor *functor;
-    TypeConstrants type;
+    TypeConstraints type;
     bool converge;
     int minNumberFevals;
     double eps;
+
+    DataDirectOperationalCharacteristics(Functor *_functor = nullptr, TypeConstraints _type = TypeConstraints::NoConstraints, double _eps = 0.01)
+        : DataDirect(), functor(_functor), type(_type), converge(false), minNumberFevals(-1), eps(_eps) {}; 
 };
 
 struct TaskDirect {

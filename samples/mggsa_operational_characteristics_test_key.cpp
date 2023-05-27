@@ -2,7 +2,7 @@
     #define _CRT_SECURE_NO_WARNINGS
     #define PROC_BIND
 #else
-    #define PROC_BIND proc_bind(spread)
+    #define PROC_BIND proc_bind(master)
 #endif
 
 #include <iostream>
@@ -23,7 +23,7 @@ using namespace std;
 
 // #define CALC
 
-const int familyNumber = 0; // 0 - Grishagin, 1 - GKLS,
+const int familyNumber = 3; // 0 - Grishagin, 1 - GKLS,
                             // 2 - Grishagin(constrained), 3 - GKLS(constrained)
 
 int main() {
@@ -39,22 +39,22 @@ int main() {
     TGKLSProblemFamily gklsProblems;
     TGKLSConstrainedProblemFamily gklsConstrainedProblems;
 
-    vector<ProblemFamily> problems{ ProblemFamily("GrishaginProblemFamily", &grishaginProblems, TypeConstrants::NoConstraints, "Grishagin"),
-                                    ProblemFamily("GKLSProblemFamily", &gklsProblems, TypeConstrants::NoConstraints, "GKLS"),
+    vector<ProblemFamily> problems{ ProblemFamily("GrishaginProblemFamily", &grishaginProblems, TypeConstraints::NoConstraints, "Grishagin"),
+                                    ProblemFamily("GKLSProblemFamily", &gklsProblems, TypeConstraints::NoConstraints, "GKLS"),
                                     ProblemFamily("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
-                                                  TypeConstrants::Constraints, "GrishaginConstrained"),
+                                                  TypeConstraints::Constraints, "GrishaginConstrained"),
                                     ProblemFamily("GKLSProblemConstrainedFamily", &gklsConstrainedProblems, 
-                                                  TypeConstrants::Constraints, "GKLSConstrained") };
+                                                  TypeConstraints::Constraints, "GKLSConstrained") };
 
-    vector<vector<int>> K{ { 0, 700, 25 },
+    vector<vector<int>> K{ { 0,  700, 25 },
                            { 0, 1200, 25 },
-                           { 0, 2200, 25 },
+                           { 0, 2500, 25 },
                            { 0, 4500, 25 } };
 
-    vector<vector<double>> r{ { 3.0, 2.4, 1.6, 1.0 },
-                              { 4.2, 3.8, 2.0, 1.0 },
-                              { 3.5, 2.6, 1.8, 1.0 },
-                              { 4.7, 3.0, 2.0, 1.0 } };
+    vector<vector<double>> r{ { 3.0, 2.8, 2.6, 2.4 },
+                              { 4.3, 4.1, 3.9, 3.7 },
+                              { 3.0, 2.6, 2.2, 1.8 },
+                              { 4.5, 4.1, 3.7, 3.3 } };
     vector<int> key{ 1, 3, 3, 3 };
     vector<double> d{ 0.0, 0.0, 0.01, 0.01 };
 
@@ -62,7 +62,7 @@ int main() {
     ofstream ofstr("output_data/mggsa_operational_characteristics_test_key.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
-    int den = 11, incr = 30;
+    int den = 10, incr = 30;
     double eps = 0.01;
     int maxFevals = 100000;
 
@@ -87,7 +87,7 @@ int main() {
             FunctorFamily functor;
             FunctorFamilyConstrained functorConstrained;
 
-            if (problems[i].type == TypeConstrants::Constraints) {
+            if (problems[i].type == TypeConstraints::Constraints) {
                 functorConstrained.constrainedOptProblemFamily = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
                 (*functorConstrained.constrainedOptProblemFamily)[0]->GetBounds(A, B);
                 mggsa.setN((*functorConstrained.constrainedOptProblemFamily)[0]->GetDimension());
@@ -112,7 +112,7 @@ int main() {
 
             double startTime = omp_get_wtime();
             for (int k = 0; k < numberFunctions; k++) {
-                if (problems[i].type == TypeConstrants::Constraints) {
+                if (problems[i].type == TypeConstraints::Constraints) {
                     functorConstrained.currentFunction = k;
                     XOpt = (*functorConstrained.constrainedOptProblemFamily)[k]->GetOptimumPoint();
                     mggsa.setF(functorConstrained);

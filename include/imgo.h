@@ -48,7 +48,7 @@ public:
     double getR() const { return r; };
     double getD() const { return d; };
 
-    void getLambda(vector<double> &lambdas) const { lambdas = mu; };
+    void getL(vector<double> &L) const { L = mu; };
 
     void solve(int &numberTrials, int &numberFevals, double &x);
     void solve(int &numberTrials, int &numberFevals, vector<double> &X) override;
