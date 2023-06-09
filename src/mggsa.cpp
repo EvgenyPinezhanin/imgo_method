@@ -333,17 +333,6 @@ void MggsaMethod::setNumberConstraints(int _numberConstraints) {
     zStar.resize((size_t)numberConstraints + 1);
 }
 
-void MggsaMethod::getPoints(vector<vector<double>> &points) {
-    points.clear();
-    vector<double> point(n);
-    size_t sizeTrialPoints = trialPoints.size();
-    for (int i = 0; i < trialPoints.size(); i++) {
-        y(trialPoints[i].x, point);
-        point.push_back(trialPoints[i].z);
-        points.push_back(point);
-    }
-}
-
 void MggsaMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X, TypeSolve type) {
 #if defined(TIME_TEST)
     ofstrTimeTest.open("output_data/mggsa_test_time.txt");
@@ -365,6 +354,7 @@ void MggsaMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X,
             I[nu].clear();
             calcI[nu] = false;
         }
+        points.clear();
         trialPoints.clear();
         lastTrials.resize(1);
         lastTrialsPos.resize(1);
@@ -443,7 +433,8 @@ void MggsaMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X,
 
     double xNew, h, deltaT;
     int t;
-    vector<double> P(n);
+    TrialConstrained trial;
+    vector<double> P(n), point;
     while(true) {
     #if defined(TIME_TEST)
         numberTimeStamp.push_back(numberTrials);
@@ -499,7 +490,7 @@ void MggsaMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X,
                 break;
             }
             lastTrials.clear();
-            TrialConstrained trial = newTrial(hNu[0]);
+            trial = newTrial(hNu[0]);
             for (int i = 0; i < hNu.size(); i++) {
                 trial.x = hNu[i];
                 lastTrials.push_back(trial);
@@ -520,7 +511,11 @@ void MggsaMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X,
         endTime = omp_get_wtime();
         trialTime.push_back(endTime - startTime);
     #endif
-        
+
+    point = P;
+    point.push_back(lastTrials[0].z);
+    points.push_back(point);
+
     #if defined(TIME_TEST)
         startTime = omp_get_wtime();
     #endif

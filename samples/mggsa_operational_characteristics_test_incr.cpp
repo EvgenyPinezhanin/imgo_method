@@ -25,8 +25,9 @@ using namespace std;
 
 const int type = 2; // 0 - number of trials, 1 - number of trial points, 
                     // 2 - number of trial points / number of trials
-const int familyNumber = 3; // 0 - Grishagin, 1 - GKLS,
-                            // 2 - Grishagin(constrained), 3 - GKLS(constrained)
+const int familyNumber = 3; // 1 - Grishagin, 2 - GKLS,
+                            // 3 - constrained Grishagin, 4 - constrained GKLS
+const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
 
 int main() {
     ofstream ofstrOpt("output_data/mggsa_operational_characteristics_test_incr_opt.txt");
@@ -182,7 +183,7 @@ int main() {
     }
     ofstrOpt.close();
 
-    vector<int> args{type, familyNumber};
+    vector<int> args{ displayType, type, familyNumber };
     drawGraphGnuplot("scripts/mggsa_operational_characteristics_test_incr.gp", args);
 
 #if defined(_MSC_VER)

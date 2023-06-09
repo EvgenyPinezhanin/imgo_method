@@ -14,6 +14,7 @@
 using namespace std;
 
 const int key = 3;
+const int displayType = 0; // 0 - application, 1 - png
 
 double f(vector<double> x, int j) {
     switch (j) {
@@ -25,8 +26,8 @@ double f(vector<double> x, int j) {
 int main() {
     ofstream ofstr("output_data/mggsa_test_evolvent.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
-    ofstream ofstrPoints("output_data/mggsa_test_evolvent_points.txt");
-    if (!ofstrPoints.is_open()) cerr << "File opening error\n";
+    ofstream ofstrPeano("output_data/mggsa_test_evolvent_peano.txt");
+    if (!ofstrPeano.is_open()) cerr << "File opening error\n";
 
     vector<double> A{ -0.5, -0.5 }, B{ 1.0, 1.0 };
     double eps = 0.01, r = 2.0, d = 0.0;
@@ -42,14 +43,14 @@ int main() {
     if (key == 3) den++;
     for (double i = 0.0; i <= 1.0; i += k) {
         mapd(i, den, XMap.data(), n, key);
-        ofstr << XMap[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " " 
+        ofstrPeano << XMap[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " " 
               << XMap[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
     }
     mapd(1.0, den, XMap.data(), n, key);
-    ofstr << XMap[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " "
+    ofstrPeano << XMap[0] * (B[0] - A[0]) + (A[0] + B[0]) / 2.0 << " "
           << XMap[1] * (B[1] - A[1]) + (A[1] + B[1]) / 2.0 << endl;
     if (key == 3) den--;
-    ofstr.close();
+    ofstrPeano.close();
 
     vector<double> XOpt{ 0.0, 0.0 }, X, L;
     int numberTrials, numberFevals;
@@ -63,16 +64,17 @@ int main() {
                      f(XOpt, numberConstraints + 1), maxTrials, maxFevals, eps, r, d, den, key, incr, numberTrials,
                      numberFevals, L, X, f(X, numberConstraints + 1));
 
-    addPointGnuplot(ofstrPoints, XOpt, f(XOpt, numberConstraints + 1));
-    addPointGnuplot(ofstrPoints, X, f(X, numberConstraints + 1));
+    addPointGnuplot(ofstr, XOpt, f(XOpt, numberConstraints + 1));
+    addPointGnuplot(ofstr, X, f(X, numberConstraints + 1));
 
     mggsa.getPoints(points);
     mggsa.getTrialPoints(trials);
-    addPointsGnuplot(ofstrPoints, points, trials);
+    addPointsGnuplot(ofstr, points, trials);
 
-    ofstrPoints.close();
+    ofstr.close();
 
-    drawGraphGnuplot("scripts/mggsa_test_evolvent.gp", key);
+    vector<int> args{ displayType, key };
+    drawGraphGnuplot("scripts/mggsa_test_evolvent.gp", args);
 
 #if defined( _MSC_VER )
     cin.get();

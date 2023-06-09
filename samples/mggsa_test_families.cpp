@@ -23,11 +23,12 @@ using namespace std;
 
 #define CALC
 
-const int familyNumber = 2; // 0 - Grishagin, 1 - GKLS
-                            // 2 - constrained Grishagin, 3 - constrained GKLS
+const int familyNumber = 3; // 1 - Grishagin, 2 - GKLS
+                            // 3 - constrained Grishagin, 4 - constrained GKLS
+const int displayType = 1; // 0 - application, 1 - png
 
-void functionGrid(vector<ofstream> &ofstr, Functor *functorFamily, const vector<double> &A,
-                  const vector<double> &B, double gridStep, TypeConstraints type, int numberConstraints = 0);
+void functionGrid(vector<ofstream> &ofstr, Functor *functorFamily, const vector<double> &A, const vector<double> &B,
+                  double gridStep, TypeConstraints type, double minValue, int numberConstraints = 0);
 
 int main() {
 #if defined( CALC )
@@ -57,9 +58,9 @@ int main() {
 
     vector<vector<ofstream>> ofstrFamily(numberFamily);
     for (int i = 0; i < numberFamily; i++) {
-        int count = (problems[i].type == TypeConstraints::Constraints) ? 2 : 1;
-        for (int j = 0; j < count; j++) {
-            ofstrFamily[i].push_back(ofstream("output_data/mggsa_test_families_" + to_string(i + 1) + "_" + to_string(j + 1) + ".txt"));
+        for (int j = 0; j < 2; j++) {
+            ofstrFamily[i].push_back(ofstream("output_data/mggsa_test_families_" + problems[i].shortName +
+                                              "_" + to_string(j + 1) + ".txt"));
         }
     }
 
@@ -83,10 +84,11 @@ int main() {
     vector<vector<vector<double>>> trialPoints(numberFamily);
     vector<vector<double>> pointOptArray(numberFamily), pointArray(numberFamily);
     vector<vector<double>> AArray(numberFamily), BArray(numberFamily);
+    vector<double> minValue(numberFamily);
 
 #pragma omp parallel for schedule(dynamic, chunk) PROC_BIND num_threads(numThreads) \
         shared(problems, functionNumber, ofstrFamily, eps, r, d, den, key, incr, maxTrials, \
-               maxFevals, trialPoints, pointOptArray, pointArray, AArray, BArray) \
+               maxFevals, trialPoints, pointOptArray, pointArray, AArray, BArray, minValue) \
         firstprivate(mggsa)
     for (int i = 0; i < numberFamily; i++) {
         vector<double> A, B, X, pointOpt;
@@ -98,7 +100,8 @@ int main() {
             functorConstrained.constrainedOptProblemFamily = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
             (*functorConstrained.constrainedOptProblemFamily)[0]->GetBounds(A, B);
             pointOpt = (*functorConstrained.constrainedOptProblemFamily)[functionNumber[i]]->GetOptimumPoint();
-            pointOpt.push_back((*functorConstrained.constrainedOptProblemFamily)[functionNumber[i]]->GetOptimumValue());
+            minValue[i] = (*functorConstrained.constrainedOptProblemFamily)[functionNumber[i]]->GetOptimumValue();
+            pointOpt.push_back(minValue[i]);
             pointOptArray[i] = pointOpt;
             mggsa.setF(functorConstrained);
             mggsa.setN((*functorConstrained.constrainedOptProblemFamily)[0]->GetDimension());
@@ -108,7 +111,8 @@ int main() {
             functor.optProblemFamily = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
             (*functor.optProblemFamily)[0]->GetBounds(A, B);
             pointOpt = (*functor.optProblemFamily)[functionNumber[i]]->GetOptimumPoint();
-            pointOpt.push_back((*functor.optProblemFamily)[functionNumber[i]]->GetOptimumValue());
+            minValue[i] = (*functor.optProblemFamily)[functionNumber[i]]->GetOptimumValue();
+            pointOpt.push_back(minValue[i]);
             pointOptArray[i] = pointOpt;
             mggsa.setF(functor);
             mggsa.setN((*functor.optProblemFamily)[0]->GetDimension());
@@ -131,10 +135,10 @@ int main() {
 
         if (problems[i].type == TypeConstraints::Constraints) {
             X.push_back(functorConstrained(X, numberConstraints + 1));
-            functionGrid(ofstrFamily[i], &functorConstrained, A, B, gridStep, problems[i].type, numberConstraints);
+            functionGrid(ofstrFamily[i], &functorConstrained, A, B, gridStep, problems[i].type, minValue[i], numberConstraints);
         } else {
             X.push_back(functor(X, numberConstraints + 1));
-            functionGrid(ofstrFamily[i], &functor, A, B, gridStep, problems[i].type);
+            functionGrid(ofstrFamily[i], &functor, A, B, gridStep, problems[i].type, minValue[i]);
         }
         pointArray[i] = X;
         AArray[i] = A;
@@ -156,11 +160,15 @@ int main() {
 
     initArrayGnuplot(ofstrOpt, "familyNames", numberFamily);
     initArrayGnuplot(ofstrOpt, "functionNumber", numberFamily);
+    initArrayGnuplot(ofstrOpt, "constrained", numberFamily);
+    initArrayGnuplot(ofstrOpt, "minValue", numberFamily);
     initArrayGnuplot(ofstrOpt, "A", numberFamily * 2);
     initArrayGnuplot(ofstrOpt, "B", numberFamily * 2);
     for (int i = 0; i < numberFamily; i++) {
         setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
         setValueInArrayGnuplot(ofstrOpt, "functionNumber", i + 1, functionNumber[i] + 1, false);
+        setValueInArrayGnuplot(ofstrOpt, "constrained", i + 1, problems[i].type == TypeConstraints::Constraints ? 1 : 0, false);
+        setValueInArrayGnuplot(ofstrOpt, "minValue", i + 1, minValue[i], false);
         for (int j = 0; j < 2; j++) {
             setValueInArrayGnuplot(ofstrOpt, "A", 2 * i + j + 1, AArray[i][j], false);
             setValueInArrayGnuplot(ofstrOpt, "B", 2 * i + j + 1, BArray[i][j], false);
@@ -169,7 +177,8 @@ int main() {
     ofstrOpt.close();
 #endif
 
-    drawGraphGnuplot("scripts/mggsa_test_families.gp", familyNumber);
+    vector<int> args{ displayType, familyNumber };
+    drawGraphGnuplot("scripts/mggsa_test_families.gp", args);
 
 #if defined( _MSC_VER )
     cin.get();
@@ -178,8 +187,8 @@ int main() {
     return 0;
 }
 
-void functionGrid(vector<ofstream> &ofstr, Functor *functorFamily, const vector<double> &A,
-                  const vector<double> &B, double gridStep, TypeConstraints type, int numberConstraints) {
+void functionGrid(vector<ofstream> &ofstr, Functor *functorFamily, const vector<double> &A, const vector<double> &B,
+                  double gridStep, TypeConstraints type, double minValue, int numberConstraints) {
     int N = floor((B[0] - A[0]) / gridStep);
     double eps = gridStep / 2.0;
 
@@ -191,35 +200,33 @@ void functionGrid(vector<ofstream> &ofstr, Functor *functorFamily, const vector<
     for (double i = A[1]; i <= B[1] + eps; i += gridStep) {
 	    ofstr[0] << i << " ";
         for (double j = A[0]; j <= B[0] + eps; j += gridStep) {
-	        ofstr[0] << (*functorFamily)(vector<double>{j, i}, numberConstraints + 1) << " ";
+	        ofstr[0] << (*functorFamily)(vector<double>{ j, i }, numberConstraints + 1) << " ";
         }
         ofstr[0] << "\n";
     }
     ofstr[0] << endl;
 
-    if (type == TypeConstraints::Constraints) {
-        bool constrained;
+    bool constrained;
 
-        ofstr[1] << N + 1 << " ";
-        for (double i = A[0]; i <= B[0] + eps; i += gridStep) {
-            ofstr[1] << i << " ";
+    ofstr[1] << N + 1 << " ";
+    for (double i = A[0]; i <= B[0] + eps; i += gridStep) {
+        ofstr[1] << i << " ";
+    }
+    ofstr[1] << "\n";
+    for (double i = A[1]; i <= B[1] + eps; i += gridStep) {
+	    ofstr[1] << i << " ";
+        for (double j = A[0]; j <= B[0] + eps; j += gridStep) {
+            constrained = type == TypeConstraints::Constraints ? true : false;
+            for (int k = 0; k < numberConstraints; k++) {
+                if ((*functorFamily)(vector<double>{ j, i }, k + 1) > 0.0) constrained = false;
+            }
+            if (constrained) {
+	            ofstr[1] << (*functorFamily)(vector<double>{ j, i }, numberConstraints + 1) << " ";
+            } else {
+                ofstr[1] << minValue - 1.0 << " ";
+            }
         }
         ofstr[1] << "\n";
-        for (double i = A[1]; i <= B[1] + eps; i += gridStep) {
-	        ofstr[1] << i << " ";
-            for (double j = A[0]; j <= B[0] + eps; j += gridStep) {
-                constrained = true;
-                for (int k = 0; k < numberConstraints; k++) {
-                    if ((*functorFamily)(vector<double>{j, i}, k + 1) > 0.0) constrained = false;
-                }
-                if (constrained) {
-	                ofstr[1] << (*functorFamily)(vector<double>{j, i}, numberConstraints + 1) << " ";
-                } else {
-                    ofstr[1] << "?" << " ";
-                }
-            }
-            ofstr[1] << "\n";
-        }
-        ofstr[1] << endl;
     }
+    ofstr[1] << endl;
 }

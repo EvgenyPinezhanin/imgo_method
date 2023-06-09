@@ -30,6 +30,7 @@ double euclideanDistance(const vector<double> &X, const vector<double> &Y) {
 const int type = 3; // 0 - number trials, 1 - number trial points,
                     // 2 - accuracy, 3 - number trial points / number trials
 const int nType = 3; // nMin ... nMax
+const int displayType = 1; // 0 - application, 1 - png
 
 int main() {
     ofstream ofstrOpt("output_data/mggsa_test_incr_opt.txt");
@@ -37,8 +38,8 @@ int main() {
 
     const int nMin = 2, nMax = 3;
     const int numberN = nMax - nMin + 1;
-    const int incrArray[numberN][2] = { {1, 60},
-                                        {1, 100} };
+    const int incrArray[numberN][2] = { { 1, 60 },
+                                        { 1, 100 } };
     const int mMin = 8, mMax = 10;
 
 #if defined(CALC)
@@ -108,7 +109,7 @@ int main() {
  
                 mggsa.solve(numberTrials, numberFevals, X);
                 mggsa.getL(L);
- 
+
                 accuracy = euclideanDistance(XOpt, X);
                 accuracyArray[i - nMin][j - mMin][k - incrArray[i - nMin][0]] = accuracy;
                 numberTrialsArray[i - nMin][j - mMin][k - incrArray[i - nMin][0]] = numberTrials;
@@ -155,12 +156,12 @@ int main() {
     }
     for (int i = 0; i < numberN; i++) {
         for (int j = 0; j < 2; j++) {
-            setValueInArrayGnuplot(ofstrOpt, arraysName[j], i + 1, to_string(incrArray[i][j]));
+            setValueInArrayGnuplot(ofstrOpt, arraysName[j], i + 1, incrArray[i][j], false);
         }
     }
     ofstrOpt.close();
 
-    vector<int> args{ type, nType, nMin, nMax, mMin, mMax };
+    vector<int> args{ displayType, type, nType, nMin, nMax, mMin, mMax };
     drawGraphGnuplot("scripts/mggsa_test_incr.gp", args);
 
     return 0;

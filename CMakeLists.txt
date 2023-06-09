@@ -30,14 +30,14 @@ add_custom_command(
   ${CMAKE_SOURCE_DIR}/scripts/
   ${OUT_DIR}/scripts
 )
-  
+
 # MAKE DIR
 set(MAKE_DIR make_directory)
 add_custom_target(${MAKE_DIR} ALL)
 add_custom_command(
   TARGET ${MAKE_DIR} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E make_directory
-  ${OUT_DIR}/output_data
+  ${OUT_DIR}/output_data ${OUT_DIR}/output_graph
 )
 
 # GPROF

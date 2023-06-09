@@ -1,13 +1,14 @@
 #!/usr/bin/gnuplot
 
-trialfile = "output_data/mggsa_test_families.txt"
+taskName = "mggsa_test_families"
 
-load "output_data/mggsa_test_families_opt.txt"
+trialfile = "output_data/".taskName.".txt"
 
-titleName(s, n) = sprintf("Graph of function №%d of the %s family", n, s)
-function(type, n) = sprintf("\"output_data/mggsa_test_families_%d_1.txt\" matrix nonuniform %s", n, type)
-constraints(n) = (n < 3) ? sprintf("") : \
-                 sprintf("\"output_data/mggsa_test_families_%d_2.txt\" matrix nonuniform with lines lc rgb \"orange\" title \"g(x, y)\" nocontours,", n)
+load "output_data/".taskName."_opt.txt"
+
+title(familyName, n) = sprintf("Graph of function №%d of the %s family", n, familyName)
+function(taskName, familyName) = sprintf("output_data/%s_%s_1.txt", taskName, familyName)
+constraints(taskName, familyName) = sprintf("output_data/%s_%s_2.txt", taskName, familyName)
 
 set grid
 
@@ -18,31 +19,54 @@ set cntrlabel onecolor
 set cntrlabel start 5 interval 150
 set cntrlabel font ",10"
 set contour base
-set isosamples 120
 
 set xlabel "X"
 set ylabel "Y"
 
-set datafile missing "?"
+set key opaque
 
-set terminal wxt size 950, 950
+set isosamples 120
 
-set title titleName(familyNames[ARG1 + 1], functionNumber[ARG1 + 1]) font "Helvetica Bold, 20"
+if (ARG1 == 0) {
+    ind = 3 * (ARG2 - 1)
 
-set xrange [A[2 * ARG1 + 1]:B[2 * ARG1 + 1]]
-set yrange [A[2 * ARG1 + 2]:B[2 * ARG1 + 2]]
+    set title title(familyNames[int(ARG2)], functionNumber[int(ARG2)]) font "Helvetica Bold, 20"
 
-ind = 3 * ARG1
+    set xrange [A[2 * (ARG2 - 1) + 1] : B[2 * (ARG2 - 1) + 1]]
+    set yrange [A[2 * (ARG2 - 1) + 2] : B[2 * (ARG2 - 1) + 2]]
+    set zrange [minValue[int(ARG2)] :]
 
-function = function("nosurface with lines title \"φ(x, y)\"", ARG1 + 1)
-constraints = constraints(ARG1 + 1)
-functionLabels = function("with labels notitle nosurface", ARG1 + 1)
+    splot function(taskName, familyNames[int(ARG2)]) matrix nonuniform title "f(x, y)" nosurface, \
+          for [i = 1 : constrained[int(ARG2)]] constraints(taskName, familyNames[int(ARG2)]) matrix nonuniform \
+          with lines lc rgb "orange" title "g(x, y)" nocontours, \
+          trialfile index ind + 2 ls 4 lc rgb "green" lw 2 title "trial points" nocontours, \
+          trialfile index ind     ls 7 lc rgb "red"   ps 2 title "X_{min}" nocontours, \
+          trialfile index ind + 1 ls 7 lc rgb "blue"  ps 1 title "X" nocontours, \
+          function(taskName, familyNames[int(ARG2)]) matrix nonuniform with labels notitle nosurface
 
-splot @function, @constraints \
-      trialfile index ind + 2 ls 5 lc rgb "green" title "trial points" nocontours, \
-      trialfile index ind + 1 ls 5 lc rgb "blue" title "X" nocontours, \
-      trialfile index ind ls 5 lc rgb "red" title "X*" nocontours # , \
-      # @functionLabels
+    bind all "alt-End" "exit gnuplot"
+    pause mouse close
+} else {
+    set terminal pngcairo size 950, 950
+    system "mkdir -p output_graph/".taskName
 
-bind all "alt-End" "exit gnuplot"
-pause mouse close
+    do for [i = 1 : 4] {
+        set output "output_graph/".taskName."/".taskName."_".familyNames[i].".png"
+
+        ind = 3 * (i - 1)
+
+        set title title(familyNames[i], functionNumber[i]) font "Helvetica Bold, 20"
+
+        set xrange [A[2 * (i - 1) + 1] : B[2 * (i - 1) + 1]]
+        set yrange [A[2 * (i - 1) + 2] : B[2 * (i - 1) + 2]]
+        set zrange [minValue[i] :]
+
+        splot function(taskName, familyNames[i]) matrix nonuniform title "f(x, y)" nosurface, \
+              for [j = 1 : constrained[i]] constraints(taskName, familyNames[i]) matrix nonuniform \
+              with lines lc rgb "orange" title "g(x, y)" nocontours, \
+              trialfile index ind + 2 ls 4 lc rgb "green" lw 2 title "trial points" nocontours, \
+              trialfile index ind     ls 7 lc rgb "red"   lw 6 title "X_{min}" nocontours, \
+              trialfile index ind + 1 ls 7 lc rgb "blue"  lw 1 title "X" nocontours, \
+              function(taskName, familyNames[i]) matrix nonuniform with labels notitle nosurface
+    }
+}

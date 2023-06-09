@@ -15,7 +15,8 @@
 
 using namespace std;
 
-const int functionNumber = 2; // 0 - f1, 1 - f2, 2 - f3
+const int functionNumber = 1; // 1 - f1, 2 - f2, 3 - f3
+const int displayType = 1; // 0 - application, 1 - png
 
 double f1(double x, int j) {
     switch (j) {
@@ -89,19 +90,14 @@ int main() {
     }
     ofstr.close();
 
-    string functionsElement;
-    initArrayGnuplot(ofstrOpt, "functions", taskArray.size());
+    initArrayGnuplot(ofstrOpt, "numberConstraints", taskArray.size());
     for (int i = 0; i < taskArray.size(); i++) {
-        functionsElement = "f" + to_string(i + 1) + "(x) title \\\"f(x)\\\""; 
-        for (int j = 0; j < taskArray[i].numberConstraints; j++) {
-            functionsElement += ", g" + to_string(i + 1) + "_" + to_string(j + 1) +
-                                "(x) title \\\"g" + to_string(j + 1) + "(x)\\\"";
-        }
-        setValueInArrayGnuplot(ofstrOpt, "functions", i + 1, functionsElement);
+        setValueInArrayGnuplot(ofstrOpt, "numberConstraints", i + 1, taskArray[i].numberConstraints, false);
     }
     ofstrOpt.close();
 
-    drawGraphGnuplot("scripts/imgo_sample.gp", functionNumber);
+    vector<int> args{ displayType, functionNumber };
+    drawGraphGnuplot("scripts/imgo_sample.gp", args);
 
 #if defined( _MSC_VER )
     cin.get();

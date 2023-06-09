@@ -13,6 +13,8 @@
 
 using namespace std;
 
+const int displayType = 1; // 0 - application, 1 - gif
+
 double f(vector<double> x, int j) {
     switch (j) {
         case 1: return x[0] * x[0] + x[1] * x[1] - cos(18.0 * x[0]) - cos(18.0 * x[1]);
@@ -60,19 +62,19 @@ int main() {
         addPointGnuplot(ofstr, X, f(X, numberConstraints + 1));
 
         mggsa.getPoints(points);
-        mggsa.getTrialPoints(trials);
-        addPointsGnuplot(ofstr, points, trials);
+        addPointsGnuplot(ofstr, points);
     }
     ofstr.close();
 
     size_t sizeDen = den.size();
     initArrayGnuplot(ofstrOpt, "den", sizeDen);
     for (int i = 0; i < den.size(); i++) {
-        setValueInArrayGnuplot(ofstrOpt, "den", i + 1, to_string(den[i]));
+        setValueInArrayGnuplot(ofstrOpt, "den", i + 1, den[i]);
     }
     ofstrOpt.close();
 
-    drawGraphGnuplot("scripts/mggsa_test_density.gp", (int)den.size());
+    vector<int> args{ displayType, (int)den.size() };
+    drawGraphGnuplot("scripts/mggsa_test_density.gp", args);
 
 #if defined( _MSC_VER )
     cin.get();

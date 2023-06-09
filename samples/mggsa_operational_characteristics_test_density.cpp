@@ -23,8 +23,9 @@ using namespace std;
 
 // #define CALC
 
-const int familyNumber = 3; // 0 - Grishagin, 1 - GKLS,
-                            // 2 - Grishagin(constrained), 3 - GKLS(constrained)
+const int familyNumber = 4; // 1 - Grishagin, 2 - GKLS,
+                            // 3 - constrained Grishagin, 4 - constrained GKLS
+const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
 
 int main() {
     ofstream ofstrOpt("output_data/mggsa_operational_characteristics_test_density_opt.txt");
@@ -48,8 +49,8 @@ int main() {
 
     vector<vector<int>> K{ { 0, 700,  25 },
                            { 0, 1500, 25 },
-                           { 0, 3000, 25 },
-                           { 0, 4500, 25 } };
+                           { 0, 2500, 50 },
+                           { 0, 3500, 50 } };
 
     vector<double> r{ 3.0, 4.3, 3.0, 4.5 };
     vector<int> den{ 4, 6, 8, 10, 12, 4, 6, 8, 10, 12 };
@@ -182,14 +183,15 @@ int main() {
     initArrayGnuplot(ofstrOpt, "den", sizeDen);
     for (int i = 0; i < sizeDen; i++) {
         if (i < 5) {
-            setValueInArrayGnuplot(ofstrOpt, "den", i + 1, "dynamic(start den = " + to_string(den[i]) + ")");
+            setValueInArrayGnuplot(ofstrOpt, "den", i + 1, "dynamic(start m = " + to_string(den[i]) + ")");
         } else {
             setValueInArrayGnuplot(ofstrOpt, "den", i + 1, den[i]);
         }
     }
     ofstrOpt.close();
 
-    drawGraphGnuplot("scripts/mggsa_operational_characteristics_test_density.gp", familyNumber);
+    vector<int> args{ displayType, familyNumber };
+    drawGraphGnuplot("scripts/mggsa_operational_characteristics_test_density.gp", args);
 
 #if defined(_MSC_VER)
     cin.get();

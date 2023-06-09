@@ -1,8 +1,8 @@
 #! /usr/bin/gnuplot
 
-datafile = "output_data/mggsa_test_lipschitz.txt"
-
-load "output_data/mggsa_test_lipschitz_opt.txt"
+taskName = "mggsa_test_lipschitz"
+datafile = "output_data/".taskName.".txt"
+load "output_data/".taskName."_opt.txt"
 
 set linetype 1 lc rgb "#0000FF" lw 5 pt 1 dt 1
 set linetype 2 lc rgb "#0020FF" lw 5 pt 1 dt 2
@@ -38,14 +38,27 @@ set linetype cycle 27
 
 set xlabel "increment"
 set ylabel "Lipschitz constant"
-set xrange [ARG6:ARG7]
+set xrange [ARG7 : ARG8]
 
-set title 'Lipschitz test for the function '.familyNames[ARG1 + 1] font "Helvetica Bold, 20"
+ind(i, j, k) = (i - 1) * (ARG4 - ARG3 + 1) * (ARG6 - ARG5 + 1) + (ARG6 - ARG5 + 1) * (j - 1) + k - ARG5
 
-ind(i, j) = ARG1 * (ARG3 - ARG2 + 1) * (ARG5 - ARG4 + 1) + (ARG5 - ARG4 + 1) * (i - 1) + j - ARG4
+if (ARG1 == 0) {
+    set title "Lipschitz test for the function ".familyNames[int(ARG2)].", method mggsa" font "Helvetica Bold, 20"
 
-plot for [i = ARG2:ARG3] for [j = ARG4:ARG5] datafile index ind(i, j) \
-    using 1:2 with lines lt 9 * (i - 1) + j - ARG4 + 1 title sprintf("key = %d, m = %d", i, j)
+    plot for [i = 1 : numberKeys] for [j = ARG5 : ARG6] datafile index ind(int(ARG2), key[i], j) \
+         using 1:2 with lines lt 9 * (key[i] - 1) + j - ARG5 + 1 title sprintf("key = %d, m = %d", key[i], j)
 
-bind all "alt-End" "exit gnuplot"
-pause mouse close
+    bind all "alt-End" "exit gnuplot"
+    pause mouse close
+} else {
+    set terminal pngcairo size 1280, 720
+    system "mkdir -p output_graph/".taskName
+
+    do for [i = 1 : 4] {
+        set title "Lipschitz test for the function ".familyNames[i].", method mggsa" font "Helvetica Bold, 20"
+        set output "output_graph/".taskName."/".taskName."_".familyNames[i].".png"
+
+        plot for [j = 1 : numberKeys] for [k = ARG5 : ARG6] datafile index ind(i, key[j], k) \
+             using 1:2 with lines lt 9 * (key[j] - 1) + k - ARG5 + 1 title sprintf("key = %d, m = %d", key[j], k)
+    }
+}

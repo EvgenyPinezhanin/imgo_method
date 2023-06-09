@@ -17,7 +17,8 @@ using namespace std;
 
 #define CALC
 
-const int familyNumber = 2; // 0 - Hill, 1 - Shekel, 2 - comparsion Hill and Shekel
+const int familyNumber = 3; // 1 - Hill, 2 - Shekel, 3 - comparsion Hill and Shekel
+const int displayType = 1; // 0 - application, 1 - png
 
 int main() {
 
@@ -99,7 +100,8 @@ int main() {
     ofstrOpt.close();
 #endif
 
-    drawGraphGnuplot("scripts/imgo_operational_characteristics.gp", familyNumber);
+    vector<int> args{ displayType, familyNumber };
+    drawGraphGnuplot("scripts/imgo_operational_characteristics.gp", args);
 
 #if defined(_MSC_VER)
     cin.get();

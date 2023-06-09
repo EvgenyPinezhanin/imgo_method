@@ -9,7 +9,8 @@
 
 using namespace std;
 
-const int functionNumber = 0; // 0 - f1, 1 - f2
+const int functionNumber = 1; // 1 - f1, 2 - f2
+const int displayType = 1; // 0 - application, 1 - png
 
 double f1(vector<double> x, int j) {
     switch (j) {
@@ -113,7 +114,8 @@ int main() {
     }
     ofstrOpt.close();
 
-    drawGraphGnuplot("scripts/mggsa_test.gp", functionNumber);
+    vector<int> args{ displayType, functionNumber };
+    drawGraphGnuplot("scripts/mggsa_test.gp", args);
 
 #if defined(_MSC_VER)
     cin.get();

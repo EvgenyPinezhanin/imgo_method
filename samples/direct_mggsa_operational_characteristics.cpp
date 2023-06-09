@@ -26,7 +26,8 @@ using namespace std;
 // #define CALC_MGGSA
 
 const int familyNumber = 0; // 0 - Grishagin, 1 - GKLS,
-                            // 2 - Grishagin(constrained), 3 - GKLS(constrained),
+                            // 2 - Grishagin(constrained), 3 - GKLS(constrained)
+const int displayType = 1; // 0 - application, 1 - png
 
 double f(int n, const double *X, int *undefinedFlag, void *data) {
     DataDirectOperationalCharacteristics *fData = static_cast<DataDirectOperationalCharacteristics*>(data);
@@ -301,7 +302,8 @@ int main() {
     }
     ofstrOpt.close();
 
-    drawGraphGnuplot("scripts/direct_mggsa_operational_characteristics.gp", familyNumber);
+    vector<int> args{ displayType, familyNumber };
+    drawGraphGnuplot("scripts/direct_mggsa_operational_characteristics.gp", args);
 
 #if defined( _MSC_VER )
     cin.get();

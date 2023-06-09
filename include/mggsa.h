@@ -16,6 +16,8 @@ private:
     int den, key;
     int incr;
 
+    vector<vector<double>> points;
+
     vector<TrialConstrained> lastTrials;
     vector<int> lastTrialsPos;
 
@@ -43,8 +45,8 @@ public:
                 vector<double> _A = vector<double>(), vector<double> _B = vector<double>(), double _r = 2.0,
                 double _d = 0.01, int _den = 10, int _key = 1, double _eps = 0.0001, int _maxTrials = 1000,
                 int _maxFevals = 1000, int _incr = 0) : OptimizationMethodConstrained(_f, _n, _numberConstraints,
-                _A, _B, _eps, _maxTrials, _maxFevals), r(_r), d(_d), den(_den), key(_key), incr(_incr), lastTrials(1),
-                lastTrialsPos(1), M(0), coincideX(false), I((size_t)numberConstraints + 1), hNu(0),
+                _A, _B, _eps, _maxTrials, _maxFevals), r(_r), d(_d), den(_den), key(_key), incr(_incr), points(0),
+                lastTrials(1), lastTrialsPos(1), M(0), coincideX(false), I((size_t)numberConstraints + 1), hNu(0),
                 calcI((size_t)numberConstraints + 1), mu((size_t)numberConstraints + 1),
                 zStar((size_t)numberConstraints + 1) {}
     
@@ -62,7 +64,7 @@ public:
     int getIncr() const { return incr; };
 
     bool getCoincideX() const { return coincideX; };
-    void getPoints(vector<vector<double>> &points);
+    void getPoints(vector<vector<double>> &points) const { points = this->points; };
     void getL(vector<double> &L) const { L = mu; };
 
     void solve(int &numberTrials, int &numberFevals, vector<double> &X, TypeSolve type);

@@ -29,8 +29,9 @@ void calculation(MggsaMethod &mggsa, vector4d &lipschitzConst, ProblemSingle pro
                  int maxFevals, double eps, double r, double d, int key, int den, int incr, const int incrMin, const int mMin,
                  const int keyMin);
 
-const int familyNumber = 3; // 0 - Grishagin, 1 - GKLS
-                            // 2 - Grishagin(constrained), 3 - GKLS(constrained)
+const int familyNumber = 1; // 1 - Grishagin, 2 - GKLS
+                            // 3 - constrained Grishagin, 4 - constrained GKLS
+const int displayType = 1; // 0 - application, 1 - png
 
 int main() {
     ofstream ofstrOpt("output_data/mggsa_test_lipschitz_opt.txt");
@@ -118,12 +119,16 @@ int main() {
 #endif
 
     initArrayGnuplot(ofstrOpt, "familyNames", numberFunctions);
+    setVariableGnuplot(ofstrOpt, "numberKeys", 2, false);
+    initArrayGnuplot(ofstrOpt, "key", 2);
+    setValueInArrayGnuplot(ofstrOpt, "key", 1, 1, false);
+    setValueInArrayGnuplot(ofstrOpt, "key", 2, 3, false);
     for (int i = 0; i < numberFunctions; i++) {
         setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].name);
     }
     ofstrOpt.close();
 
-    vector<int> args{ familyNumber, keyMin, keyMax, mMin, mMax, incrMin, incrMax };
+    vector<int> args{ displayType, familyNumber, keyMin, keyMax, mMin, mMax, incrMin, incrMax };
     drawGraphGnuplot("scripts/mggsa_test_lipschitz.gp", args);
 
     return 0;

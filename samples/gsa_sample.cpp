@@ -15,7 +15,8 @@
 
 using namespace std;
 
-const int functionNumber = 3; // 0 - f1, 1 - f2, 2 - f3, 3 - f4
+const int functionNumber = 2; // 1 - f1, 2 - f2, 3 - f3, 4 - f4
+const int displayType = 1; // 0 - application, 1 - png
 
 double f1(double x) {
     return -4.0 * x + 1.0;
@@ -79,7 +80,8 @@ int main() {
     }
     ofstr.close();
 
-    drawGraphGnuplot("scripts/gsa_sample.gp", functionNumber);
+    vector<int> args{ displayType, functionNumber };
+    drawGraphGnuplot("scripts/gsa_sample.gp", args);
 
 #if defined( _MSC_VER )
     cin.get();
