@@ -16,7 +16,7 @@
 using namespace std;
 
 const int functionNumber = 6; // 1 - f1, 2 - f2, 3 - f3, ...
-const int displayType = 1; // 0 - application, 1 - png
+const int displayType = 1; // 0 - application, 1 - png, 2 - notitle
 
 double f1(double x, int j) {
     switch (j) {

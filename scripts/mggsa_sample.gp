@@ -1,10 +1,8 @@
 #!/usr/bin/gnuplot
 
-nameTask = "mggsa_sample"
-
-trialfile = "output_data/".nameTask.".txt"
-
-load "output_data/".nameTask."_opt.txt"
+taskName = "mggsa_sample"
+trialfile = "output_data/".taskName.".txt"
+load "output_data/".taskName."_opt.txt"
 
 f1(i, x, y) = (i == 0 ? 1.0 - x - y : 1/0)
 
@@ -25,16 +23,14 @@ f(i, j, x, y) = (i == 1 ? f1(j, x, y) : \
                  i == 3 ? f3(j, x, y) : \
                  i == 4 ? f4(j, x, y) : 1/0)
 
-titleName(n) = sprintf("Graph of the sample function №%d, method mggsa", n)
-functionName(i) = (i == 0 ? sprintf("f(x, y)") : sprintf("g%d(x, y)", i))
-
 set contour
-set view map
 set cntrparam bspline levels auto 10
 set cntrlabel onecolor
 set cntrlabel start 5 interval 150
 set cntrlabel font ",10"
 set contour base
+
+set view map
 
 set grid
 
@@ -43,14 +39,17 @@ set ylabel "Y"
 
 set isosamples 100
 
+title(n) = sprintf("Graph of the sample function №%d, method mggsa", n)
+titlePng(n) = (ARG1 == 1) ? title(n) : sprintf("")
+functionName(i) = (i == 0 ? sprintf("f(x, y)") : sprintf("g%d(x, y)", i))
+
 if (ARG1 == 0) {
     ind = 3 * (ARG2 - 1)
-
-    set title titleName(int(ARG2)) font "Helvetica Bold, 20"
 
     set xrange [AX[int(ARG2)] : BX[int(ARG2)]]
     set yrange [AY[int(ARG2)] : BY[int(ARG2)]]
 
+    set title title(int(ARG2)) font "Helvetica Bold, 20"
     splot f(ARG2, 0, x, y) title "f(x, y)" nosurface, \
           f(ARG2, 1, x, y) lc rgb "orange" title "g(x, y)" nocontours, \
           trialfile index ind + 2 ls 4 lc rgb "green" lw 2 title "trial points" nocontours, \
@@ -61,19 +60,18 @@ if (ARG1 == 0) {
     bind all "alt-End" "exit gnuplot"
     pause mouse close
 } else {
-    set terminal pngcairo size 950, 950
-    system "mkdir -p output_graph/".nameTask
+    set terminal pngcairo size 950, 950 font "Helvetica Bold, 15"
+    system "mkdir -p output_graph/".taskName
 
     do for [i = 1 : 4] {
-        set output "output_graph/".nameTask."/".nameTask."_".i.".png"
+        set output "output_graph/".taskName."/".taskName."_".i.".png"
 
         ind = 3 * (i - 1)
-
-        set title titleName(i) font "Helvetica Bold, 20"
 
         set xrange [AX[i] : BX[i]]
         set yrange [AY[i] : BY[i]]
 
+        set title titlePng(i) font "Helvetica Bold, 15"
         splot f(i, 0, x, y) title "f(x, y)" nosurface, \
               f(i, 1, x, y) lc rgb "orange" title "g(x, y)" nocontours, \
               trialfile index ind + 2 ls 4 lc rgb "green" lw 2 title "trial points" nocontours, \

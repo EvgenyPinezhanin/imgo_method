@@ -53,6 +53,15 @@ void setValueInArrayGnuplot(ofstream &ofstr, string nameArray, int index, T valu
                                  value << (stringExpression ? "\"" : "") << endl;
 }
 
+template <typename T>
+void initArrayGnuplot(ofstream &ofstr, string nameArray, vector<T> elements, bool stringExpression = true) {
+    size_t size = elements.size();
+    initArrayGnuplot(ofstr, nameArray, size);
+    for (int i = 0; i < size; i++) {
+        setValueInArrayGnuplot(ofstr, nameArray, i + 1, elements[i], stringExpression);
+    }
+}
+
 void drawGraphGnuplot(string nameScript);
 void drawGraphGnuplot(string nameScript, int arg);
 void drawGraphGnuplot(string nameScript, const vector<int> &args);

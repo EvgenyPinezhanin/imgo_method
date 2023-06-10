@@ -16,7 +16,7 @@
 using namespace std;
 
 const int functionNumber = 13; // 1 - f1, 2 - f2, 3 - f3, 4 - f4, ...
-const int displayType = 1; // 0 - application, 1 - png
+const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
 
 double f1(double x) {
     return -(-1.0 / 6.0 * pow(x, 6) + 52.0 / 25.0 * pow(x, 5) - 39.0 / 80.0 * pow(x, 4) - 

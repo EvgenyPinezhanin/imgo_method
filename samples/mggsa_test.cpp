@@ -10,7 +10,7 @@
 using namespace std;
 
 const int functionNumber = 1; // 1 - f1, 2 - f2
-const int displayType = 1; // 0 - application, 1 - png
+const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
 
 double f1(vector<double> x, int j) {
     switch (j) {
@@ -103,6 +103,9 @@ int main() {
 
     size_t sizeTaskArray = taskArray.size();
     string arraysName[] = { "AX", "BX", "AY", "BY" };
+    vector<double> incrementalParam{  -1.6,  0.3,  1.0,
+                                     -50.0, 10.0, 50.0 };
+    initArrayGnuplot(ofstrOpt, "incrementalParam", incrementalParam, false);
     for (int i = 0; i < 4; i++) {
         initArrayGnuplot(ofstrOpt, arraysName[i], sizeTaskArray);
     }

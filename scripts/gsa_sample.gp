@@ -1,8 +1,7 @@
 #!/usr/bin/gnuplot
 
-nameTask = "gsa_sample"
-
-trialfile = "output_data/".nameTask.".txt"
+taskName = "gsa_sample"
+trialfile = "output_data/".taskName.".txt"
 
 f1(x) = -4.0 * x + 1.0
 
@@ -17,17 +16,20 @@ f(i, x) = (i == 1 ? f1(x) : \
            i == 3 ? f3(x) : \
            i == 4 ? f4(x) : 1/0)
 
-titleName(n) = sprintf("Graph of the sample function №%d, method gsa", n)
-
 set grid
+
 set xlabel "x"
 set ylabel "f(x)"
+
 set samples 400
+
+title(n) = sprintf("Graph of the sample function №%d, method gsa", n)
+titlePng(n) = (ARG1 == 1) ? title(n) : sprintf("")
 
 if (ARG1 == 0) {
     ind = 3 * (ARG2 - 1)
 
-    set title titleName(int(ARG2)) font "Helvetica Bold, 20"
+    set title title(int(ARG2)) font "Helvetica Bold, 20"
 
     plot f(ARG2, x) title "f(x)", \
          trialfile index ind + 2 ls 4 lc rgb "green" lw 2 title "trials", \
@@ -37,15 +39,15 @@ if (ARG1 == 0) {
     bind all "alt-End" "exit gnuplot"
     pause mouse close
 } else {
-    set terminal pngcairo size 1280, 800
-    system "mkdir -p output_graph/".nameTask
+    set terminal pngcairo size 1440, 800 font "Helvetica Bold, 15"
+    system "mkdir -p output_graph/".taskName
 
     do for [i = 1 : 4] {
-        set output "output_graph/".nameTask."/".nameTask."_".i.".png"
+        set output "output_graph/".taskName."/".taskName."_".i.".png"
 
         ind = 3 * (i - 1)
 
-        set title titleName(i) font "Helvetica Bold, 20"
+        set title titlePng(i) font "Helvetica Bold, 15"
 
         plot f(i, x) title "f(x)", \
              trialfile index ind + 2 ls 4 lc rgb "green" lw 2 title "trials", \

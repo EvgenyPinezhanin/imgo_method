@@ -20,9 +20,8 @@ using namespace std;
 // #define CALC
 
 const int familyNumber = 1; // 1 - Grishagin, 2 - GKLS,
-                            // 3 - Grishagin(constrained), 4 - GKLS(constrained),
-                            // 5 - comparison Grishagin and GKLS, 6 - comparison Grishagin and GKLS(constrained)
-const int displayType = 0; // 0 - application, 1 - png
+                            // 3 - constrained Grishagin, 4 - constrained GKLS
+const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
 
 int main() {
     ofstream ofstrOpt("output_data/mggsa_operational_characteristics_opt.txt");
@@ -141,7 +140,7 @@ int main() {
     vector<int> args{ displayType, familyNumber };
     drawGraphGnuplot("scripts/mggsa_operational_characteristics.gp", args);
 
-#if defined(_MSC_VER)
+#if defined( _MSC_VER )
     cin.get();
 #endif
 

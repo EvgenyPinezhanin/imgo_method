@@ -47,7 +47,7 @@ if (ARG1 == 0) {
     } else {
         set y2tics
 
-        et y2label y2Name[int(ARG2)] font ", 15"
+        set y2label y2Name[int(ARG2)] font ", 15"
 
         if (ARG1 == 1) {
             plot for [i = 1:2] datafile index ind + i - 1 using 1:2 with lines lt i * 2 - 1 title "P_s^{max}(".Parameters[i].")" axes x1y1, \
