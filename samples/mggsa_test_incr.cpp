@@ -30,7 +30,7 @@ double euclideanDistance(const vector<double> &X, const vector<double> &Y) {
 const int type = 3; // 0 - number trials, 1 - number trial points,
                     // 2 - accuracy, 3 - number trial points / number trials
 const int nType = 3; // nMin ... nMax
-const int displayType = 1; // 0 - application, 1 - png
+const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
 
 int main() {
     ofstream ofstrOpt("output_data/mggsa_test_incr_opt.txt");
@@ -38,8 +38,8 @@ int main() {
 
     const int nMin = 2, nMax = 3;
     const int numberN = nMax - nMin + 1;
-    const int incrArray[numberN][2] = { { 1, 60 },
-                                        { 1, 100 } };
+    const int incrArray[numberN][2] = { { 1, 100 },
+                                        { 1, 1 } };
     const int mMin = 8, mMax = 10;
 
 #if defined(CALC)
@@ -50,7 +50,7 @@ int main() {
 
     double eps = 0.01, r = 2.3, d = 0.0;
     int numberConstraints = 0, key = 3;
-    int maxTrials = 100000, maxFevals = 100000;
+    int maxTrials = 50000, maxFevals = 50000;
 
     vector<double> XOpt, A, B;
     for (int i = 0; i < nMin - 1; i++) {

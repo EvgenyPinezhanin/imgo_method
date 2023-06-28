@@ -21,11 +21,11 @@
 
 using namespace std;
 
-#define CALC
+// #define CALC
 
 const int familyNumber = 3; // 1 - Grishagin, 2 - GKLS
                             // 3 - constrained Grishagin, 4 - constrained GKLS
-const int displayType = 1; // 0 - application, 1 - png
+const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
 
 void functionGrid(vector<ofstream> &ofstr, Functor *functorFamily, const vector<double> &A, const vector<double> &B,
                   double gridStep, TypeConstraints type, double minValue, int numberConstraints = 0);
@@ -69,8 +69,8 @@ int main() {
     double gridStep = 0.01;
 
     vector<double> eps{ 0.01, 0.01, 0.01, 0.01 };
-    vector<double> r{ 2.2, 2.2, 2.2, 2.2 };
-    vector<double> d{ 0.0, 0.0, 0.01, 0.01 };
+    vector<double> r{ 2.2, 2.2, 2.2, 3.0 };
+    vector<double> d{ 0.0, 0.0, 0.02, 0.001 };
 
     vector<int> den{ 10, 10, 10, 10 };
     vector<int> key{ 3, 3, 3, 3 };

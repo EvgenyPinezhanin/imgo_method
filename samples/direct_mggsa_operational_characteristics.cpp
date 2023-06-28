@@ -23,11 +23,11 @@
 using namespace std;
 
 // #define CALC_DIRECT
-// #define CALC_MGGSA
+#define CALC_MGGSA
 
 const int familyNumber = 0; // 0 - Grishagin, 1 - GKLS,
                             // 2 - Grishagin(constrained), 3 - GKLS(constrained)
-const int displayType = 1; // 0 - application, 1 - png
+const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
 
 double f(int n, const double *X, int *undefinedFlag, void *data) {
     DataDirectOperationalCharacteristics *fData = static_cast<DataDirectOperationalCharacteristics*>(data);
@@ -76,7 +76,7 @@ double f(int n, const double *X, int *undefinedFlag, void *data) {
 }
 
 int main() {
-    ofstream ofstrOpt("output_data/direct_operational_characteristics_opt.txt");
+    ofstream ofstrOpt("output_data/direct_mggsa_operational_characteristics_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
     
     const int numberFamily = 4;
@@ -114,11 +114,11 @@ int main() {
     // Parameters of mggsa
     int den = 10, incr = 30;
     int maxFevals = 100000;
-    vector<vector<double>> r{ { 3.0, 2.8, 2.6, 2.4 },
-                              { 4.3, 4.1, 3.9, 3.7 },
-                              { 3.0, 2.6, 2.2, 1.8 },
-                              { 4.5, 4.1, 3.7, 3.3 } };
-    vector<int> key{ 1, 3, 3, 3 };
+    vector<vector<double>> r{ { 3.0, 2.6 },
+                              { 4.3, 3.9 },
+                              { 3.0, 2.2 },
+                              { 4.5, 4.1 } };
+    vector<int> key{ 1, 3 };
     vector<double> d{ 0.0, 0.0, 0.01, 0.01 };
 
     MggsaMethod mggsa(nullptr, -1, -1, vector<double>{}, vector<double>{}, -1.0, -1.0, den, -1, eps, -1, maxFevals, incr);
@@ -213,8 +213,8 @@ int main() {
     const int chunkMggsa = 2;
 
 #pragma omp parallel for schedule(static, chunkMggsa) PROC_BIND num_threads(omp_get_num_procs()) collapse(2) \
-        shared(numberFamily, problems, r, sizeR, successRate, K) \
-        firstprivate(mggsa, key, d)
+        shared(numberFamily, problems, r, sizeR, successRate, K, key, d) \
+        firstprivate(mggsa)
     for (int i = 0; i < numberFamily; i++) {
         for (int j = 0; j < sizeR; j++) {
             vector<double> A, B;
@@ -232,17 +232,17 @@ int main() {
                 mggsa.setN((*functor.optProblemFamily)[0]->GetDimension());
                 mggsa.setNumberConstraints(0);
             }
-
+            
             mggsa.setMaxTrials(K[i][1]);
             mggsa.setAB(A, B);
             mggsa.setD(d[i]);
             mggsa.setKey(key[j]);
             mggsa.setR(r[i][j]);
 
+            vector<double> XOpt;
+            int numberSuccessful, numberTrials, numberFevals;
             int numberFunctions = problems[i].optProblemFamily->GetFamilySize();
             vector<int> numberTrialsArray(numberFunctions);
-            int numberSuccessful, numberTrials, numberFevals;
-            vector<double> XOpt;
 
             double startTime = omp_get_wtime();
             for (int k = 0; k < numberFunctions; k++) {
@@ -261,6 +261,7 @@ int main() {
                     numberTrialsArray[k] = K[i][1] + 1;
                 }
             }
+            
             for (int k = K[i][0]; k <= K[i][1]; k += K[i][2]) {
                 numberSuccessful = (int)count_if(numberTrialsArray.begin(), numberTrialsArray.end(), [k](double elem){ return elem <= k; });
                 successRate[i][j + 2][k / K[i][2]] = (double)numberSuccessful / numberFunctions;
@@ -289,13 +290,16 @@ int main() {
     cout << "Total time: " << totalWorkTime << endl;
 
     int sizeKey = key.size();
-    setVariableGnuplot(ofstrOpt, "numberKey", to_string(sizeKey));
+    setVariableGnuplot(ofstrOpt, "numberKey", to_string(sizeKey), false);
     initArrayGnuplot(ofstrOpt, "familyNames", numberFamily);
     initArrayGnuplot(ofstrOpt, "r", sizeKey * numberFamily);
-    initArrayGnuplot(ofstrOpt, "key", sizeKey);
+    initArrayGnuplot(ofstrOpt, "keys", sizeKey);
+    for (int i = 0; i < sizeKey; i++) {
+        setValueInArrayGnuplot(ofstrOpt, "keys", i + 1, key[i]);
+    }
     for (int i = 0; i < numberFamily; i++) {
         setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
-        setValueInArrayGnuplot(ofstrOpt, "key", i + 1, key[i], false);
+
         for (int j = 0; j < r[i].size(); j++) {
             setValueInArrayGnuplot(ofstrOpt, "r", (i * sizeKey) + j + 1, r[i][j]);
         }

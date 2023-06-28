@@ -21,7 +21,7 @@
 
 using namespace std;
 
-// #define CALC
+#define CALC
 
 const int familyNumber = 3; // 1 - Grishagin, 2 - GKLS,
                             // 3 - constrained Grishagin, 4 - constrained GKLS
@@ -123,7 +123,7 @@ int main() {
                     mggsa.setF(functor);
                 }
                 if (mggsa.solveTest(XOpt, numberTrials, numberFevals)) {
-                    numberTrialsArray[k] = numberFevals;
+                    numberTrialsArray[k] = numberTrials;
                 } else {
                     numberTrialsArray[k] = K[i][1] + 1;
                 }

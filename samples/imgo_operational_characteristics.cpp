@@ -18,7 +18,7 @@ using namespace std;
 #define CALC
 
 const int familyNumber = 3; // 1 - Hill, 2 - Shekel
-const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
+const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
 
 int main() {
 

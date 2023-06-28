@@ -69,7 +69,6 @@ int main() {
 
     vector<double> X, L;
     vector<vector<double>> points;
-    vector<TrialConstrained> trials;
     int numberTrials, numberFevals;
 
     for (int i = 0; i < taskArray.size(); i++) {
@@ -99,8 +98,7 @@ int main() {
             addPointGnuplot(ofstr, X, taskArray[i].f(X, taskArray[i].numberConstraints + 1));
 
             mggsa.getPoints(points);
-            mggsa.getTrialPoints(trials);
-            addPointsGnuplot(ofstr, points, trials);
+            addPointsGnuplot(ofstr, points);
         }
     }
     ofstr.close();

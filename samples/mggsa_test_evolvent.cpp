@@ -55,7 +55,6 @@ int main() {
     vector<double> XOpt{ 0.0, 0.0 }, X, L;
     int numberTrials, numberFevals;
     vector<vector<double>> points;
-    vector<TrialConstrained> trials;
 
     mggsa.solve(numberTrials, numberFevals, X);
     mggsa.getL(L);
@@ -68,8 +67,7 @@ int main() {
     addPointGnuplot(ofstr, X, f(X, numberConstraints + 1));
 
     mggsa.getPoints(points);
-    mggsa.getTrialPoints(trials);
-    addPointsGnuplot(ofstr, points, trials);
+    addPointsGnuplot(ofstr, points);
 
     ofstr.close();
 

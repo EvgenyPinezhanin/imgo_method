@@ -24,6 +24,7 @@ set xlabel "X"
 set ylabel "Y"
 
 set key opaque
+set key spacing 1.3
 
 set isosamples 120
 
@@ -47,15 +48,20 @@ if (ARG1 == 0) {
     bind all "alt-End" "exit gnuplot"
     pause mouse close
 } else {
-    set terminal pngcairo size 950, 950
+    set terminal pngcairo size 950, 950 font "Helvetica, 18"
     system "mkdir -p output_graph/".taskName
+
+    set lmargin 1
+    set rmargin 0
+    set tmargin 0
+    set bmargin 0
 
     do for [i = 1 : 4] {
         set output "output_graph/".taskName."/".taskName."_".familyNames[i].".png"
 
         ind = 3 * (i - 1)
 
-        set title title(familyNames[i], functionNumber[i]) font "Helvetica Bold, 20"
+        # set title title(familyNames[i], functionNumber[i]) font "Helvetica, 20"
 
         set xrange [A[2 * (i - 1) + 1] : B[2 * (i - 1) + 1]]
         set yrange [A[2 * (i - 1) + 2] : B[2 * (i - 1) + 2]]
@@ -66,7 +72,7 @@ if (ARG1 == 0) {
               with lines lc rgb "orange" title "g(x, y)" nocontours, \
               trialfile index ind + 2 ls 4 lc rgb "green" lw 2 title "trial points" nocontours, \
               trialfile index ind     ls 7 lc rgb "red"   lw 6 title "X_{min}" nocontours, \
-              trialfile index ind + 1 ls 7 lc rgb "blue"  lw 1 title "X" nocontours, \
-              function(taskName, familyNames[i]) matrix nonuniform with labels notitle nosurface
+              trialfile index ind + 1 ls 7 lc rgb "blue"  lw 1 title "X" nocontours # , \
+              # function(taskName, familyNames[i]) matrix nonuniform with labels notitle nosurface
     }
 }

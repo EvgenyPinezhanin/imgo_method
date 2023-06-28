@@ -50,15 +50,15 @@ int main() {
     ofstream ofstrOpt("output_data/mggsa_test_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
 
-    double eps = 0.001, r = 2.2, d = 0.05;
-    int n = 2, den = 10, key = 1;
+    double eps = 0.01, r = 1.7, d = 0.005;
+    int n = 2, den = 8, key = 3;
     int maxTrials = 100000, maxFevals = 100000;
 
-    vector<TaskMggsa> taskArray = { TaskMggsa(f1, "f1", n, 3, vector<double>{0.0, -1.0}, vector<double>{4.0, 3.0},
-                                              vector<double>{0.942, 0.944}, vector<double>{}, eps, maxTrials, maxFevals,
-                                              r, d, 12, key, -1, true),
-                                    TaskMggsa(f2, "f2", n, 4, vector<double>{0.0, 0.0}, vector<double>{80.0, 80.0},
-                                              vector<double>{77.489, 63.858}, vector<double>{}, eps, maxTrials, maxFevals,
+    vector<TaskMggsa> taskArray = { TaskMggsa(f1, "f1", n, 3, vector<double>{ 0.0, -1.0 }, vector<double>{ 4.0, 3.0 },
+                                              vector<double>{ 0.942, 0.944 }, vector<double>{}, eps, maxTrials, maxFevals,
+                                              r, d, den, key, -1, true),
+                                    TaskMggsa(f2, "f2", n, 4, vector<double>{ 0.0, 0.0 }, vector<double>{ 80.0, 80.0 },
+                                              vector<double>{ 77.489, 63.858 }, vector<double>{}, eps, maxTrials, maxFevals,
                                               3.3, 0.01, den, key, -1, true) };
 
     MggsaMethod mggsa;
@@ -95,8 +95,7 @@ int main() {
             addPointGnuplot(ofstr, X, taskArray[i].f(X, taskArray[i].numberConstraints + 1));
 
             mggsa.getPoints(points);
-            mggsa.getTrialPoints(trials);
-            addPointsGnuplot(ofstr, points, trials);
+            addPointsGnuplot(ofstr, points);
         }
     }
     ofstr.close();

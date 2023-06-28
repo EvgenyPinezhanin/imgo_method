@@ -145,7 +145,7 @@ int main() {
     ofstream ofstrOpt("output_data/imgo_test_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
 
-    double eps = 0.000001, r = 2.0, d = 0.0;
+    double eps = 0.0001, r = 2.0, d = 0.0;
     int maxTrials = 100000, maxFevals = 100000;
 
     vector<TaskImgo> taskArray = { TaskImgo(f1, "f1(x)", 1, -2.5, 1.5, 1.05738, vector<double>{ 4.640837, 8.666667 }, eps, maxTrials,

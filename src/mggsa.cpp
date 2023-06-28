@@ -512,12 +512,12 @@ void MggsaMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X,
         trialTime.push_back(endTime - startTime);
     #endif
 
-    if (key != 3) {
-        y(xNew, P);
-    }
-    point = P;
-    point.push_back(lastTrials[0].z);
-    points.push_back(point);
+        if (key != 3) {
+            y(xNew, P);
+        }
+        point = P;
+        point.push_back(lastTrials[0].z);
+        points.push_back(point);
 
     #if defined(TIME_TEST)
         startTime = omp_get_wtime();

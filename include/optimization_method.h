@@ -16,8 +16,9 @@ protected:
     int numberFevals; // number of calls to the target function
 
 public:
-    OptimizationMethod(int _n, const vector<double> &_A, const vector<double> &_B, double _eps, int _maxTrials, int _maxFevals) 
-                       : n(_n), A(_A), B(_B), eps(_eps), maxTrials(_maxTrials), maxFevals(_maxFevals), numberFevals(0) {}
+    OptimizationMethod(int _n, const vector<double> &_A, const vector<double> &_B, double _eps, int _maxTrials,
+                       int _maxFevals) : n(_n), A(_A), B(_B), eps(_eps), maxTrials(_maxTrials), maxFevals(_maxFevals),
+                       numberFevals(0) {}
 
     void setN(int _n) { n = _n; };
     void setMaxTrials(int _maxTrials) { maxTrials = _maxTrials; };
@@ -27,12 +28,13 @@ public:
     void setB(const vector<double> &_B) { B = _B; };
     void setAB(const vector<double> &_A, const vector<double> &_B) { A = _A; B = _B; };
 
-    int getN() { return n; };
-    int getMaxTrials() { return maxTrials; };
-    int getMaxFevals() { return maxFevals; };
-    double getEps() { return eps; };
-    vector<double> getA() { return A; };
-    vector<double> getB() { return B; };
+    int getN() const { return n; };
+    int getMaxTrials() const { return maxTrials; };
+    int getMaxFevals() const { return maxFevals; };
+    double getEps() const { return eps; };
+    void getA(vector<double>& _A) const { _A = A; };
+    void getB(vector<double>& _B) const { _B = B; };
+    void getAB(vector<double>& _A, vector<double>& _B) const { _A = A; _B = B; };
 
     virtual void solve(int &numberTrials, int &numberFevals, vector<double> &X) = 0;
 };

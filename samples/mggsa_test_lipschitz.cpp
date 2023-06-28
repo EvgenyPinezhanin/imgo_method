@@ -31,7 +31,7 @@ void calculation(MggsaMethod &mggsa, vector4d &lipschitzConst, ProblemSingle pro
 
 const int familyNumber = 1; // 1 - Grishagin, 2 - GKLS
                             // 3 - constrained Grishagin, 4 - constrained GKLS
-const int displayType = 1; // 0 - application, 1 - png
+const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
 
 int main() {
     ofstream ofstrOpt("output_data/mggsa_test_lipschitz_opt.txt");

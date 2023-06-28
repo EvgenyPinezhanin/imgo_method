@@ -4,35 +4,45 @@ taskName = "mggsa_test_incr"
 datafile = "output_data/".taskName.".txt"
 load "output_data/".taskName."_opt.txt"
 
-set linetype 1 lc rgb "#0000FF" lw 5 pt 1 dt 1
-set linetype 2 lc rgb "#0020FF" lw 4 pt 1 dt 2
-set linetype 3 lc rgb "#0040FF" lw 3 pt 1 dt 3
-set linetype 4 lc rgb "#0060FF" lw 2 pt 1 dt 4
-set linetype 5 lc rgb "#0080FF" lw 1 pt 1 dt 5
+# set linetype 1 lc rgb "#0000FF" lw 5 pt 1 dt 1
+# set linetype 2 lc rgb "#0020FF" lw 4 pt 1 dt 2
+# set linetype 3 lc rgb "#0040FF" lw 3 pt 1 dt 3
+# set linetype 4 lc rgb "#0060FF" lw 2 pt 1 dt 4
+# set linetype 5 lc rgb "#0080FF" lw 1 pt 1 dt 5
 
-set linetype cycle 5
+set linetype 1 lc rgb "red" lw 5
+set linetype 2 lc rgb "green" lw 4
+set linetype 3 lc rgb "blue" lw 3
 
-set xlabel "increment"
+set linetype cycle 3
+
+set xlabel "incr"
+
+set key spacing 1.3
 
 array yName[4]
 yName[1] = "trials"
 yName[2] = "point trials"
 yName[3] = "accuracy"
-yName[4] = "point trials / trials"
+yName[4] = "Количество точек / количество испытаний"
 
 array fileName[4]
 fileName[1] = "trials"
 fileName[2] = "point_trials"
 fileName[3] = "accuracy"
-fileName[4] = "point_trials_trials"
+fileName[4] = "point_trials_div_trials"
 
+title(n) = sprintf("Increment test for Rastrigin function(N = %d), method mggsa", n)
+titlePng(n) = (ARG1 == 1) ? title(n) : sprintf("")
 
 if (ARG1 == 0) {
+	set key font ", 15"
+
     set xrange [incrMin[ARG3 - ARG4 + 1] : incrMax[ARG3 - ARG4 + 1]]
-    set title "Increment test for Rastrigin function(N = ".ARG3."), method mggsa" font "Helvetica Bold, 20"
 
 	set ylabel yName[ARG2 + 1]
 
+    set title title(ARG3) font "Helvetica Bold, 20"
     if (ARG2 == 3) {
         plot for [i = ARG6 : ARG7] datafile index (ARG3 - ARG4) * (ARG7 - ARG6 + 1) + i - ARG6 \
              using 1:($3 / $2) with lines lt i - ARG6 + 1 title "m = ".i
@@ -44,15 +54,20 @@ if (ARG1 == 0) {
     bind all "alt-End" "exit gnuplot"
     pause mouse close
 } else {
-    set terminal pngcairo size 1280, 720
+    set terminal pngcairo size 1440, 700 font "Helvetica, 18"
 	system "mkdir -p output_graph/".taskName
+
+	set lmargin 8
+    set rmargin 6
+    set tmargin 3
+    set bmargin 3
 
     do for [i = ARG4 : ARG5] {
        	set xrange [incrMin[i - ARG4 + 1] : incrMax[i - ARG4 + 1]]
-       	set title "Increment test for Rastrigin function(N = ".i."), method mggsa" font "Helvetica Bold, 20"
 
+       	set title titlePng(i) font "Helvetica, 18"
 		do for [j = 1 : 4] {
-			set output "output_graph/".taskName."/".taskName."_".i."_".fileName[j].".png"
+			set output "output_graph/".taskName."/".i."_".fileName[j].".png"
 
 			set ylabel yName[j]
 

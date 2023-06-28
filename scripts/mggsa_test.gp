@@ -71,9 +71,13 @@ titlePng(n) = (ARG1 == 1) ? title(n) : sprintf("")
 functionName(i) = (i == 0 ? sprintf("f(x, y)") : sprintf("g%d(x, y)", i))
 
 if (ARG1 == 0) {
+    set tics font ", 13"
+
+    set key font ", 15"
+
     ind = 3 * (ARG2 - 1)
 
-    set title title(int(ARG2)) font "Helvetica Bold, 20"
+    set title title(int(ARG2)) font "Helvetica, 19"
 
     set xrange [AX[int(ARG2)] : BX[int(ARG2)]]
     set yrange [AY[int(ARG2)] : BY[int(ARG2)]]
@@ -88,10 +92,10 @@ if (ARG1 == 0) {
     bind all "alt-End" "exit gnuplot"
     pause mouse close
 } else {
-    set terminal pngcairo size 950, 950 font "Helvetica Bold, 15"
+    set terminal pngcairo size 950, 950 font "Helvetica, 19"
     system "mkdir -p output_graph/".taskName
 
-    set lmargin 0
+    set lmargin 1
     set rmargin 0
     set tmargin 0
     set bmargin 0
@@ -105,16 +109,16 @@ if (ARG1 == 0) {
 
         ind = 3 * (i - 1)
 
-        set title titlePng(i) font "Helvetica Bold, 20"
+        set title titlePng(i) font "Helvetica, 19"
 
         set xrange [AX[i] : BX[i]]
         set yrange [AY[i] : BY[i]]
 
-        splot f(i, 0, x, y) title "f(x, y)" nosurface, \
+        splot f(i, 0, x, y) title "φ(x, y)" nosurface, \
               f(i, 1, x, y) lc rgb "orange" title "g(x, y)" nocontours, \
-              trialfile index ind + 2 ls 4 lc rgb "green" lw 2 title "trial points" nocontours, \
-              trialfile index ind     ls 7 lc rgb "red"   lw 6 title "X_{min}" nocontours, \
-              trialfile index ind + 1 ls 7 lc rgb "blue"  lw 1 title "X" nocontours, \
-              f(i, 0, x, y) with labels notitle nosurface
+              trialfile index ind     ls 7 lc rgb "red"   lw 6 title "X_{min}" nocontours #, \
+              # trialfile index ind + 2 ls 4 lc rgb "green" lw 2 title "trial points" nocontours, \
+              # trialfile index ind + 1 ls 7 lc rgb "blue"  lw 1 title "X" nocontours #, \
+              # f(i, 0, x, y) with labels notitle nosurface
     }
 }

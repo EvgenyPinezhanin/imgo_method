@@ -36,14 +36,20 @@ set linetype 27 lc rgb "#FF00FF" lw 1 pt 1 dt 1
 
 set linetype cycle 27
 
-set xlabel "increment"
-set ylabel "Lipschitz constant"
+set xlabel "incr"
+set ylabel "Оценка константы Гельдера"
+
+set key outside right top box
+
 set xrange [ARG7 : ARG8]
+
+title(familyName) = sprintf("Lipschitz test for the function %s, method mggsa", familyName)
+titlePng(familyName) = (ARG1 == 1) ? title(familyName) : sprintf("")
 
 ind(i, j, k) = (i - 1) * (ARG4 - ARG3 + 1) * (ARG6 - ARG5 + 1) + (ARG6 - ARG5 + 1) * (j - 1) + k - ARG5
 
 if (ARG1 == 0) {
-    set title "Lipschitz test for the function ".familyNames[int(ARG2)].", method mggsa" font "Helvetica Bold, 20"
+    set title title(familyNames[int(ARG2)]) font "Helvetica Bold, 20"
 
     plot for [i = 1 : numberKeys] for [j = ARG5 : ARG6] datafile index ind(int(ARG2), key[i], j) \
          using 1:2 with lines lt 9 * (key[i] - 1) + j - ARG5 + 1 title sprintf("key = %d, m = %d", key[i], j)
@@ -51,12 +57,12 @@ if (ARG1 == 0) {
     bind all "alt-End" "exit gnuplot"
     pause mouse close
 } else {
-    set terminal pngcairo size 1280, 720
+    set terminal pngcairo size 1640, 800 font "Helvetica, 20"
     system "mkdir -p output_graph/".taskName
 
     do for [i = 1 : 4] {
-        set title "Lipschitz test for the function ".familyNames[i].", method mggsa" font "Helvetica Bold, 20"
-        set output "output_graph/".taskName."/".taskName."_".familyNames[i].".png"
+        set title titlePng(familyNames[i]) font "Helvetica, 20"
+        set output "output_graph/".taskName."/".familyNames[i].".png"
 
         plot for [j = 1 : numberKeys] for [k = ARG5 : ARG6] datafile index ind(i, key[j], k) \
              using 1:2 with lines lt 9 * (key[j] - 1) + k - ARG5 + 1 title sprintf("key = %d, m = %d", key[j], k)
