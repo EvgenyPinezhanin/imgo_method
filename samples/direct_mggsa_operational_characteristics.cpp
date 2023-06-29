@@ -23,7 +23,7 @@
 using namespace std;
 
 // #define CALC_DIRECT
-#define CALC_MGGSA
+// #define CALC_MGGSA
 
 const int familyNumber = 0; // 0 - Grishagin, 1 - GKLS,
                             // 2 - Grishagin(constrained), 3 - GKLS(constrained)
@@ -59,7 +59,7 @@ double f(int n, const double *X, int *undefinedFlag, void *data) {
 
         f = (*problem)(point, 1);
     }
-    fData->f.push_back(f);
+    // fData->f.push_back(f);
 
     if (!fData->converge) {
         double distance = 0.0;

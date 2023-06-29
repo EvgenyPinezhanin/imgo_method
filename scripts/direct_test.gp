@@ -1,80 +1,97 @@
 #!/usr/bin/gnuplot
 
-trialfile = "output_data/direct_test.txt"
+taskName = "direct_test"
+trialfile = "output_data/".taskName.".txt"
+load "output_data/".taskName."_opt.txt"
 
-load "output_data/direct_test_opt.txt"
+f1Sample(i, x, y) = (i == 0 ? 1.0 - x - y : 1/0)
 
-f1(x, y) = -1.5 * x ** 2 * exp(1 - x ** 2 - 20.25 * (x - y) ** 2) - (0.5 * (x - 1) * (y - 1)) ** 4 * \
-            exp(2.0 - (0.5 * (x - 1)) ** 4 - (y - 1.0) ** 4)
-g1_1(x, y) = 0.01 * ((x - 2.2) ** 2 + (y - 1.2) ** 2 - 2.25)
-g1_2(x, y) = 100.0 * (1.0 - ((x - 2.0) ** 2) / 1.44 - (0.5 * y) ** 2)
-g1_3(x, y) = 10.0 * (y - 1.5 - 1.5 * sin(6.283 * (x - 1.75)))
-g1(x, y) = (g1_1(x, y) <= 0.0) ? (g1_2(x, y) <= 0 ? (g1_3(x, y) <= 0 ? g1_3(x, y) : 1 / 0) : 1 / 0) : 1 / 0
+f2Sample(i, x, y) = (i == 0 ? (x - 1.0) ** 2 / 5.0 + (y - 1.0) ** 2 / 5.0 : 1/0)
 
-array C[20]
-C[1]=75.1963666677
-C[2]=-3.8112755343
-C[3]=0.1269366345
-C[4]=-0.0020567665
-C[5]=0.000010345
-C[6]=-6.8306567631
-C[7]=0.0302344793
-C[8]=-0.0012813448
-C[9]=0.0000352559
-C[10]=-0.0000002266
-C[11]=0.2564581253
-C[12]=-0.0034604030
-C[13]=0.0000135139
-C[14]=-28.1064434908
-C[15]=-0.0000052375
-C[16]=-0.0000000063
-C[17]=0.0000000007
-C[18]=0.0003405462
-C[19]=-0.0000016638
-C[20]=-2.8673112392
+g3Sample_1(x, y) = 1.0 - x - y
+g3Sample(x, y) = g3Sample_1(x, y) <= 0.0 ? g3Sample_1(x, y) : 1/0
+f3Sample(i, x, y) = i == 0 ? x ** 2 / 5.0 + y ** 2 / 5.0 : \
+                    i == 1 ? g3Sample(x, y) : 1/0
 
-f2(x, y) = -(C[1] + C[2] * x + C[3] * x ** 2 + C[4] * x ** 3 + C[5] * x ** 4 + C[6] * y + C[7] * x * y + C[8] * x ** 2 * y \
-           + C[9] * x ** 3 * y + C[10] * x ** 4 * y + C[11] * y ** 2 + C[12] * y ** 3 + C[13] * y ** 4 + C[14] / (y + 1) + \
-           C[15] * x ** 2 * y ** 2 + C[16] * x ** 3 * y ** 2 + C[17] * x ** 3 * y ** 3 + C[18] * x * y ** 2 + \
-           C[19] * x * y ** 3 + C[20] * exp(0.0005 * x * y))
-g2_1(x, y) = 450.0 - x * y
-g2_2(x, y) = (0.1 * x - 1.0) ** 2 - y
-g2_3(x, y) = 8.0 * (x - 40.0) - (y - 30.0) * (y - 55.0)
-g2_4(x, y) = y + (x - 35.0) * (x - 30.0) / 125.0 - 80.0
-g2(x, y) = (g2_1(x, y) <= 0.0) ? (g2_2(x, y) <= 0 ? (g2_3(x, y) <= 0 ? (g2_4(x, y) <= 0 ? (g2_4(x, y)) : 1 / 0) : 1 / 0) : 1 / 0) : 1 / 0
+g4Sample_1(x, y) = (x - 2.0) ** 2 + (y - 2.0) ** 2 - 2.0
+g4Sample(x, y) = g4Sample_1(x, y) <= 0.0 ? g4Sample_1(x, y) : 1/0
+f4Sample(i, x, y) = i == 0 ? x ** 2 / 5.0 + y ** 2 / 5.0 : \
+                    i == 1 ? g4Sample(x, y) : 1/0
 
-title_name(n) = sprintf("Graph of the test function №%d with DIRECT", n)
-function_name(s, n) = sprintf("%s%d(x, y)", s, n)
+load "scripts/functions/multidimensional/test/1.txt"
+load "scripts/functions/multidimensional/test/2.txt"
 
-set grid
-set contour
-set view map
-set cntrparam bspline levels auto 14
-set cntrlabel onecolor
-set cntrlabel start 5 interval 150
-set cntrlabel font ",10"
+f(i, j, x, y) = (i == 1 ? f1Sample(j, x, y) : \
+                 i == 2 ? f2Sample(j, x, y) : \
+                 i == 3 ? f3Sample(j, x, y) : \
+                 i == 4 ? f4Sample(j, x, y) : \
+                 i == 5 ? f1MTest(j, x, y) : \
+                 i == 6 ? f2MTest(j, x, y) : 1/0)
+
 set contour base
+set cntrlabel onecolor
+set cntrparam levels auto 10
+set cntrlabel start 5 interval 40
+set cntrlabel font "Helvetica, 10"
+
+set view map
+
 set isosamples 120
 
-set xlabel "X"
-set ylabel "Y"
+set grid
 
-set terminal wxt size 950, 950
+set xlabel "X" font "Helvetica, 16"
+set ylabel "Y" font "Helvetica, 16" offset -1
 
-ind = 3 * ARG1
-function_f = function_name("f", ARG1 + 1)
-function_g = function_name("g", ARG1 + 1)
+set tics font "Helvetica, 16"
 
-set title title_name(ARG1 + 1) font "Helvetica Bold, 20"
+set key box outside right top
+set key font "Helvetica, 16" spacing 1.5
 
-set xrange [AX[ARG1 + 1]:BX[ARG1 + 1]]
-set yrange [AY[ARG1 + 1]:BY[ARG1 + 1]]
+title(block, n) = sprintf("Graph of the %s function №%d, method DIRECT", block, n)
+titlePng(block, n) = ARG1 == 1 ? title(block, n) : sprintf("")
 
-splot @function_f title "φ(x, y)" nosurface, \
-      @function_g lc rgb "orange" title "g(x, y)" nocontours, \
-      trialfile index ind + 2 ls 5 lc rgb "green" title "trial points" nocontours, \
-      trialfile index ind + 1 ls 5 lc rgb "blue" title "X" nocontours, \
-      trialfile index ind ls 5 lc rgb "red" title "X*" nocontours
+if (ARG1 == 0) {
+    set key width 3
 
-bind all "alt-End" "exit gnuplot"
-pause mouse close
+    set xrange [A[ARG2 + 1] : B[ARG2 + 1]]
+    set yrange [A[ARG2 + 2] : B[ARG2 + 2]]
+
+    set title title(functionBlockName[ARG2 + 1], functionNumber[ARG2 + 1]) font "Helvetica, 16"
+
+    ind = 3 * ARG2
+    splot f(ARG2 + 1, 0, x, y) title "φ(x, y)" nosurface, \
+          f(ARG2 + 1, 1, x, y) lc rgb "orange" title "g(x, y)" nocontours, \
+          trialfile index ind + 2 ls 4 lc rgb "green" lw 2 title "trial points" nocontours, \
+          trialfile index ind     ls 7 lc rgb "red"   ps 2 title "X_{min}" nocontours, \
+          trialfile index ind + 1 ls 7 lc rgb "blue"  ps 1 title "X" nocontours, \
+          f(ARG2 + 1, 0, x, y) with labels notitle nosurface
+
+    bind all "alt-End" "exit gnuplot"
+    pause mouse close
+} else {
+    set terminal pngcairo size 1150, 950 font "Helvetica, 16"
+    system "mkdir -p output_graph/".taskName
+
+    set lmargin 0
+    set rmargin 0
+    set tmargin 0
+    set bmargin 0
+
+    do for [i = 1 : 6] {
+        set output "output_graph/".taskName."/".functionBlockName[i]."_".functionNumber[i].".png"
+
+        set xrange [A[2 * i - 1] : B[2 * i - 1]]
+        set yrange [A[2 * i] : B[2 * i]]
+
+        set title titlePng(functionBlockName[i], functionNumber[i]) font "Helvetica, 16"
+
+        ind = 3 * (i - 1)
+        splot f(i, 0, x, y) title "φ(x, y)" nosurface, \
+              f(i, 1, x, y) lc rgb "orange" title "g(x, y)" nocontours, \
+              trialfile index ind + 2 ls 4 lc rgb "green" lw 2 title "trial points" nocontours, \
+              trialfile index ind     ls 7 lc rgb "red"   lw 6 title "X_{min}" nocontours, \
+              trialfile index ind + 1 ls 7 lc rgb "blue"  lw 1 title "X" nocontours, \
+              f(i, 0, x, y) with labels notitle nosurface
+    }
+}

@@ -205,9 +205,8 @@ public:
 struct DataDirect {
     int numberFevals;
     vector<vector<double>> points;
-    vector<double> f;
 
-    DataDirect() : numberFevals(0), points(0), f(0) {};
+    DataDirect() : numberFevals(0), points(0) {};
 };
 
 struct DataDirectOperationalCharacteristics : public DataDirect {
