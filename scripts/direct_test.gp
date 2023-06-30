@@ -4,9 +4,9 @@ taskName = "direct_test"
 trialfile = "output_data/".taskName.".txt"
 load "output_data/".taskName."_opt.txt"
 
-f1Sample(i, x, y) = (i == 0 ? 1.0 - x - y : 1/0)
+f1Sample(i, x, y) = i == 0 ? 1.0 - x - y : 1/0
 
-f2Sample(i, x, y) = (i == 0 ? (x - 1.0) ** 2 / 5.0 + (y - 1.0) ** 2 / 5.0 : 1/0)
+f2Sample(i, x, y) = i == 0 ? (x - 1.0) ** 2 / 5.0 + (y - 1.0) ** 2 / 5.0 : 1/0
 
 g3Sample_1(x, y) = 1.0 - x - y
 g3Sample(x, y) = g3Sample_1(x, y) <= 0.0 ? g3Sample_1(x, y) : 1/0
@@ -21,12 +21,12 @@ f4Sample(i, x, y) = i == 0 ? x ** 2 / 5.0 + y ** 2 / 5.0 : \
 load "scripts/functions/multidimensional/test/1.txt"
 load "scripts/functions/multidimensional/test/2.txt"
 
-f(i, j, x, y) = (i == 1 ? f1Sample(j, x, y) : \
-                 i == 2 ? f2Sample(j, x, y) : \
-                 i == 3 ? f3Sample(j, x, y) : \
-                 i == 4 ? f4Sample(j, x, y) : \
-                 i == 5 ? f1MTest(j, x, y) : \
-                 i == 6 ? f2MTest(j, x, y) : 1/0)
+f(i, j, x, y) = i == 1 ? f1Sample(j, x, y) : \
+                i == 2 ? f2Sample(j, x, y) : \
+                i == 3 ? f3Sample(j, x, y) : \
+                i == 4 ? f4Sample(j, x, y) : \
+                i == 5 ? f1MTest(j, x, y) : \
+                i == 6 ? f2MTest(j, x, y) : 1/0
 
 set contour base
 set cntrlabel onecolor
@@ -73,7 +73,7 @@ if (ARG1 == 0) {
     set terminal pngcairo size 1150, 950 font "Helvetica, 16"
     system "mkdir -p output_graph/".taskName
 
-    set lmargin 0
+    set lmargin 1
     set rmargin 0
     set tmargin 0
     set bmargin 0

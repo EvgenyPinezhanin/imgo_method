@@ -145,17 +145,17 @@ int main() {
     direct_algorithm algorithm = DIRECT_ORIGINAL;
 
     vector<TaskDirect> taskArray = {
-        TaskDirect("f1 sample", f1Sample, &fData, n, vector<double>{ -4.0, -4.0 }, vector<double>{ 4.0, 4.0 },
+        TaskDirect("f1(x, y) sample", f1Sample, &fData, n, vector<double>{ -4.0, -4.0 }, vector<double>{ 4.0, 4.0 },
                    vector<double>{ 4.0, 4.0 }, maxFevals, maxIters, magicEps, volumeReltol, sigmaReltol, nullptr, algorithm),
-        TaskDirect("f2 sample", f2Sample, &fData, n, vector<double>{ -4.0, -4.0 }, vector<double>{ 4.0, 4.0 },
+        TaskDirect("f2(x, y) sample", f2Sample, &fData, n, vector<double>{ -4.0, -4.0 }, vector<double>{ 4.0, 4.0 },
                    vector<double>{ 1.0, 1.0 }, maxFevals, maxIters, magicEps, volumeReltol, sigmaReltol, nullptr, algorithm),
-        TaskDirect("f3 sample", f3Sample, &fData, n, vector<double>{ -1.0, -1.0 }, vector<double>{ 1.0, 1.0 },
+        TaskDirect("f3(x, y) sample", f3Sample, &fData, n, vector<double>{ -1.0, -1.0 }, vector<double>{ 1.0, 1.0 },
                    vector<double>{ 0.5, 0.5 }, maxFevals, maxIters, magicEps, volumeReltol, sigmaReltol, nullptr, algorithm),
-        TaskDirect("f4 sample", f4Sample, &fData, n, vector<double>{ 0.0, 0.0 }, vector<double>{ 3.0, 3.0 },
+        TaskDirect("f4(x, y) sample", f4Sample, &fData, n, vector<double>{ 0.0, 0.0 }, vector<double>{ 3.0, 3.0 },
                    vector<double>{ 1.0, 1.0 }, maxFevals, maxIters, magicEps, volumeReltol, sigmaReltol, nullptr, algorithm),
-        TaskDirect("f1 test", f1Test, &fData, n, vector<double>{ 0.0, -1.0 }, vector<double>{ 4.0, 3.0 },
+        TaskDirect("f1(x, y) test", f1Test, &fData, n, vector<double>{ 0.0, -1.0 }, vector<double>{ 4.0, 3.0 },
                    vector<double>{ 0.942, 0.944 }, maxFevals, maxIters, magicEps, volumeReltol, sigmaReltol, nullptr, algorithm),
-        TaskDirect("f2 test", f2Test, &fData, n, vector<double>{ 0.0, 0.0 }, vector<double>{ 80.0, 80.0 },
+        TaskDirect("f2(x, y) test", f2Test, &fData, n, vector<double>{ 0.0, 0.0 }, vector<double>{ 80.0, 80.0 },
                    vector<double>{ 77.489, 63.858 }, maxFevals, maxIters, magicEps, volumeReltol, sigmaReltol, nullptr, algorithm)
     };
 
@@ -218,6 +218,7 @@ int main() {
             index++;
         }
     }
+    ofstrOpt.close();
 
     int totalFunctionNumber = functionNumber;
     for (int i = 0; i < functionBlock; i++)

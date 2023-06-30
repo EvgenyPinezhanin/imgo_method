@@ -9,10 +9,45 @@
 
 using namespace std;
 
-const int functionNumber = 1; // 1 - f1, 2 - f2
-const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
+const int functionNumber = 0; // 0 - f1, 1 - f2, ...
+const int functionBlock = 0; // 0 - sample, 1 - test
+const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
 
-double f1(vector<double> x, int j) {
+const int numberBlocks = 2;
+const int numberFunctions[2] = { 4, 2 };
+const vector<string> functionBlockName{ "sample", "test" };
+
+double f1Sample(vector<double> x, int j) {
+    switch (j) {
+        case 1: return 1.0 - x[0] - x[1];
+        default: return numeric_limits<double>::quiet_NaN();
+    }
+}
+
+double f2Sample(vector<double> x, int j) {
+    switch (j) {
+        case 1: return (x[0] - 1.0) * (x[0] - 1.0) / 5.0 + (x[1] - 1.0) * (x[1] - 1.0) / 5.0;
+        default: return numeric_limits<double>::quiet_NaN();
+    }
+}
+
+double f3Sample(vector<double> x, int j) {
+    switch (j) {
+        case 1: return 1.0 - x[0] - x[1];
+        case 2: return x[0] * x[0] / 5.0 + x[1] * x[1] / 5.0;
+        default: return numeric_limits<double>::quiet_NaN();
+    }
+}
+
+double f4Sample(vector<double> x, int j) {
+    switch (j) {
+        case 1: return (x[0] - 2.0) * (x[0] - 2.0) + (x[1] - 2.0) * (x[1] - 2.0) - 2.0;
+        case 2: return x[0] * x[0] / 5.0 + x[1] * x[1] / 5.0;
+        default: return numeric_limits<double>::quiet_NaN();
+    }
+}
+
+double f1Test(vector<double> x, int j) {
     switch (j) {
         case 1: return 0.01 * (pow((x[0] - 2.2), 2) + pow((x[1] - 1.2), 2) - 2.25);
         case 2: return 100.0 * (1.0 - pow((x[0] - 2.0), 2) / 1.44 - pow(0.5 * x[1], 2));
@@ -29,7 +64,7 @@ const double C[20] = { 75.1963666677, -3.8112755343, 0.1269366345, -0.0020567665
                        0.2564581253, -0.0034604030, 0.0000135139, -28.1064434908, -0.0000052375,
                       -0.0000000063, 0.0000000007, 0.0003405462, -0.0000016638, -2.8673112392 };
 
-double f2(vector<double> x, int j) {
+double f2Test(vector<double> x, int j) {
     switch (j) {
         case 1: return 450.0 - x[0] * x[1];
         case 2: return (0.1 * x[0] - 1.0) * (0.1 * x[0] - 1.0) - x[1];
@@ -54,12 +89,20 @@ int main() {
     int n = 2, den = 8, key = 3;
     int maxTrials = 100000, maxFevals = 100000;
 
-    vector<TaskMggsa> taskArray = { TaskMggsa(f1, "f1", n, 3, vector<double>{ 0.0, -1.0 }, vector<double>{ 4.0, 3.0 },
-                                              vector<double>{ 0.942, 0.944 }, vector<double>{}, eps, maxTrials, maxFevals,
-                                              r, d, den, key, -1, true),
-                                    TaskMggsa(f2, "f2", n, 4, vector<double>{ 0.0, 0.0 }, vector<double>{ 80.0, 80.0 },
-                                              vector<double>{ 77.489, 63.858 }, vector<double>{}, eps, maxTrials, maxFevals,
-                                              3.3, 0.01, den, key, -1, true) };
+    vector<TaskMggsa> taskArray = { TaskMggsa(f1Sample, "f1(x, y) sample", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
+                                              vector<double>{4.0, 4.0}, vector<double>{}, eps, maxTrials, maxFevals, r, d, den, key, -1),
+                                    TaskMggsa(f2Sample, "f2(x, y) sample", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
+                                              vector<double>{1.0, 1.0}, vector<double>{}, eps, maxTrials, maxFevals, r, d, den, key, -1),
+                                    TaskMggsa(f3Sample, "f3(x, y) sample", n, 1, vector<double>{-1.0, -1.0}, vector<double>{1.0, 1.0},
+                                              vector<double>{0.5, 0.5}, vector<double>{}, eps, maxTrials, maxFevals, r, d, den, key, -1),
+                                    TaskMggsa(f4Sample, "f4(x, y) sample", n, 1, vector<double>{0.0, 0.0}, vector<double>{3.0, 3.0},
+                                              vector<double>{1.0, 1.0}, vector<double>{}, eps, maxTrials, maxFevals, r, d, den, key, -1),
+                                    TaskMggsa(f1Test, "f1(x, y) test", n, 3, vector<double>{ 0.0, -1.0 }, vector<double>{ 4.0, 3.0 },
+                                              vector<double>{ 0.942, 0.944 }, vector<double>{}, eps, maxTrials, maxFevals, r, d, den,
+                                              key, -1),
+                                    TaskMggsa(f2Test, "f2(x, y) test", n, 4, vector<double>{ 0.0, 0.0 }, vector<double>{ 80.0, 80.0 },
+                                              vector<double>{ 77.489, 63.858 }, vector<double>{}, eps, maxTrials, maxFevals, 3.3, 0.01,
+                                              den, key, -1) };
 
     MggsaMethod mggsa;
 
@@ -68,7 +111,8 @@ int main() {
     vector<TrialConstrained> trials;
     int numberTrials, numberFevals;
 
-    for (int i = 0; i < taskArray.size(); i++) {
+    int taskArraySize = taskArray.size();
+    for (int i = 0; i < taskArraySize; i++) {
         if (taskArray[i].used) {
             mggsa.setF(taskArray[i].f);
             mggsa.setN(taskArray[i].n);
@@ -100,23 +144,30 @@ int main() {
     }
     ofstr.close();
 
-    size_t sizeTaskArray = taskArray.size();
-    string arraysName[] = { "AX", "BX", "AY", "BY" };
-    vector<double> incrementalParam{  -1.6,  0.3,  1.0,
-                                     -50.0, 10.0, 50.0 };
-    initArrayGnuplot(ofstrOpt, "incrementalParam", incrementalParam, false);
-    for (int i = 0; i < 4; i++) {
-        initArrayGnuplot(ofstrOpt, arraysName[i], sizeTaskArray);
-    }
-    for (int i = 0; i < sizeTaskArray; i++) {
+    initArrayGnuplot(ofstrOpt, "A", 2 * taskArraySize);
+    initArrayGnuplot(ofstrOpt, "B", 2 * taskArraySize);
+    for (int i = 0; i < taskArraySize; i++) {
         for (int j = 0; j < 2; j++) {
-            setValueInArrayGnuplot(ofstrOpt, arraysName[2 * j], i + 1, taskArray[i].A[j], false);
-            setValueInArrayGnuplot(ofstrOpt, arraysName[2 * j + 1], i + 1, taskArray[i].B[j], false);
+            setValueInArrayGnuplot(ofstrOpt, "A", 2 * i + 1 + j, taskArray[i].A[j], false);
+            setValueInArrayGnuplot(ofstrOpt, "B", 2 * i + 1 + j, taskArray[i].B[j], false);
+        }
+    }
+    initArrayGnuplot(ofstrOpt, "functionBlockName", taskArraySize);
+    initArrayGnuplot(ofstrOpt, "functionNumber", taskArraySize);
+    int index = 1;
+    for (int i = 0; i < numberBlocks; i++) {
+        for (int j = 0; j < numberFunctions[i]; j++) {
+            setValueInArrayGnuplot(ofstrOpt, "functionNumber", index, j + 1, false);
+            setValueInArrayGnuplot(ofstrOpt, "functionBlockName", index, functionBlockName[i]);
+            index++;
         }
     }
     ofstrOpt.close();
 
-    vector<int> args{ displayType, functionNumber };
+    int totalFunctionNumber = functionNumber;
+    for (int i = 0; i < functionBlock; i++)
+        totalFunctionNumber += numberFunctions[i];
+    vector<int> args{ displayType, totalFunctionNumber };
     drawGraphGnuplot("scripts/mggsa_test.gp", args);
 
 #if defined(_MSC_VER)

@@ -4,19 +4,6 @@ taskName = "imgo_sample"
 trialfile = "output_data/".taskName.".txt"
 load "output_data/".taskName."_opt.txt"
 
-f1(i, x) = (i == 0 ? sin(x) : 1/0)
-
-f2(i, x) = (i == 0 ? -2.0 * x + 3.0 : \
-            i == 1 ? sin(x) : 1/0)
-
-f3(i, x) = (i == 0 ? 5.0 * x ** 2 + 3.0 * x - 1.0 : \
-            i == 1 ? x ** 2 - 0.05 : \
-            i == 2 ? -x + 0.1 : 1/0)
-
-f(i, j, x) = (i == 1 ? f1(j, x) : \
-              i == 2 ? f2(j, x) : \
-              i == 3 ? f3(j, x) : 1/0)
-
 set grid
 
 set xlabel "x"
