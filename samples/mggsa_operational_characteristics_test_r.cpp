@@ -25,8 +25,8 @@ using namespace std;
 const int type = 1; // 0 - P max, 1 - number of trials,
                     // 2 - number of trial points,
                     // 3 - number of trial points / number of trials
-const int familyNumber = 1; // 1 - Grishagin, 2 - GKLS,
-                            // 3 - constrained Grishagin, 4 - constrained GKLS
+const int familyNumber = 0; // 0 - Grishagin, 1 - GKLS,
+                            // 2 - Grishagin(with constraints), 3 - GKLS(with constraints)
 const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
 
 int main() {
@@ -105,7 +105,7 @@ int main() {
     }
 
     double totalStartTime = omp_get_wtime();
-#if defined(CALC)
+#if defined( CALC )
     ofstream ofstrData("output_data/mggsa_operational_characteristics_test_r_data.txt");
     if (!ofstrData.is_open()) cerr << "File opening error\n";
 
@@ -274,10 +274,10 @@ int main() {
     }
     ofstr.close();
 
-    initArrayGnuplot(ofstrOpt, "familyNames", numberFamily);
+    initArrayGnuplot(ofstrOpt, "familyName", numberFamily);
     initArrayGnuplot(ofstrOpt, "K", numberFamily);
     for (int i = 0; i < numberFamily; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
+        setValueInArrayGnuplot(ofstrOpt, "familyName", i + 1, problems[i].shortName);
         setValueInArrayGnuplot(ofstrOpt, "K", i + 1, K[i], false);
     }
     ofstrOpt.close();

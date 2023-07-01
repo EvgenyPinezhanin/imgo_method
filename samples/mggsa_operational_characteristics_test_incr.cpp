@@ -25,9 +25,9 @@ using namespace std;
 
 const int type = 2; // 0 - number of trials, 1 - number of trial points, 
                     // 2 - number of trial points / number of trials
-const int familyNumber = 3; // 1 - Grishagin, 2 - GKLS,
-                            // 3 - constrained Grishagin, 4 - constrained GKLS
-const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
+const int familyNumber = 3; // 0 - Grishagin, 1 - GKLS,
+                            // 2 - Grishagin(with constraints), 4 - GKLS(with constraints)
+const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
 
 int main() {
     ofstream ofstrOpt("output_data/mggsa_operational_characteristics_test_incr_opt.txt");
@@ -173,10 +173,10 @@ int main() {
 
     size_t sizeIncr = incr.size();
     setVariableGnuplot(ofstrOpt, "numberKey", sizeIncr, false);
-    initArrayGnuplot(ofstrOpt, "familyNames", numberFamily);
+    initArrayGnuplot(ofstrOpt, "familyName", numberFamily);
     initArrayGnuplot(ofstrOpt, "r", sizeIncr * numberFamily);
     for (int i = 0; i < numberFamily; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
+        setValueInArrayGnuplot(ofstrOpt, "familyName", i + 1, problems[i].shortName);
         for (int j = 0; j < r[i].size(); j++) {
             setValueInArrayGnuplot(ofstrOpt, "r", (i * sizeIncr) + j + 1, r[i][j]);
         }
@@ -186,7 +186,7 @@ int main() {
     vector<int> args{ displayType, type, familyNumber };
     drawGraphGnuplot("scripts/mggsa_operational_characteristics_test_incr.gp", args);
 
-#if defined(_MSC_VER)
+#if defined( _MSC_VER )
     cin.get();
 #endif
 

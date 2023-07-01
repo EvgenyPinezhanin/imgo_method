@@ -13,11 +13,17 @@ set linetype cycle 4
 
 set grid
 
-set xlabel "increment" font ", 15"
+set tics font "Helvetica, 16"
 
-set tics font ", 11"
+set xlabel "increment" font "Helvetica, 16"
 
-set key font ", 15"
+set tics font ", 16"
+
+set key box outside right top
+set key font "Helvetica, 16" spacing 1.3
+
+title(familyName) = sprintf("Operational characteristics for mggsa on a family of tasks %s, (incr test)", familyName)
+titlePng(familyName) = ARG1 == 1 ? title(familyName) : sprintf("")
 
 array yName[3]
 yName[1] = "trials"
@@ -29,16 +35,14 @@ fileName[1] = "trials"
 fileName[2] = "point_trials"
 fileName[3] = "point_trials_trials"
 
-title(familyName) = sprintf("Operational characteristics for mggsa on a family of tasks %s, (incr test)", familyName)
-titlePng(familyName) = (ARG1 == 1) ? title(familyName) : sprintf("")
-
 if (ARG1 == 0) {
-    ind = numberKey * (ARG3 - 1)
+    set title title(familyName[ARG3 + 1]) font "Helvetica, 16"
 
-    set title title(familyNames[int(ARG3)]) font "Helvetica Bold, 20"
+    set ylabel yName[ARG2 + 1] font "Helvetica, 16"
 
-    set ylabel yName[ARG2 + 1] font ", 15"
+    set lmargin 12
 
+    ind = numberKey * ARG3
     if (ARG2 == 2) {
         plot for [i = 1 : numberKey] datafile index ind + i - 1 using 1:($3 / $2) with lines lt i title "r = ".r[ind + i]
     } else {
@@ -48,17 +52,22 @@ if (ARG1 == 0) {
     bind all "alt-End" "exit gnuplot"
     pause mouse close
 } else {
-    set terminal pngcairo size 1440, 800 font "Helvetica Bold, 20"
+    set terminal pngcairo size 1440, 700 font "Helvetica, 16"
     system "mkdir -p output_graph/".taskName
 
+    set lmargin 10
+    set rmargin 16
+    set tmargin 3
+    set bmargin 3
+
     do for [i = 1 : 4] {
-        set title titlePng(familyNames[i])
+        set title titlePng(familyName[i])
         ind = numberKey * (i - 1)
 
 		do for [j = 1 : 3] {
-			set output "output_graph/".taskName."/".taskName."_".familyNames[i]."_".fileName[j].".png"
+			set output "output_graph/".taskName."/".familyName[i]."_".fileName[j].".png"
 
-            set ylabel yName[j] font ", 15"
+            set ylabel yName[j] font "Helvetica, 16"
 
 			if (j == 3) {
     		    plot for [k = 1 : numberKey] datafile index ind + k - 1 using 1:($3 / $2) with lines lt k title "r = ".r[ind + k]

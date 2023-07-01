@@ -7,7 +7,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <algorithm>
 
 #include <Grishagin/GrishaginProblemFamily.hpp>
@@ -23,8 +22,8 @@ using namespace std;
 
 // #define CALC
 
-const int familyNumber = 4; // 1 - Grishagin, 2 - GKLS,
-                            // 3 - constrained Grishagin, 4 - constrained GKLS
+const int familyNumber = 4; // 0 - Grishagin, 1 - GKLS,
+                            // 2 - Grishagin(with constraints), 3 - GKLS(with constraints)
 const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
 
 int main() {
@@ -176,9 +175,9 @@ int main() {
     cout << "Total time: " << totalWorkTime << endl;
 
     setVariableGnuplot(ofstrOpt, "sizeDen", to_string(sizeDen));
-    initArrayGnuplot(ofstrOpt, "familyNames", numberFamily);
+    initArrayGnuplot(ofstrOpt, "familyName", numberFamily);
     for (int i = 0; i < numberFamily; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
+        setValueInArrayGnuplot(ofstrOpt, "familyName", i + 1, problems[i].shortName);
     }
     initArrayGnuplot(ofstrOpt, "den", sizeDen);
     for (int i = 0; i < sizeDen; i++) {
@@ -193,7 +192,7 @@ int main() {
     vector<int> args{ displayType, familyNumber };
     drawGraphGnuplot("scripts/mggsa_operational_characteristics_test_density.gp", args);
 
-#if defined(_MSC_VER)
+#if defined( _MSC_VER )
     cin.get();
 #endif
 

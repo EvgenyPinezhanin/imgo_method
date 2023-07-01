@@ -19,25 +19,26 @@ set linetype 10 lc rgb "cyan"        lw 2 dt 1 pt 13
 set linetype cycle 10
 
 set grid
-set xlabel "K"
-set ylabel "P_s(K)"
 
-set key right center
+set tics font "Helvetica, 16"
+
+set xlabel "K" font "Helvetica, 16"
+set ylabel "P_s(K)" font "Helvetica, 16"
+
+set key box outside right top
+set key font "Helvetica, 16" spacing 1.3
 
 title(familyName) = sprintf("Operational characteristics for mggsa on a family of tasks %s (density test)", familyName)
-titlePng(familyName) = (ARG1 == 1) ? title(familyName) : sprintf("")
-pointSize(i) = (i <= sizeDen / 2) ? 2 : 1
+titlePng(familyName) = ARG1 == 1 ? title(familyName) : sprintf("")
+pointSize(i) = i <= sizeDen / 2 ? 2 : 1
 
 if (ARG1 == 0) {
-    set xlabel font ", 15"
-    set ylabel font ", 15"
+    set title title(familyName[ARG2 + 1]) font "Helvetica Bold, 20"
 
-    set tics font ", 11"
+    set lmargin 12
 
-    set key font ", 15"
-
-    set title title(familyNames[int(ARG2)]) font "Helvetica Bold, 20"
-    plot for [i = 1 : sizeDen] datafile index sizeDen * (ARG2 - 1) + i - 1 using 1:2 with linespoints lt i ps pointSize(i) title "m = ".den[i]
+    ind = sizeDen * ARG2
+    plot for [i = 1 : sizeDen] datafile index ind + i - 1 using 1:2 with linespoints lt i ps pointSize(i) title "m = ".den[i]
 
     bind all "alt-End" "exit gnuplot"
     pause mouse close
@@ -45,10 +46,19 @@ if (ARG1 == 0) {
     set terminal pngcairo size 1440, 700 font "Helvetica, 20"
     system "mkdir -p output_graph/".taskName
 
-    do for [i = 1 : 4] {
-        set output "output_graph/".taskName."/".familyNames[i].".png"
+    set key width -3
 
-        set title titlePng(familyNames[i])
+    set lmargin 8
+    set rmargin 26
+    set tmargin 3
+    set bmargin 3
+
+    do for [i = 1 : 4] {
+        set output "output_graph/".taskName."/".familyName[i].".png"
+
+        set title titlePng(familyName[i])
+
+        ind = sizeDen * (i - 1)
         plot for [j = 1 : sizeDen] datafile index sizeDen * (i - 1) + j - 1 using 1:2 with linespoints lt j title "m = ".den[j]
     }
 }
