@@ -1,7 +1,3 @@
-#if defined( _MSC_VER )
-    #define _CRT_SECURE_NO_WARNINGS
-#endif
-
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -12,13 +8,14 @@
 #include <imgo.h>
 #include <task.h>
 #include <output_results.h>
+#include <omp.h>
 
 using namespace std;
 
 #define CALC
 
-const int familyNumber = 3; // 1 - Hill, 2 - Shekel
-const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
+const int familyNumber = 0; // 0 - Hill, 1 - Shekel
+const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
 
 int main() {
 
@@ -56,6 +53,7 @@ int main() {
     int numberTrials, numberFevals;
     FunctorFamily functor;
 
+    double totalStartTime = omp_get_wtime();
     for (int i = 0; i < numberFamily; i++) {
         functor.optProblemFamily = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
         numberFunctions = problems[i].optProblemFamily->GetFamilySize();
@@ -65,6 +63,7 @@ int main() {
             cout << "r = " << r[i][j] << endl;
             imgo.setR(r[i][j]);
 
+            double startTime = omp_get_wtime();
             for (int k = 0; k < numberFunctions; k++) {
                 functor.currentFunction = k;
                 imgo.setF(function<double(double, int)>(functor));
@@ -85,14 +84,20 @@ int main() {
                 ofstr << k << " " << (double)numberSuccessful / numberFunctions << endl;
             }
             ofstr << endl << endl;
+            double endTime = omp_get_wtime();
+            double workTime = endTime - startTime;
+            cout << "Time: " << workTime << endl;
         }
     }
     ofstr.close();
+    double totalEndTime = omp_get_wtime();
+    double totalWorkTime = totalEndTime - totalStartTime;
+    cout << "Total time: " << totalWorkTime << endl;
 
-    initArrayGnuplot(ofstrOpt, "familyNames", numberFamily);
+    initArrayGnuplot(ofstrOpt, "familyName", numberFamily);
     initArrayGnuplot(ofstrOpt, "r", r.size() * 3);
     for (int i = 0; i < numberFamily; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
+        setValueInArrayGnuplot(ofstrOpt, "familyName", i + 1, problems[i].shortName);
         for (int j = 0; j < r[i].size(); j++) {
             setValueInArrayGnuplot(ofstrOpt, "r", i * 3 + 1 + j, r[i][j]); 
         }

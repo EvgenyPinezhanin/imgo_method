@@ -26,8 +26,8 @@ using namespace std;
 // #define CALC_MGGSA
 
 const int familyNumber = 0; // 0 - Grishagin, 1 - GKLS,
-                            // 2 - Grishagin(constrained), 3 - GKLS(constrained)
-const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
+                            // 2 - Grishagin(with constraints), 3 - GKLS(with constraints)
+const int displayType = 0; // 0 - application, 1 - png, 2 - png(notitle)
 
 double f(int n, const double *X, int *undefinedFlag, void *data) {
     DataDirectOperationalCharacteristics *fData = static_cast<DataDirectOperationalCharacteristics*>(data);
@@ -36,7 +36,6 @@ double f(int n, const double *X, int *undefinedFlag, void *data) {
     for (int i = 0; i < n; i++) {
         point[i] = X[i];
     }
-    fData->points.push_back(point);
 
     double f;
     if (fData->type == TypeConstraints::Constraints) {
@@ -59,7 +58,8 @@ double f(int n, const double *X, int *undefinedFlag, void *data) {
 
         f = (*problem)(point, 1);
     }
-    // fData->f.push_back(f);
+    point.push_back(f);
+    fData->points.push_back(point);
 
     if (!fData->converge) {
         double distance = 0.0;
@@ -291,14 +291,14 @@ int main() {
 
     int sizeKey = key.size();
     setVariableGnuplot(ofstrOpt, "numberKey", to_string(sizeKey), false);
-    initArrayGnuplot(ofstrOpt, "familyNames", numberFamily);
+    initArrayGnuplot(ofstrOpt, "familyName", numberFamily);
     initArrayGnuplot(ofstrOpt, "r", sizeKey * numberFamily);
-    initArrayGnuplot(ofstrOpt, "keys", sizeKey);
+    initArrayGnuplot(ofstrOpt, "key", sizeKey);
     for (int i = 0; i < sizeKey; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "keys", i + 1, key[i]);
+        setValueInArrayGnuplot(ofstrOpt, "key", i + 1, key[i]);
     }
     for (int i = 0; i < numberFamily; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
+        setValueInArrayGnuplot(ofstrOpt, "familyName", i + 1, problems[i].shortName);
 
         for (int j = 0; j < r[i].size(); j++) {
             setValueInArrayGnuplot(ofstrOpt, "r", (i * sizeKey) + j + 1, r[i][j]);

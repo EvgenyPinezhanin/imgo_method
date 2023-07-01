@@ -7,7 +7,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <ctime>
 #include <algorithm>
 
 #include <Grishagin/GrishaginProblemFamily.hpp>
@@ -21,14 +20,14 @@
 
 using namespace std;
 
-#define CALC
+// #define CALC
 
-const int familyNumber = 3; // 1 - Grishagin, 2 - GKLS,
-                            // 3 - constrained Grishagin, 4 - constrained GKLS
+const int familyNumber = 3; // 0 - Grishagin, 1 - GKLS,
+                            // 2 - Grishagin(with constraints), 3 - GKLS(with constraints)
 const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
 
 int main() {
-    ofstream ofstrOpt("output_data/mggsa_operational_characteristics_test_key_opt.txt");
+    ofstream ofstrOpt("output_data/mggsa_operational_characteristics_test_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
 
     const int chunk = 2;
@@ -60,7 +59,7 @@ int main() {
     vector<double> d{ 0.0, 0.0, 0.01, 0.01 };
 
 #if defined(CALC)
-    ofstream ofstr("output_data/mggsa_operational_characteristics_test_key.txt");
+    ofstream ofstr("output_data/mggsa_operational_characteristics_test.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
     int den = 10, incr = 30;
@@ -158,11 +157,11 @@ int main() {
 
     int sizeKey = key.size();
     setVariableGnuplot(ofstrOpt, "numberKey", to_string(sizeKey));
-    initArrayGnuplot(ofstrOpt, "familyNames", numberFamily);
+    initArrayGnuplot(ofstrOpt, "familyName", numberFamily);
     initArrayGnuplot(ofstrOpt, "r", sizeKey * numberFamily);
     initArrayGnuplot(ofstrOpt, "key", sizeKey);
     for (int i = 0; i < numberFamily; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyNames", i + 1, problems[i].shortName);
+        setValueInArrayGnuplot(ofstrOpt, "familyName", i + 1, problems[i].shortName);
         setValueInArrayGnuplot(ofstrOpt, "key", i + 1, key[i], false);
         for (int j = 0; j < r[i].size(); j++) {
             setValueInArrayGnuplot(ofstrOpt, "r", (i * sizeKey) + j + 1, r[i][j]);
@@ -171,7 +170,7 @@ int main() {
     ofstrOpt.close();
 
     vector<int> args{ displayType, familyNumber };
-    drawGraphGnuplot("scripts/mggsa_operational_characteristics_test_key.gp", args);
+    drawGraphGnuplot("scripts/mggsa_operational_characteristics_test.gp", args);
 
 #if defined(_MSC_VER)
     cin.get();
