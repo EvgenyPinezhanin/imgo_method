@@ -1,13 +1,9 @@
-#include <gsa.h>
+#include <GsaMethod.h>
 
 #include <algorithm>
 #include <limits>
-#if defined( _MSC_VER )
-    #define _USE_MATH_DEFINES
-    #include <math.h>
-#else
-    #include <cmath>
-#endif
+
+#include <MyMath.h>
 
 const double epsilon = 1e-14;
 

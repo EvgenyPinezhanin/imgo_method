@@ -10,8 +10,8 @@
 #endif
 
 #include <gsa.h>
-#include <task.h>
-#include <output_results.h>
+// #include <task.h>
+// #include <output_results.h>
 
 using namespace std;
 
@@ -130,7 +130,7 @@ double f20Test(double x) {
 }
 
 int main() {
-    ofstream ofstr("output_data/gsa_test.txt");
+/*     ofstream ofstr("output_data/gsa_test.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
     ofstream ofstrOpt("output_data/gsa_test_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
@@ -221,6 +221,6 @@ int main() {
 #if defined( _MSC_VER )
     cin.get();
 #endif
-
+ */
     return 0;
 }

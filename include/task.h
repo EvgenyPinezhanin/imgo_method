@@ -13,7 +13,7 @@
 #include <IOptProblemFamily.hpp>
 #include <IConstrainedOptProblemFamily.hpp>
 
-using namespace std;
+/* using namespace std;
 
 struct Task {
     string name;
@@ -242,6 +242,6 @@ struct TaskDirect {
                FILE *_logfile, direct_algorithm _algorithm, bool _used = true) : name(_name), f(_f), fData(_fData), n(_n), A(_A),
                B(_B), XOpt(_XOpt), maxFevals(_maxFevals), maxIters(_maxIters), magicEps(_magicEps), volumeReltol(_volumeReltol),
                sigmaReltol(_sigmaReltol), logfile(_logfile), algorithm(_algorithm), used(_used) {};
-};
+}; */
 
 #endif // TASK_H_
