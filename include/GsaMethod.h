@@ -1,5 +1,5 @@
-#ifndef GSA_H_
-#define GSA_H_
+#ifndef GSA_METHOD_H_
+#define GSA_METHOD_H_
 
 #include <vector>
 #include <functional>
@@ -11,12 +11,21 @@ using std::function;
 
 class GsaMethod : public IStronginOptimizationMethod<function<double(double)>> {
 private:
-    double m; // parameter m
+    double m;
+
+    int insertInSorted(vector<Trial> &trials, Trial trial) override;
+    double searchMin() const override;
+
+    void calcCharacteristic() override;
 
     Trial newTrial(double x) override;
     double newPoint() override;
     double selectNewPoint() override;
+    bool stopConditions() override;
 
+    void solveImplementation(vector<double> &X);
+    bool solveTestImplementation(const vector<double> &XOpt);
+    
 public:
     GsaMethod(function<double(double)> _f = nullptr, double _a = 0.0, double _b = 10.0, double _r = 2.0, double _eps = 0.001, 
               int _maxTrials = 1000, int _maxFevals = 1000) : OptimizationMethodNoConstrained(nullptr, 1,
@@ -35,6 +44,9 @@ public:
     
     void solve(int &numberTrials, int &numberFevals, double &x);
     void solve(int &numberTrials, int &numberFevals, vector<double> &X) override;
+
+    bool solveTest(int &numberTrials, int &numberFevals, double xOpt);
+    bool solveTest(int &numberTrials, int &numberFevals, vector<double> XOpt) override;
 };
 
-#endif // GSA_H_
+#endif // GSA_METHOD_H_

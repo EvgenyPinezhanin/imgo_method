@@ -13,6 +13,9 @@ protected:
     vector<Trial> lastTrials;
     vector<int> lastTrialsPos;
 
+    virtual int insertInSorted(vector<Trial> &trials, Trial trial) = 0;
+    virtual double searchMin() const = 0;
+
 public:
     IGeneralStronginOptimizationMethod(int _dimension, const vector<double> &_lowerBound, const vector<double> &_upBound,
                                        double _accuracy, int _maxTrials, int _maxFevals) : IGeneralCharacteristicOptimizationMethod<Trial>(
