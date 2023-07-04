@@ -11,8 +11,6 @@ using std::function;
 
 class GsaMethod : public IStronginOptimizationMethod<function<double(double)>> {
 private:
-    double m;
-
     int insertInSorted(vector<Trial> &trials, Trial trial) override;
     double searchMin() const override;
 
@@ -23,30 +21,25 @@ private:
     double selectNewPoint() override;
     bool stopConditions() override;
 
-    void solveImplementation(vector<double> &X);
-    bool solveTestImplementation(const vector<double> &XOpt);
-    
+    double compute(vector<double> X) const override;
+
 public:
-    GsaMethod(function<double(double)> _f = nullptr, double _a = 0.0, double _b = 10.0, double _r = 2.0, double _eps = 0.001, 
-              int _maxTrials = 1000, int _maxFevals = 1000) : OptimizationMethodNoConstrained(nullptr, 1,
-              vector<double>{ _a }, vector<double>{ _b }, _eps, _maxTrials, _maxFevals), f(_f), r(_r), m(0) {};
+    GsaMethod(function<double(double)> _objFunction = nullptr, double _a = 0.0, double _b = 10.0, double _r = 2.0,
+              double _accuracy = 0.001, int _maxTrials = 1000, int _maxFevals = 1000)
+              : IStronginOptimizationMethod(_objFunction, 1, vector<double>{ _a }, vector<double>{ _b }, _r,
+              _accuracy, _maxTrials, _maxFevals) {};
     
-    void setA(double _a) { OptimizationMethod::setA(vector<double>{ _a }); };
-    void setB(double _b) { OptimizationMethod::setB(vector<double>{ _b }); };
-    void setAB(double _a, double _b) { OptimizationMethod::setAB(vector<double>{ _a }, vector<double>{ _b }); };
-    void setR(double _r) { r = _r; };
+    void setLowerBound(double _a) { IGeneralOptimizationMethod::setLowerBound(vector<double>{ _a }); };
+    void setUpBound(double _b) { IGeneralOptimizationMethod::setUpBound(vector<double>{ _b }); };
+    void setBounds(double _a, double _b) { IGeneralOptimizationMethod::setBounds(vector<double>{ _a }, vector<double>{ _b }); };
 
-    double getA() const { return A[0]; };
-    double getB() const { return B[0]; };
-    double getR() const { return r; };
+    double getA() const { return lowerBound[0]; };
+    double getB() const { return upBound[0]; };
 
-    double getL() const { return m; };
-    
-    void solve(int &numberTrials, int &numberFevals, double &x);
-    void solve(int &numberTrials, int &numberFevals, vector<double> &X) override;
+    void solve(ResultMethod *result) override;
 
-    bool solveTest(int &numberTrials, int &numberFevals, double xOpt);
-    bool solveTest(int &numberTrials, int &numberFevals, vector<double> XOpt) override;
+    bool solveTest(double xOpt, ResultMethod *result);
+    bool solveTest(vector<double> XOpt, ResultMethod *result) override;
 };
 
 #endif // GSA_METHOD_H_

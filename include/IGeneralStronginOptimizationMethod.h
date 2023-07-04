@@ -7,8 +7,8 @@
 
 using std::vector;
 
-template <typename Trial>
-class IGeneralStronginOptimizationMethod : public IGeneralCharacteristicOptimizationMethod<Trial> {
+template <typename ObjectiveFunction, typename Trial>
+class IGeneralStronginOptimizationMethod : public IGeneralCharacteristicOptimizationMethod<ObjectiveFunction, Trial> {
 protected:
     vector<Trial> lastTrials;
     vector<int> lastTrialsPos;
@@ -17,8 +17,9 @@ protected:
     virtual double searchMin() const = 0;
 
 public:
-    IGeneralStronginOptimizationMethod(int _dimension, const vector<double> &_lowerBound, const vector<double> &_upBound,
-                                       double _accuracy, int _maxTrials, int _maxFevals) : IGeneralCharacteristicOptimizationMethod<Trial>(
+    IGeneralStronginOptimizationMethod(ObjectiveFunction _objFunction, int _dimension, const vector<double> &_lowerBound,
+                                       const vector<double> &_upBound, double _accuracy, int _maxTrials, int _maxFevals)
+                                       : IGeneralCharacteristicOptimizationMethod<ObjectiveFunction, Trial>(_objFunction,
                                        _dimension, _lowerBound, _upBound, _accuracy, _maxTrials, _maxFevals), lastTrials(0),
                                        lastTrialsPos(0) {};
 };

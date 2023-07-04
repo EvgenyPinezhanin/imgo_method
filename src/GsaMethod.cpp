@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <limits>
 
+#include <StronginResultMethod.h>
 #include <MyMath.h>
 
 const double epsilon = 1e-14;

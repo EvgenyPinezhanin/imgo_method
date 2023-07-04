@@ -1,7 +1,11 @@
 #ifndef STRONGIN_RESULT_METHOD_H_
 #define STRONGIN_RESULT_METHOD_H_
 
+#include <vector>
+
 #include <ResultMethod.h>
+
+using std::vector;
 
 enum class StopCriteria { accuracy, maxTrials, maxFevals, coincidePoints };
 

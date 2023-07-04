@@ -7,8 +7,8 @@
 
 using std::vector;
 
-template <typename Trial>
-class IGeneralNumericalOptimizationMethod : public IGeneralOptimizationMethod {
+template <typename ObjectiveFunction, typename Trial>
+class IGeneralNumericalOptimizationMethod : public IGeneralOptimizationMethod<ObjectiveFunction> {
 protected:
     vector<Trial> trialPoints;
 
@@ -21,10 +21,11 @@ protected:
     virtual bool stopConditions() = 0;
 
 public:
-    IGeneralNumericalOptimizationMethod(int _dimension, const vector<double> &_lowerBound, const vector<double> &_upBound,
-                                        double _accuracy, int _maxTrials, int _maxFevals)
-                                        : IGeneralOptimizationMethod(_dimension, _lowerBound, _upBound, _maxFevals),
-                                        trialPoints(0), accuracy(_accuracy), maxTrials(_maxTrials), numberTrials(0) {};
+    IGeneralNumericalOptimizationMethod(ObjectiveFunction _objFunction, int _dimension, const vector<double> &_lowerBound,
+                                        const vector<double> &_upBound, double _accuracy, int _maxTrials, int _maxFevals)
+                                        : IGeneralOptimizationMethod<ObjectiveFunction>(_objFunction, _dimension, _lowerBound,
+                                        _upBound, _maxFevals), trialPoints(0), accuracy(_accuracy), maxTrials(_maxTrials),
+                                        numberTrials(0) {};
 
     void setAccuracy(double _accuracy) { accuracy = _accuracy; };
     double getAccuracy() const { return accuracy; };

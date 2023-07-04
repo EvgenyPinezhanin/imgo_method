@@ -3,23 +3,18 @@
 
 #include <vector>
 
-#include <IObjectiveFunction.h>
-
 using std::vector;
 
-template <typename ObjectiveFunction>
-class IConstrainedObjectiveFunction : public IObjectiveFunction<ObjectiveFunction> {
+class IConstrainedOptimizationMethod {
 protected:
     int numberConstraints;
 
     virtual double computeConstraint(vector<double> X, int index) const = 0;
 
 public:
-    IConstrainedObjectiveFunction(ObjectiveFunction _objFunction, int _numberConstraints)
-                                  : objFunction(_objFunction), numberConstraints(_numberConstraints) {};
+    IConstrainedOptimizationMethod(int _numberConstraints) : numberConstraints(_numberConstraints) {};
 
     void setNumberConstraints(int _numberConstraints) { numberConstraints = _numberConstraints; };
-
     int getNumberConstraints() const { return numberConstraints; };
 };
 
