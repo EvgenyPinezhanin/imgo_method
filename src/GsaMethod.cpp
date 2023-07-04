@@ -2,31 +2,46 @@
 
 #include <algorithm>
 #include <limits>
+#include <iterator>
 
 #include <StronginResultMethod.h>
 #include <MyMath.h>
 
+using std::numeric_limits;
+using std::advance;
+using std::distance;
+
 const double epsilon = 1e-14;
 
-inline int insertInSorted(vector<Trial> &trials, Trial trial) {
-    vector<Trial>::iterator iter = trials.begin();
-    vector<Trial>::iterator iterEnd = trials.end();
-    int pos = 0;
-    while(true) {
-        if (iter == iterEnd || iter->x > trial.x) break;
-        iter++; pos++;
-    }
-    trials.insert(iter, trial);
-    return pos;
+double GsaMethod::compute(vector<double> X) const {
+    return objFunction(X[0]);
 }
 
-inline double searchMin(vector<Trial> &trials) {
+int GsaMethod::insertInSorted(vector<Trial> &trials, Trial trial) {
+    vector<Trial>::iterator iter = trials.begin();
+    int dist = trials.size();
+
+    advance(iter, dist / 2);
+    while (true) {
+        dist /= 2;
+        if (trial.x < iter->x) advance(iter, -dist / 2);
+        else {
+            if (trial.x < (iter + 1)->x) break;
+            else advance(iter, dist / 2);
+        }
+    }
+    iter = trials.insert(iter, trial);
+
+    return distance(trials.begin(), iter);
+}
+
+double GsaMethod::searchMin() const {
     double z = numeric_limits<double>::infinity(), x = 0.0;
-    size_t sizeTrials = trials.size();
-    for (int i = 0; i < sizeTrials; i++) {
-        if (trials[i].z < z) {
-            z = trials[i].z;
-            x = trials[i].x;
+    size_t trialPointsSize = trialPoints.size();
+    for (int i = 0; i < trialPointsSize; i++) {
+        if (trialPoints[i].z < z) {
+            z = trialPoints[i].z;
+            x = trialPoints[i].x;
         }
     }
     return x;

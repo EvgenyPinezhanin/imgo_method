@@ -11,6 +11,8 @@ using std::function;
 
 class GsaMethod : public IStronginOptimizationMethod<function<double(double)>> {
 private:
+    double compute(vector<double> X) const override;
+
     int insertInSorted(vector<Trial> &trials, Trial trial) override;
     double searchMin() const override;
 
@@ -20,8 +22,6 @@ private:
     double newPoint() override;
     double selectNewPoint() override;
     bool stopConditions() override;
-
-    double compute(vector<double> X) const override;
 
 public:
     GsaMethod(function<double(double)> _objFunction = nullptr, double _a = 0.0, double _b = 10.0, double _r = 2.0,
