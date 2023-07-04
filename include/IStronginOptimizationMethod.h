@@ -8,18 +8,16 @@
 
 using std::vector;
 
-template <typename ObjectiveFunction>
-class IStronginOptimizationMethod : public IGeneralStronginOptimizationMethod<ObjectiveFunction, Trial> {
+template <typename TaskOptimizationMethodType>
+class IStronginOptimizationMethod : public IGeneralStronginOptimizationMethod<TaskOptimizationMethodType, Trial> {
 protected:
     double r;
     double constantEstimation;
 
 public:
-    IStronginOptimizationMethod(ObjectiveFunction _objFunction, int _dimension, const vector<double> &_lowerBound,
-                                const vector<double> &_upBound, double _r, double _accuracy, int _maxTrials,
-                                int _maxFevals)
-                                : IGeneralStronginOptimizationMethod<ObjectiveFunction, Trial>(_objFunction, _dimension,
-                                _lowerBound, _upBound, _accuracy, _maxTrials, _maxFevals), r(_r), constantEstimation(0) {};
+    IStronginOptimizationMethod(const TaskOptimizationMethodType &_task, double _r, double _accuracy, int _maxTrials, int _maxFevals)
+                                : IGeneralStronginOptimizationMethod<TaskOptimizationMethodType, Trial>(_task, _accuracy,
+                                _maxTrials, _maxFevals), r(_r), constantEstimation(0) {};
 
     void setR(double _r) { r = _r; };
     double getR() const { return r; };

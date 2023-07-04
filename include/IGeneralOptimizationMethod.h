@@ -7,41 +7,19 @@
 
 using std::vector;
 
-template <typename ObjectiveFunction>
+template <typename TaskOptimizationMethodType>
 class IGeneralOptimizationMethod {
 protected:
-    ObjectiveFunction objFunction;
-    int dimension;
-    vector<double> lowerBound, upBound; // area of search
+    TaskOptimizationMethodType task;
 
     int maxFevals, numberFevals;
 
-    virtual double compute(vector<double> X) const = 0;
-
 public:
-    IGeneralOptimizationMethod(ObjectiveFunction _objFunction, int _dimension, const vector<double> &_lowerBound,
-                               const vector<double> &_upBound, int _maxFevals)
-                               : objFunction(_objFunction), dimension(_dimension), lowerBound(_lowerBound),
-                               upBound(_upBound), maxFevals(_maxFevals), numberFevals(0) {};
+    IGeneralOptimizationMethod(const TaskOptimizationMethodType &_task, int _maxFevals)
+                               : task(_task), maxFevals(_maxFevals), numberFevals(0) {};
 
-    void setF(ObjectiveFunction _objFunction) { objFunction = _objFunction; };
-    ObjectiveFunction getF() const { return objFunction; };
-
-    void setDimension(int _dimension) { dimension = _dimension; };
-    int getDimension() const { return dimension; };
-
-    void setLowerBound(const vector<double> &_lowerBound) { lowerBound = _lowerBound; };
-    void getLowerBound(vector<double>& _lowerBound) const { _lowerBound = lowerBound; };
-
-    void setUpBound(const vector<double> &_upBound) { upBound = _upBound; };
-    void getUpBound(vector<double>& _upBound) const { _upBound = upBound; };
-
-    void setBounds(const vector<double> &_lowerBound, const vector<double> &_upBound) {
-        lowerBound = _lowerBound; upBound = _upBound;
-    };
-    void getBounds(vector<double>& _lowerBound, vector<double>& _upBound) const {
-        _lowerBound = lowerBound; _upBound = upBound;
-    };
+    void setTask(const TaskOptimizationMethodType &_task) { task = _task; };
+    void getTask(TaskOptimizationMethodType &_task) const { _task = task; };
 
     void setMaxFevals(int _maxFevals) { maxFevals = _maxFevals; };
     int getMaxFevals() const { return maxFevals; };
