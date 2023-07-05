@@ -1,4 +1,4 @@
-/* #ifndef TASK_H_
+#ifndef TASK_H_
 #define TASK_H_
 
 #include <cstdio>
@@ -6,6 +6,7 @@
 #include <vector>
 #include <limits>
 
+/* 
 #include <optimization_method.h>
 #include <direct_method.h>
 #include <IGeneralOptProblem.hpp>
@@ -243,6 +244,5 @@ struct TaskDirect {
                B(_B), XOpt(_XOpt), maxFevals(_maxFevals), maxIters(_maxIters), magicEps(_magicEps), volumeReltol(_volumeReltol),
                sigmaReltol(_sigmaReltol), logfile(_logfile), algorithm(_algorithm), used(_used) {};
 }; */
-/* 
+
 #endif // TASK_H_
- */

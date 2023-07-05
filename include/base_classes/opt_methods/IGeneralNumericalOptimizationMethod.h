@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include <AbstractOptimizationMethods/IGeneralOptimizationMethod.h>
+#include <base_classes/opt_methods/IGeneralOptimizationMethod.h>
 
 using std::vector;
 

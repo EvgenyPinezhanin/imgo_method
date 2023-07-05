@@ -1,4 +1,4 @@
-#include <mggsa.h>
+/* #include <mggsa.h>
 
 #include <iostream>
 #include <fstream>
@@ -677,3 +677,4 @@ bool MggsaMethod::solveTest(vector<double> XOpt, int &numberTrials, int &numberF
 bool MggsaMethod::solveTest(vector<double> XOpt, int &numberTrials, int &numberFevals) {
     return solveTest(XOpt, numberTrials, numberFevals, TypeSolve::SOLVE);
 }
+ */

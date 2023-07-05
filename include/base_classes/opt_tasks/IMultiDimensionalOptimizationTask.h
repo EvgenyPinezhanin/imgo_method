@@ -1,22 +1,22 @@
-#ifndef MULTI_DIMENSIONAL_TASK_OPTIMIZATION_METHOD_H_
-#define MULTI_DIMENSIONAL_TASK_OPTIMIZATION_METHOD_H_
+#ifndef I_MULTI_DIMENSIONAL_OPTIMIZATION_TASK_H_
+#define I_MULTI_DIMENSIONAL_OPTIMIZATION_TASK_H_
 
 #include <vector>
 
 using std::vector;
 
 template <typename ObjectiveFunctionType>
-class MultiDimensionalTaskOptimizationMethod {
+class IMultiDimensionalOptimizationTask {
 protected:
     ObjectiveFunctionType objFunction;
     int dimension;
     vector<double> lowerBound, upBound; // area of search
 
 public:
-    MultiDimensionalTaskOptimizationMethod(ObjectiveFunctionType _objFunction, int _dimension,
-                                           const vector<double> &_lowerBound, const vector<double> &_upBound)
-                                           : objFunction(_objFunction), dimension(_dimension),
-                                           lowerBound(_lowerBound), upBound(_upBound) {};
+    IMultiDimensionalOptimizationTask(ObjectiveFunctionType _objFunction, int _dimension,
+                                      const vector<double> &_lowerBound, const vector<double> &_upBound)
+                                      : objFunction(_objFunction), dimension(_dimension), lowerBound(_lowerBound),
+                                      upBound(_upBound) {};
 
     void setF(ObjectiveFunctionType _objFunction) { objFunction = _objFunction; };
     ObjectiveFunctionType getF() const { return objFunction; };
@@ -34,7 +34,7 @@ public:
         _lowerBound = lowerBound; _upBound = upBound;
     };
 
-    virtual double computeObjFunction(const vector<double> X) const = 0;
+    virtual double computeObjFunction(const vector<double> &X) const = 0;
 };
 
-#endif // MULTI_DIMENSIONAL_TASK_OPTIMIZATION_METHOD_H_
+#endif // I_MULTI_DIMENSIONAL_OPTIMIZATION_TASK_H_

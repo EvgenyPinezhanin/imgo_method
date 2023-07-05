@@ -4,10 +4,10 @@
 #include <vector>
 #include <functional>
 
-#include <StronginMethods/IConstrainedStronginOptimizationMethod.h>
+#include <AbstractOptimizationMethods/IConstrainedStronginOptimizationMethod.h>
 #include <task.h>
 
-using namespace std;
+/* using namespace std;
 
 class ImgoMethod : public OptimizationMethodConstrained {
 private:
@@ -54,6 +54,6 @@ public:
     void solve(int &numberTrials, int &numberFevals, vector<double> &X) override;
 
     bool solveTest(double xOpt, int &numberTrials, int &numberFevals);
-};
+}; */
 
 #endif // IMGO_H_

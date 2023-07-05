@@ -1,16 +1,17 @@
-#include <GsaMethod.h>
+#include <opt_methods/GsaMethod.h>
 
 #include <algorithm>
 #include <limits>
 #include <iterator>
 
-#include <StronginResultMethod.h>
+#include <ResultMethods/StronginResultMethod.h>
 #include <MyMath.h>
 
 using std::numeric_limits;
 using std::advance;
 using std::distance;
 
+/* 
 const double epsilon = 1e-14;
 
 double GsaMethod::compute(vector<double> X) const {
@@ -99,12 +100,13 @@ double GsaMethod::selectNewPoint(int &t) {
     // Step 6
     return newPoint(t);
 }
+ */
 
-void GsaMethod::solve(int &numberIters, int &numberFevals, double &x) {
+void GsaMethod::solve(StronginResultMethod &result) {
     trialPoints.clear();
-    this->numberFevals = 0;
+    numberFevals = 0;
 
-    trialPoints.push_back(newTrial(A[0]));
+/*     trialPoints.push_back(newTrial(A[0]));
 
     lastTrial = newTrial(B[0]);
     lastTrialPos = 1;
@@ -113,7 +115,6 @@ void GsaMethod::solve(int &numberIters, int &numberFevals, double &x) {
     numberIters = 2;
 
     double xNew;
-    int t;
     while(true) {
         numberIters++;
 
@@ -131,9 +132,49 @@ void GsaMethod::solve(int &numberIters, int &numberFevals, double &x) {
         lastTrialPos = insertInSorted(trialPoints, lastTrial);
     }
     numberFevals = this->numberFevals;
-    x = searchMin(trialPoints);
+    x = searchMin(trialPoints); */
 }
 
-void GsaMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X) {
-    solve(numberTrials, numberFevals, X[0]);
+bool GsaMethod::solveTest(const double &xOpt, StronginResultMethod &result) {
+/*     for (int nu = 0; nu < numberConstraints + 1; nu++) {
+        I[nu].clear();
+        calcI[nu] = false;
+    }
+    trialPoints.clear();
+    this->numberFevals = 0;
+
+    lastTrial = newTrial(A[0]);
+    trialPoints.push_back(lastTrial);
+    insertInSorted(I[(size_t)lastTrial.nu - 1], lastTrial);
+    lastTrial = newTrial(B[0]);
+    trialPoints.push_back(lastTrial);
+    lastTrialPos = insertInSorted(I[(size_t)lastTrial.nu - 1], lastTrial);
+    numberTrials = 2;
+
+    double xNew;
+    int t;
+    while (true) {
+        numberTrials++;
+
+        // Steps 3, 4, 5, 6, 7
+        xNew = selectNewPoint(t);
+        lastTrial = newTrial(xNew);
+
+        // Step 1
+        insertInSorted(trialPoints, lastTrial);
+
+        // Step 2
+        lastTrialPos = insertInSorted(I[(size_t)lastTrial.nu - 1], lastTrial);
+
+        // Stop conditions
+        if (abs(xNew - xOpt) <= eps) {
+            numberFevals = this->numberFevals;
+            return true;
+        }
+        if (this->numberFevals >= maxFevals || numberTrials >= maxTrials) {
+            numberFevals = this->numberFevals;
+            return false;
+        }
+    } */
+    return false;
 }

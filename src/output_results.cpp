@@ -1,4 +1,4 @@
-#include <output_results.h>
+/* #include <output_results.h>
 
 #include <iostream>
 #include <iomanip>
@@ -295,3 +295,4 @@ void drawGraphGnuplot(string nameScript, const vector<int> &args) {
     if (system(inputString.c_str()))
         cerr << "Error gnuplot" << endl;
 }
+ */

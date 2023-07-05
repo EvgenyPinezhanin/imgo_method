@@ -1,4 +1,4 @@
-#include <imgo.h>
+/* #include <imgo.h>
 
 #include <algorithm>
 #include <limits>
@@ -270,3 +270,4 @@ bool ImgoMethod::solveTest(double xOpt, int &numberTrials, int &numberFevals) {
         }
     }
 }
+ */

@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include <ResultMethod.h>
+#include <ResultMethods/ResultMethod.h>
 
 using std::vector;
 

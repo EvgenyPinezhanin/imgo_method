@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include <AbstractOptimizationMethods/IGeneralStronginOptimizationMethod.h>
+#include <base_classes/opt_methods/IGeneralStronginOptimizationMethod.h>
 #include <Trials/ConstrainedTrial.h>
 
 using std::vector;

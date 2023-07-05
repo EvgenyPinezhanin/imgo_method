@@ -1,15 +1,15 @@
-#ifndef ONE_DIMENSIONAL_OPTIMIZATION_TASK_H_
-#define ONE_DIMENSIONAL_OPTIMIZATION_TASK_H_
+#ifndef I_ONE_DIMENSIONAL_OPTIMIZATION_TASK_H_
+#define I_ONE_DIMENSIONAL_OPTIMIZATION_TASK_H_
 
 template <typename ObjectiveFunctionType>
-class OneDimensionalOptimizationTask {
+class IOneDimensionalOptimizationTask {
 protected:
     ObjectiveFunctionType objFunction;
     double lowerBound, upBound; // area of search
 
 public:
-    OneDimensionalOptimizationTask(ObjectiveFunctionType _objFunction, double _lowerBound, double _upBound)
-                                   : objFunction(_objFunction), lowerBound(_lowerBound), upBound(_upBound) {};
+    IOneDimensionalOptimizationTask(ObjectiveFunctionType _objFunction, double _lowerBound, double _upBound)
+                                    : objFunction(_objFunction), lowerBound(_lowerBound), upBound(_upBound) {};
 
     void setObjFunction(ObjectiveFunctionType _objFunction) { objFunction = _objFunction; };
     ObjectiveFunctionType getObjFunction() const { return objFunction; };
@@ -26,4 +26,4 @@ public:
     virtual double computeObjFunction(double x) const = 0;
 };
 
-#endif // ONE_DIMENSIONAL_OPTIMIZATION_TASK_H_
+#endif // I_ONE_DIMENSIONAL_OPTIMIZATION_TASK_H_

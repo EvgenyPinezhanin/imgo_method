@@ -1,9 +1,11 @@
-/* #ifndef OUTPUT_RESULTS_H_
+#ifndef OUTPUT_RESULTS_H_
 #define OUTPUT_RESULTS_H_
 
 #include <fstream>
 #include <string>
 #include <vector>
+
+/* 
 
 #include <optimization_method.h>
 #include <direct_method.h>
@@ -66,5 +68,6 @@ void drawGraphGnuplot(string nameScript);
 void drawGraphGnuplot(string nameScript, int arg);
 void drawGraphGnuplot(string nameScript, const vector<int> &args);
 
-#endif // OUTPUT_RESULTS_H_
  */
+
+#endif // OUTPUT_RESULTS_H_
