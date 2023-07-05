@@ -1,4 +1,4 @@
-#ifndef OUTPUT_RESULTS_H_
+/* #ifndef OUTPUT_RESULTS_H_
 #define OUTPUT_RESULTS_H_
 
 #include <fstream>
@@ -67,3 +67,4 @@ void drawGraphGnuplot(string nameScript, int arg);
 void drawGraphGnuplot(string nameScript, const vector<int> &args);
 
 #endif // OUTPUT_RESULTS_H_
+ */

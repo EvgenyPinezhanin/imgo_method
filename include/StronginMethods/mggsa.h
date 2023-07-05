@@ -4,9 +4,9 @@
 #include <vector>
 #include <functional>
 
-#include <optimization_method.h>
+#include <AbstractOptimizationMethods/IConstrainedStronginOptimizationMethod.h>
 
-using namespace std;
+/* using namespace std;
 
 enum class TypeSolve { SOLVE, RESOLVE };
 
@@ -72,6 +72,6 @@ public:
 
     bool solveTest(vector<double> XOpt, int &numberTrials, int &numberFevals, TypeSolve type);
     bool solveTest(vector<double> XOpt, int &numberTrials, int &numberFevals);
-};
+}; */
 
 #endif // MGGSA_H

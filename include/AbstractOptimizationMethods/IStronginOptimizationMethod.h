@@ -3,13 +3,13 @@
 
 #include <vector>
 
-#include <IGeneralStronginOptimizationMethod.h>
-#include <Trial.h>
+#include <AbstractOptimizationMethods/IGeneralStronginOptimizationMethod.h>
+#include <Trials/Trial.h>
 
 using std::vector;
 
-template <typename TaskOptimizationMethodType>
-class IStronginOptimizationMethod : public IGeneralStronginOptimizationMethod<TaskOptimizationMethodType, Trial> {
+template <typename SolutionType, typename TaskOptimizationMethodType, typename ResultMethodType, typename PointType>
+class IStronginOptimizationMethod : public IGeneralStronginOptimizationMethod<SolutionType, Trial, TaskOptimizationMethodType> {
 protected:
     double r;
     double constantEstimation;

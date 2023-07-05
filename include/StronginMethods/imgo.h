@@ -4,7 +4,7 @@
 #include <vector>
 #include <functional>
 
-#include <optimization_method.h>
+#include <StronginMethods/IConstrainedStronginOptimizationMethod.h>
 #include <task.h>
 
 using namespace std;

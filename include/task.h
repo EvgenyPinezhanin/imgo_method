@@ -1,4 +1,4 @@
-#ifndef TASK_H_
+/* #ifndef TASK_H_
 #define TASK_H_
 
 #include <cstdio>
@@ -11,7 +11,7 @@
 #include <IGeneralOptProblem.hpp>
 #include <IGeneralOptProblemFamily.hpp>
 #include <IOptProblemFamily.hpp>
-#include <IConstrainedOptProblemFamily.hpp>
+#include <IConstrainedOptProblemFamily.hpp> */
 
 /* using namespace std;
 
@@ -243,5 +243,6 @@ struct TaskDirect {
                B(_B), XOpt(_XOpt), maxFevals(_maxFevals), maxIters(_maxIters), magicEps(_magicEps), volumeReltol(_volumeReltol),
                sigmaReltol(_sigmaReltol), logfile(_logfile), algorithm(_algorithm), used(_used) {};
 }; */
-
+/* 
 #endif // TASK_H_
+ */
