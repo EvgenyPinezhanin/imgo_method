@@ -7,9 +7,9 @@
 
 using std::vector;
 
-template <typename SolutionType, typename TrialType, typename TaskOptimizationMethodType, typename ResultMethodType, typename PointType>
+template <typename SolutionType, typename TrialType, typename OptimizationTaskType, typename ResultMethodType, typename PointType>
 class IGeneralNumericalOptimizationMethod
-    : public IGeneralOptimizationMethod<TaskOptimizationMethodType, ResultMethodType, PointType> {
+    : public IGeneralOptimizationMethod<OptimizationTaskType, ResultMethodType, PointType> {
 protected:
     vector<TrialType> trialPoints;
 
@@ -19,12 +19,12 @@ protected:
     virtual TrialType newTrial(const PointType &x) = 0;
     virtual PointType selectNewPoint() = 0;
 
-    virtual SolutionType estimateSolution() = 0;
+    virtual SolutionType estimateSolution() const = 0;
     virtual bool stopConditions() = 0;
 
 public:
-    IGeneralNumericalOptimizationMethod(const TaskOptimizationMethodType &_task, double _accuracy, int _maxTrials, int _maxFevals)
-                                        : IGeneralOptimizationMethod<TaskOptimizationMethodType, ResultMethodType, PointType>(
+    IGeneralNumericalOptimizationMethod(const OptimizationTaskType &_task, double _accuracy, int _maxTrials, int _maxFevals)
+                                        : IGeneralOptimizationMethod<OptimizationTaskType, ResultMethodType, PointType>(
                                         _task, _maxFevals), trialPoints(0), accuracy(_accuracy), maxTrials(_maxTrials),
                                         numberTrials(0) {};
 

@@ -4,23 +4,20 @@
 #include <limits>
 #include <iterator>
 
-#include <ResultMethods/StronginResultMethod.h>
+#include <result_methods/StronginResultMethod.h>
 #include <MyMath.h>
 
 using std::numeric_limits;
 using std::advance;
 using std::distance;
+using std::max;
+using std::abs;
 
-/* 
 const double epsilon = 1e-14;
 
-double GsaMethod::compute(vector<double> X) const {
-    return objFunction(X[0]);
-}
-
-int GsaMethod::insertInSorted(vector<Trial> &trials, Trial trial) {
-    vector<Trial>::iterator iter = trials.begin();
-    int dist = trials.size();
+int GsaMethod::insertInSorted(Trial trial) {
+    vector<Trial>::iterator iter = trialPoints.begin();
+    int dist = trialPoints.size();
 
     advance(iter, dist / 2);
     while (true) {
@@ -31,9 +28,9 @@ int GsaMethod::insertInSorted(vector<Trial> &trials, Trial trial) {
             else advance(iter, dist / 2);
         }
     }
-    iter = trials.insert(iter, trial);
+    iter = trialPoints.insert(iter, trial);
 
-    return distance(trials.begin(), iter);
+    return distance(trialPoints.begin(), iter);
 }
 
 double GsaMethod::searchMin() const {
@@ -48,28 +45,43 @@ double GsaMethod::searchMin() const {
     return x;
 }
 
-Trial GsaMethod::newTrial(double x) {
+void GsaMethod::calcCharacteristic() {
+    double R = -numeric_limits<double>::infinity(), Rtmp, dx;
+    
+    int sizeTrialPoints = trialPoints.size();
+    for (size_t i = 1; i < sizeTrialPoints; i++) {
+        dx = trialPoints[i].x - trialPoints[i - 1].x;
+        Rtmp = constantEstimation * dx + pow(trialPoints[i].z - trialPoints[i - 1].z, 2) / (constantEstimation * dx) -
+               2 * (trialPoints[i].z + trialPoints[i - 1].z);
+        if (Rtmp > R) {
+            R = Rtmp;
+            t = (int)i;
+        }
+    }
+}
+
+Trial GsaMethod::newTrial(const double &x) {
     numberFevals++;
-    return Trial(x, f(x));
+    return Trial(x, task.computeObjFunction(x));
 }
 
-double GsaMethod::newPoint(int t) {
-    return (trialPoints[t].x + trialPoints[(size_t)t - 1].x) / 2 - (trialPoints[t].z - trialPoints[(size_t)t - 1].z) / (2 * m);
+double GsaMethod::newPoint() {
+    return (trialPoints[t].x + trialPoints[(size_t)t - 1].x) / 2 - (trialPoints[t].z - trialPoints[(size_t)t - 1].z) / (2 * constantEstimation);
 }
 
-double GsaMethod::selectNewPoint(int &t) {
+double GsaMethod::selectNewPoint() {
     static double M = -1.0;
     size_t sizeTrialPoints;
 
     // Step 2
     // with optimization(const)
-    if (lastTrial.x == B[0]) {
+    if (lastTrials[0].x == task.getUpBound()) {
         M = abs((trialPoints[1].z - trialPoints[0].z) / (trialPoints[1].x - trialPoints[0].x));
     } else {
-        M = max({ M, abs((lastTrial.z - trialPoints[(size_t)lastTrialPos - 1].z) / 
-                         (lastTrial.x - trialPoints[(size_t)lastTrialPos - 1].x)), 
-                     abs((trialPoints[(size_t)lastTrialPos + 1].z - lastTrial.z) / 
-                         (trialPoints[(size_t)lastTrialPos + 1].x - lastTrial.x)) });
+        M = max({ M, abs((lastTrials[0].z - trialPoints[(size_t)lastTrialsPos[0] - 1].z) / 
+                         (lastTrials[0].x - trialPoints[(size_t)lastTrialsPos[0] - 1].x)), 
+                     abs((trialPoints[(size_t)lastTrialsPos[0] + 1].z - lastTrials[0].z) / 
+                         (trialPoints[(size_t)lastTrialsPos[0] + 1].x - lastTrials[0].x)) });
     }
 
     // without optimization
@@ -82,60 +94,61 @@ double GsaMethod::selectNewPoint(int &t) {
     // }
 
     // Step 3
-    m = (abs(M) <= epsilon) ? 1.0 : r * M;
+    constantEstimation = (abs(M) <= epsilon) ? 1.0 : r * M;
 
     // Steps 4, 5
-    double R = -numeric_limits<double>::infinity(), Rtmp, dx;
-    
-    sizeTrialPoints = trialPoints.size();
-    for (size_t i = 1; i < sizeTrialPoints; i++) {
-        dx = trialPoints[i].x - trialPoints[i - 1].x;
-        Rtmp = m * dx + pow(trialPoints[i].z - trialPoints[i - 1].z, 2) / (m * dx) - 2 * (trialPoints[i].z + trialPoints[i - 1].z);
-        if (Rtmp > R) {
-            R = Rtmp;
-            t = (int)i;
-        }
-    }
+    calcCharacteristic();
 
     // Step 6
-    return newPoint(t);
+    return newPoint();
 }
- */
 
-void GsaMethod::solve(StronginResultMethod &result) {
+inline double GsaMethod::estimateSolution() const {
+    return searchMin();
+}
+
+bool GsaMethod::stopConditions() {
+    if (trialPoints[t].x - trialPoints[(size_t)t - 1].x <= accuracy) {
+        stopCriteria = StopCriteria::accuracy;
+        return true;
+    }
+    if (numberFevals >= maxFevals) {
+        stopCriteria = StopCriteria::maxFevals;
+        return true;
+    }
+    if (numberTrials >= maxTrials) {
+        stopCriteria = StopCriteria::maxTrials;
+        return true;
+    }
+    return false;
+}
+
+void GsaMethod::solve(StronginResultMethod<double> &result) {
     trialPoints.clear();
     numberFevals = 0;
 
-/*     trialPoints.push_back(newTrial(A[0]));
+    trialPoints.push_back(newTrial(task.getLowerBound()));
+    lastTrials[0] = newTrial(task.getUpBound());
 
-    lastTrial = newTrial(B[0]);
-    lastTrialPos = 1;
-
-    trialPoints.push_back(lastTrial);
-    numberIters = 2;
+    numberTrials = 2;
 
     double xNew;
     while(true) {
-        numberIters++;
+        // Step 1
+        lastTrialsPos[0] = insertInSorted(lastTrials[0]);
 
         // Steps 2, 3, 4, 5, 6
-        xNew = selectNewPoint(t);
+        xNew = selectNewPoint();
 
-        // Trial
-        lastTrial = newTrial(xNew);
+        lastTrials[0] = newTrial(xNew);
+        numberTrials++;
 
-        // Stop conditions
-        if (trialPoints[t].x - trialPoints[(size_t)t - 1].x <= eps) break;
-        if (this->numberFevals >= maxFevals || numberIters >= maxTrials) break;
-
-        // Step 1
-        lastTrialPos = insertInSorted(trialPoints, lastTrial);
+        if (stopConditions()) break;
     }
-    numberFevals = this->numberFevals;
-    x = searchMin(trialPoints); */
+    setDataInResultMethod(result);
 }
 
-bool GsaMethod::solveTest(const double &xOpt, StronginResultMethod &result) {
+bool GsaMethod::solveTest(const double &xOpt, StronginResultMethod<double> &result) {
 /*     for (int nu = 0; nu < numberConstraints + 1; nu++) {
         I[nu].clear();
         calcI[nu] = false;

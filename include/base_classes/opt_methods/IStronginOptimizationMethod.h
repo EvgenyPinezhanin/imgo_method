@@ -8,17 +8,17 @@
 
 using std::vector;
 
-template <typename SolutionType, typename TaskOptimizationMethodType, typename ResultMethodType, typename PointType>
+template <typename SolutionType, typename OptimizationTaskType, typename PointType>
 class IStronginOptimizationMethod
-    : public IGeneralStronginOptimizationMethod<SolutionType, Trial, TaskOptimizationMethodType, ResultMethodType, PointType> {
+    : public IGeneralStronginOptimizationMethod<SolutionType, Trial, OptimizationTaskType, PointType> {
 protected:
     double r;
     double constantEstimation;
 
 public:
-    IStronginOptimizationMethod(const TaskOptimizationMethodType &_task, double _r, double _accuracy, int _maxTrials, int _maxFevals)
-                 : IGeneralStronginOptimizationMethod<SolutionType, Trial, TaskOptimizationMethodType, ResultMethodType, PointType>(
-                                _task, _accuracy, _maxTrials, _maxFevals), r(_r), constantEstimation(0) {};
+    IStronginOptimizationMethod(const OptimizationTaskType &_task, double _r, double _accuracy, int _maxTrials, int _maxFevals)
+                                : IGeneralStronginOptimizationMethod<SolutionType, Trial, OptimizationTaskType, PointType>(
+                                _task, _accuracy, _maxTrials, _maxFevals, 1), r(_r), constantEstimation(0) {};
 
     void setR(double _r) { r = _r; };
     double getR() const { return r; };

@@ -8,9 +8,9 @@
 
 using std::vector;
 
-template <typename SolutionType, typename TaskOptimizationMethodType, typename ResultMethodType, typename PointType>
+template <typename SolutionType, typename OptimizationTaskType, typename PointType>
 class IConstrainedStronginOptimizationMethod
-    : public IGeneralStronginOptimizationMethod<SolutionType, ConstrainedTrial, TaskOptimizationMethodType, ResultMethodType, PointType> {
+    : public IGeneralStronginOptimizationMethod<SolutionType, ConstrainedTrial, OptimizationTaskType, PointType> {
 protected:
     vector<double> r;
     vector<double> constantsEstimation;
@@ -21,10 +21,10 @@ protected:
     vector<double> zStar;
 
 public:
-    IConstrainedStronginOptimizationMethod(const TaskOptimizationMethodType &_task, vector<double> _r, double _accuracy,
+    IConstrainedStronginOptimizationMethod(const OptimizationTaskType &_task, vector<double> _r, double _accuracy,
                                            int _maxTrials, int _maxFevals)
-    : IGeneralStronginOptimizationMethod<SolutionType, ConstrainedTrial, TaskOptimizationMethodType, ResultMethodType, PointType>(
-                                           _task, _accuracy, _maxTrials, _maxFevals), r(_r), constantsEstimation(0) {};
+            : IGeneralStronginOptimizationMethod<SolutionType, ConstrainedTrial, OptimizationTaskType, PointType>(
+                                           _task, _accuracy, _maxTrials, _maxFevals, 0), r(_r), constantsEstimation(0) {};
 
     void setR(const vector<double> &_r) { r = _r; };
     void getR(vector<double>& _r) const { _r = r; };

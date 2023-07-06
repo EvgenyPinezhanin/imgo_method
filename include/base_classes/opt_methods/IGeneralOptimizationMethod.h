@@ -8,6 +8,8 @@ protected:
 
     int maxFevals, numberFevals;
 
+    virtual void setDataInResultMethod(ResultMethodType &result) const = 0;
+
 public:
     IGeneralOptimizationMethod(const OptimizationTaskType &_task, int _maxFevals)
                                : task(_task), maxFevals(_maxFevals), numberFevals(0) {};
