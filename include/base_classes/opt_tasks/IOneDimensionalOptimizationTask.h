@@ -18,7 +18,7 @@ public:
     double getLowerBound() const { return lowerBound; };
 
     void setUpBound(double _upBound) { upBound = _upBound; };
-    double getUpBound(double _upBound) const { return upBound; };
+    double getUpBound() const { return upBound; };
 
     void setBounds(double _lowerBound, double &_upBound) { lowerBound = _lowerBound; upBound = _upBound; };
     void getBounds(double &_lowerBound, double &_upBound) const { _lowerBound = lowerBound; _upBound = upBound; };
