@@ -23,7 +23,7 @@ protected:
     virtual double searchMin() const = 0;
 
     void setDataInResultData(StronginResultMethod<SolutionType> &result) const {
-        result.numberFevals = IGeneralOptimizationMethod<OptimizationTaskType, StronginResultMethod<SolutionType>, PointType>::numberFevals;
+        result.numberFevals = IGeneralOptimizationMethod<OptimizationTaskType, StronginResultMethod<SolutionType>>::numberFevals;
         result.numberTrials = IGeneralNumericalOptimizationMethod<SolutionType, TrialType, OptimizationTaskType, StronginResultMethod<SolutionType>, PointType>::numberTrials;
         result.stopCriteria = stopCriteria;
         result.solution = IGeneralNumericalOptimizationMethod<SolutionType, TrialType, OptimizationTaskType, StronginResultMethod<SolutionType>, PointType>::estimateSolution();

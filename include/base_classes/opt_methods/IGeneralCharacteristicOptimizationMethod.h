@@ -17,8 +17,8 @@ protected:
 
 public:
     IGeneralCharacteristicOptimizationMethod(const OptimizationTaskType &_task, double _accuracy, int _maxTrials, int _maxFevals)
-            : IGeneralNumericalOptimizationMethod<SolutionType, TrialType, OptimizationTaskType, ResultMethodType, PointType>(
-                                             _task, _accuracy, _maxTrials, _maxFevals), t(0) {};
+                                             : IGeneralNumericalOptimizationMethod<SolutionType, TrialType, OptimizationTaskType,
+                                             ResultMethodType, PointType>(_task, _accuracy, _maxTrials, _maxFevals), t(0) {};
 };
 
 #endif // I_GENERAL_CHARACTERISTIC_OPTIMIZATION_METHOD_H_

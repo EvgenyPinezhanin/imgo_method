@@ -9,7 +9,7 @@ using std::vector;
 
 template <typename SolutionType, typename TrialType, typename OptimizationTaskType, typename ResultMethodType, typename PointType>
 class IGeneralNumericalOptimizationMethod
-    : public IGeneralOptimizationMethod<OptimizationTaskType, ResultMethodType, PointType> {
+    : public IGeneralOptimizationMethod<OptimizationTaskType, ResultMethodType> {
 protected:
     vector<TrialType> trialPoints;
 
@@ -24,9 +24,8 @@ protected:
 
 public:
     IGeneralNumericalOptimizationMethod(const OptimizationTaskType &_task, double _accuracy, int _maxTrials, int _maxFevals)
-                                        : IGeneralOptimizationMethod<OptimizationTaskType, ResultMethodType, PointType>(
-                                        _task, _maxFevals), trialPoints(0), accuracy(_accuracy), maxTrials(_maxTrials),
-                                        numberTrials(0) {};
+                                        : IGeneralOptimizationMethod<OptimizationTaskType, ResultMethodType>(_task, _maxFevals),
+                                        trialPoints(0), accuracy(_accuracy), maxTrials(_maxTrials), numberTrials(0) {};
 
     void setAccuracy(double _accuracy) { accuracy = _accuracy; };
     double getAccuracy() const { return accuracy; };
