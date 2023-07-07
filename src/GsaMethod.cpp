@@ -75,7 +75,7 @@ double GsaMethod::selectNewPoint() {
 
     // Step 2
     // with optimization(const)
-    if (lastTrials[0].x == task.getUpBound()) {
+    if (lastTrials[0].x == task.getSearchArea().getUpBound()) {
         M = abs((trialPoints[1].z - trialPoints[0].z) / (trialPoints[1].x - trialPoints[0].x));
     } else {
         M = max({ M, abs((lastTrials[0].z - trialPoints[(size_t)lastTrialsPos[0] - 1].z) / 
@@ -127,8 +127,8 @@ void GsaMethod::solve(StronginResultMethod<double> &result) {
     trialPoints.clear();
     numberFevals = 0;
 
-    trialPoints.push_back(newTrial(task.getLowerBound()));
-    lastTrials[0] = newTrial(task.getUpBound());
+    trialPoints.push_back(newTrial(task.getSearchArea().getLowerBound()));
+    lastTrials[0] = newTrial(task.getSearchArea().getUpBound());
 
     numberTrials = 2;
 
@@ -148,7 +148,7 @@ void GsaMethod::solve(StronginResultMethod<double> &result) {
     setDataInResultMethod(result);
 }
 
-bool GsaMethod::solveTest(const double &xOpt, StronginResultMethod<double> &result) {
+bool GsaMethod::solveTest(StronginResultMethod<double> &result) {
 /*     for (int nu = 0; nu < numberConstraints + 1; nu++) {
         I[nu].clear();
         calcI[nu] = false;

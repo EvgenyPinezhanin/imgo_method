@@ -26,7 +26,7 @@ public:
 
     void solve(StronginResultMethod<double> &result) override;
 
-    bool solveTest(const double &xOpt, StronginResultMethod<double> &result) override;
+    bool solveTest(StronginResultMethod<double> &result) override;
 };
 
 #endif // GSA_METHOD_H_

@@ -3,14 +3,18 @@
 
 #include <functional>
 
-#include <base_classes/opt_tasks/IOneDimensionalOptimizationTask.h>
+#include <base_classes/opt_tasks/IOptimizationTask.h>
+#include <base_classes/search_areas/OneDimensionalSearchArea.h>
 
 using std::function;
 
-class OneDimensionalTask : public IOneDimensionalOptimizationTask<function<double(double)>> {
+class OneDimensionalTask : public IOptimizationTask<function<double(double)>, OneDimensionalSearchArea, double> {
 public:
-    OneDimensionalTask(function<double(double)> _objFunction = nullptr, double _lowerBound = 0.0, double _upBound = 1.0)
-                       : IOneDimensionalOptimizationTask<function<double(double)>>(_objFunction, _lowerBound, _upBound) {};
+    OneDimensionalTask(const function<double(double)> &_objFunction = nullptr,
+                       const OneDimensionalSearchArea &_area = OneDimensionalSearchArea(0.0, 1.0),
+                       double _optPoint = 0.0)
+                       : IOptimizationTask<function<double(double)>, OneDimensionalSearchArea, double>(_objFunction,
+                       _area, _optPoint) {};
 
     double computeObjFunction(double x) const override { return objFunction(x); };
 };
