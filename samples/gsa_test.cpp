@@ -2,16 +2,10 @@
 #include <fstream>
 #include <vector>
 
-#if defined( _MSC_VER )
-    #define _USE_MATH_DEFINES
-    #include <math.h>
-#else
-    #include <cmath>
-#endif
-
-#include <gsa.h>
-// #include <task.h>
-// #include <output_results.h>
+#include <opt_methods/GsaMethod.h>
+#include <tasks/task.h>
+#include <output_results.h>
+#include <MyMath.h>
 
 using namespace std;
 
@@ -130,7 +124,7 @@ double f20Test(double x) {
 }
 
 int main() {
-/*     ofstream ofstr("output_data/gsa_test.txt");
+/*    ofstream ofstr("output_data/gsa_test.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
     ofstream ofstrOpt("output_data/gsa_test_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";

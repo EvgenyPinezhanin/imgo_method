@@ -1,4 +1,4 @@
-#if defined( _MSC_VER )
+/* #if defined( _MSC_VER )
     #define _CRT_SECURE_NO_WARNINGS
     #define PROC_BIND
 #else
@@ -29,9 +29,9 @@ const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
 
 void functionGrid(vector<ofstream> &ofstr, Functor *functorFamily, const vector<double> &A, const vector<double> &B,
                   double gridStep, TypeConstraints type, double minValue, int numberConstraints = 0);
-
+*/
 int main() {
-#if defined( CALC )
+/* #if defined( CALC )
     ofstream ofstr("output_data/mggsa_test_families.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
     ofstream ofstrOpt("output_data/mggsa_test_families_opt.txt");
@@ -183,10 +183,10 @@ int main() {
 #if defined( _MSC_VER )
     cin.get();
 #endif
-
+*/
     return 0;
 }
-
+/*
 void functionGrid(vector<ofstream> &ofstr, Functor *functorFamily, const vector<double> &A, const vector<double> &B,
                   double gridStep, TypeConstraints type, double minValue, int numberConstraints) {
     int N = floor((B[0] - A[0]) / gridStep);
@@ -230,3 +230,4 @@ void functionGrid(vector<ofstream> &ofstr, Functor *functorFamily, const vector<
     }
     ofstr[1] << endl;
 }
+ */

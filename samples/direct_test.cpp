@@ -1,7 +1,3 @@
-#if defined( _MSC_VER )
-    #define _CRT_SECURE_NO_WARNINGS    
-#endif
-
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -9,11 +5,11 @@
 #include <cmath>
 
 #include <direct_method.h>
-#include <task.h>
+#include <tasks/task.h>
 #include <output_results.h>
 
 using namespace std;
-
+/* 
 const int functionNumber = 0; // 0 - f1, 1 - f2, ...
 const int functionBlock = 0; // 0 - sample, 1 - test
 const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
@@ -126,10 +122,10 @@ double f2Test(int n, const double *X, int *undefinedFlag, void *data) {
     fData->points.push_back(point);
 
     return f;
-}
+} */
 
 int main() {
-    ofstream ofstr("output_data/direct_test.txt");
+/*    ofstream ofstr("output_data/direct_test.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
     ofstream ofstrOpt("output_data/direct_test_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
@@ -229,6 +225,6 @@ int main() {
 #if defined( _MSC_VER )
     cin.get();
 #endif
-
+ */
     return 0;
 }

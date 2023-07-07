@@ -1,4 +1,4 @@
-#if defined( _MSC_VER )
+/* #if defined( _MSC_VER )
     #define _CRT_SECURE_NO_WARNINGS
     #define PROC_BIND
 #else
@@ -28,9 +28,9 @@ const int type = 2; // 0 - number of trials, 1 - number of trial points,
 const int familyNumber = 3; // 0 - Grishagin, 1 - GKLS,
                             // 2 - Grishagin(with constraints), 4 - GKLS(with constraints)
 const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
-
+*/
 int main() {
-    ofstream ofstrOpt("output_data/mggsa_operational_characteristics_test_incr_opt.txt");
+/*    ofstream ofstrOpt("output_data/mggsa_operational_characteristics_test_incr_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
 
     const int chunk = 4;
@@ -189,6 +189,6 @@ int main() {
 #if defined( _MSC_VER )
     cin.get();
 #endif
-
+ */
     return 0;
 }

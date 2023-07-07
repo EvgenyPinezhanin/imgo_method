@@ -10,22 +10,22 @@
 #include <ctime>
 #include <algorithm>
 
-#include <Grishagin/GrishaginProblemFamily.hpp>
+/* #include <Grishagin/GrishaginProblemFamily.hpp>
 #include <Grishagin/GrishaginConstrainedProblemFamily.hpp>
 #include <GKLS/GKLSProblemFamily.hpp>
 #include <GKLS/GKLSConstrainedProblemFamily.hpp>
 #include <direct_method.h>
-#include <mggsa.h>
+#include <StronginMethods/mggsa.h>
 #include <task.h>
 #include <output_results.h>
 #include <omp.h>
 
-using namespace std;
+using namespace std; */
 
 // #define CALC_DIRECT
 // #define CALC_MGGSA
 
-const int familyNumber = 0; // 0 - Grishagin, 1 - GKLS,
+/* const int familyNumber = 0; // 0 - Grishagin, 1 - GKLS,
                             // 2 - Grishagin(with constraints), 3 - GKLS(with constraints)
 const int displayType = 0; // 0 - application, 1 - png, 2 - png(notitle)
 
@@ -73,10 +73,10 @@ double f(int n, const double *X, int *undefinedFlag, void *data) {
     }
 
     return f;
-}
+} */
 
 int main() {
-    ofstream ofstrOpt("output_data/direct_mggsa_operational_characteristics_opt.txt");
+/*     ofstream ofstrOpt("output_data/direct_mggsa_operational_characteristics_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
     
     const int numberFamily = 4;
@@ -312,6 +312,6 @@ int main() {
 #if defined( _MSC_VER )
     cin.get();
 #endif
-
+ */
 	return 0;
 }

@@ -1,4 +1,4 @@
-#include <iostream>
+/* #include <iostream>
 #include <fstream>
 #include <vector>
 #include <limits>
@@ -167,9 +167,9 @@ double f10Test(double x, int j) {
         default: return numeric_limits<double>::quiet_NaN();
     }
 }
-
+*/
 int main() {
-    ofstream ofstr("output_data/imgo_test.txt");
+  /*  ofstream ofstr("output_data/imgo_test.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
     ofstream ofstrOpt("output_data/imgo_test_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
@@ -269,6 +269,6 @@ int main() {
 #if defined( _MSC_VER )
     cin.get();
 #endif
-
+ */
     return 0;
 }

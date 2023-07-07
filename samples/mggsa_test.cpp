@@ -1,4 +1,4 @@
-#include <iostream>
+/* #include <iostream>
 #include <fstream>
 #include <vector>
 #include <cmath>
@@ -78,8 +78,9 @@ double f2Test(vector<double> x, int j) {
         default: return numeric_limits<double>::quiet_NaN();
     }
 }
-
+*/
 int main() {
+ /*   
     ofstream ofstr("output_data/mggsa_test.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
     ofstream ofstrOpt("output_data/mggsa_test_opt.txt");
@@ -173,6 +174,6 @@ int main() {
 #if defined(_MSC_VER)
     cin.get();
 #endif
-
+ */
     return 0;
 }

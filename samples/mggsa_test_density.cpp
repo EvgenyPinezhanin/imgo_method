@@ -1,4 +1,4 @@
-#if defined( _MSC_VER )
+/* #if defined( _MSC_VER )
     #define _CRT_SECURE_NO_WARNINGS
 #endif
 
@@ -21,9 +21,9 @@ double f(vector<double> x, int j) {
         default: return numeric_limits<double>::quiet_NaN();
     }
 }
-
+*/
 int main() {
-    ofstream ofstr("output_data/mggsa_test_density.txt");
+/*    ofstream ofstr("output_data/mggsa_test_density.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
     ofstream ofstrOpt("output_data/mggsa_test_density_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
@@ -79,6 +79,6 @@ int main() {
 #if defined( _MSC_VER )
     cin.get();
 #endif
-
+ */
     return 0;
 }

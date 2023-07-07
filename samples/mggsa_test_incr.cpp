@@ -1,4 +1,4 @@
-#include <fstream>
+/* #include <fstream>
 #include <iostream>
 #include <vector>
 #if defined( _MSC_VER )
@@ -31,9 +31,9 @@ const int type = 3; // 0 - number trials, 1 - number trial points,
                     // 2 - accuracy, 3 - number trial points / number trials
 const int nType = 3; // nMin ... nMax
 const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
-
+*/
 int main() {
-    ofstream ofstrOpt("output_data/mggsa_test_incr_opt.txt");
+/*    ofstream ofstrOpt("output_data/mggsa_test_incr_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
 
     const int nMin = 2, nMax = 3;
@@ -163,6 +163,6 @@ int main() {
 
     vector<int> args{ displayType, type, nType, nMin, nMax, mMin, mMax };
     drawGraphGnuplot("scripts/mggsa_test_incr.gp", args);
-
+ */
     return 0;
 }

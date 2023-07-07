@@ -1,4 +1,4 @@
-#include <iostream>
+/* #include <iostream>
 #include <fstream>
 #include <algorithm>
 #include <limits>
@@ -16,9 +16,9 @@ using namespace std;
 
 const int familyNumber = 0; // 0 - Hill, 1 - Shekel
 const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
-
+*/
 int main() {
-
+/*
 #if defined(CALC)
     ofstream ofstr("output_data/imgo_operational_characteristics.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
@@ -111,6 +111,6 @@ int main() {
 #if defined(_MSC_VER)
     cin.get();
 #endif
-
+ */
 	return 0;
 }

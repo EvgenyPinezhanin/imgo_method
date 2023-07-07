@@ -1,4 +1,4 @@
-#if defined( _MSC_VER )
+/* #if defined( _MSC_VER )
     #define _CRT_SECURE_NO_WARNINGS
     #define PROC_BIND
 #else
@@ -25,9 +25,9 @@ using namespace std;
 const int familyNumber = 4; // 0 - Grishagin, 1 - GKLS,
                             // 2 - Grishagin(with constraints), 3 - GKLS(with constraints)
 const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
-
+*/
 int main() {
-    ofstream ofstrOpt("output_data/mggsa_operational_characteristics_test_density_opt.txt");
+/*    ofstream ofstrOpt("output_data/mggsa_operational_characteristics_test_density_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
 
     const int chunk = 2;
@@ -195,6 +195,6 @@ int main() {
 #if defined( _MSC_VER )
     cin.get();
 #endif
-
+ */
 	return 0;
 }

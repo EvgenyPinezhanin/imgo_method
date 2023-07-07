@@ -1,4 +1,4 @@
-#if defined( _MSC_VER )
+/* #if defined( _MSC_VER )
     #define PROC_BIND
 #else
     #define PROC_BIND proc_bind(master)
@@ -28,9 +28,9 @@ const int type = 1; // 0 - P max, 1 - number of trials,
 const int familyNumber = 0; // 0 - Grishagin, 1 - GKLS,
                             // 2 - Grishagin(with constraints), 3 - GKLS(with constraints)
 const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
-
+*/
 int main() {
-    ofstream ofstr("output_data/mggsa_operational_characteristics_test_r.txt");
+/*    ofstream ofstr("output_data/mggsa_operational_characteristics_test_r.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
     ofstream ofstrOpt("output_data/mggsa_operational_characteristics_test_r_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
@@ -288,6 +288,6 @@ int main() {
 #if defined(_MSC_VER)
     cin.get();
 #endif
-
+ */
 	return 0;
 }

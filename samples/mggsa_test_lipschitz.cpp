@@ -1,4 +1,4 @@
-#if defined( _MSC_VER )
+/* #if defined( _MSC_VER )
     #define PROC_BIND
 #else
     #define PROC_BIND proc_bind(master)
@@ -32,9 +32,9 @@ void calculation(MggsaMethod &mggsa, vector4d &lipschitzConst, ProblemSingle pro
 const int familyNumber = 1; // 1 - Grishagin, 2 - GKLS
                             // 3 - constrained Grishagin, 4 - constrained GKLS
 const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
-
+*/
 int main() {
-    ofstream ofstrOpt("output_data/mggsa_test_lipschitz_opt.txt");
+/*    ofstream ofstrOpt("output_data/mggsa_test_lipschitz_opt.txt");
     if (!ofstrOpt.is_open()) cerr << "File opening error\n";
 
     const int chunk = 10;
@@ -194,4 +194,5 @@ void calculation(MggsaMethod &mggsa, vector4d &lipschitzConst, ProblemSingle pro
                         " time: " + to_string(workTime) + " thread number = " + to_string(omp_get_thread_num()) + "\n";
     cout << strOutput;
 #endif
+ */
 }
