@@ -10,8 +10,8 @@ protected:
 
 public:
     IGeneralOptTask(const ObjectiveFunctionType &_objFunction, const SearchAreaType &_area,
-                    const OptimalPointType &_optPoint)
-                    : objFunction(_objFunction), area(_area), optPoint(_optPoint) {};
+                    const OptimalPointType &_optimalPoint)
+                    : objFunction(_objFunction), area(_area), optimalPoint(_optimalPoint) {};
 
     void setObjFunction(ObjectiveFunctionType _objFunction) { objFunction = _objFunction; };
     ObjectiveFunctionType getObjFunction() const { return objFunction; };
@@ -19,8 +19,8 @@ public:
     void setSearchArea(const SearchAreaType &_area) { area = _area; };
     SearchAreaType getSearchArea() const { return area; };
 
-    void setOptimalPoint(const OptimalPointType &_optPoint) { optPoint = _optPoint; };
-    OptimalPointType getOptimalPoint() const { return optPoint; };
+    void setOptimalPoint(const OptimalPointType &_optimalPoint) { optimalPoint = _optimalPoint; };
+    OptimalPointType getOptimalPoint() const { return optimalPoint; };
 
     virtual double computeObjFunction(double x) const = 0;
 };
