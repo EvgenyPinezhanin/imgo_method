@@ -105,7 +105,7 @@ void ScanningMethod::solve(ResultMethod &_result) {
 
         if (stopConditions()) break;
     }
-    
+
     result.numberTrials = numberTrials;
     result.numberFevals = numberFevals;
     result.solution = estimateSolution();
