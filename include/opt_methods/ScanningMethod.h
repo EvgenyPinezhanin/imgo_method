@@ -3,12 +3,9 @@
 
 #include <base_classes/opt_methods/ICharacteristicOptMethod.h>
 #include <base_classes/opt_methods/IGeneralNumericalOptMethod.h>
-#include <base_structures/result_methods/GeneralNumericalResultMethod.h>
+#include <result_methods/ResultMethod.h>
 #include <opt_tasks/OneDimensionalTask.h>
 #include <trials/Trial.h>
-
-using StoppingCondition = GeneralNumericalStoppingCondition;
-using ResultMethod = GeneralNumericalResultMethod<StoppingCondition, double>;
 
 class ScanningMethod : public ICharacteristicOptMethod<Trial>,
     public IGeneralNumericalOptMethod<double, Trial, OneDimensionalTask, ResultMethod, double> {
