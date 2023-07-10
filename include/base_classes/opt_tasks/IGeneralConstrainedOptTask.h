@@ -4,14 +4,14 @@
 #include <base_classes/opt_tasks/IGeneralOptTask.h>
 
 template <typename ObjectiveFunctionType, typename SearchAreaType, typename OptimalPointType>
-class IConstrainedOptimizationTask : public IOptimizationTask<ObjectiveFunctionType, SearchAreaType, OptimalPointType> {
+class IGeneralConstrainedOptTask : public IGeneralOptTask<ObjectiveFunctionType, SearchAreaType, OptimalPointType> {
 protected:
     int numberConstraints;
 
 public:
     IGeneralConstrainedOptTask(const ObjectiveFunctionType &_objFunction, int _numberConstraints,
                                const SearchAreaType &_area, const OptimalPointType &_optPoint)
-                               : IOptimizationTask<ObjectiveFunctionType>(_objFunction, _area, _optPoint),
+                               : IGeneralOptTask<ObjectiveFunctionType>(_objFunction, _area, _optPoint),
                                numberConstraints(_numberConstraints) {};
 
     void setNumberConstraints(double _numberConstraints) { numberConstraints = _numberConstraints; };
