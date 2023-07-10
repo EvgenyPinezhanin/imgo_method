@@ -13,8 +13,8 @@ public:
     OneDimensionalTask(const function<double(double)> &_objFunction = nullptr,
                        const OneDimensionalSearchArea &_area = OneDimensionalSearchArea(0.0, 1.0),
                        double _optPoint = 0.0)
-                       : IGeneralOptTask<function<double(double)>, OneDimensionalSearchArea, double>(_objFunction,
-                       _area, _optPoint) {};
+                      : IGeneralOptTask<function<double(double)>, OneDimensionalSearchArea, double>(_objFunction,
+                      _area, _optPoint) {};
 
     double computeObjFunction(double x) const override { return objFunction(x); };
 };
