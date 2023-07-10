@@ -5,13 +5,13 @@
 
 template <typename OptimizationTaskType>
 struct GeneralNumericalTask : public GeneralTask<OptimizationTaskType> {
-    double accuracy;
+    double accuracy, error;
     int maxTrials;
 
     GeneralNumericalTask(string _name, const OptimizationTaskType &_optTask, double _accuracy,
-                         int _maxTrials, int _maxFevals, bool _use)
+                         double _error, int _maxTrials, int _maxFevals, bool _use = true)
                          : GeneralTask<OptimizationTaskType>(_name, _optTask, _maxFevals, _use),
-                         accuracy(_accuracy), maxTrials(_maxTrials) {};
+                         accuracy(_accuracy), error(_error), maxTrials(_maxTrials) {};
 };
 
 #endif // GENERAL_NUMERICAL_TASK_H_
