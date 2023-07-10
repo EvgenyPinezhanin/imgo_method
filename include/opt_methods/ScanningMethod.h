@@ -11,7 +11,7 @@ using StoppingCondition = GeneralNumericalStoppingCondition;
 using ResultMethod = GeneralNumericalResultMethod<StoppingCondition, double>;
 
 class ScanningMethod : public ICharacteristicOptMethod<Trial>,
-    public IGeneralNumericalOptMethod<double, Trial, OneDimensionalTask, ResultMethod, double>  {
+    public IGeneralNumericalOptMethod<double, Trial, OneDimensionalTask, ResultMethod, double> {
 private:
     void insertInSorted(const Trial &trial) override;
 
