@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <opt_tasks/OneDimensionalTask.h>
-#include <myMath.h>
+#include <my_math.h>
 
 using std::vector;
 using std::sin;
