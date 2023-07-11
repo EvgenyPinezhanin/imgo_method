@@ -1,4 +1,4 @@
-#include <myMath.h>
+#include <my_math.h>
 
 double euclideanDistance(const vector<double> &val1, const vector<double> &val2) {
     double res = 0.0;
