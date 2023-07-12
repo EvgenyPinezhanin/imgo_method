@@ -58,7 +58,7 @@ double ScanningMethod::estimateSolution() const {
 }
 
 bool ScanningMethod::stopConditions() {
-    if (trialPoints[t].x - trialPoints[(size_t)t - 1].x <= accuracy) {
+    if (abs(trialPoints[t].x - trialPoints[(size_t)t - 1].x) <= accuracy) {
         result.stoppingCondition = StoppingCondition::accuracy;
         return true;
     }
@@ -85,30 +85,30 @@ void ScanningMethod::solve(ResultMethod &_result) {
     trialPoints.clear();
     numberFevals = 0;
 
-    result = _result;
-
+    // Step 1
     trialPoints.push_back(newTrial(task.getSearchArea().getLowerBound()));
-    Trial trial = newTrial(task.getSearchArea().getUpBound());
+    trialPoints.push_back(newTrial(task.getSearchArea().getUpBound()));
+    t = 1;
 
     numberTrials = 2;
 
+    Trial trial;
     double xNew;
-    while(true) {
-        // Step 1
-        insertInSorted(trial);
-
+    while(!stopConditions()) {
         // Steps 2, 3, 4
         xNew = selectNewPoint();
 
         trial = newTrial(xNew);
         numberTrials++;
 
-        if (stopConditions()) break;
+        // Step 1
+        insertInSorted(trial);
     }
 
     result.numberTrials = numberTrials;
     result.numberFevals = numberFevals;
     result.solution = estimateSolution();
+    _result = result;
 }
 
 bool ScanningMethod::solveTest(ResultMethod &_result) {
