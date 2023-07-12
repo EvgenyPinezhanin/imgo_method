@@ -115,30 +115,29 @@ bool ScanningMethod::solveTest(ResultMethod &_result) {
     trialPoints.clear();
     numberFevals = 0;
 
-    result = _result;
-
+    // Step 1
     trialPoints.push_back(newTrial(task.getSearchArea().getLowerBound()));
-    Trial trial = newTrial(task.getSearchArea().getUpBound());
+    trialPoints.push_back(newTrial(task.getSearchArea().getUpBound()));
 
     numberTrials = 2;
 
+    Trial trial;
     double xNew;
-    while (true) {
-        // Step 1
-        insertInSorted(trial);
-
+    while (stopConditionsTest()) {
         // Steps 2, 3, 4
         xNew = selectNewPoint();
 
         trial = newTrial(xNew);
         numberTrials++;
 
-        if (stopConditionsTest()) break;
+        // Step 1
+        insertInSorted(trial);
     }
     
     result.numberTrials = numberTrials;
     result.numberFevals = numberFevals;
     result.solution = estimateSolution();
+    _result = result;
 
     return result.stoppingCondition == StoppingCondition::error;
 }
