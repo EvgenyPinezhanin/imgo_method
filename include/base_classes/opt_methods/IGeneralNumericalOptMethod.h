@@ -7,8 +7,8 @@
 
 using std::vector;
 
-template <typename SolutionType, typename TrialType, typename OptTaskType, typename ResultMethodType, typename PointType>
-class IGeneralNumericalOptMethod : public IGeneralOptMethod<OptTaskType, ResultMethodType> {
+template <typename SolutionType, typename TrialType, typename OptProblemType, typename ResultMethodType, typename PointType>
+class IGeneralNumericalOptMethod : public IGeneralOptMethod<OptProblemType, ResultMethodType> {
 protected:
     vector<TrialType> trialPoints;
 
@@ -25,8 +25,8 @@ protected:
     virtual bool stopConditionsTest() = 0;
 
 public:
-    IGeneralNumericalOptMethod(const OptTaskType &_task, double _accuracy, double _error, int _maxTrials, int _maxFevals)
-                              : IGeneralOptMethod<OptTaskType, ResultMethodType>(_task, _maxFevals), trialPoints(0),
+    IGeneralNumericalOptMethod(const OptProblemType &_problem, double _accuracy, double _error, int _maxTrials, int _maxFevals)
+                              : IGeneralOptMethod<OptProblemType, ResultMethodType>(_problem, _maxFevals), trialPoints(0),
                               accuracy(_accuracy), error(_error), maxTrials(_maxTrials), numberTrials(0),
                               maxFevals(_maxFevals), numberFevals(0) {};
 

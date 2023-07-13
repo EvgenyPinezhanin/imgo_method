@@ -13,11 +13,11 @@ void printResult(ostream &ostr, const ScanningTask &task, const ResultMethod &re
     ostr << setprecision(8);
 
     ostr << "Task: " << task.name << "\n";
-    ostr << "[a; b] = [" << task.optTask.getSearchArea().getLowerBound() << "; " <<
-                            task.optTask.getSearchArea().getUpBound() << "]"<< "\n";
-    double xOpt = task.optTask.getOptimalPoint();
+    ostr << "[a; b] = [" << task.optProblem.getSearchArea().getLowerBound() << "; " <<
+                            task.optProblem.getSearchArea().getUpBound() << "]"<< "\n";
+    double xOpt = task.optProblem.getOptimalPoint();
     ostr << "X* = " << xOpt << "\n";
-    double fXOpt = task.optTask.computeObjFunction(xOpt);
+    double fXOpt = task.optProblem.computeObjFunction(xOpt);
     ostr << "f(X*) = " << fXOpt << "\n";
 
     ostr << "Method Parameters:" << "\n";
@@ -29,7 +29,7 @@ void printResult(ostream &ostr, const ScanningTask &task, const ResultMethod &re
     ostr << "Number of trials = " << result.numberTrials << "\n";
     ostr << "Number of fevals = " << result.numberFevals << "\n";
     ostr << "X = " << result.solution << "\n";
-    double fX = task.optTask.computeObjFunction(result.solution);
+    double fX = task.optProblem.computeObjFunction(result.solution);
     ostr << "f(X) = " << fX << "\n";
     ostr << "|X* - X| = " << abs(xOpt - result.solution) << "\n";
     ostr << "|f(X*) - f(X)| = " << abs(fXOpt - fX) << "\n";

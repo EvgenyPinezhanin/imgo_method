@@ -1,17 +1,17 @@
-#ifndef I_GENERAL_OPT_TASK_H_
-#define I_GENERAL_OPT_TASK_H_
+#ifndef I_GENERAL_OPT_PROBLEM_H_
+#define I_GENERAL_OPT_PROBLEM_H_
 
 template <typename ObjectiveFunctionType, typename SearchAreaType, typename OptimalPointType>
-class IGeneralOptTask {
+class IGeneralOptProblem {
 protected:
     ObjectiveFunctionType objFunction;
     SearchAreaType area;
     OptimalPointType optimalPoint;
 
 public:
-    IGeneralOptTask(const ObjectiveFunctionType &_objFunction, const SearchAreaType &_area,
-                    const OptimalPointType &_optimalPoint)
-                    : objFunction(_objFunction), area(_area), optimalPoint(_optimalPoint) {};
+    IGeneralOptProblem(const ObjectiveFunctionType &_objFunction, const SearchAreaType &_area,
+                       const OptimalPointType &_optimalPoint)
+                      : objFunction(_objFunction), area(_area), optimalPoint(_optimalPoint) {};
 
     void setObjFunction(ObjectiveFunctionType _objFunction) { objFunction = _objFunction; };
     ObjectiveFunctionType getObjFunction() const { return objFunction; };
@@ -25,4 +25,4 @@ public:
     virtual double computeObjFunction(double x) const = 0;
 };
 
-#endif // I_GENERAL_OPT_TASK_H_
+#endif // I_GENERAL_OPT_PROBLEM_H_

@@ -1,19 +1,19 @@
 #ifndef I_GENERAL_OPT_METHOD_H_
 #define I_GENERAL_OPT_METHOD_H_
 
-template <typename OptTaskType, typename ResultMethodType>
+template <typename OptProblemType, typename ResultMethodType>
 class IGeneralOptMethod {
 protected:
-    OptTaskType task;
+    OptProblemType problem;
 
     ResultMethodType result;
 
 public:
-    IGeneralOptMethod(const OptTaskType &_task, int _maxFevals)
-                     : task(_task), result(ResultMethodType()) {};
+    IGeneralOptMethod(const OptProblemType &_problem, int _maxFevals)
+                     : problem(_problem), result(ResultMethodType()) {};
 
-    void setTask(const OptTaskType &_task) { task = _task; };
-    OptTaskType getTask() const { return task; };
+    void setProblem(const OptProblemType &_problem) { problem = _problem; };
+    OptProblemType getProblem() const { return problem; };
 
     virtual void solve(ResultMethodType &_result) = 0;
     virtual bool solveTest(ResultMethodType &_result) = 0;

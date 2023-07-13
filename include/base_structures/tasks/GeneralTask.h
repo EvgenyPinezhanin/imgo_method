@@ -5,17 +5,17 @@
 
 using std::string;
 
-template <typename OptimizationTaskType>
+template <typename OptimizationProblemType>
 struct GeneralTask {
     string name;
 
-    OptimizationTaskType optTask;
+    OptimizationProblemType optProblem;
     int maxFevals;
 
     bool use;
 
-    GeneralTask(string _name, const OptimizationTaskType &_optTask, int _maxFevals, bool _use)
-                : name(_name), optTask(_optTask), maxFevals(_maxFevals), use(_use) {};
+    GeneralTask(string _name, const OptimizationProblemType &_optTask, int _maxFevals, bool _use)
+                : name(_name), optProblem(_optTask), maxFevals(_maxFevals), use(_use) {};
 };
 
 #endif // GENERAL_TASK_H_

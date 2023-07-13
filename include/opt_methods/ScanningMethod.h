@@ -4,11 +4,11 @@
 #include <base_classes/opt_methods/ICharacteristicOptMethod.h>
 #include <base_classes/opt_methods/IGeneralNumericalOptMethod.h>
 #include <result_methods/ResultMethod.h>
-#include <opt_tasks/OneDimensionalTask.h>
+#include <opt_problems/OneDimensionalProblem.h>
 #include <trials/Trial.h>
 
 class ScanningMethod : public ICharacteristicOptMethod<Trial>,
-    public IGeneralNumericalOptMethod<double, Trial, OneDimensionalTask, ResultMethod, double> {
+    public IGeneralNumericalOptMethod<double, Trial, OneDimensionalProblem, ResultMethod, double> {
 private:
     void insertInSorted(const Trial &trial) override;
 
@@ -23,10 +23,10 @@ private:
     bool stopConditionsTest() override;
 
 public:
-    ScanningMethod(const OneDimensionalTask &_task = OneDimensionalTask(), double _accuracy = 0.001,
+    ScanningMethod(const OneDimensionalProblem &_problem = OneDimensionalProblem(), double _accuracy = 0.001,
                    double _error = 0.001, int _maxTrials = 1000, int _maxFevals = 1000)
                   : ICharacteristicOptMethod<Trial>(), IGeneralNumericalOptMethod<double, Trial,
-                  OneDimensionalTask, ResultMethod, double>(_task, _accuracy, _error, _maxTrials, _maxFevals) {};
+                  OneDimensionalProblem, ResultMethod, double>(_problem, _accuracy, _error, _maxTrials, _maxFevals) {};
 
     void solve(ResultMethod &result) override;
 

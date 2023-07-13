@@ -37,7 +37,7 @@ void ScanningMethod::calcCharacteristic() {
 
 Trial ScanningMethod::newTrial(const double &x) {
     numberFevals++;
-    return Trial(x, task.computeObjFunction(x));
+    return Trial(x, problem.computeObjFunction(x));
 }
 
 double ScanningMethod::selectNewPoint() {
@@ -74,7 +74,7 @@ bool ScanningMethod::stopConditions() {
 }
 
 bool ScanningMethod::stopConditionsTest() {
-    if (abs(trialPoints[t].x - task.getOptimalPoint()) <= error) {
+    if (abs(trialPoints[t].x - problem.getOptimalPoint()) <= error) {
         result.stoppingCondition = StoppingCondition::error;
         return true;
     }
@@ -86,8 +86,8 @@ void ScanningMethod::solve(ResultMethod &_result) {
     numberFevals = 0;
 
     // Step 1
-    trialPoints.push_back(newTrial(task.getSearchArea().getLowerBound()));
-    trialPoints.push_back(newTrial(task.getSearchArea().getUpBound()));
+    trialPoints.push_back(newTrial(problem.getSearchArea().getLowerBound()));
+    trialPoints.push_back(newTrial(problem.getSearchArea().getUpBound()));
     t = 1;
 
     numberTrials = 2;
@@ -116,8 +116,8 @@ bool ScanningMethod::solveTest(ResultMethod &_result) {
     numberFevals = 0;
 
     // Step 1
-    trialPoints.push_back(newTrial(task.getSearchArea().getLowerBound()));
-    trialPoints.push_back(newTrial(task.getSearchArea().getUpBound()));
+    trialPoints.push_back(newTrial(problem.getSearchArea().getLowerBound()));
+    trialPoints.push_back(newTrial(problem.getSearchArea().getUpBound()));
 
     numberTrials = 2;
 
