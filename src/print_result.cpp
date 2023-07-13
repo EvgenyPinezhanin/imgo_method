@@ -12,7 +12,7 @@ void printResult(ostream &ostr, const ScanningTask &task, const ResultMethod &re
     const auto defaultPrecision = ostr.precision();
     ostr << setprecision(8);
 
-    ostr << "Task name: " << task.name << "\n";
+    ostr << "Task: " << task.name << "\n";
     ostr << "[a; b] = [" << task.optTask.getSearchArea().getLowerBound() << "; " <<
                             task.optTask.getSearchArea().getUpBound() << "]"<< "\n";
     double xOpt = task.optTask.getOptimalPoint();
