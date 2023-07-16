@@ -10,12 +10,11 @@ struct GeneralTask {
     string name;
 
     OptimizationProblemType optProblem;
-    int maxFevals;
 
     bool use;
 
-    GeneralTask(string _name, const OptimizationProblemType &_optTask, int _maxFevals, bool _use)
-                : name(_name), optProblem(_optTask), maxFevals(_maxFevals), use(_use) {};
+    GeneralTask(string _name, const OptimizationProblemType &_optProblem, bool _use)
+                : name(_name), optProblem(_optProblem), use(_use) {};
 };
 
 #endif // GENERAL_TASK_H_

@@ -6,12 +6,12 @@
 template <typename OptimizationProblemType>
 struct GeneralNumericalTask : public GeneralTask<OptimizationProblemType> {
     double accuracy, error;
-    int maxTrials;
+    int maxTrials, maxFevals;
 
     GeneralNumericalTask(string _name, const OptimizationProblemType &_optProblem, double _accuracy,
                          double _error, int _maxTrials, int _maxFevals, bool _use = true)
-                         : GeneralTask<OptimizationProblemType>(_name, _optProblem, _maxFevals, _use),
-                         accuracy(_accuracy), error(_error), maxTrials(_maxTrials) {};
+                         : GeneralTask<OptimizationProblemType>(_name, _optProblem, _use),
+                         accuracy(_accuracy), error(_error), maxTrials(_maxTrials), maxFevals(_maxFevals) {};
 };
 
 #endif // GENERAL_NUMERICAL_TASK_H_
