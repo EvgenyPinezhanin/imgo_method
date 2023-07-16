@@ -81,6 +81,13 @@ bool ScanningMethod::stopConditionsTest() {
     return stopConditions();
 }
 
+void ScanningMethod::setDataInResultMethod(ResultMethod &result) {
+    result.numberTrials = numberTrials;
+    result.numberFevals = numberFevals;
+    result.solution = estimateSolution();
+    result.stoppingCondition = this->result.stoppingCondition;
+}
+
 void ScanningMethod::solve(ResultMethod &_result) {
     trialPoints.clear();
     numberFevals = 0;
@@ -105,10 +112,7 @@ void ScanningMethod::solve(ResultMethod &_result) {
         insertInSorted(trial);
     }
 
-    result.numberTrials = numberTrials;
-    result.numberFevals = numberFevals;
-    result.solution = estimateSolution();
-    _result = result;
+    setDataInResultMethod(result);
 }
 
 bool ScanningMethod::solveTest(ResultMethod &_result) {
@@ -134,10 +138,7 @@ bool ScanningMethod::solveTest(ResultMethod &_result) {
         insertInSorted(trial);
     }
     
-    result.numberTrials = numberTrials;
-    result.numberFevals = numberFevals;
-    result.solution = estimateSolution();
-    _result = result;
+    setDataInResultMethod(result);
 
     return result.stoppingCondition == StoppingCondition::error;
 }
