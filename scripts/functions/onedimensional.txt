@@ -1,0 +1,152 @@
+numberBlocks = 2
+array numberFunctions[numberBlocks]
+numberFunctions[1] = 4
+numberFunctions[2] = 20
+array blockNames[numberBlocks]
+blockNames[1] = "sample"
+blockNames[2] = "test"
+
+############
+## SAMPLE ##
+############
+
+array ASample[4]
+array BSample[4]
+
+f1Sample(x) = -4.0 * x + 1.0
+ASample[1] = 3.0
+BSample[1] = 4.0
+
+f2Sample(x) = 5.0 * x ** 2 + 3.0 * x - 1.0
+ASample[2] = -2.0
+BSample[2] = 2.0
+
+f3Sample(x) = x * sin(x)
+ASample[3] = 0.0
+BSample[3] = 20.0
+
+f4Sample(x) = x != 0 ? x * sin(1 / x) : 0.0
+ASample[4] = -4.0
+BSample[4] = -0.05
+
+fSample(i, x) = i == 1 ? f1Sample(x) : \
+                i == 2 ? f2Sample(x) : \
+                i == 3 ? f3Sample(x) : \
+                i == 4 ? f4Sample(x) : 1/0
+
+##########
+## TEST ##
+##########
+
+array ATest[20]
+array BTest[20]
+
+f1Test(x) = 1.0 / 6.0 * x ** 6 - 52.0 / 25.0 * x ** 5 + 39.0 / 80.0 * x ** 4 + \
+            71.0 / 10.0 * x ** 3 - 79.0 / 20.0 * x ** 2 - x + 1.0 / 10.0
+ATest[1] = -1.5
+BTest[1] = 11.0
+
+f2Test(x) = sin(x) + sin(10.0 / 3.0 * x)
+ATest[2] = 2.7
+BTest[2] = 7.5
+
+f3Test(x) = -sum[i = 1 : 5] i * sin((i + 1.0) * x  + i)
+ATest[3] = -10.0
+BTest[3] = 10.0
+
+f4Test(x) = (-16.0 * x ** 2 + 24.0 * x - 5.0) * exp(-x)
+ATest[4] = 1.9
+BTest[4] = 3.9
+
+f5Test(x) = (3.0 * x - 1.4) * sin(18.0 * x)
+ATest[5] = 0.0
+BTest[5] = 1.2
+
+f6Test(x) = -(x + sin(x)) * exp(-x ** 2)
+ATest[6] = -10.0
+BTest[6] = 10.0
+
+f7Test(x) = sin(x) + sin(10.0 / 3.0 * x) + log(x) - 0.84 * x + 3.0
+ATest[7] = 2.7
+BTest[7] = 7.5
+
+f8Test(x) = -sum[i = 1 : 5] i * cos((i + 1.0) * x  + i)
+ATest[8] = -10.0
+BTest[8] = 10.0
+
+f9Test(x) = sin(x) + sin(2.0 / 3.0 * x)
+ATest[9] = 3.1
+BTest[9] = 20.4
+
+f10Test(x) = -x * sin(x)
+ATest[10] = 0.0
+BTest[10] = 10.0
+
+f11Test(x) = 2.0 * cos(x) + cos(2.0 * x)
+ATest[11] = -1.57
+BTest[11] = 6.28
+
+f12Test(x) = sin(x) ** 3 + cos(x) ** 3
+ATest[12] = 0.0
+BTest[12] = 6.28
+
+f13Test(x) = x * x - 1 < 0 ? -x ** (2.0 / 3.0) - (-x ** 2 + 1) ** (1.0 / 3.0) : \
+                             -x ** (2.0 / 3.0) + (x ** 2 - 1) ** (1.0 / 3.0)
+ATest[13] = 0.001
+BTest[13] = 0.99
+
+f14Test(x) = -exp(-x) * sin(2 * pi * x)
+ATest[14] = 0.0
+BTest[14] = 4.0
+
+f15Test(x) = (x ** 2 - 5.0 * x + 6.0) / (x * x + 1)
+ATest[15] = -5.0
+BTest[15] = 5.0
+
+f16Test(x) = 2.0 * (x - 3) ** 2 + exp(-x * x / 2)
+ATest[16] = -3.0
+BTest[16] = 3.0
+
+f17Test(x) = x ** 6 - 15.0 * x ** 4 + 27.0 * x ** 2 + 250.0
+ATest[17] = -4.0
+BTest[17] = 4.0
+
+f18Test(x) = x <= 3.0 ? (x - 2.0) ** 2 : 2.0 * log(x - 2.0) + 1.0
+ATest[18] = 0.0
+BTest[18] = 6.0
+
+f19Test(x) = -x + sin(3.0 * x) - 1.0
+ATest[19] = 0.0
+BTest[19] = 6.5
+
+f20Test(x) = (-x + sin(x)) * exp(-x ** 2)
+ATest[20] = -10.0
+BTest[20] = 10.0
+
+fTest(i, x) = i == 1 ? f1Test(x) : \
+              i == 2 ? f2Test(x) : \
+              i == 3 ? f3Test(x) : \
+              i == 4 ? f4Test(x) : \
+              i == 5 ? f5Test(x) : \
+              i == 6 ? f6Test(x) : \
+              i == 7 ? f7Test(x) : \
+              i == 8 ? f8Test(x) : \
+              i == 9 ? f9Test(x) : \
+              i == 10 ? f10Test(x) : \
+              i == 11 ? f11Test(x) : \
+              i == 12 ? f12Test(x) : \
+              i == 13 ? f13Test(x) : \
+              i == 14 ? f14Test(x) : \
+              i == 15 ? f15Test(x) : \
+              i == 16 ? f16Test(x) : \
+              i == 17 ? f17Test(x) : \
+              i == 18 ? f18Test(x) : \
+              i == 19 ? f19Test(x) : \
+              i == 20 ? f20Test(x) : 1/0
+
+f(i, j, x) = i == 1 ? fSample(j, x) : \
+             i == 2 ? fTest(j, x) : 1/0
+A(i, j) = i == 1 ? ASample[j] : \
+          i == 2 ? ATest[j] : 1/0
+B(i, j) = i == 1 ? BSample[j] : \
+          i == 2 ? BTest[j] : 1/0
