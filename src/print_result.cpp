@@ -8,7 +8,7 @@ using std::setprecision;
 using std::endl;
 using std::abs;
 
-void printResult(ostream &ostr, const ScanningTask &task, const ResultMethod &result) {
+void printResult(ostream &ostr, const ScanningTask &task, const ResultMethod &result, double workTime) {
     const auto defaultPrecision = ostr.precision();
     ostr << setprecision(8);
 
@@ -33,6 +33,8 @@ void printResult(ostream &ostr, const ScanningTask &task, const ResultMethod &re
     ostr << "f(X) = " << fX << "\n";
     ostr << "|X* - X| = " << abs(xOpt - result.solution) << "\n";
     ostr << "|f(X*) - f(X)| = " << abs(fXOpt - fX) << "\n";
+
+    ostr << "Time: " << workTime << "\n";
     ostr << endl;
 
     ostr << setprecision(defaultPrecision);

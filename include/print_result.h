@@ -8,6 +8,6 @@
 
 using std::ostream;
 
-void printResult(ostream &ostr, const ScanningTask &task, const ResultMethod &result);
+void printResult(ostream &ostr, const ScanningTask &task, const ResultMethod &result, double workTime);
 
 #endif // PRINT_RESULT_H_
