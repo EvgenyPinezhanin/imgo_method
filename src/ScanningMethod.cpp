@@ -88,7 +88,7 @@ void ScanningMethod::setDataInResultMethod(ResultMethod &result) {
     result.stoppingCondition = this->result.stoppingCondition;
 }
 
-void ScanningMethod::solve(ResultMethod &_result) {
+void ScanningMethod::solve(ResultMethod &result) {
     trialPoints.clear();
     numberFevals = 0;
 
@@ -115,7 +115,7 @@ void ScanningMethod::solve(ResultMethod &_result) {
     setDataInResultMethod(result);
 }
 
-bool ScanningMethod::solveTest(ResultMethod &_result) {
+bool ScanningMethod::solveTest(ResultMethod &result) {
     trialPoints.clear();
     numberFevals = 0;
 
