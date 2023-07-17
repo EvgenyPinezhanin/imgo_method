@@ -1,9 +1,9 @@
 #ifndef SCANNING_TASK_H_
 #define SCANNING_TASK_H_
 
-#include <base_structures/tasks/GeneralNumericalTask.h>
+#include <tasks/Task.h>
 #include <opt_problems/OneDimensionalProblem.h>
 
-using ScanningTask = GeneralNumericalTask<OneDimensionalProblem>;
+using ScanningTask = Task<OneDimensionalProblem>;
 
 #endif // SCANNING_TASK_H_
