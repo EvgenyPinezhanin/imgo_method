@@ -13,7 +13,7 @@ set ylabel "f(x)" font fontName offset -1
 
 set tics font fontName
 
-set key box outside right top
+set key box width -3 outside right top
 set key font fontName spacing 1.3
 
 title(block, n, method) = sprintf("Graph of the %s function №%d, %s method", block, n, method)
@@ -44,7 +44,7 @@ if (ARG2 == 0) {
     system "mkdir -p output_graph/".ARG1."_test"
 
     set lmargin 12
-    set rmargin 16
+    set rmargin 18
     set tmargin 3
     set bmargin 3
 
