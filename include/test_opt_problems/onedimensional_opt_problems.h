@@ -1,15 +1,33 @@
-#ifndef TEST_OPT_PROBLEMS_H_
-#define TEST_OPT_PROBLEMS_H_
+#ifndef ONEDIMENSIONAL_OPT_PROBLEMS_H_
+#define ONEDIMENSIONAL_OPT_PROBLEMS_H_
 
 #include <vector>
+#include <string>
 
 #include <opt_problems/OneDimensionalProblem.h>
 #include <my_math.h>
 
 using std::vector;
+using std::string;
 using std::sin;
 using std::cos;
 using std::pow;
+
+const int numberBlocks = 2;
+const int numberFunctions[numberBlocks] = { 4, 20 };
+const string blockNames[numberBlocks] = { "sample", "test" };
+
+const vector<OneDimensionalProblem> sampleTasks{
+    OneDimensionalProblem([] (double x) { return -4.0 * x + 1.0; }, OneDimensionalSearchArea(3.0, 4.0), 4.0, 4.0),
+
+    OneDimensionalProblem([] (double x) { return 5.0 * x * x + 3.0 * x - 1.0; },
+                          OneDimensionalSearchArea(-2.0, 2.0), -0.3, 23.0),
+
+    OneDimensionalProblem([] (double x) { return x * sin(x); }, OneDimensionalSearchArea(0.0, 20.0), 17.336, 18.955),
+
+    OneDimensionalProblem([] (double x) { return x != 0 ? x * sin(1 / x) : 0.0; },
+                          OneDimensionalSearchArea(-0.4, -0.05), -0.2225, 6.0 * M_PI)
+};
 
 const vector<OneDimensionalProblem> testTasks{
     OneDimensionalProblem(
@@ -91,4 +109,4 @@ const vector<OneDimensionalProblem> testTasks{
                           OneDimensionalSearchArea(-10.0, 10.0), 1.195137, 1.3)
 };
 
-#endif // TEST_OPT_PROBLEMS_H_
+#endif // ONEDIMENSIONAL_OPT_PROBLEMS_H_
