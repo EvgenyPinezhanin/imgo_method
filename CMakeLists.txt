@@ -38,6 +38,7 @@ add_custom_command(
   TARGET ${MAKE_DIR} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E make_directory
   ${OUT_DIR}/output_data ${OUT_DIR}/output_graph
+  ${OUT_DIR}/output_data/scanning_test
 )
 
 # GPROF
