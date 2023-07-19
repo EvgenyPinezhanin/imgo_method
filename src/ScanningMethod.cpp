@@ -72,9 +72,14 @@ bool ScanningMethod::stopConditions() {
 }
 
 bool ScanningMethod::stopConditionsTest() {
-    if (abs(trialPoints[t].x - problem.getOptimalPoint()) <= error) {
-        result.stoppingCondition = StoppingCondition::error;
-        return true;
+    vector<double> optimalPoints;
+    problem.getOptimalPoints(optimalPoints);
+    int numberOptimalPoints = (int)optimalPoints.size();
+    for (int i = 0; i < numberOptimalPoints; i++) {
+        if (abs(trialPoints[t].x - optimalPoints[i]) <= error) {
+            result.stoppingCondition = StoppingCondition::error;
+            return true;
+        }
     }
     return stopConditions();
 }

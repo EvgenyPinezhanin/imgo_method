@@ -4,7 +4,7 @@ load "scripts/functions/onedimensional.txt"
 
 fontName = "Helvetica, 16"
 
-set sample 400
+set sample 500
 
 set grid
 

@@ -1,17 +1,21 @@
 #ifndef I_GENERAL_OPT_PROBLEM_H_
 #define I_GENERAL_OPT_PROBLEM_H_
 
+#include <vector>
+
+using std::vector;
+
 template <typename ObjectiveFunctionType, typename SearchAreaType, typename OptimalPointType>
 class IGeneralOptProblem {
 protected:
     ObjectiveFunctionType objFunction;
     SearchAreaType area;
-    OptimalPointType optimalPoint;
+    vector<OptimalPointType> optimalPoints;
 
 public:
     IGeneralOptProblem(const ObjectiveFunctionType &_objFunction, const SearchAreaType &_area,
-                       const OptimalPointType &_optimalPoint)
-                      : objFunction(_objFunction), area(_area), optimalPoint(_optimalPoint) {};
+                       const vector<OptimalPointType> &_optimalPoints)
+                      : objFunction(_objFunction), area(_area), optimalPoints(_optimalPoints) {};
 
     void setObjFunction(ObjectiveFunctionType _objFunction) { objFunction = _objFunction; };
     ObjectiveFunctionType getObjFunction() const { return objFunction; };
@@ -19,8 +23,8 @@ public:
     void setSearchArea(const SearchAreaType &_area) { area = _area; };
     SearchAreaType getSearchArea() const { return area; };
 
-    void setOptimalPoint(const OptimalPointType &_optimalPoint) { optimalPoint = _optimalPoint; };
-    OptimalPointType getOptimalPoint() const { return optimalPoint; };
+    void setOptimalPoints(const vector<OptimalPointType> &_optimalPoints) { optimalPoints = _optimalPoints; };
+    void getOptimalPoints(vector<OptimalPointType> &_optimalPoints) const { _optimalPoints = optimalPoints; };
 
     virtual double computeObjFunction(double x) const = 0;
 };

@@ -16,7 +16,7 @@ using std::vector;
 using std::cout;
 using std::cerr;
 
-// #define CALC
+#define CALC
 
 const string methodName = "scanning";
 const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
@@ -58,7 +58,8 @@ int main() {
     TrialsFile trialsFile;
     ResultMethod result;
     vector<Trial> trials;
-    double optimalPoint, point;
+    vector<double> optimalPoints;
+    double point;
     int numberTasks = (int)tasks.size();
     double startTime, endTime, workTime;
 
@@ -82,8 +83,8 @@ int main() {
                                "_" + to_string(tasks[i].functionNumber));
             if (!trialsFile.isOpen()) cerr << "TrialsFile opening error\n";
 
-            optimalPoint = tasks[i].optProblem.getOptimalPoint();
-            trialsFile.addPoint(optimalPoint, tasks[i].optProblem.computeObjFunction(optimalPoint));
+            tasks[i].optProblem.getOptimalPoints(optimalPoints);
+            trialsFile.addPoints(optimalPoints, tasks[i].optProblem.computeObjFunction(optimalPoints[0]));
             point = result.solution;
             trialsFile.addPoint(point, tasks[i].optProblem.computeObjFunction(point));
 

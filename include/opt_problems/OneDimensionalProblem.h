@@ -15,9 +15,9 @@ private:
 public:
     OneDimensionalProblem(const function<double(double)> &_objFunction = nullptr,
                        const OneDimensionalSearchArea &_area = OneDimensionalSearchArea(0.0, 1.0),
-                       double _optPoint = 0.0, double _lipschitzConstant = -1.0)
+                       vector<double> _optimalPoints = vector<double>{}, double _lipschitzConstant = -1.0)
                       : IGeneralOptProblem<function<double(double)>, OneDimensionalSearchArea, double>(_objFunction,
-                      _area, _optPoint), lipschitzConstant(_lipschitzConstant) {};
+                      _area, _optimalPoints), lipschitzConstant(_lipschitzConstant) {};
 
     void setLipschitzConstant(double _lipschitzConstant) { lipschitzConstant = _lipschitzConstant; };
     double getLipschitzConstant() const { return lipschitzConstant; };
