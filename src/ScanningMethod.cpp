@@ -41,10 +41,8 @@ Trial ScanningMethod::newTrial(const double &x) {
 }
 
 double ScanningMethod::selectNewPoint() {
-    // Steps 2, 3
     calcCharacteristic();
 
-    // Step 4
     return 0.5 * (trialPoints[t].x + trialPoints[(size_t)t - 1].x);
 }
 
@@ -92,7 +90,6 @@ void ScanningMethod::solve(ResultMethod &result) {
     trialPoints.clear();
     numberFevals = 0;
 
-    // Step 1
     trialPoints.push_back(newTrial(problem.getSearchArea().getLowerBound()));
     trialPoints.push_back(newTrial(problem.getSearchArea().getUpBound()));
     t = 1;
@@ -102,13 +99,11 @@ void ScanningMethod::solve(ResultMethod &result) {
     Trial trial;
     double xNew;
     while(!stopConditions()) {
-        // Steps 2, 3, 4
         xNew = selectNewPoint();
 
         trial = newTrial(xNew);
         numberTrials++;
 
-        // Step 1
         insertInSorted(trial);
     }
 
@@ -119,22 +114,20 @@ bool ScanningMethod::solveTest(ResultMethod &result) {
     trialPoints.clear();
     numberFevals = 0;
 
-    // Step 1
     trialPoints.push_back(newTrial(problem.getSearchArea().getLowerBound()));
     trialPoints.push_back(newTrial(problem.getSearchArea().getUpBound()));
+    t = 1;
 
     numberTrials = 2;
 
     Trial trial;
     double xNew;
     while (stopConditionsTest()) {
-        // Steps 2, 3, 4
         xNew = selectNewPoint();
 
         trial = newTrial(xNew);
         numberTrials++;
 
-        // Step 1
         insertInSorted(trial);
     }
     
