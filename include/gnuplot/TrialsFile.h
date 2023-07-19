@@ -32,6 +32,7 @@ public:
     // void addPointGnuplot(ofstream &ofstr, const vector<double> &x);
 
     void addPoints(const vector<Trial> &trials, bool space = true);
+    void addPoints(const vector<double> &x, double f, bool space = true);
 
     // void addPointsGnuplot(ofstream &ofstr, const vector<vector<double>> &X, const vector<double> &f);
     // void addPointsGnuplot(ofstream &ofstr, const vector<vector<double>> &X);

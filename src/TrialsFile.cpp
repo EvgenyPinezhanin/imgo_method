@@ -26,6 +26,14 @@ void TrialsFile::addPoints(const vector<Trial> &trials, bool space) {
     if (space) file << "\n\n";
 }
 
+void TrialsFile::addPoints(const vector<double> &x, double f, bool space) {
+    int numberPoints = (int)x.size();
+    for (int i = 0; i < numberPoints; i++) {
+        file << x[i] << " " << f << "\n";
+    }
+    if (space) file << "\n\n";
+}
+
 /* 
 
 void addPointGnuplot(ofstream &ofstr, const vector<double> &X, double f) {
