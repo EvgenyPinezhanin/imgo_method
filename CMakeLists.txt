@@ -40,6 +40,7 @@ add_custom_command(
   ${OUT_DIR}/output_data ${OUT_DIR}/output_graph
   ${OUT_DIR}/output_data/scanning_test
   ${OUT_DIR}/output_data/piyavsky_test
+  ${OUT_DIR}/output_data/gsa_test
 )
 
 # GPROF
