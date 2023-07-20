@@ -30,7 +30,7 @@ void PiyavskyMethod::calcCharacteristic() {
 }
 
 double PiyavskyMethod::selectNewPoint() {
-    static double M = -1.0;
+    static double M = 0.0;
 
     // with optimization(const)
     if (trialPoints[t].x == problem.getSearchArea().getUpBound()) {
@@ -44,13 +44,14 @@ double PiyavskyMethod::selectNewPoint() {
 
     // without optimization
     // double Mtmp;
+    // M = 0.0;
     // int trialPointsSize = (int)trialPoints.size();
     // for (int i = 1; i < trialPointsSize; i++) {
     //     Mtmp = abs(trialPoints[i].z - trialPoints[(size_t)i - 1].z) / (trialPoints[i].x - trialPoints[(size_t)i - 1].x);
     //     if (Mtmp > M) M = Mtmp;
     // }
 
-    constantEstimation = (abs(M) <= epsilon) ? 1.0 : reliability * M;
+    constantEstimation = (M <= epsilon) ? 1.0 : reliability * M;
 
     calcCharacteristic();
 
