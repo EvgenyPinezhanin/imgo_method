@@ -82,7 +82,8 @@ int main() {
     TrialsFile trialsFile;
     ResultMethod result;
     vector<Trial> trials;
-    double optimalPoint, point;
+    vector<double> optimalPoints;
+    double point;
     int numberTasks = (int)tasks.size();
     double startTime, endTime, workTime;
 
@@ -107,8 +108,8 @@ int main() {
                                "_" + to_string(tasks[i].functionNumber));
             if (!trialsFile.isOpen()) cerr << "TrialsFile opening error\n";
 
-            optimalPoint = tasks[i].optProblem.getOptimalPoint();
-            trialsFile.addPoint(optimalPoint, tasks[i].optProblem.computeObjFunction(optimalPoint));
+            tasks[i].optProblem.getOptimalPoints(optimalPoints);
+            trialsFile.addPoints(optimalPoints, tasks[i].optProblem.computeObjFunction(optimalPoints[0]));
             point = result.solution;
             trialsFile.addPoint(point, tasks[i].optProblem.computeObjFunction(point));
 
