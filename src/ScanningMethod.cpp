@@ -135,7 +135,7 @@ bool ScanningMethod::solveTest(ResultMethod &result) {
 
         insertInSorted(trial);
     }
-    
+
     setDataInResultMethod(result);
 
     return result.stoppingCondition == StoppingCondition::error;
