@@ -1,15 +1,10 @@
 #include <opt_methods/PiyavskyMethod.h>
 
-#include <algorithm>
 #include <limits>
-#include <iterator>
 
 #include <my_math.h>
 
 using std::numeric_limits;
-using std::advance;
-using std::distance;
-using std::min_element;
 using std::max;
 using std::abs;
 
