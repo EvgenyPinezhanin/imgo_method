@@ -3,18 +3,20 @@
 
 #include <base_structures/result_methods/GeneralResultMethod.h>
 
-enum class GeneralNumericalStoppingCondition { accuracy, error, maxTrials, maxFevals };
+namespace om {
+    enum class GeneralNumericalStoppingCondition { accuracy, error, maxTrials, maxFevals };
 
-template <typename StoppingConditionType, typename SolutionType>
-struct GeneralNumericalResultMethod : GeneralResultMethod<SolutionType> {
-    int numberTrials, numberFevals;
+    template <typename StoppingConditionType, typename PointType>
+    struct GeneralNumericalResultMethod : GeneralResultMethod<PointType> {
+        int numberTrials, numberFevals;
 
-    StoppingConditionType stoppingCondition;
+        StoppingConditionType stoppingCondition;
 
-    GeneralNumericalResultMethod(SolutionType _solution = SolutionType(), int _numberTrials = 0, int _numberFevals = 0,
-                                 StoppingConditionType _stoppingCondition = StoppingConditionType())
-                                : GeneralResultMethod<SolutionType>(_solution), numberTrials(_numberTrials),
-                                numberFevals(_numberFevals), stoppingCondition(_stoppingCondition) {};
-};
+        GeneralNumericalResultMethod(const PointType &_point = PointType(), _double _value = 0.0, int _numberTrials = 0,
+                                     int _numberFevals = 0, StoppingConditionType _stoppingCondition = StoppingConditionType())
+                                    : GeneralResultMethod<SolutionType>(_point, _value), numberTrials(_numberTrials),
+                                    numberFevals(_numberFevals), stoppingCondition(_stoppingCondition) {};
+    };
+}
 
 #endif // GENERAL_NUMERICAL_RESULT_METHOD_H_

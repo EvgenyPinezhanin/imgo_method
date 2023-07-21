@@ -5,16 +5,18 @@
 
 using std::string;
 
-template <typename OptProblemType>
-struct GeneralTask {
-    string name;
+namespace om {
+    template <typename OptProblemType>
+    struct GeneralTask {
+        string name;
 
-    OptProblemType optProblem;
+        OptProblemType optProblem;
 
-    bool use;
+        bool use;
 
-    GeneralTask(string _name, const OptProblemType &_optProblem, bool _use)
-                : name(_name), optProblem(_optProblem), use(_use) {};
-};
+        GeneralTask(const string &_name, const OptProblemType &_optProblem, bool _use)
+                   : name(_name), optProblem(_optProblem), use(_use) {};
+    };
+}
 
 #endif // GENERAL_TASK_H_

@@ -5,28 +5,35 @@
 
 using std::vector;
 
-template <typename ObjectiveFunctionType, typename SearchAreaType, typename OptimalPointType>
-class IGeneralOptProblem {
-protected:
-    ObjectiveFunctionType objFunction;
-    SearchAreaType area;
-    vector<OptimalPointType> optimalPoints;
+namespace om {
+    template <typename ObjectiveFunctionType, typename SearchAreaType, typename PointType>
+    class IGeneralOptProblem {
+    protected:
+        ObjectiveFunctionType objFunction;
+        SearchAreaType area;
+        vector<PointType> optimalPoints;
+        double optimalValue;
 
-public:
-    IGeneralOptProblem(const ObjectiveFunctionType &_objFunction, const SearchAreaType &_area,
-                       const vector<OptimalPointType> &_optimalPoints)
-                      : objFunction(_objFunction), area(_area), optimalPoints(_optimalPoints) {};
+    public:
+        IGeneralOptProblem(const ObjectiveFunctionType &_objFunction, const SearchAreaType &_area,
+                           const vector<PointType> &_optimalPoints, double _optimalValue)
+                          : objFunction(_objFunction), area(_area), optimalPoints(_optimalPoints),
+                          optimalValue(_optimalValue) {};
 
-    void setObjFunction(ObjectiveFunctionType _objFunction) { objFunction = _objFunction; };
-    ObjectiveFunctionType getObjFunction() const { return objFunction; };
+        void setObjFunction(const ObjectiveFunctionType &_objFunction) { objFunction = _objFunction; };
+        ObjectiveFunctionType getObjFunction() const { return objFunction; };
 
-    void setSearchArea(const SearchAreaType &_area) { area = _area; };
-    SearchAreaType getSearchArea() const { return area; };
+        void setSearchArea(const SearchAreaType &_area) { area = _area; };
+        SearchAreaType getSearchArea() const { return area; };
 
-    void setOptimalPoints(const vector<OptimalPointType> &_optimalPoints) { optimalPoints = _optimalPoints; };
-    void getOptimalPoints(vector<OptimalPointType> &_optimalPoints) const { _optimalPoints = optimalPoints; };
+        void setOptimalPoints(const vector<PointType> &_optimalPoints) { optimalPoints = _optimalPoints; };
+        void getOptimalPoints(vector<PointType> &_optimalPoints) const { _optimalPoints = optimalPoints; };
 
-    virtual double computeObjFunction(double x) const = 0;
-};
+        void setOptimalValue(double _optimalValue) { optimalValue = _optimalValue; };
+        double getOptimalValue() const { return optimalValue; };
+
+        virtual double computeObjFunction(const PointType &x) const = 0;
+    };
+}
 
 #endif // I_GENERAL_OPT_PROBLEM_H_

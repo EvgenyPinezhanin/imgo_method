@@ -1,17 +1,19 @@
 #ifndef I_CHARACTERISTIC_OPT_METHOD_H_
 #define I_CHARACTERISTIC_OPT_METHOD_H_
 
-template<typename TrialType>
-class ICharacteristicOptMethod {
-protected:
-    double t;
+namespace om {
+    template<typename TrialType>
+    class ICharacteristicOptMethod {
+    protected:
+        double t;
 
-    virtual void calcCharacteristic() = 0;
+        virtual void calcCharacteristic() = 0;
 
-    virtual void insertInSorted(const TrialType &trial) = 0;
+        virtual void insertInSorted(const TrialType &trial) = 0;
 
-public:
-    ICharacteristicOptMethod() : t(0) {};
-};
+    public:
+        ICharacteristicOptMethod() : t(0) {};
+    };
+}
 
 #endif // I_CHARACTERISTIC_OPT_METHOD_H_

@@ -7,11 +7,13 @@
 
 using std::vector;
 
-struct GeneralZeroOrderConstrainedTrial : public GeneralZeroOrderTrial {
-    vector<double> g;
+namespace om {
+    struct GeneralZeroOrderConstrainedTrial : public GeneralZeroOrderTrial {
+        vector<double> g;
 
-    GeneralZeroOrderConstrainedTrial(double _x = 0.0, double _z = 0.0, const vector<double> &_g)
-                                    : GeneralZeroOrderTrial(_x, _z), g(_g) {};
-};
+        GeneralZeroOrderConstrainedTrial(double _x = 0.0, double _z = 0.0, const vector<double> &_g)
+                                        : GeneralZeroOrderTrial(_x, _z), g(_g) {};
+    };
+}
 
 #endif // GENERAL_ZERO_ORDER_CONSTRAINED_TRIAL_H_
