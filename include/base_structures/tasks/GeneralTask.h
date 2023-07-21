@@ -5,15 +5,15 @@
 
 using std::string;
 
-template <typename OptimizationProblemType>
+template <typename OptProblemType>
 struct GeneralTask {
     string name;
 
-    OptimizationProblemType optProblem;
+    OptProblemType optProblem;
 
     bool use;
 
-    GeneralTask(string _name, const OptimizationProblemType &_optProblem, bool _use)
+    GeneralTask(string _name, const OptProblemType &_optProblem, bool _use)
                 : name(_name), optProblem(_optProblem), use(_use) {};
 };
 
