@@ -26,7 +26,7 @@ ASample[3] = 0.0
 BSample[3] = 20.0
 
 f4Sample(x) = x != 0 ? x * sin(1 / x) : 0.0
-ASample[4] = -4.0
+ASample[4] = -0.4
 BSample[4] = -0.05
 
 fSample(i, x) = i == 1 ? f1Sample(x) : \
