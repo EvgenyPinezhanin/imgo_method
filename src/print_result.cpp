@@ -15,8 +15,8 @@ void printResult(ostream &ostr, const ScanningTask &task, const ResultMethod &re
     ostr << setprecision(8);
 
     ostr << "Task: " << task.name << "\n";
-    ostr << "[a; b] = [" << task.optProblem.getSearchArea().getLowerBound() << "; " <<
-                            task.optProblem.getSearchArea().getUpBound() << "]"<< "\n";
+    ostr << "[a; b] = [" << task.optProblem.getSearchArea().lowerBound << "; " <<
+                            task.optProblem.getSearchArea().upBound << "]"<< "\n";
     vector<double> optimalPoints;
     task.optProblem.getOptimalPoints(optimalPoints);
     ostr << "X* = (" << optimalPoints[0];
@@ -25,8 +25,8 @@ void printResult(ostream &ostr, const ScanningTask &task, const ResultMethod &re
         ostr << "; " << optimalPoints[i];
     }
     ostr << ")\n";
-    double optimalF = task.optProblem.computeObjFunction(optimalPoints[0]);
-    ostr << "f(X*) = " << optimalF << "\n";
+    double optimalValue = task.optProblem.getOptimalValue();
+    ostr << "f(X*) = " << optimalValue << "\n";
 
     ostr << "Method Parameters:" << "\n";
     ostr << "Maximum of trials = " << task.maxTrials << "\n";
@@ -36,15 +36,16 @@ void printResult(ostream &ostr, const ScanningTask &task, const ResultMethod &re
     ostr << "Result of method:" << "\n";
     ostr << "Number of trials = " << result.numberTrials << "\n";
     ostr << "Number of fevals = " << result.numberFevals << "\n";
-    ostr << "X = " << result.solution << "\n";
-    double f = task.optProblem.computeObjFunction(result.solution);
-    ostr << "f(X) = " << f << "\n";
+    double point = result.point;
+    ostr << "X = " << point << "\n";
+    double value = result.value;
+    ostr << "f(X) = " << value << "\n";
     auto iter = min_element(optimalPoints.begin(), optimalPoints.end(),
-    [&result] (const double &point1, const double &point2) {
-        return abs(point1 - result.solution) < abs(point2 - result.solution);
+    [&point] (const double &point1, const double &point2) {
+        return abs(point1 - point) < abs(point2 - point);
     });
-    ostr << "|X* - X| = " << abs(*iter - result.solution) << "\n";
-    ostr << "|f(X*) - f(X)| = " << abs(optimalF - f) << "\n";
+    ostr << "|X* - X| = " << abs(*iter - point) << "\n";
+    ostr << "|f(X*) - f(X)| = " << abs(optimalValue - value) << "\n";
 
     ostr << "Time: " << workTime << "\n";
     ostr << endl;
