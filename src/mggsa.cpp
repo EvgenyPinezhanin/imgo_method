@@ -31,19 +31,6 @@ const double epsilon = 1e-14;
 
 const double peanoA = 0.0, peanoB = 1.0, peanoRandom = 0.5;
 
-inline double euclideanDistance(vector<double> val1, vector<double> val2) {
-    double res = 0.0;
-    size_t size = val1.size();
-    for (int i = 0; i < size; i++) {
-        res += (val1[i] - val2[i]) * (val1[i] - val2[i]);
-    }
-    return sqrt(res);
-}
-
-template<typename T> int sgn(T val) {
-    return (T(0) < val) - (val < T(0));
-}
-
 inline int insertInSorted(vector<TrialConstrained> &trials, TrialConstrained trial) {
     vector<TrialConstrained>::iterator iter = trials.begin();
     vector<TrialConstrained>::iterator iterEnd = trials.end();

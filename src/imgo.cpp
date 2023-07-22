@@ -21,6 +21,22 @@ inline int insertInSorted(vector<TrialConstrained> &trials, TrialConstrained tri
     }
     trials.insert(iter, trial);
     return pos;
+
+        vector<Trial>::iterator iter = trialPoints.begin();
+    int dist = trialPoints.size();
+
+    advance(iter, dist / 2);
+    while (true) {
+        dist /= 2;
+        if (trial.x < iter->x) advance(iter, -dist / 2);
+        else {
+            if (trial.x < (iter + 1)->x) break;
+            else advance(iter, dist / 2);
+        }
+    }
+    iter = trialPoints.insert(iter, trial);
+
+    return distance(trialPoints.begin(), iter);
 }
 
 inline double searchMin(vector<TrialConstrained> &trials, int numberConstraints) {
@@ -162,7 +178,7 @@ double ImgoMethod::selectNewPoint(int &t) {
             muV = mu[(size_t)trialPoints[i].nu - 1];
             zStarV = zStar[(size_t)trialPoints[i].nu - 1];
             Rtmp = 2.0 * dx - 4.0 * (trialPoints[i].z - zStarV) / (r * muV);
-        } else  {
+        } else {
             muV = mu[(size_t)trialPoints[i - 1].nu - 1];
             zStarV = zStar[(size_t)trialPoints[i - 1].nu - 1];
             Rtmp = 2.0 * dx - 4.0 * (trialPoints[i - 1].z - zStarV) / (r * muV);

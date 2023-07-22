@@ -4,7 +4,7 @@
 #include <vector>
 #include <functional>
 
-#include <AbstractOptimizationMethods/IConstrainedStronginOptimizationMethod.h>
+// #include <AbstractOptimizationMethods/IConstrainedStronginOptimizationMethod.h>
 
 /* using namespace std;
 
