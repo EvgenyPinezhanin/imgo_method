@@ -22,7 +22,7 @@ private:
     bool stopConditions() override;
     bool stopConditionsTest() override;
 
-    void setDataInResultMethod(ResultMethod &result);
+    void setDataInResultMethod(ResultMethod &result) const;
 
 public:
     ScanningMethod(const OneDimensionalProblem &_problem = OneDimensionalProblem(), double _accuracy = 0.001,

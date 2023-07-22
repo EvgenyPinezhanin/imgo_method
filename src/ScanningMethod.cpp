@@ -85,7 +85,7 @@ bool ScanningMethod::stopConditionsTest() {
     return stopConditions();
 }
 
-void ScanningMethod::setDataInResultMethod(ResultMethod &result) {
+void ScanningMethod::setDataInResultMethod(ResultMethod &result) const {
     double x;
 
     result.numberTrials = numberTrials;
