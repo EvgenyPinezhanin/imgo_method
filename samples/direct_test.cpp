@@ -5,8 +5,10 @@
 #include <cmath>
 
 #include <direct_method.h>
-#include <tasks/task.h>
-#include <output_results.h>
+#include <print_result.h>
+#include <gnuplot/TrialsFile.h>
+#include <gnuplot/VariablesFile.h>
+#include <gnuplot/Script.h>
 
 using namespace std;
 /* 
