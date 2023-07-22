@@ -10,8 +10,7 @@ namespace om {
         ResultMethodType result;
 
     public:
-        IGeneralOptMethod(const OptProblemType &_problem)
-                         : problem(_problem), result(ResultMethodType()) {};
+        IGeneralOptMethod(const OptProblemType &_problem) : problem(_problem), result(ResultMethodType()) {};
 
         void setProblem(const OptProblemType &_problem) { problem = _problem; };
         OptProblemType getProblem() const { return problem; };
