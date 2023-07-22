@@ -4,7 +4,7 @@
 namespace om {
     class IConstantEstimationOptMethod {
     protected:
-        double reliability; 
+        double reliability;
         double constantEstimation;
 
     public:
