@@ -4,25 +4,26 @@
 #include <functional>
 
 #include <base_classes/opt_problems/IGeneralOptProblem.h>
-#include <base_classes/search_areas/OneDimensionalSearchArea.h>
+#include <base_structures/search_areas/OneDimensionalSearchArea.h>
 
 using std::function;
 
-class OneDimensionalProblem : public IGeneralOptProblem<function<double(double)>, OneDimensionalSearchArea, double> {
+class OneDimensionalProblem : public om::IGeneralOptProblem<function<double(double)>, om::OneDimensionalSearchArea, double> {
 private:
     double lipschitzConstant;
 
 public:
     OneDimensionalProblem(const function<double(double)> &_objFunction = nullptr,
-                       const OneDimensionalSearchArea &_area = OneDimensionalSearchArea(0.0, 1.0),
-                       vector<double> _optimalPoints = vector<double>{}, double _lipschitzConstant = -1.0)
-                      : IGeneralOptProblem<function<double(double)>, OneDimensionalSearchArea, double>(_objFunction,
-                      _area, _optimalPoints), lipschitzConstant(_lipschitzConstant) {};
+                          const om::OneDimensionalSearchArea &_area = om::OneDimensionalSearchArea(0.0, 1.0),
+                          vector<double> _optimalPoints = vector<double>{}, double _optimalValue = 0.0,
+                          double _lipschitzConstant = -1.0)
+                         : om::IGeneralOptProblem<function<double(double)>, om::OneDimensionalSearchArea, double>(_objFunction,
+                         _area, _optimalPoints, _optimalValue), lipschitzConstant(_lipschitzConstant) {};
 
     void setLipschitzConstant(double _lipschitzConstant) { lipschitzConstant = _lipschitzConstant; };
     double getLipschitzConstant() const { return lipschitzConstant; };
 
-    double computeObjFunction(double x) const override { return objFunction(x); };
+    double computeObjFunction(const double &x) const override { return objFunction(x); };
 };
 
 #endif // ONE_DIMENSIONAL_OPTIMIZATION_PROBLEM_H_
