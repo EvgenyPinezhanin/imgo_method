@@ -5,7 +5,7 @@
 #include <opt_methods/ScanningMethod.h>
 #include <trials/Trial.h>
 
-class PiyavskyMethod : public ScanningMethod, public IConstantEstimationOptMethod {
+class PiyavskyMethod : public ScanningMethod, public om::IConstantEstimationOptMethod {
 private:
     void calcCharacteristic() override;
 
@@ -15,7 +15,7 @@ public:
     PiyavskyMethod(const OneDimensionalProblem &_problem = OneDimensionalProblem(), double _reliability = 1.0,
                    double _accuracy = 0.001, double _error = 0.001, int _maxTrials = 1000, int _maxFevals = 1000)
                   : ScanningMethod(_problem, _accuracy, _error, _maxTrials, _maxFevals),
-                  IConstantEstimationOptMethod(_reliability) {};
+                  om::IConstantEstimationOptMethod(_reliability) {};
 };
 
 #endif // PIYAVSKY_METHOD_H_

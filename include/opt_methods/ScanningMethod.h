@@ -7,8 +7,8 @@
 #include <opt_problems/OneDimensionalProblem.h>
 #include <trials/Trial.h>
 
-class ScanningMethod : public ICharacteristicOptMethod<Trial>,
-    public IGeneralNumericalOptMethod<double, Trial, OneDimensionalProblem, ResultMethod, double> {
+class ScanningMethod : public om::ICharacteristicOptMethod<Trial>,
+    public om::IGeneralNumericalOptMethod<Trial, double, OneDimensionalProblem, ResultMethod> {
 private:
     void insertInSorted(const Trial &trial) override;
 
@@ -17,7 +17,7 @@ private:
     Trial newTrial(const double &x) override;
     double selectNewPoint() override;
 
-    double estimateSolution() const override;
+    double estimateSolution(double &x) const override;
 
     bool stopConditions() override;
     bool stopConditionsTest() override;
@@ -27,8 +27,9 @@ private:
 public:
     ScanningMethod(const OneDimensionalProblem &_problem = OneDimensionalProblem(), double _accuracy = 0.001,
                    double _error = 0.001, int _maxTrials = 1000, int _maxFevals = 1000)
-                  : ICharacteristicOptMethod<Trial>(), IGeneralNumericalOptMethod<double, Trial,
-                  OneDimensionalProblem, ResultMethod, double>(_problem, _accuracy, _error, _maxTrials, _maxFevals) {};
+                  : om::ICharacteristicOptMethod<Trial>(),
+                    om::IGeneralNumericalOptMethod<Trial, double, OneDimensionalProblem, ResultMethod>(_problem,
+                    _accuracy, _error, _maxTrials, _maxFevals) {};
 
     void solve(ResultMethod &result) override;
 

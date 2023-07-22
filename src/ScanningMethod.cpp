@@ -46,13 +46,14 @@ double ScanningMethod::selectNewPoint() {
     return 0.5 * (trialPoints[t].x + trialPoints[(size_t)t - 1].x);
 }
 
-double ScanningMethod::estimateSolution() const {
+double ScanningMethod::estimateSolution(double &x) const {
     auto iter = min_element(trialPoints.begin(), trialPoints.end(),
     [] (const Trial &trial1, const Trial &trial2) {
         return trial1.z < trial2.z;
     });
+    x = iter->x;
 
-    return iter->x;
+    return iter->z;
 }
 
 bool ScanningMethod::stopConditions() {
@@ -85,9 +86,12 @@ bool ScanningMethod::stopConditionsTest() {
 }
 
 void ScanningMethod::setDataInResultMethod(ResultMethod &result) {
+    double x;
+
     result.numberTrials = numberTrials;
     result.numberFevals = numberFevals;
-    result.solution = estimateSolution();
+    result.value = estimateSolution(x);
+    result.point = x;
     result.stoppingCondition = this->result.stoppingCondition;
 }
 
@@ -95,8 +99,8 @@ void ScanningMethod::solve(ResultMethod &result) {
     trialPoints.clear();
     numberFevals = 0;
 
-    trialPoints.push_back(newTrial(problem.getSearchArea().getLowerBound()));
-    trialPoints.push_back(newTrial(problem.getSearchArea().getUpBound()));
+    trialPoints.push_back(newTrial(problem.getSearchArea().lowerBound));
+    trialPoints.push_back(newTrial(problem.getSearchArea().upBound));
     t = 1;
 
     numberTrials = 2;
@@ -119,8 +123,8 @@ bool ScanningMethod::solveTest(ResultMethod &result) {
     trialPoints.clear();
     numberFevals = 0;
 
-    trialPoints.push_back(newTrial(problem.getSearchArea().getLowerBound()));
-    trialPoints.push_back(newTrial(problem.getSearchArea().getUpBound()));
+    trialPoints.push_back(newTrial(problem.getSearchArea().lowerBound));
+    trialPoints.push_back(newTrial(problem.getSearchArea().upBound));
     t = 1;
 
     numberTrials = 2;

@@ -28,7 +28,7 @@ double PiyavskyMethod::selectNewPoint() {
     static double M = 0.0;
 
     // with optimization(const)
-    if (trialPoints[t].x == problem.getSearchArea().getUpBound()) {
+    if (trialPoints[t].x == problem.getSearchArea().upBound) {
         M = abs((trialPoints[1].z - trialPoints[0].z) / (trialPoints[1].x - trialPoints[0].x));
     } else {
         M = max({ M, abs((trialPoints[t].z - trialPoints[(size_t)t - 1].z) / 
