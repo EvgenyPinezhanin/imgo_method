@@ -12,9 +12,9 @@ namespace om {
 
         StoppingConditionType stoppingCondition;
 
-        GeneralNumericalResultMethod(const PointType &_point = PointType(), _double _value = 0.0, int _numberTrials = 0,
+        GeneralNumericalResultMethod(const PointType &_point = PointType(), double _value = 0.0, int _numberTrials = 0,
                                      int _numberFevals = 0, StoppingConditionType _stoppingCondition = StoppingConditionType())
-                                    : GeneralResultMethod<SolutionType>(_point, _value), numberTrials(_numberTrials),
+                                    : GeneralResultMethod<PointType>(_point, _value), numberTrials(_numberTrials),
                                     numberFevals(_numberFevals), stoppingCondition(_stoppingCondition) {};
     };
 }
