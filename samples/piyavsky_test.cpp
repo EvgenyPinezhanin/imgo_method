@@ -109,9 +109,9 @@ int main() {
             if (!trialsFile.isOpen()) cerr << "TrialsFile opening error\n";
 
             tasks[i].optProblem.getOptimalPoints(optimalPoints);
-            trialsFile.addPoints(optimalPoints, tasks[i].optProblem.computeObjFunction(optimalPoints[0]));
-            point = result.solution;
-            trialsFile.addPoint(point, tasks[i].optProblem.computeObjFunction(point));
+            trialsFile.addPoints(optimalPoints, tasks[i].optProblem.getOptimalValue());
+
+            trialsFile.addPoint(result.point, result.value);
 
             piyavsky.getTrialPoints(trials);
             trialsFile.addPoints(trials);
