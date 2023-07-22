@@ -3,7 +3,7 @@
 
 #include <base_structures/result_methods/GeneralNumericalResultMethod.h>
 
-using StoppingCondition = GeneralNumericalStoppingCondition;
-using ResultMethod = GeneralNumericalResultMethod<StoppingCondition, double>;
+using StoppingCondition = om::GeneralNumericalStoppingCondition;
+using ResultMethod = om::GeneralNumericalResultMethod<StoppingCondition, double>;
 
 #endif // RESULT_METHOD_H_
