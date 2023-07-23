@@ -17,8 +17,8 @@ using std::pow;
 using om::OneDimensionalSearchArea;
 
 const int numberBlocks = 2;
-const int numberFunctions[numberBlocks] = { 4, 20 };
-const string blockNames[numberBlocks] = { "sample", "test" };
+const vector<int> numberFunctions = { 4, 20 };
+const vector<string> blockNames = { "sample", "test" };
 
 const vector<OneDimensionalProblem> sampleTasks{
     OneDimensionalProblem([] (double x) { return -4.0 * x + 1.0; },
