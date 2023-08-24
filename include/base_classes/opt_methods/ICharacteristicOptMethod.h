@@ -1,7 +1,7 @@
 #ifndef I_CHARACTERISTIC_OPT_METHOD_H_
 #define I_CHARACTERISTIC_OPT_METHOD_H_
 
-namespace om {
+namespace opt {
     template<typename TrialType>
     class ICharacteristicOptMethod {
     protected:

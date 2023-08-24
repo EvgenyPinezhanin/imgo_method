@@ -7,7 +7,7 @@
 
 using std::vector;
 
-namespace om {
+namespace opt {
     struct GeneralZeroOrderConstrainedTrial : public GeneralZeroOrderTrial {
         vector<double> g;
 

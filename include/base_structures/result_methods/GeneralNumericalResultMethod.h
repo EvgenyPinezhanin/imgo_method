@@ -3,7 +3,7 @@
 
 #include <base_structures/result_methods/GeneralResultMethod.h>
 
-namespace om {
+namespace opt {
     enum class GeneralNumericalStoppingCondition { accuracy, error, maxTrials, maxFevals };
 
     template <typename StoppingConditionType, typename PointType>

@@ -1,7 +1,7 @@
 #ifndef I_CONSTANT_ESTIMATION_OPT_METHOD_H_
 #define I_CONSTANT_ESTIMATION_OPT_METHOD_H_
 
-namespace om {
+namespace opt {
     class IConstantEstimationOptMethod {
     protected:
         double reliability;

@@ -1,7 +1,7 @@
 #ifndef ONE_DIMENSIONAL_SEARCH_AREA_H_
 #define ONE_DIMENSIONAL_SEARCH_AREA_H_
 
-namespace om {
+namespace opt {
     struct OneDimensionalSearchArea {
         double lowerBound, upBound;
 

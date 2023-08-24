@@ -5,7 +5,7 @@
 
 using std::vector;
 
-namespace om {
+namespace opt {
     template <typename ObjectiveFunctionType, typename SearchAreaType, typename PointType>
     class IGeneralOptProblem {
     protected:

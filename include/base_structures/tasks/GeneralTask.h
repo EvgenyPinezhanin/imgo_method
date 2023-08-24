@@ -5,8 +5,8 @@
 
 using std::string;
 
-namespace om {
-    template <typename OptProblemType>
+namespace opt {
+    template <typename OptProblemType, typename ParametersOptMethodType>
     struct GeneralTask {
         string name;
 

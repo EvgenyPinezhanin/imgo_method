@@ -7,7 +7,7 @@
 
 using std::vector;
 
-namespace om {
+namespace opt {
     template <typename TrialType, typename PointType, typename OptProblemType, typename ResultMethodType>
     class IGeneralNumericalOptMethod : public IGeneralOptMethod<OptProblemType, ResultMethodType> {
     protected:

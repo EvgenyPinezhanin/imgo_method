@@ -5,7 +5,7 @@
 
 using std::vector;
 
-namespace om {
+namespace opt {
     class MultiDimensionalSearchArea {
         int dimension;
         vector<double> lowerBound, upBound;

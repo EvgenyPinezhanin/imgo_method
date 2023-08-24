@@ -1,7 +1,7 @@
 #ifndef GENERAL_RESULT_METHOD_H_
 #define GENERAL_RESULT_METHOD_H_
 
-namespace om {
+namespace opt {
     template <typename PointType>
     struct GeneralResultMethod {
         PointType point;

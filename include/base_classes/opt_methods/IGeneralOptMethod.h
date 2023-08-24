@@ -1,7 +1,7 @@
 #ifndef I_GENERAL_OPT_METHOD_H_
 #define I_GENERAL_OPT_METHOD_H_
 
-namespace om {
+namespace opt {
     template <typename OptProblemType, typename ResultMethodType>
     class IGeneralOptMethod {
     protected:

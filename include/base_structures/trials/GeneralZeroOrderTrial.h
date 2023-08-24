@@ -1,7 +1,7 @@
 #ifndef GENERAL_ZERO_ORDER_TRIAL_H_
 #define GENERAL_ZERO_ORDER_TRIAL_H_
 
-namespace om {
+namespace opt {
     struct GeneralZeroOrderTrial {
         double x, z;
 

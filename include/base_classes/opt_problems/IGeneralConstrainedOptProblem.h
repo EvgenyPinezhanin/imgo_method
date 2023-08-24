@@ -3,7 +3,7 @@
 
 #include <base_classes/opt_problems/IGeneralOptProblem.h>
 
-namespace om {
+namespace opt {
     template <typename ObjectiveFunctionType, typename SearchAreaType, typename PointType>
     class IGeneralConstrainedOptProblem : public IGeneralOptProblem<ObjectiveFunctionType, SearchAreaType, PointType> {
     protected:
