@@ -9,9 +9,9 @@ using std::vector;
 
 namespace opt {
     template <typename TrialType, typename PointType, typename OptProblemType,
-              typename ParametersMethod, typename ResultMethodType>
+              typename ParametersMethodType, typename ResultMethodType>
     class IGeneralNumericalOptMethod:
-        public IGeneralOptMethod<OptProblemType, ParametersMethod, ResultMethodType> {
+        public IGeneralOptMethod<OptProblemType, ParametersMethodType, ResultMethodType> {
     protected:
         vector<TrialType> trialPoints;
 
@@ -26,8 +26,8 @@ namespace opt {
         virtual bool stopConditionsTest() = 0;
 
     public:
-        IGeneralNumericalOptMethod(const OptProblemType &_problem, const ParametersMethod &_parameters):
-            IGeneralOptMethod<OptProblemType, ParametersMethod, ResultMethodType>(_problem, _parameters),
+        IGeneralNumericalOptMethod(const OptProblemType &_problem, const ParametersMethodType &_parameters):
+            IGeneralOptMethod<OptProblemType, ParametersMethodType, ResultMethodType>(_problem, _parameters),
             trialPoints(0),
             numberTrials(0),
             numberFevals(0)
@@ -48,7 +48,7 @@ namespace opt {
         void getTrialPoints(vector<TrialType> &_trialPoints) const { _trialPoints = trialPoints; };
         int getNumberTrialPoints() const { return trialPoints.size(); };
 
-        using IGeneralOptMethod<OptProblemType, ParametersMethod, ResultMethodType>::parameters;
+        using IGeneralOptMethod<OptProblemType, ParametersMethodType, ResultMethodType>::parameters;
     };
 }
 
