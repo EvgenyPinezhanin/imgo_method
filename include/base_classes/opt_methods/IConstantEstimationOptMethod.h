@@ -7,6 +7,8 @@ namespace opt {
         double reliability;
         double constantEstimation;
 
+        virtual void estimatingConstant() = 0;
+
     public:
         IConstantEstimationOptMethod(double _reliability) : reliability(_reliability), constantEstimation(0.0) {};
 
