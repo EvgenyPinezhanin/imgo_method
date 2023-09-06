@@ -8,16 +8,16 @@
 
 using std::function;
 
-class OneDimensionalProblem : public om::IGeneralOptProblem<function<double(double)>, om::OneDimensionalSearchArea, double> {
+class OneDimensionalProblem : public opt::IGeneralOptProblem<function<double(double)>, opt::OneDimensionalSearchArea, double> {
 private:
     double lipschitzConstant;
 
 public:
     OneDimensionalProblem(const function<double(double)> &_objFunction = nullptr,
-                          const om::OneDimensionalSearchArea &_area = om::OneDimensionalSearchArea(0.0, 1.0),
+                          const opt::OneDimensionalSearchArea &_area = opt::OneDimensionalSearchArea(0.0, 1.0),
                           vector<double> _optimalPoints = vector<double>{}, double _optimalValue = 0.0,
                           double _lipschitzConstant = -1.0)
-                         : om::IGeneralOptProblem<function<double(double)>, om::OneDimensionalSearchArea, double>(_objFunction,
+                         : opt::IGeneralOptProblem<function<double(double)>, opt::OneDimensionalSearchArea, double>(_objFunction,
                          _area, _optimalPoints, _optimalValue), lipschitzConstant(_lipschitzConstant) {};
 
     void setLipschitzConstant(double _lipschitzConstant) { lipschitzConstant = _lipschitzConstant; };
