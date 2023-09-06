@@ -4,18 +4,18 @@
 #include <vector>
 
 #include <base_classes/opt_methods/IGeneralOptMethod.h>
-
-using std::vector;
+#include <base_structures/GeneralParametersNumericalOptMethod.h>
 
 namespace opt {
-    template <typename TrialType, typename PointType, typename OptProblemType,
-              typename ParametersMethodType, typename ResultMethodType>
+    template <typename TrialType, typename PointType, typename OptProblemType, typename ResultMethodType>
     class IGeneralNumericalOptMethod:
-        public IGeneralOptMethod<OptProblemType, ParametersMethodType, ResultMethodType> {
+        public IGeneralOptMethod<OptProblemType, GeneralParametersNumericalOptMethod, ResultMethodType> {
     protected:
-        vector<TrialType> trialPoints;
+        std::vector<TrialType> trialPoints;
 
-        int numberTrials, numberFevals;
+        double accuracy, error;
+        int numberTrials, maxTrials;
+        int numberFevals, maxFevals;
 
         virtual TrialType newTrial(const PointType &x) = 0;
         virtual PointType selectNewPoint() = 0;
@@ -25,29 +25,42 @@ namespace opt {
         virtual bool stopConditions() = 0;
         virtual bool stopConditionsTest() = 0;
 
-        using IGeneralOptMethod<OptProblemType, ParametersMethodType, ResultMethodType>::parameters;
-
     public:
-        IGeneralNumericalOptMethod(const OptProblemType &_problem, const ParametersMethodType &_parameters):
-            IGeneralOptMethod<OptProblemType, ParametersMethodType, ResultMethodType>(_problem, _parameters),
-            trialPoints(0),
+        IGeneralNumericalOptMethod(const OptProblemType &_problem,
+                                   const GeneralParametersNumericalOptMethod &parameters):
+            IGeneralOptMethod<OptProblemType, GeneralParametersNumericalOptMethod, ResultMethodType>(_problem),
+            trialPoints(),
+            accuracy(parameters.accuracy),
+            error(parameters.error),
             numberTrials(0),
-            numberFevals(0)
+            maxTrials(parameters.maxTrials),
+            numberFevals(0),
+            maxFevals(parameters.maxFevals)
         {};
 
-        void setAccuracy(double _accuracy) { parameters.accuracy = _accuracy; };
-        double getAccuracy() const { return parameters.accuracy; };
+        void setParameters(const GeneralParametersNumericalOptMethod &parameters) override {
+            accuracy = parameters.accuracy;
+            error = parameters.error;
+            maxTrials = parameters.maxTrials;
+            maxFevals = parameters.maxFevals;
+        }
+        void getParameters(GeneralParametersNumericalOptMethod &parameters) const override {
+            parameters = GeneralParametersNumericalOptMethod(accuracy, error, numberTrials, numberFevals);
+        }
 
-        void setError(double _error) { parameters.error = _error; };
-        double getError() const { return parameters.error; };
+        void setAccuracy(double _accuracy) { accuracy = _accuracy; };
+        double getAccuracy() const { return accuracy; };
 
-        void setMaxTrials(int _maxTrials) { parameters.maxTrials = _maxTrials; };
-        int getMaxTrials() const { return parameters.maxTrials; };
+        void setError(double _error) { error = _error; };
+        double getError() const { return error; };
 
-        void setMaxFevals(int _maxFevals) { parameters.maxFevals = _maxFevals; };
-        int getMaxFevals() const { return parameters.maxFevals; };
+        void setMaxTrials(int _maxTrials) { maxTrials = _maxTrials; };
+        int getMaxTrials() const { return maxTrials; };
 
-        void getTrialPoints(vector<TrialType> &_trialPoints) const { _trialPoints = trialPoints; };
+        void setMaxFevals(int _maxFevals) { maxFevals = _maxFevals; };
+        int getMaxFevals() const { return maxFevals; };
+
+        void getTrialPoints(std::vector<TrialType> &_trialPoints) const { _trialPoints = trialPoints; };
         int getNumberTrialPoints() const { return trialPoints.size(); };
     };
 }

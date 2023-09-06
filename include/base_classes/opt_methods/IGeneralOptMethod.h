@@ -6,21 +6,19 @@ namespace opt {
     class IGeneralOptMethod {
     protected:
         OptProblemType problem;
-        ParametersMethodType parameters;
         ResultMethodType result;
 
     public:
-        IGeneralOptMethod(const OptProblemType &_problem, const ParametersMethodType &_parameters):
+        IGeneralOptMethod(const OptProblemType &_problem):
             problem(_problem),
-            parameters(_parameters),
             result(ResultMethodType())
         {};
 
         void setProblem(const OptProblemType &_problem) { problem = _problem; };
         OptProblemType getProblem() const { return problem; };
 
-        void setParameters(const ParametersMethodType &_parameters) { parameters = _parameters; };
-        ParametersMethodType getParameters() const { return parameters; };
+        virtual void setParameters(const ParametersMethodType &parameters) = 0;
+        virtual void getParameters(ParametersMethodType &parameters) const = 0;
 
         virtual void solve(ResultMethodType &_result) = 0;
         virtual bool solveTest(ResultMethodType &_result) = 0;
