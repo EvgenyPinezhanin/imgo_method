@@ -25,6 +25,8 @@ namespace opt {
         virtual bool stopConditions() = 0;
         virtual bool stopConditionsTest() = 0;
 
+        using IGeneralOptMethod<OptProblemType, ParametersMethodType, ResultMethodType>::parameters;
+
     public:
         IGeneralNumericalOptMethod(const OptProblemType &_problem, const ParametersMethodType &_parameters):
             IGeneralOptMethod<OptProblemType, ParametersMethodType, ResultMethodType>(_problem, _parameters),
@@ -47,8 +49,6 @@ namespace opt {
 
         void getTrialPoints(vector<TrialType> &_trialPoints) const { _trialPoints = trialPoints; };
         int getNumberTrialPoints() const { return trialPoints.size(); };
-
-        using IGeneralOptMethod<OptProblemType, ParametersMethodType, ResultMethodType>::parameters;
     };
 }
 
