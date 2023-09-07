@@ -1,57 +1,31 @@
-#include <print_result.h>
+#ifndef SCANNING_REPORT_H_
+#define SCANNING_REPORT_H_
 
-#include <iomanip>
-#include <algorithm>
+#include <ostream>
 
-#include <my_math.h>
+#include <base_classes/IGeneralReport.h>
+#include <base_structures/GeneralParametersNumericalOptMethod.h>
+#include <opt_methods/ScanningMethod.h>
+#include <opt_problems/OneDimensionalProblem.h>
+#include <result_methods/ResultMethod.h>
+#include <tasks/ScanningTask.h>
 
-using std::setprecision;
-using std::min_element;
-using std::endl;
-using std::abs;
+class ScanningReport: public opt::IGeneralReport<ScanningTask, OneDimensionalProblem, ResultMethod> {
+protected:
+    void printOptProblem(std::ostream &stream, const OneDimensionalProblem &optProblem) const override;
+    void printMethodParameters(std::ostream &stream,
+                               const opt::GeneralParametersNumericalOptMethod &parameters) const override;
+    void printResultMethod(std::ostream &stream, const ResultMethod &result) const override;
+    void printErrorEstimate(std::ostream &stream, const OneDimensionalProblem &optProblem,
+                            const ResultMethod &result) const override;
 
-void printResult(ostream &ostr, const ScanningTask &task, const ResultMethod &result, double workTime) {
-    const auto defaultPrecision = ostr.precision();
-    ostr << setprecision(8);
+public:
+    ScanningReport():
+        opt::IGeneralReport<ScanningTask, OneDimensionalProblem, ResultMethod>()
+    {};
+};
 
-    ostr << "Task: " << task.name << "\n";
-    ostr << "[a; b] = [" << task.optProblem.getSearchArea().lowerBound << "; " <<
-                            task.optProblem.getSearchArea().upBound << "]"<< "\n";
-    vector<double> optimalPoints;
-    task.optProblem.getOptimalPoints(optimalPoints);
-    ostr << "X* = (" << optimalPoints[0];
-    int numberOptimalPoints = optimalPoints.size();
-    for (int i = 1; i < numberOptimalPoints; i++) {
-        ostr << "; " << optimalPoints[i];
-    }
-    ostr << ")\n";
-    double optimalValue = task.optProblem.getOptimalValue();
-    ostr << "f(X*) = " << optimalValue << "\n";
-
-    ostr << "Method Parameters:" << "\n";
-    ostr << "Maximum of trials = " << task.maxTrials << "\n";
-    ostr << "Maximum of fevals = " << task.maxFevals << "\n";
-    ostr << "Accuracy = " << task.accuracy << "\n";
-
-    ostr << "Result of method:" << "\n";
-    ostr << "Number of trials = " << result.numberTrials << "\n";
-    ostr << "Number of fevals = " << result.numberFevals << "\n";
-    double point = result.point;
-    ostr << "X = " << point << "\n";
-    double value = result.value;
-    ostr << "f(X) = " << value << "\n";
-    auto iter = min_element(optimalPoints.begin(), optimalPoints.end(),
-    [&point] (const double &point1, const double &point2) {
-        return abs(point1 - point) < abs(point2 - point);
-    });
-    ostr << "|X* - X| = " << abs(*iter - point) << "\n";
-    ostr << "|f(X*) - f(X)| = " << abs(optimalValue - value) << "\n";
-
-    ostr << "Time: " << workTime << "\n";
-    ostr << endl;
-
-    ostr << setprecision(defaultPrecision);
-}
+#endif // SCANNING_REPORT_H_
 
 /* void printResultGsa(string taskName, double a, double b, double lipschitzConst, double xOpt, double optimalF,
                     int maxTrials, int maxFevals, double eps, double r, int numberTrials, int numberFevals,
