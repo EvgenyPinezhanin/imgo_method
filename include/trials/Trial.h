@@ -3,6 +3,6 @@
 
 #include <base_structures/trials/GeneralZeroOrderTrial.h>
 
-using Trial = om::GeneralZeroOrderTrial;
+using Trial = opt::GeneralZeroOrderTrial;
 
 #endif // TRIAL_H_

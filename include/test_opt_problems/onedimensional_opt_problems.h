@@ -14,7 +14,7 @@ using std::sin;
 using std::cos;
 using std::pow;
 
-using om::OneDimensionalSearchArea;
+using opt::OneDimensionalSearchArea;
 
 const int numberBlocks = 2;
 const vector<int> numberFunctions = { 4, 20 };
