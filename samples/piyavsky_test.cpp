@@ -1,4 +1,4 @@
-#include <iostream>
+/* #include <iostream>
 #include <vector>
 #include <string>
 
@@ -21,10 +21,10 @@ using std::cerr;
 const string methodName = "piyavsky";
 const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
 const int functionBlock = 1; // 0 - sample, 1 - test
-const int functionNumber = 5; // 0 - f1, 1 - f2, ...
+const int functionNumber = 5; // 0 - f1, 1 - f2, ... */
 
 int main() {
-    double reliability = 2.0, accuracy = 0.001;
+/*     double reliability = 2.0, accuracy = 0.001;
     int maxTrials = 100000, maxFevals = 100000;
 
     vector<PiyavskyGsaTask> tasks = { PiyavskyGsaTask("Sample Task №1", sampleTasks[0], 0, 1,  reliability, accuracy,
@@ -131,7 +131,7 @@ int main() {
 
 #if defined( _MSC_VER )
     cin.get();
-#endif
+#endif */
 
     return 0;
 }

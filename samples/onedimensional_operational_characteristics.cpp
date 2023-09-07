@@ -7,7 +7,7 @@
 #include <opt_methods/PiyavskyMethod.h>
 #include <opt_methods/ScanningMethod.h>
 #include <tasks/FamilyOptProblemsTask.h>
-#include <print_result.h>
+// #include <print_result.h>
 #include <omp.h>
 
 #define CALC
