@@ -15,6 +15,8 @@ namespace opt {
         double optimalValue;
 
     public:
+        using Point = PointType;
+
         IGeneralOptProblem(const ObjectiveFunctionType &_objFunction, const SearchAreaType &_area,
                            const vector<PointType> &_optimalPoints, double _optimalValue)
                           : objFunction(_objFunction), area(_area), optimalPoints(_optimalPoints),
