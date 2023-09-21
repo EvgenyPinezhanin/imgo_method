@@ -1,6 +1,6 @@
 #include <gnuplot/TrialsFile.h>
 
-using std::endl;
+#include <sstream>
 
 void TrialsFile::newFile(const string &fileName) {
     if (open) file.close();
@@ -14,27 +14,33 @@ void TrialsFile::closeFile() {
 }
 
 void TrialsFile::addPoint(double x, double f, bool space) {
-    file << x << " " << f << "\n";
-    if (space) file << "\n\n";
+    std::stringstream strPoint;
+    strPoint << x << " " << f << "\n";
+    if (space) strPoint << "\n\n";
+    file << strPoint.str();
 }
 
 void TrialsFile::addPoints(const vector<Trial> &trials, bool space) {
+    std::stringstream strPoints;
     int numberPoints = (int)trials.size();
     for (int i = 0; i < numberPoints; i++) {
-        file << trials[i].x << " " << trials[i].z << "\n";
+        strPoints << trials[i].x << " " << trials[i].z << "\n";
     }
-    if (space) file << "\n\n";
+    if (space) strPoints << "\n\n";
+    file << strPoints.str();
 }
 
 void TrialsFile::addPoints(const vector<double> &x, double f, bool space) {
+    std::stringstream strPoints;
     int numberPoints = (int)x.size();
     for (int i = 0; i < numberPoints; i++) {
-        file << x[i] << " " << f << "\n";
+        strPoints << x[i] << " " << f << "\n";
     }
-    if (space) file << "\n\n";
+    if (space) strPoints << "\n\n";
+    file << strPoints.str();
 }
 
-/* 
+/*
 
 void addPointGnuplot(ofstream &ofstr, const vector<double> &X, double f) {
     size_t dimensionX = X.size();
