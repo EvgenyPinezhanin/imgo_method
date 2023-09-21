@@ -10,21 +10,7 @@ using std::abs;
 
 const double epsilon = 1e-14;
 
-void PiyavskyMethod::calcCharacteristic() {
-    double R = -numeric_limits<double>::infinity(), Rtmp;
-    
-    int trialPointsSize = (int)trialPoints.size();
-    for (int i = 1; i < trialPointsSize; i++) {
-        Rtmp = 0.5 * (constantEstimation * (trialPoints[i].x - trialPoints[i - 1].x) -
-                      (trialPoints[i].z + trialPoints[i - 1].z));
-        if (Rtmp > R) {
-            R = Rtmp;
-            t = i;
-        }
-    }
-}
-
-double PiyavskyMethod::selectNewPoint() {
+void PiyavskyMethod::estimatingConstant() {
     static double M = 0.0;
 
     // with optimization(const)
@@ -47,6 +33,24 @@ double PiyavskyMethod::selectNewPoint() {
     // }
 
     constantEstimation = (M <= epsilon) ? 1.0 : reliability * M;
+}
+
+void PiyavskyMethod::calcCharacteristic() {
+    double R = -numeric_limits<double>::infinity(), Rtmp;
+    
+    int trialPointsSize = (int)trialPoints.size();
+    for (int i = 1; i < trialPointsSize; i++) {
+        Rtmp = 0.5 * (constantEstimation * (trialPoints[i].x - trialPoints[i - 1].x) -
+                      (trialPoints[i].z + trialPoints[i - 1].z));
+        if (Rtmp > R) {
+            R = Rtmp;
+            t = i;
+        }
+    }
+}
+
+double PiyavskyMethod::selectNewPoint() {
+    estimatingConstant();
 
     calcCharacteristic();
 
