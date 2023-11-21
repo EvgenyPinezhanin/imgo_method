@@ -1,55 +1,50 @@
-#include <gnuplot/TrialsFile.h>
+#include <gnuplot/output_file.h>
 
-#include <sstream>
-
-void TrialsFile::newFile(const string &fileName) {
-    if (open) file.close();
-    file.open(fileName);
-    open = file.is_open();
+void output_file::init_array(const std::string &name, size_t number_values) {
+    std::stringstream str_array;
+    str_array << "array " << name << "[" << number_values << "]\n";
+    stream << str_array.str();
 }
 
-void TrialsFile::closeFile() {
-    file.close();
-    open = file.is_open();
+void output_file::add_point(double x, double f, bool space) {
+    std::stringstream str_point;
+    str_point << x << " " << f << "\n";
+    if (space) str_point << "\n\n";
+    stream << str_point.str();
 }
 
-void TrialsFile::addPoint(double x, double f, bool space) {
-    std::stringstream strPoint;
-    strPoint << x << " " << f << "\n";
-    if (space) strPoint << "\n\n";
-    file << strPoint.str();
-}
-
-void TrialsFile::addPoints(const vector<Trial> &trials, bool space) {
-    std::stringstream strPoints;
-    int numberPoints = (int)trials.size();
-    for (int i = 0; i < numberPoints; i++) {
-        strPoints << trials[i].x << " " << trials[i].z << "\n";
+void output_file::add_point(const std::vector<double> &x, double f, bool space) {
+    std::stringstream str_point;
+    size_t dim_x = x.size();
+    for (size_t i = 0; i < dim_x; ++i) {
+        str_point << x[i] << " ";
     }
-    if (space) strPoints << "\n\n";
-    file << strPoints.str();
+    str_point << f << "\n";
+    if (space) str_point << "\n\n";
+    stream << str_point.str();
 }
 
-void TrialsFile::addPoints(const vector<double> &x, double f, bool space) {
-    std::stringstream strPoints;
-    int numberPoints = (int)x.size();
-    for (int i = 0; i < numberPoints; i++) {
-        strPoints << x[i] << " " << f << "\n";
+void output_file::add_points(const std::vector<Trial> &trials, bool space) {
+    std::stringstream str_points;
+    size_t number_points = trials.size();
+    for (size_t i = 0; i < number_points; ++i) {
+        str_points << trials[i].x << " " << trials[i].z << "\n";
     }
-    if (space) strPoints << "\n\n";
-    file << strPoints.str();
+    if (space) str_points << "\n\n";
+    stream << str_points.str();
+}
+
+void output_file::add_points(const std::vector<double> &x, double f, bool space) {
+    std::stringstream str_points;
+    size_t number_points = x.size();
+    for (size_t i = 0; i < number_points; ++i) {
+        str_points << x[i] << " " << f << "\n";
+    }
+    if (space) str_points << "\n\n";
+    stream << str_points.str();
 }
 
 /*
-
-void addPointGnuplot(ofstream &ofstr, const vector<double> &X, double f) {
-    size_t dimensionX = X.size();
-    for (int i = 0; i < dimensionX; i++) {
-        ofstr << X[i] << " ";
-    }
-    ofstr << f << "\n";
-    ofstr << "\n" << endl;
-}
 
 void addPointGnuplot(ofstream &ofstr, const vector<double> &X) {
     size_t dimensionX = X.size();
