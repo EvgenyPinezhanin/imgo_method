@@ -4,8 +4,8 @@
 #include <vector>
 #include <functional>
 
-#include <AbstractOptimizationMethods/IConstrainedStronginOptimizationMethod.h>
-#include <task.h>
+/* #include <AbstractOptimizationMethods/IConstrainedStronginOptimizationMethod.h>
+#include <task.h> */
 
 /* using namespace std;
 
@@ -57,3 +57,40 @@ public:
 }; */
 
 #endif // IMGO_H_
+
+/* void printResultImgo(string taskName, int numberConstraints, double a, double b, const vector<double> &lipschitzConst, double xOpt,
+                     double optimalF, int maxTrials, int maxFevals, double eps, double r, double d, int numberTrials, int numberFevals,
+                     const vector<double> &estLipschitzConst, double x, double f) {
+    const auto defaultPrecision = cout.precision();
+    cout << setprecision(8);
+
+    cout << "Function: " << taskName << "\n";
+    cout << "Number of constraints = " << numberConstraints << "\n";
+    cout << "[a; b] = [" << a << "; " << b << "]"<< "\n";
+    cout << "Lipschitz constant:" << "\n";
+    cout << "L*(f) = " << lipschitzConst[numberConstraints] << "\n";
+    for (int j = 0; j < numberConstraints; j++) {
+        cout << "L*(g" << j + 1 << ") = " << lipschitzConst[j] << "\n";
+    }
+    cout << "X* = " << setprecision(8) << xOpt << "\n";
+    cout << "f(X*) = " << setprecision(8) << optimalF << "\n";
+    cout << "Parameters for method:" << endl;
+    cout << "Maximum of trials = " << maxTrials << "\n";
+    cout << "Maximum of fevals = " << maxFevals << "\n";
+    cout << "eps = " << eps << " r = " << r << " d = " << d << "\n";
+    cout << "Trials result:" << "\n";
+    cout << "Number of trials = " << numberTrials << "\n";
+    cout << "Number of fevals = " << numberFevals << "\n";
+    cout << "Estimation of the Lipschitz constant:" << "\n";
+    cout << "L(f) = " << estLipschitzConst[numberConstraints] << "\n";
+    for (int j = 0; j < numberConstraints; j++) {
+        cout << "L(g" << j + 1 << ") = " << estLipschitzConst[j] << "\n";
+    }
+    cout << "X = " << x << "\n";
+    cout << "f(X) = " << f << "\n";
+    cout << "|X* - X| = " << abs(xOpt - x) << "\n";
+    cout << "|f(X*) - f(X)| = " << abs(optimalF - f) << "\n";
+    cout << endl;
+
+    cout << setprecision(defaultPrecision);
+} */
