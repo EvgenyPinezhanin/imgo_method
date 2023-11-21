@@ -37,10 +37,20 @@ add_custom_target(${MAKE_DIR} ALL)
 add_custom_command(
   TARGET ${MAKE_DIR} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E make_directory
-  ${OUT_DIR}/output_data ${OUT_DIR}/output_graph
+  ${OUT_DIR}/output_graph
+
+  ${OUT_DIR}/output_data
+
   ${OUT_DIR}/output_data/scanning_test
   ${OUT_DIR}/output_data/piyavsky_test
   ${OUT_DIR}/output_data/gsa_test
+
+  ${OUT_DIR}/output_data/onedimensional_operational_characteristics
+  ${OUT_DIR}/output_data/onedimensional_operational_characteristics/scanning
+  ${OUT_DIR}/output_data/onedimensional_operational_characteristics/piyavsky
+  ${OUT_DIR}/output_data/onedimensioanl_operational_characteristics/gsa
+
+  ${OUT_DIR}/output_data/sample_test_problem
 )
 
 # GPROF
@@ -50,7 +60,7 @@ if (GPROF)
   SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
   SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
 endif()
-  
+
 # GCGEN
 add_subdirectory(GCGen)
 include_directories(${GCGEN_INC_NAME})
