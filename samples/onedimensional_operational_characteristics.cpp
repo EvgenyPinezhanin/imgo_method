@@ -1,36 +1,36 @@
 #include <iostream>
-#include <algorithm>
+#include <string>
+#include <vector>
 
 #include <Hill/HillProblemFamily.hpp>
 #include <Shekel/ShekelProblemFamily.hpp>
+#include <tasks/FamilyOptProblemsTask.h>
+#include <Solver.h>
 #include <opt_methods/GsaMethod.h>
 #include <opt_methods/PiyavskyMethod.h>
 #include <opt_methods/ScanningMethod.h>
-#include <tasks/FamilyOptProblemsTask.h>
-// #include <print_result.h>
+#include <gnuplot/output_file.h>
+#include <gnuplot/Script.h>
 #include <omp.h>
 
 #define CALC
+#define DRAW
 
 const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
 const int familyNumber = 0; // 0 - Hill, 1 - Shekel
 
 int main() {
-
-#if defined(CALC)
-/*     ofstream ofstr("output_data/imgo_operational_characteristics.txt");
-    if (!ofstr.is_open()) cerr << "File opening error\n";
-    ofstream ofstrOpt("output_data/imgo_operational_characteristics_opt.txt");
-    if (!ofstrOpt.is_open()) cerr << "File opening error\n";
-
-    const int numberFamily = 2;
+/*     const int numberFamily = 2;
 
     THillProblemFamily hillProblems;
     TShekelProblemFamily shekelProblems;
 
-    vector<ProblemFamily> problems{ ProblemFamily("HillProblemFamily", &hillProblems, TypeConstraints::NoConstraints, "Hill"),
+    vector<> problems{ ProblemFamily("HillProblemFamily", &hillProblems, TypeConstraints::NoConstraints, "Hill"),
                                     ProblemFamily("ShekelProblemFamily", &shekelProblems, TypeConstraints::NoConstraints, "Shekel") };
 
+const std::vector<std::string> methodNames{ "scanning", "piyavsky", "gsa" };
+
+#if defined( CALC )
     double eps = 0.0001, d = 0.0;
     int numberConstraints = 0;
     int maxTrials = 100000, maxFevals = 100000;
@@ -91,7 +91,13 @@ int main() {
     double totalEndTime = omp_get_wtime();
     double totalWorkTime = totalEndTime - totalStartTime;
     cout << "Total time: " << totalWorkTime << endl;
+#endif
 
+#if defined( DRAW )
+    VariablesFile variablesFile("output_data/onedimensional_operational_characteristics/vars.txt");
+    if (!variablesFile.isOpen()) std::cerr << "Variables file opening error\n";
+
+    
     initArrayGnuplot(ofstrOpt, "familyName", numberFamily);
     initArrayGnuplot(ofstrOpt, "r", r.size() * 3);
     for (int i = 0; i < numberFamily; i++) {
@@ -100,16 +106,19 @@ int main() {
             setValueInArrayGnuplot(ofstrOpt, "r", i * 3 + 1 + j, r[i][j]);
         }
     }
-    ofstrOpt.close(); */
+
+    variablesFile.closeFile();
+
+    Script script("scripts/onedimensional_operational_characteristics.gp");
+    script.addArgs(std::vector<int>{ displayType, familyNumber });
+    script.start();
+    if (script.isError() == 2) std::cerr << "Error gnuplot\n";
+    if (script.isError() == 1) std::cerr << "Error chmod\n";
 #endif
-
-/*     vector<int> args{ displayType, familyNumber };
-    drawGraphGnuplot("scripts/imgo_operational_characteristics.gp", args); */
-
 
 #if defined(_MSC_VER)
     cin.get();
-#endif
+#endif */
 
 	return 0;
 }

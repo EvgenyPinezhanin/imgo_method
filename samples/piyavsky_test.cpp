@@ -2,19 +2,19 @@
 #include <vector>
 #include <string>
 
-#include <opt_methods/PiyavskyMethod.h>
-#include <test_opt_problems/onedimensional_opt_problems.h>
 #include <Solver.h>
+#include <opt_methods/PiyavskyMethod.h>
+#include <opt_problems/OneDimensionalProblem.h>
+#include <test_opt_problems/onedimensional_opt_problems.h>
 #include <gnuplot/Script.h>
 
 #define CALC
 // #define DRAW
 
-using Task = PiyavskyMethod::Task;
-using Parameters = PiyavskyMethod::Parameters;
+using Task = PiyavskyMethod<OneDimensionalProblem>::Task;
+using Parameters = PiyavskyMethod<OneDimensionalProblem>::Parameters;
 
 const std::string methodName = "piyavsky";
-const bool isDraw = false;
 const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
 const int problemBlock = 1; // 0 - sample, 1 - test
 const int problemNumber = 5; // 0 - f1, 1 - f2, ...
@@ -51,9 +51,9 @@ int main() {
                            Task( "Test Task №20", 1, 20,  testTasks[19], parameters) };
 
 #if defined( CALC )
-    PiyavskyMethod method;
+    PiyavskyMethod<OneDimensionalProblem> method;
     Solver solver(method);
-    solver.solve(tasks, "output_data/" + methodName + "_test/");
+    solver.solveTasks(tasks, "output_data/" + methodName + "_test/");
 #endif
 
 #if defined( DRAW )

@@ -4,17 +4,17 @@
 
 #include <Solver.h>
 #include <opt_methods/ScanningMethod.h>
+#include <opt_problems/OneDimensionalProblem.h>
 #include <test_opt_problems/onedimensional_opt_problems.h>
 #include <gnuplot/Script.h>
 
 #define CALC
 // #define DRAW
 
-using Task = ScanningMethod::Task;
-using Parameters = ScanningMethod::Parameters;
+using Task = ScanningMethod<OneDimensionalProblem>::Task;
+using Parameters = ScanningMethod<OneDimensionalProblem>::Parameters;
 
 const std::string methodName = "scanning";
-const bool isDraw = false;
 const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
 const int problemBlock = 1; // 0 - sample, 1 - test
 const int problemNumber = 5; // 0, 1, 2, ...
@@ -51,9 +51,9 @@ int main() {
                            Task( "Test Task №20", 1, 20,  testTasks[19], parameters) };
 
 #if defined( CALC )
-    ScanningMethod method;
+    ScanningMethod<OneDimensionalProblem> method;
     Solver solver(method);
-    solver.solve(tasks, "output_data/" + methodName + "_test/");
+    solver.solveTasks(tasks, "output_data/" + methodName + "_test/");
 #endif
 
 #if defined( DRAW )

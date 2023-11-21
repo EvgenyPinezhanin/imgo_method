@@ -2,16 +2,17 @@
 #include <vector>
 #include <string>
 
-#include <opt_methods/GsaMethod.h>
-#include <test_opt_problems/onedimensional_opt_problems.h>
 #include <Solver.h>
+#include <opt_methods/GsaMethod.h>
+#include <opt_problems/OneDimensionalProblem.h>
+#include <test_opt_problems/onedimensional_opt_problems.h>
 #include <gnuplot/Script.h>
 
 #define CALC
 // #define DRAW;
 
-using Task = GsaMethod::Task;
-using Parameters = GsaMethod::Parameters;
+using Task = GsaMethod<OneDimensionalProblem>::Task;
+using Parameters = GsaMethod<OneDimensionalProblem>::Parameters;
 
 const std::string methodName = "gsa";
 const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
@@ -50,9 +51,9 @@ int main() {
                            Task( "Test Task №20", 1, 20,  testTasks[19], parameters) };
 
 #if defined( CALC )
-    GsaMethod method;
+    GsaMethod<OneDimensionalProblem> method;
     Solver solver(method);
-    solver.solve(tasks, "output_data/" + methodName + "_test/");
+    solver.solveTasks(tasks, "output_data/" + methodName + "_test/");
 #endif
 
 #if defined( DRAW )
