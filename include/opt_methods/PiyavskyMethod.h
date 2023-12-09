@@ -16,6 +16,10 @@ class PiyavskyMethod : public ScanningMethod<OptProblemType>,
 public:
     using GeneralMethod = typename ScanningMethod<OptProblemType>::GeneralMethod;
 
+    using typename ScanningMethod<OptProblemType>::Task;
+    using typename ScanningMethod<OptProblemType>::StoppingConditions;
+    using typename ScanningMethod<OptProblemType>::Result;
+
     struct Parameters : public ScanningMethod<OptProblemType>::Parameters {
         double reliability;
 
