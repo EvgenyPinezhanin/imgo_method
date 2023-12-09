@@ -5,8 +5,8 @@
 #include <limits>
 #include <iterator>
 
-#include <base_classes/opt_methods/ICharacteristicOptMethod.h>
 #include <base_classes/opt_methods/IGeneralNumericalOptMethod.h>
+#include <base_classes/opt_methods/ICharacteristicOptMethod.h>
 #include <opt_problems/OneDimensionalProblem.h>
 #include <trials/Trial.h>
 #include <my_math.h>
@@ -24,12 +24,13 @@ public:
     using typename GeneralNumMethod::Result;
 
     struct Task : public GeneralNumMethod::Task {
-        int blockNumber, functionNumber;
+        std::string blockName;
+        int functionNumber;
 
-        Task(const std::string &_name, int _blockNumber, int _functionNumber,
+        Task(const std::string &_name, std::string _blockName, int _functionNumber,
              const OptProblemType &_problem, Parameters &_parameters, bool _use = true):
             GeneralNumMethod::Task(_name, _problem, _parameters, _use),
-            blockNumber(_blockNumber),
+            blockName(_blockName),
             functionNumber(_functionNumber)
         {};
     };
