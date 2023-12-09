@@ -48,7 +48,7 @@ add_custom_command(
   ${OUT_DIR}/output_data/onedimensional_operational_characteristics
   ${OUT_DIR}/output_data/onedimensional_operational_characteristics/scanning
   ${OUT_DIR}/output_data/onedimensional_operational_characteristics/piyavsky
-  ${OUT_DIR}/output_data/onedimensioanl_operational_characteristics/gsa
+  ${OUT_DIR}/output_data/onedimensional_operational_characteristics/gsa
 
   ${OUT_DIR}/output_data/sample_test_problem
 )

@@ -12,12 +12,12 @@
 #include <my_math.h>
 #include <omp.h>
 
-// #define CALC
+#define CALC
 #define DRAW
 
 const std::vector<std::string> method_names{ "scanning", "piyavsky", "gsa" };
 
-const int display_type = 1; // 0 - application, 1 - png, 2 - png(notitle)
+const int display_type = 2; // 0 - application, 1 - png, 2 - png(notitle)
 const int graph_type = 1; // 0 - u(t), 1 - trial points
 const int method_index = 2; // 0 - scanning, 1 - piyavsky, 2 - gsa
 
@@ -135,6 +135,7 @@ int main() {
         end_time = omp_get_wtime();
         work_time = end_time - start_time;
 
+        std::cout << "Method name: " << method_names[i] << '\n';
         method_reports[i]->print(std::cout, task, result, work_time);
 
         sample_test_problem.computeObjFunction(result.point);

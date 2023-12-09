@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 
-#include <test_opt_problems/onedimensional_opt_problems.h>
 #include <gnuplot/output_file.h>
 #include <omp.h>
 
@@ -19,8 +18,8 @@ protected:
 
     output_file trials_file;
 
-    vector<typename OptMethodType::Trial> trials;
-    vector<typename OptMethodType::OptProblem::Point> optimalPoints;
+    std::vector<typename OptMethodType::Trial> trials;
+    std::vector<typename OptMethodType::OptProblem::Point> optimalPoints;
     typename OptMethodType::OptProblem::Point point;
 
 public:
@@ -31,10 +30,9 @@ public:
         trials_file()
     {};
 
-    void solveTask(const typename OptMethodType::Task &task, const string &saveDirectory) {
+    void solveTask(const typename OptMethodType::Task &task, const std::string &saveDirectory) {
         if (task.use) {
-            trials_file.open(saveDirectory + blockNames[task.blockNumber] + 
-                             "_" + std::to_string(task.functionNumber));
+            trials_file.open(saveDirectory + task.blockName + "_" + std::to_string(task.functionNumber));
             if (!trials_file.is_open()) std::cerr << "trials_file opening error\n";
 
             optMethod.setProblem(task.problem);
@@ -59,7 +57,7 @@ public:
         }
     }
 
-    void solveTasks(const vector<typename OptMethodType::Task> &tasks, const string &saveDirectory) {
+    void solveTasks(const std::vector<typename OptMethodType::Task> &tasks, const std::string &saveDirectory) {
         int numberTasks = (int)tasks.size();
 
         double totalStartTime = omp_get_wtime();
@@ -72,10 +70,9 @@ public:
         std::cout << "Total time: " << totalEndTime - totalStartTime << "\n";
     }
 
-    void solveTestTask(const typename OptMethodType::Task &task, const string &saveDirectory) {
+    void solveTestTask(const typename OptMethodType::Task &task, const std::string &saveDirectory) {
         if (task.use) {
-            trials_file.open(saveDirectory + blockNames[task.blockNumber] + 
-                             "_" + std::to_string(task.functionNumber));
+            trials_file.open(saveDirectory + task.blockName + "_" + std::to_string(task.functionNumber));
             if (!trials_file.is_open()) std::cerr << "trials_file opening error\n";
 
             optMethod.setProblem(task.problem);
@@ -100,7 +97,7 @@ public:
         }
     }
 
-    void solveTestTasks(const vector<typename OptMethodType::Task> &tasks, const string &saveDirectory) {
+    void solveTestTasks(const std::vector<typename OptMethodType::Task> &tasks, const std::string &saveDirectory) {
         int numberTasks = (int)tasks.size();
 
         double totalStartTime = omp_get_wtime();
