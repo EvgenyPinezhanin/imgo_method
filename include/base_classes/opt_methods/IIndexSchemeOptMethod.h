@@ -28,7 +28,7 @@ namespace opt {
         void setReliability(const vector<double> &_reliability) { reliability = _reliability; };
         void getReliability(vector<double>& _reliability) const { _reliability = reliability; };
 
-        void getConstantEstimation(const vector<double> &_constantsEstimation) const {
+        void getConstantEstimation(vector<double> &_constantsEstimation) const {
             _constantsEstimation = constantsEstimation;
         };
     };
