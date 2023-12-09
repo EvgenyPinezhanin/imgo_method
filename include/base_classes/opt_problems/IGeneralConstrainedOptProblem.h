@@ -10,15 +10,15 @@ namespace opt {
         int numberConstraints;
 
     public:
-        IGeneralConstrainedOptProblem(const ObjectiveFunctionType &_objFunction, int _numberConstraints,
-                                      const SearchAreaType &_area, const PointType &_optPoint)
-                                     : IGeneralOptProblem<ObjectiveFunctionType, SearchAreaType, PointType>(_objFunction,
-                                     _area, _optPoint), numberConstraints(_numberConstraints) {};
+        IGeneralConstrainedOptProblem(const ObjectiveFunctionType &_objFunction, const SearchAreaType &_area,
+                                      int _numberConstraints, const std::vector<PointType> &_optPoint,  double _optimalValue)
+            : IGeneralOptProblem<ObjectiveFunctionType, SearchAreaType, PointType>(_objFunction,
+              _area, _optPoint, _optimalValue), numberConstraints(_numberConstraints) {};
 
         void setNumberConstraints(double _numberConstraints) { numberConstraints = _numberConstraints; };
         int getNumberConstraints() const { return numberConstraints; };
 
-        virtual double computeConstraints(const PointType &x, int index) const = 0;
+        virtual double computeConstraint(const PointType &x, int index) const = 0;
     };
 }
 
