@@ -81,7 +81,7 @@ const std::vector<OneDimConstrainedProblem> testTasks{
             double sum = 0.0;
             switch (j) {
                 case 0:
-                    for (int i = 1; i <= 5; i++) {
+                    for (int i = 1; i <= 5; ++i) {
                         sum += std::cos(5.0 / 4.0 * (i + 1.0) * x + i);
                     }
                     return 6.0 / 25.0 - sum;
@@ -92,7 +92,7 @@ const std::vector<OneDimConstrainedProblem> testTasks{
                                std::pow(std::cos(M_PI / 2.0 * x + 1.0 / 10.0), 3.0), 2.0);
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(0.0, 4.0), 2, std::vector<double>{ 2.45956 }, 2.8408089, std::vector<double>{ 29.731102, 35.390605, 12.893183 }),
+        }, opt::OneDimensionalSearchArea(0.0, 4.0), 2, std::vector<double>{ 2.45956 }, 1.8408089, std::vector<double>{ 29.731102, 35.390605, 12.893183 }),
 
     OneDimConstrainedProblem(
         [] (double x, int j) {
@@ -128,7 +128,7 @@ const std::vector<OneDimConstrainedProblem> testTasks{
                 case 2: return std::exp(-std::cos(4.0 * x - 3.0)) + 1.0 / 250.0 * (4.0 * x - 3.0) * (4.0 * x - 3.0) - 1.0;
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(-3.0, 2.0), 2, std::vector<double>{ -0.774575 }, -0.33007413, std::vector<double>{ 8.332010, 5.359309, 6.387862 }),
+        }, opt::OneDimensionalSearchArea(-3.0, 2.0), 2, std::vector<double>{ -0.774575 }, -0.47704013, std::vector<double>{ 8.332010, 5.359309, 6.387862 }),
 
     OneDimConstrainedProblem(
         [] (double x, int j) {
@@ -163,7 +163,7 @@ const std::vector<OneDimConstrainedProblem> testTasks{
                     return sum;
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(0.0, 14.0), 3, std::vector<double>{ 4.0 }, 1.92218867, std::vector<double>{ 0.873861, 1.682731, 1.254588, 3.843648 }),
+        }, opt::OneDimensionalSearchArea(0.0, 14.0), 3, std::vector<double>{ 4.0 }, 9.92218867, std::vector<double>{ 0.873861, 1.682731, 1.254588, 3.843648 }),
 
     OneDimConstrainedProblem(
         [] (double x, int j) {

@@ -249,7 +249,7 @@ bool ScanningMethod<OptProblemType>::solveTest(typename GeneralMethod::Result &r
 
     Trial trial;
     double xNew;
-    while (stopConditionsTest()) {
+    while (!stopConditionsTest()) {
         xNew = selectNewPoint();
 
         trial = newTrial(xNew);

@@ -7,9 +7,8 @@ namespace opt {
     protected:
         int t;
 
-        virtual void calcCharacteristic() = 0;
-
         virtual void insertInSorted(const TrialType &trial) = 0;
+        virtual void calcCharacteristic() = 0;
 
     public:
         ICharacteristicOptMethod() : t(0) {};

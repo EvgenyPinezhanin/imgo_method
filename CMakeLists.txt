@@ -44,6 +44,7 @@ add_custom_command(
   ${OUT_DIR}/output_data/scanning_test
   ${OUT_DIR}/output_data/piyavsky_test
   ${OUT_DIR}/output_data/gsa_test
+  ${OUT_DIR}/output_data/imgo_test
 
   ${OUT_DIR}/output_data/onedimensional_operational_characteristics
   ${OUT_DIR}/output_data/onedimensional_operational_characteristics/scanning

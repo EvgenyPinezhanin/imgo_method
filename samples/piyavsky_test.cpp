@@ -8,14 +8,14 @@
 #include <test_opt_problems/OneDimTestProblems.h>
 #include <gnuplot/Script.h>
 
-#define CALC
-// #define DRAW
+// #define CALC
+#define DRAW
 
 using Task = PiyavskyMethod<OneDimensionalProblem>::Task;
 using Parameters = PiyavskyMethod<OneDimensionalProblem>::Parameters;
 
 const std::string methodName = "piyavsky";
-const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
+const int displayType = 0; // 0 - application, 1 - png, 2 - png(notitle)
 const int problemBlock = 1; // 0 - sample, 1 - test
 const int problemNumber = 5; // 0 - f1, 1 - f2, ...
 
