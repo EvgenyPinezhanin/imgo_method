@@ -34,6 +34,16 @@ void output_file::add_points(const std::vector<Trial> &trials, bool space) {
     stream << str_points.str();
 }
 
+void output_file::add_points(const std::vector<opt::IndexTrial> &trials, bool space) {
+    std::stringstream str_points;
+    size_t number_points = trials.size();
+    for (size_t i = 0; i < number_points; ++i) {
+        str_points << trials[i].x << " " << trials[i].z << trials[i].nu << "\n";
+    }
+    if (space) str_points << "\n\n";
+    stream << str_points.str();
+}
+
 void output_file::add_points(const std::vector<double> &x, double f, bool space) {
     std::stringstream str_points;
     size_t number_points = x.size();

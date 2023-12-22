@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include <trials/Trial.h>
+#include <base_structures/trials/IndexTrial.h>
 
 class output_file {
 private:
@@ -62,6 +63,7 @@ public:
     // void addPointGnuplot(ofstream &ofstr, const vector<double> &x, double f);
 
     void add_points(const std::vector<Trial> &trials, bool space = true);
+    void add_points(const std::vector<opt::IndexTrial> &trials, bool space = true);
     void add_points(const std::vector<double> &x, double f, bool space = true);
 
     // void addPointsGnuplot(ofstream &ofstr, const vector<vector<double>> &X, const vector<double> &f);
