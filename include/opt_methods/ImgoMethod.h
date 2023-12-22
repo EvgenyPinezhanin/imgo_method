@@ -32,7 +32,7 @@ public:
 
         Parameters(double _accuracy = 0.001, double _error = 0.001,
                    int _maxTrials = 1000, int _maxFevals = 1000,
-                   std::vector<double> _reliability = 2.0, double _d = 0.0):
+                   std::vector<double> _reliability = std::vector<double>{}, double _d = 0.0):
             GeneralNumMethod::Parameters(_accuracy, _error, _maxTrials, _maxFevals),
             reliability(_reliability), d(_d)
         {};
@@ -67,11 +67,17 @@ public:
     };
 
 protected:
-    void insertInSorted(const Trial &trial) override;
+    double d;
+
+    int lastI, lastTrialPosI;
+
+    vector<bool> IIsCalc;
 
     void calcCharacteristic() override;
 
-    Trial newTrial(const typename OptProblemType::Point &x) override;
+    void insertInSorted(const opt::IndexTrial &trial) override;
+
+    opt::IndexTrial newTrial(const typename OptProblemType::Point &x) override;
     typename OptProblemType::Point selectNewPoint() override;
 
     double estimateSolution(typename OptProblemType::Point &x) const override;
@@ -79,69 +85,39 @@ protected:
     bool stopConditions() override;
     bool stopConditionsTest() override;
 
-    virtual void estimatingConstants() = 0;
-
-    virtual void calcI() = 0;
-    virtual void calcZValues() = 0;
+    void estimatingConstants() override;
+    void calcZValues() override;
 
     using GeneralNumMethod::setResult;
-private:
-    function<double(double, int)> f;
-    double r, d;
-
-    TrialConstrained lastTrial;
-    int lastTrialPos;
-
-    vector<bool> IIsCalc;
-    vector<double> mu;
-    vector<double> zStar;
-
-    TrialConstrained newTrial(double x) override;
-    double newPoint(int t) override;
-    double selectNewPoint(int &t) override;
 
 public:
-    ImgoMethod(function<double(double, int)> _f = nullptr, int _numberConstraints = 0, double _a = 0.0, double _b = 1.0, 
-               double _r = 2.0, double _d = 0.0, double _eps = 0.0001, int _maxTrials = 1000, int _maxFevals = 1000)
-               : OptimizationMethodConstrained(nullptr, 1, _numberConstraints, vector<double>{_a}, vector<double>{_b},
-               _eps, _maxTrials, _maxFevals), f(_f), r(_r), d(_d), lastTrial(0.0, 0.0, 0), lastTrialPos(0),
-               I((size_t)numberConstraints + 1), calcI((size_t)numberConstraints + 1), mu((size_t)numberConstraints + 1),
-               zStar((size_t)numberConstraints + 1) {}
+    ImgoMethod(const OptProblemType &_problem = OptProblemType(), const Parameters &parameters = Parameters())
+        : GeneralNumMethod(_problem, parameters), opt::IIndexSchemeOptMethod(parameters.reliability),
+          opt::ICharacteristicOptMethod<opt::IndexTrial>(), d(parameters.d), lastI(0), lastTrialPosI(0),
+          IIsCalc(this->problem.getNumberConstraints() + 1) {}
+
+    void setProblem(const OptProblemType &_problem) {
+        GeneralMethod::setProblem(_problem);
+
+        IIsCalc.resize(this->problem.getNumberConstraints() + 1);
+    }
 
     void setParameters(const typename GeneralMethod::Parameters &parameters) override {
         GeneralNumMethod::setParameters(parameters);
+
+        auto parametersCast = static_cast<const Parameters&>(parameters);
+        setReliability(parametersCast.reliability);
+        d = parametersCast.d;
     };
     void getParameters(typename GeneralMethod::Parameters &parameters) const override {
-        GeneralNumMethod::getParameters(parameters);
+        parameters = Parameters(this->accuracy, this->error, this->maxTrials, this->maxFevals, reliability, d);
     };
+
+    void setD(double _d) { d = _d; };
+    double getD() const { return d; };
 
     void solve(typename GeneralMethod::Result &result) override;
     bool solveTest(typename GeneralMethod::Result &result) override;
-
-    void setF(const function<double(double, int)> &_f) { f = _f; };
-    void setA(double _a) { OptimizationMethod::setA(vector<double>{ _a }); };
-    void setB(double _b) { OptimizationMethod::setB(vector<double>{ _b }); };
-    void setAB(double _a, double _b) { OptimizationMethod::setAB(vector<double>{ _a }, vector<double>{ _b }); };
-    void setNumberConstraints(int _numberConstraints);
-    void setR(double _r) { r = _r; };
-    void setD(double _d) { d = _d; };
-
-    function<double(double, int)> getF() const { return f; };
-    double getA() const { return A[0]; };
-    double getB() const { return B[0]; };
-    double getR() const { return r; };
-    double getD() const { return d; };
-
-    void getL(vector<double> &L) const { L = mu; };
-
-    bool solveTest(double xOpt, int &numberTrials, int &numberFevals);
-
-        ScanningMethod(const OptProblemType &_problem = OptProblemType(),
-                   const Parameters &parameters = Parameters()):
-        opt::ICharacteristicOptMethod<Trial>(),
-        GeneralNumMethod(_problem, parameters),
-        cycleBoundary(0)
-    {};
 };
 
 template <typename OptProblemType>
@@ -149,7 +125,7 @@ void ImgoMethod<OptProblemType>::Report::printOptProblem(
     std::ostream &stream,
     const OptProblemType &optProblem) const
 {
-    stream << "Number of constraints = " << optProblem.numberConstraints << "\n";
+    stream << "Number of constraints = " << optProblem.getNumberConstraints() << "\n";
     stream << "[a; b] = [" << optProblem.getSearchArea().lowerBound << "; " <<
                               optProblem.getSearchArea().upBound << "]"<< "\n";
     std::vector<double> optimalPoints;
@@ -176,16 +152,16 @@ void ImgoMethod<OptProblemType>::Report::printMethodParameters(
     std::ostream &stream,
     const typename GeneralMethod::Parameters &parameters) const
 {
-    GeneralNumMethod::Report::printMethodParameters(stream, parameters);
+    GeneralNumMethod::IReport::printMethodParameters(stream, parameters);
     auto parametersCast = static_cast<const Parameters&>(parameters);
 
-    stream << "reliability = (" << parametersCast.reliability << "\n";
+    stream << "reliability = (";
     size_t numberConstraints = parametersCast.reliability.size();
     for (size_t i = 0; i < numberConstraints - 1; ++i) {
         stream << parametersCast.reliability[i] << ", ";
     }
     stream << parametersCast.reliability[numberConstraints - 1] << ")" << "\n";
-    stream << "d = " << parametersCast.accuracy << "\n";
+    stream << "d = " << parametersCast.d << "\n";
 }
 
 template <typename OptProblemType>
@@ -193,7 +169,7 @@ void ImgoMethod<OptProblemType>::Report::printResultMethod(
     std::ostream &stream,
     const typename GeneralMethod::Result &result) const
 {
-    GeneralNumMethod::Report::printResultMethod(stream, result);
+    GeneralNumMethod::IReport::printResultMethod(stream, result);
     
     // cout << "Estimation of the Lipschitz constant:" << "\n";
     // cout << "L(f) = " << estLipschitzConst[numberConstraints] << "\n";
@@ -221,218 +197,114 @@ void ImgoMethod<OptProblemType>::Report::printErrorEstimate(
     }
 }
 
-template <typename OptProblemType>
-void ScanningMethod<OptProblemType>::solve(typename GeneralMethod::Result &result) {
-    this->trialPoints.clear();
-    this->numberFevals = 0;
-
-    this->trialPoints.push_back(newTrial(this->problem.getSearchArea().lowerBound));
-    this->trialPoints.push_back(newTrial(this->problem.getSearchArea().upBound));
-    t = 1;
-
-    this->numberTrials = 2;
-    cycleBoundary = 0;
-
-    Trial trial;
-    double xNew;
-    while(!stopConditions()) {
-        xNew = selectNewPoint();
-
-        trial = newTrial(xNew);
-        this->numberTrials++;
-
-        insertInSorted(trial);
-    }
-
-    setResult(result);
-}
 
 template <typename OptProblemType>
-void ImgoMethod<OptProblemType>::solve(typename GeneralMethod::Result &result) {
-    for (size_t i = 0; i < this->problem.numberConstraints; ++i) {
-        this->I[i].clear();
-        IIsCalc[i] = false;
-    }
-    this->trialPoints.clear();
-    this->numberFevals = 0;
+void ImgoMethod<OptProblemType>::calcCharacteristic() {
+    double R = -std::numeric_limits<double>::infinity(), Rtmp;
+    double constantEstimation, zValue, dx;
 
-    this->trialPoints.push_back(newTrial(this->problem.getSearchArea().lowerBound));
-    this->trialPoints.push_back(newTrial(this->problem.getSearchArea().upBound));
-    t = 1;
-
-    lastTrial = newTrial(A[0]);
-    trialPoints.push_back(lastTrial);
-    insertInSorted(I[(size_t)lastTrial.nu - 1], lastTrial);
-    lastTrial = newTrial(B[0]);
-    trialPoints.push_back(lastTrial);
-    lastTrialPos = insertInSorted(I[(size_t)lastTrial.nu - 1], lastTrial);
-    numberTrials = 2;
-
-    double xNew;
-    int t;
-    while(true) {
-        numberTrials++;
-
-        // Steps 3, 4, 5, 6, 7
-        xNew = selectNewPoint(t);
-        lastTrial = newTrial(xNew);
-
-        // Step 1
-        insertInSorted(trialPoints, lastTrial);
-
-        // Step 2
-        lastTrialPos = insertInSorted(I[(size_t)lastTrial.nu - 1], lastTrial);
-
-        // Stop conditions
-        if (trialPoints[t].x - trialPoints[(size_t)t - 1].x <= eps) break;
-        if (this->numberFevals >= maxFevals || numberTrials >= maxTrials) break;
-    }
-    numberFevals = this->numberFevals;
-    x = searchMin(trialPoints, numberConstraints);
-}
-
-bool ImgoMethod::solveTest(double xOpt, int &numberTrials, int &numberFevals) {
-    for (int nu = 0; nu < numberConstraints + 1; nu++) {
-        I[nu].clear();
-        calcI[nu] = false;
-    }
-    trialPoints.clear();
-    this->numberFevals = 0;
-
-    lastTrial = newTrial(A[0]);
-    trialPoints.push_back(lastTrial);
-    insertInSorted(I[(size_t)lastTrial.nu - 1], lastTrial);
-    lastTrial = newTrial(B[0]);
-    trialPoints.push_back(lastTrial);
-    lastTrialPos = insertInSorted(I[(size_t)lastTrial.nu - 1], lastTrial);
-    numberTrials = 2;
-
-    double xNew;
-    int t;
-    while (true) {
-        numberTrials++;
-
-        // Steps 3, 4, 5, 6, 7
-        xNew = selectNewPoint(t);
-        lastTrial = newTrial(xNew);
-
-        // Step 1
-        insertInSorted(trialPoints, lastTrial);
-
-        // Step 2
-        lastTrialPos = insertInSorted(I[(size_t)lastTrial.nu - 1], lastTrial);
-
-        // Stop conditions
-        if (abs(xNew - xOpt) <= eps) {
-            numberFevals = this->numberFevals;
-            return true;
+    size_t trialPointsSize = this->trialPoints.size();
+    for (size_t i = 1; i < trialPointsSize; ++i) {
+        dx = this->trialPoints[i].x - this->trialPoints[i - 1].x;
+        if (this->trialPoints[i].nu == this->trialPoints[i - 1].nu) {
+            constantEstimation = constantsEstimation[this->trialPoints[i].nu - 1];
+            zValue = zValues[this->trialPoints[i].nu - 1];
+            Rtmp = dx + pow(this->trialPoints[i].z - this->trialPoints[i - 1].z, 2) /
+                        (reliability[this->trialPoints[i].nu - 1] * reliability[this->trialPoints[i].nu - 1] *
+                        constantEstimation * constantEstimation * dx) -
+                   2.0 * (this->trialPoints[i].z + this->trialPoints[i - 1].z - 2.0 * zValue) /
+                   (reliability[this->trialPoints[i].nu - 1]  * constantEstimation);
+        } else if (this->trialPoints[i - 1].nu < this->trialPoints[i].nu) {
+            constantEstimation = constantsEstimation[this->trialPoints[i].nu - 1];
+            zValue = zValues[this->trialPoints[i].nu - 1];
+            Rtmp = 2.0 * dx - 4.0 * (this->trialPoints[i].z - zValue) / 
+                    (reliability[this->trialPoints[i].nu - 1] * constantEstimation);
+        } else {
+            constantEstimation = constantsEstimation[this->trialPoints[i - 1].nu - 1];
+            zValue = zValues[this->trialPoints[i - 1].nu - 1];
+            Rtmp = 2.0 * dx - 4.0 * (this->trialPoints[i - 1].z - zValue) /
+                    (reliability[this->trialPoints[i].nu - 1] * constantEstimation);
         }
-        if (this->numberFevals >= maxFevals || numberTrials >= maxTrials) {
-            numberFevals = this->numberFevals;
-            return false;
+        if (Rtmp > R) {
+            R = Rtmp;
+            t = (int)i;
         }
     }
 }
 
+template <typename OptProblemType>
+void ImgoMethod<OptProblemType>::insertInSorted(const opt::IndexTrial &trial) {
+    auto iter = this->trialPoints.begin();
 
-#endif // IMGO_METHOD_H_
+    std::advance(iter, t);
+    this->trialPoints.insert(iter, trial);
 
-inline int insertInSorted(vector<TrialConstrained> &trials, TrialConstrained trial) {
-    vector<TrialConstrained>::iterator iter = trials.begin();
-    vector<TrialConstrained>::iterator iterEnd = trials.end();
-    int pos = 0;
+    iter = this->I[trial.nu - 1].begin();
+    auto iterEnd = this->I[trial.nu - 1].end();
+
     while(true) {
         if (iter == iterEnd || iter->x > trial.x) break;
-        iter++; pos++;
+        iter++;
     }
-    trials.insert(iter, trial);
-    return pos;
+    iter = this->I[trial.nu - 1].insert(iter, trial);
 
-        vector<Trial>::iterator iter = trialPoints.begin();
-    int dist = trialPoints.size();
+    lastI = trial.nu;
+    lastTrialPosI = distance(this->I[trial.nu - 1].begin(), iter);
 
-    advance(iter, dist / 2);
-    while (true) {
-        dist /= 2;
-        if (trial.x < iter->x) advance(iter, -dist / 2);
-        else {
-            if (trial.x < (iter + 1)->x) break;
-            else advance(iter, dist / 2);
-        }
-    }
-    iter = trialPoints.insert(iter, trial);
+    // iter = this->I[trial.nu - 1].begin();
+    // iterEnd = this->I[trial.nu - 1].end();
+    // int dist = this->I[trial.nu - 1].size();
 
-    return distance(trialPoints.begin(), iter);
+    // if (dist != 0) {
+    //     advance(iter, dist / 2);
+    //     while (true) {
+    //         dist /= 2;
+    //         if (trial.x < iter->x) {
+    //             advance(iter, -dist / 2);
+    //         } else {
+    //             if (iter  trial.x < (iter + 1)->x) {
+    //                 break;
+    //             } else {
+    //                 advance(iter, dist / 2);
+    //             }
+    //         }
+    //     }
+    // }
+    // iter = this->I[trial.nu - 1].insert(iter, trial);
+
+    // lastI = trial.nu;
+    // lastTrialPosI = distance(this->I[trial.nu - 1].begin(), iter);
 }
 
-inline double searchMin(vector<TrialConstrained> &trials, int numberConstraints) {
-    double z = numeric_limits<double>::infinity(), x = 0.0;
-    size_t sizeTrials = trials.size();
-    for (int i = 0; i < sizeTrials; i++) {
-        if (trials[i].nu == numberConstraints + 1 && trials[i].z < z) {
-            z = trials[i].z;
-            x = trials[i].x;
-        }
-    }
-    return x;
-}
-
-TrialConstrained ImgoMethod::newTrial(double x) {
-    TrialConstrained trial(x);
-    for (int j = 1; j <= numberConstraints + 1; j++) {
-        numberFevals++;
-        if ((f(x, j) > 0) || (j == numberConstraints + 1)) {
-            trial.z = f(x, j);
-            trial.nu = j;
-            break;
-        }
-    }
-    return trial;
-}
-
-double ImgoMethod::newPoint(int t) {
-    if (trialPoints[t].nu != trialPoints[(size_t)t - 1].nu) {
-        return (trialPoints[t].x + trialPoints[(size_t)t - 1].x) / 2.0;
-    } else {
-        return (trialPoints[t].x + trialPoints[(size_t)t - 1].x) / 2.0 - 
-               (trialPoints[t].z - trialPoints[(size_t)t - 1].z) / (2.0 * r * mu[(size_t)trialPoints[t].nu - 1]);
-    }
-}
-
-double ImgoMethod::selectNewPoint(int &t) {
-    int nuLastTrial;
-    size_t sizeI;
-    double muTmp;
-
-    // Step 3
+template <typename OptProblemType>
+void ImgoMethod<OptProblemType>::estimatingConstants() {
     // with optimization(const)
-    nuLastTrial = lastTrial.nu - 1;
-    sizeI = I[nuLastTrial].size();
-    for (int nu = 0; nu < numberConstraints + 1; nu++) {
-        if (!calcI[nu]) mu[nu] = 0.0;
+    size_t sizeI = I[lastI - 1].size();
+    for (int nu = 0; nu < this->problem.getNumberConstraints() + 1; nu++) {
+        if (!IIsCalc[nu]) constantsEstimation[nu] = 0.0;
     }
-    if (I[nuLastTrial].size() >= 3) {
-        if (lastTrialPos == 0) {
-            mu[nuLastTrial] = max({ mu[nuLastTrial], abs(I[nuLastTrial][1].z - I[nuLastTrial][0].z) /
-                                                     pow(I[nuLastTrial][1].x - I[nuLastTrial][0].x, 1.0 / n) });  
-        } else if (lastTrialPos == I[nuLastTrial].size() - 1) {
-            mu[nuLastTrial] = max({ mu[nuLastTrial],
-                                    abs(I[nuLastTrial][sizeI - 1].z - I[nuLastTrial][sizeI - 2].z) / 
-                                    pow(I[nuLastTrial][sizeI - 1].x - I[nuLastTrial][sizeI - 2].x, 1.0 / n) });
+    if (I[lastI - 1].size() >= 3) {
+        if (lastTrialPosI == 0) {
+            constantsEstimation[lastI] = std::max({ constantsEstimation[lastI - 1],
+                std::abs(I[lastI - 1][1].z - I[lastI - 1][0].z) / (I[lastI - 1][1].x - I[lastI - 1][0].x) });  
+        } else if (lastTrialPosI == I[lastI - 1].size() - 1) {
+            constantsEstimation[lastI - 1] = std::max({ constantsEstimation[lastI - 1],
+                std::abs(I[lastI - 1][sizeI - 1].z - I[lastI - 1][sizeI - 2].z) /
+                        (I[lastI - 1][sizeI - 1].x - I[lastI - 1][sizeI - 2].x) });
         } else {
-            mu[nuLastTrial] = max({ mu[nuLastTrial],
-                                    abs(I[nuLastTrial][lastTrialPos].z - I[nuLastTrial][(size_t)lastTrialPos - 1].z) / 
-                                    pow(I[nuLastTrial][lastTrialPos].x - I[nuLastTrial][(size_t)lastTrialPos - 1].x, 1.0 / n),
-                                    abs(I[nuLastTrial][(size_t)lastTrialPos + 1].z - I[nuLastTrial][lastTrialPos].z) / 
-                                    pow(I[nuLastTrial][(size_t)lastTrialPos + 1].x - I[nuLastTrial][lastTrialPos].x, 1.0 / n) });
+            constantsEstimation[lastI - 1] = std::max({ constantsEstimation[lastI - 1],
+                std::abs(I[lastI - 1][lastTrialPosI].z - I[lastI - 1][lastTrialPosI - 1].z) / 
+                    (I[lastI - 1][lastTrialPosI].x - I[lastI - 1][lastTrialPosI - 1].x),
+                std::abs(I[lastI - 1][lastTrialPosI + 1].z - I[lastI - 1][lastTrialPosI].z) / 
+                    (I[lastI - 1][lastTrialPosI + 1].x - I[lastI - 1][lastTrialPosI].x) });
         }
-    } else if (I[nuLastTrial].size() == 2) {
-        mu[nuLastTrial] = max({ mu[nuLastTrial], abs(I[nuLastTrial][1].z - I[nuLastTrial][0].z) /
-                                                 pow(I[nuLastTrial][1].x - I[nuLastTrial][0].x, 1.0 / n) });
+    } else if (I[lastI - 1].size() == 2) {
+        constantsEstimation[lastI - 1] = std::max({ constantsEstimation[lastI - 1],
+            std::abs(I[lastI - 1][1].z - I[lastI - 1][0].z) / (I[lastI - 1][1].x - I[lastI - 1][0].x) });
     }
-    if (abs(mu[nuLastTrial]) > epsilon) calcI[nuLastTrial] = true;
-    for (int nu = 0; nu < numberConstraints + 1; nu++) {
-        if (abs(mu[nu]) <= epsilon) mu[nu] = 1.0;
+    if (std::abs(constantsEstimation[lastI - 1]) > epsilon) IIsCalc[lastI - 1] = true;
+    for (int nu = 0; nu < this->problem.getNumberConstraints() + 1; ++nu) {
+        if (std::abs(constantsEstimation[nu]) <= epsilon) constantsEstimation[nu] = 1.0;
     }
 
     // with optimization(linear)
@@ -471,58 +343,161 @@ double ImgoMethod::selectNewPoint(int &t) {
     //         mu[nu] = 1.0;
     //     };
     // }
+}
 
-    // Step 4
-    for (int nu = 0; nu < numberConstraints + 1; nu++) {
+template <typename OptProblemType>
+void ImgoMethod<OptProblemType>::calcZValues() {
+    size_t ISize;
+    for (int nu = 0; nu < this->problem.getNumberConstraints() + 1; nu++) {
         if (I[nu].size() != 0) {
-            zStar[nu] = I[nu][0].z;
-            sizeI = I[nu].size();
-            for (int i = 1; i < sizeI; i++) {
-                if (I[nu][i].z < zStar[nu]) {
-                    zStar[nu] = I[nu][i].z;
+            zValues[nu] = I[nu][0].z;
+            ISize = I[nu].size();
+            for (int i = 1; i < ISize; i++) {
+                if (I[nu][i].z < zValues[nu]) {
+                    zValues[nu] = I[nu][i].z;
                 }
             }
-            if (zStar[nu] <= 0.0 && nu != numberConstraints) {
-                zStar[nu] = -mu[nu] * d;
+            if (zValues[nu] <= 0.0 && nu != this->problem.getNumberConstraints()) {
+                zValues[nu] = -constantsEstimation[nu] * d;
             }
         }
     }
+}
 
-    // Steps 5, 6
-    double R = -numeric_limits<double>::infinity(), Rtmp;
-    double muV, zStarV, dx;
-
-    size_t sizeTrialPoints = trialPoints.size();
-    for (size_t i = 1; i < sizeTrialPoints; i++) {
-        dx = trialPoints[i].x - trialPoints[i - 1].x;
-        if (trialPoints[i].nu == trialPoints[i - 1].nu) {
-            muV = mu[(size_t)trialPoints[i].nu - 1];
-            zStarV = zStar[(size_t)trialPoints[i].nu - 1];
-            Rtmp = dx + pow(trialPoints[i].z - trialPoints[i - 1].z, 2) / (r * r * muV * muV * dx) -
-                   2.0 * (trialPoints[i].z + trialPoints[i - 1].z - 2.0 * zStarV) / (r * muV);
-        } else if (trialPoints[i - 1].nu < trialPoints[i].nu) {
-            muV = mu[(size_t)trialPoints[i].nu - 1];
-            zStarV = zStar[(size_t)trialPoints[i].nu - 1];
-            Rtmp = 2.0 * dx - 4.0 * (trialPoints[i].z - zStarV) / (r * muV);
-        } else {
-            muV = mu[(size_t)trialPoints[i - 1].nu - 1];
-            zStarV = zStar[(size_t)trialPoints[i - 1].nu - 1];
-            Rtmp = 2.0 * dx - 4.0 * (trialPoints[i - 1].z - zStarV) / (r * muV);
+template <typename OptProblemType>
+opt::IndexTrial ImgoMethod<OptProblemType>::newTrial(const typename OptProblemType::Point &x) {
+    opt::IndexTrial trial(x);
+    for (int j = 0; j <= this->problem.getNumberConstraints(); ++j) {
+        this->numberFevals++;
+        if ((this->problem.computeConstraint(x, j) > 0) || (j == this->problem.getNumberConstraints())) {
+            trial.z = this->problem.computeConstraint(x, j);
+            trial.nu = j + 1;
+            break;
         }
-        if (Rtmp > R) {
-            R = Rtmp;
-            t = (int)i;
+    }
+    return trial;
+}
+
+template <typename OptProblemType>
+typename OptProblemType::Point ImgoMethod<OptProblemType>::selectNewPoint() {
+    estimatingConstants();
+    calcZValues();
+    calcCharacteristic();
+    
+    return this->trialPoints[t].nu != this->trialPoints[(size_t)t - 1].nu ?
+           (this->trialPoints[t].x + this->trialPoints[(size_t)t - 1].x) / 2.0 :
+           (this->trialPoints[t].x + this->trialPoints[(size_t)t - 1].x) / 2.0 - 
+           (this->trialPoints[t].z - this->trialPoints[(size_t)t - 1].z) /
+           (2.0 * reliability[this->trialPoints[t].nu - 1] * constantsEstimation[this->trialPoints[t].nu - 1]);
+}
+
+template <typename OptProblemType>
+double ImgoMethod<OptProblemType>::estimateSolution(typename OptProblemType::Point &x) const {
+    double z = std::numeric_limits<double>::infinity();
+    x = 0.0;
+
+    size_t sizeTrials = this->trialPoints.size();
+    for (int i = 0; i < sizeTrials; i++) {
+        if (this->trialPoints[i].nu == this->problem.getNumberConstraints() + 1 && this->trialPoints[i].z < z) {
+            z = this->trialPoints[i].z;
+            x = this->trialPoints[i].x;
         }
     }
 
-    // Step 7
-    return newPoint(t);
+    return z;
 }
 
-void ImgoMethod::setNumberConstraints(int _numberConstraints) {
-    OptimizationMethodConstrained::setNumberConstraints(_numberConstraints);
-    I.resize((size_t)numberConstraints + 1);
-    calcI.resize((size_t)numberConstraints + 1);
-    mu.resize((size_t)numberConstraints + 1);
-    zStar.resize((size_t)numberConstraints + 1);
+template <typename OptProblemType>
+bool ImgoMethod<OptProblemType>::stopConditions() {
+    if (std::abs(this->trialPoints[t].x - this->trialPoints[(size_t)t - 1].x) <= this->accuracy) {
+        this->stoppingCondition = StoppingConditions::ACCURACY;
+        return true;
+    }
+    if (this->numberTrials >= this->maxTrials) {
+        this->stoppingCondition = StoppingConditions::MAXTRIALS;
+        return true;
+    }
+    if (this->numberFevals >= this->maxFevals) {
+        this->stoppingCondition = StoppingConditions::MAXFEVALS;
+        return true;
+    }
+    return false;
 }
+
+template <typename OptProblemType>
+bool ImgoMethod<OptProblemType>::stopConditionsTest() {
+    std::vector<double> optimalPoints;
+    this->problem.getOptimalPoints(optimalPoints);
+    int numberOptimalPoints = (int)optimalPoints.size();
+    for (int i = 0; i < numberOptimalPoints; i++) {
+        if (std::abs(this->trialPoints[t].x - optimalPoints[i]) <= this->error) {
+            this->stoppingCondition = StoppingConditions::ERROR;
+            return true;
+        }
+    }
+    return stopConditions();
+}
+
+
+template <typename OptProblemType>
+void ImgoMethod<OptProblemType>::solve(typename GeneralMethod::Result &result) {
+    for (size_t i = 0; i < this->problem.getNumberConstraints() + 1; ++i) {
+        this->I[i].clear();
+        IIsCalc[i] = false;
+    }
+    this->trialPoints.clear();
+    this->numberFevals = 0;
+
+    t = 0;
+    insertInSorted(newTrial(this->problem.getSearchArea().lowerBound));
+    t = 1;
+    insertInSorted(newTrial(this->problem.getSearchArea().upBound));
+    
+    this->numberTrials = 2;
+
+    opt::IndexTrial trial;
+    double xNew;
+    while(!stopConditions()) {
+        xNew = selectNewPoint();
+
+        trial = newTrial(xNew);
+        this->numberTrials++;
+
+        insertInSorted(trial);
+    }
+
+    setResult(result);
+}
+
+template <typename OptProblemType>
+bool ImgoMethod<OptProblemType>::solveTest(typename GeneralMethod::Result &result) {
+    for (size_t i = 0; i < this->problem.getNumberConstraints() + 1; ++i) {
+        this->I[i].clear();
+        IIsCalc[i] = false;
+    }
+    this->trialPoints.clear();
+    this->numberFevals = 0;
+
+    insertInSorted(newTrial(this->problem.getSearchArea().lowerBound));
+    insertInSorted(newTrial(this->problem.getSearchArea().upBound));
+    t = 1;
+    
+    this->numberTrials = 2;
+
+    opt::IndexTrial trial;
+    double xNew;
+    while(!stopConditionsTest()) {
+        xNew = selectNewPoint();
+
+        trial = newTrial(xNew);
+        this->numberTrials++;
+
+        insertInSorted(trial);
+    }
+
+    setResult(result);
+
+    return static_cast<Result&>(result).stoppingCondition == StoppingConditions::ERROR;
+}
+
+#endif // IMGO_METHOD_H_
