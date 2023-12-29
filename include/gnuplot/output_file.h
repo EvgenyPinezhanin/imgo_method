@@ -65,9 +65,9 @@ public:
     void add_points(const std::vector<Trial> &trials, bool space = true);
     void add_points(const std::vector<opt::IndexTrial> &trials, bool space = true);
     void add_points(const std::vector<double> &x, double f, bool space = true);
+    void add_points(const std::vector<std::vector<double>> &x, bool space = true);
 
     // void addPointsGnuplot(ofstream &ofstr, const vector<vector<double>> &X, const vector<double> &f);
-    // void addPointsGnuplot(ofstream &ofstr, const vector<vector<double>> &X);
     // void addPointsGnuplot(ofstream &ofstr, const vector<double> &X, const vector<double> &f);
     // void addPointsGnuplot(ofstream &ofstr, const vector<TrialConstrained> &trials);
     // void addPointsGnuplot(ofstream &ofstr, const vector<vector<double>> &X, const vector<TrialConstrained> &trials);

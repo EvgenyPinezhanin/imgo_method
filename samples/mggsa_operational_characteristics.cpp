@@ -1,4 +1,4 @@
-/* #if defined( _MSC_VER )
+#if defined( _MSC_VER )
     #define _CRT_SECURE_NO_WARNINGS
     #define PROC_BIND
 #else
@@ -7,59 +7,52 @@
 
 #include <iostream>
 #include <fstream>
+#include <iostream>
 #include <algorithm>
 
 #include <Grishagin/GrishaginProblemFamily.hpp>
 #include <Grishagin/GrishaginConstrainedProblemFamily.hpp>
 #include <GKLS/GKLSProblemFamily.hpp>
 #include <GKLS/GKLSConstrainedProblemFamily.hpp>
-#include <mggsa.h>
-#include <task.h>
-#include <output_results.h>
+#include <opt_methods/MggsaMethod.h>
+#include <opt_problems/FamilyProblem.h>
+#include <gnuplot/output_file.h>
+#include <gnuplot/Script.h>
 #include <omp.h>
 
 using namespace std;
 
-// #define CALC
+#define CALC
+// #define DRAW
 
-const int familyNumber = 3; // 0 - Grishagin, 1 - GKLS,
-                            // 2 - Grishagin(with constraints), 3 - GKLS(with constraints)
-const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
-*/
+const int familyNumber = 0; // 0 - Grishagin(with constraints), 2 - GKLS(with constraints)
+const int displayType = 0; // 0 - application, 1 - png, 2 - png(notitle)
+
 int main() {
-/*    ofstream ofstrOpt("output_data/mggsa_operational_characteristics_test_opt.txt");
-    if (!ofstrOpt.is_open()) cerr << "File opening error\n";
+    output_file vars_file("output_data/mggsa_operational_characteristics/vars.txt");
+    if (!vars_file.is_open()) std::cerr << "vars_file opening error\n";
 
-    const int chunk = 2;
+    const int chunk = 1;
 
-    const int numberFamily = 4;
-
-    TGrishaginProblemFamily grishaginProblems;
+    const int numberFamily = 2;
     TGrishaginConstrainedProblemFamily grishaginConstrainedProblems;
-    TGKLSProblemFamily gklsProblems;
     TGKLSConstrainedProblemFamily gklsConstrainedProblems;
 
-    vector<ProblemFamily> problems{ ProblemFamily("GrishaginProblemFamily", &grishaginProblems, TypeConstraints::NoConstraints, "Grishagin"),
-                                    ProblemFamily("GKLSProblemFamily", &gklsProblems, TypeConstraints::NoConstraints, "GKLS"),
-                                    ProblemFamily("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
-                                                  TypeConstraints::Constraints, "GrishaginConstrained"),
-                                    ProblemFamily("GKLSProblemConstrainedFamily", &gklsConstrainedProblems, 
-                                                  TypeConstraints::Constraints, "GKLSConstrained") };
+    std::vector<FamilyProblem> problems{ FamilyProblem("GrishaginProblemConstrainedFamily", &grishaginConstrainedProblems, 
+                                                       "GrishaginConstrained"),
+                                         FamilyProblem("GKLSProblemConstrainedFamily", &gklsConstrainedProblems, 
+                                                       "GKLSConstrained") };
 
-    vector<vector<int>> K{ { 0,  700, 25 },
-                           { 0, 1200, 25 },
-                           { 0, 2500, 25 },
+    vector<vector<int>> K{ { 0, 2500, 25 },
                            { 0, 4500, 25 } };
 
-    vector<vector<double>> r{ { 3.0, 2.8, 2.6, 2.4 },
-                              { 4.3, 4.1, 3.9, 3.7 },
-                              { 3.0, 2.6, 2.2, 1.8 },
+    vector<vector<double>> r{ { 3.0, 2.6, 2.2, 1.8 },
                               { 4.5, 4.1, 3.7, 3.3 } };
     vector<int> key{ 1, 3, 3, 3 };
     vector<double> d{ 0.0, 0.0, 0.01, 0.01 };
 
 #if defined(CALC)
-    ofstream ofstr("output_data/mggsa_operational_characteristics_test.txt");
+    ofstream ofstr("output_data/mggsa_operational_characteristics/operational_characteristics.txt");
     if (!ofstr.is_open()) cerr << "File opening error\n";
 
     int den = 10, incr = 30;
@@ -84,20 +77,12 @@ int main() {
     for (int i = 0; i < numberFamily; i++) {
         for (int j = 0; j < sizeR; j++) {
             vector<double> A, B;
-            FunctorFamily functor;
-            FunctorFamilyConstrained functorConstrained;
+            FunctorFamilyConstrained functor;
 
-            if (problems[i].type == TypeConstraints::Constraints) {
-                functorConstrained.constrainedOptProblemFamily = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
-                (*functorConstrained.constrainedOptProblemFamily)[0]->GetBounds(A, B);
-                mggsa.setN((*functorConstrained.constrainedOptProblemFamily)[0]->GetDimension());
-                mggsa.setNumberConstraints((*functorConstrained.constrainedOptProblemFamily)[0]->GetConstraintsNumber());
-            } else {
-                functor.optProblemFamily = static_cast<IOptProblemFamily*>(problems[i].optProblemFamily);
-                (*functor.optProblemFamily)[0]->GetBounds(A, B);
-                mggsa.setN((*functor.optProblemFamily)[0]->GetDimension());
-                mggsa.setNumberConstraints(0);
-            }
+            functor.constrainedOptProblemFamily = static_cast<IConstrainedOptProblemFamily*>(problems[i].optProblemFamily);
+            (*functor.constrainedOptProblemFamily)[0]->GetBounds(A, B);
+            mggsa.setN((*functor.constrainedOptProblemFamily)[0]->GetDimension());
+            mggsa.setNumberConstraints((*functor.constrainedOptProblemFamily)[0]->GetConstraintsNumber());
             
             mggsa.setMaxTrials(K[i][1]);
             mggsa.setAB(A, B);
@@ -112,15 +97,10 @@ int main() {
 
             double startTime = omp_get_wtime();
             for (int k = 0; k < numberFunctions; k++) {
-                if (problems[i].type == TypeConstraints::Constraints) {
-                    functorConstrained.currentFunction = k;
-                    XOpt = (*functorConstrained.constrainedOptProblemFamily)[k]->GetOptimumPoint();
-                    mggsa.setF(functorConstrained);
-                } else {
-                    functor.currentFunction = k;
-                    XOpt = (*functor.optProblemFamily)[k]->GetOptimumPoint();
-                    mggsa.setF(functor);
-                }
+                functor.currentFunction = k;
+                XOpt = (*functor.constrainedOptProblemFamily)[k]->GetOptimumPoint();
+                mggsa.setF(functor);
+
                 if (mggsa.solveTest(XOpt, numberTrials, numberFevals)) {
                     numberTrialsArray[k] = numberTrials;
                 } else {
@@ -156,25 +136,32 @@ int main() {
 #endif
 
     int sizeKey = key.size();
-    setVariableGnuplot(ofstrOpt, "numberKey", to_string(sizeKey));
-    initArrayGnuplot(ofstrOpt, "familyName", numberFamily);
-    initArrayGnuplot(ofstrOpt, "r", sizeKey * numberFamily);
-    initArrayGnuplot(ofstrOpt, "key", sizeKey);
+    vars_file.set_variable("numberKey", sizeKey, false);
+    vars_file.init_array("familyName", numberFamily);
+    vars_file.init_array("r", sizeKey * numberFamily);
+    vars_file.init_array("key", sizeKey);
     for (int i = 0; i < numberFamily; i++) {
-        setValueInArrayGnuplot(ofstrOpt, "familyName", i + 1, problems[i].shortName);
-        setValueInArrayGnuplot(ofstrOpt, "key", i + 1, key[i], false);
+        vars_file.set_value_in_array("familyName", i + 1, problems[i].shortName);
         for (int j = 0; j < r[i].size(); j++) {
-            setValueInArrayGnuplot(ofstrOpt, "r", (i * sizeKey) + j + 1, r[i][j]);
+            vars_file.set_value_in_array("r", (i * sizeKey) + j + 1, r[i][j]);
         }
     }
-    ofstrOpt.close();
+    for (int i = 0; i < sizeKey; i++) {
+        vars_file.set_value_in_array("key", i + 1, key[i]);
+    }
+    vars_file.close();
 
-    vector<int> args{ displayType, familyNumber };
-    drawGraphGnuplot("scripts/mggsa_operational_characteristics_test.gp", args);
+#if defined( DRAW )
+    Script script("scripts/mggsa_operational_characteristics.gp");
+    script.addArgs(std::vector<int>{ displayType, familyNumber });
+    script.start();
+    if (script.isError() == 2) std::cerr << "Error gnuplot\n";
+    if (script.isError() == 1) std::cerr << "Error chmod\n";
+#endif
 
-#if defined(_MSC_VER)
+#if defined( _MSC_VER )
     cin.get();
 #endif
- */
+
 	return 0;
 }

@@ -4,7 +4,7 @@
 
 #include <Hill/HillProblemFamily.hpp>
 #include <Shekel/ShekelProblemFamily.hpp>
-#include <tasks/FamilyOptProblemsTask.h>
+// #include <tasks/FamilyOptProblemsTask.h>
 #include <Solver.h>
 #include <opt_methods/GsaMethod.h>
 #include <opt_methods/PiyavskyMethod.h>

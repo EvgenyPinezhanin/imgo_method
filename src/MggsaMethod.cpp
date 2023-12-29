@@ -1,19 +1,15 @@
-/* #include <mggsa.h>
+#include <opt_methods/MggsaMethod.h>
 
 #include <iostream>
 #include <fstream>
 #include <ctime>
 #include <limits>
 #include <algorithm>
-#if defined( _MSC_VER )
-    #define _USE_MATH_DEFINES
-    #include <math.h>
-#else
-    #include <cmath>
-#endif
+#include <iomanip>
+#include <my_math.h>
 
 #include <map.h>
-#include <output_results.h>
+// #include <output_results.h>
 #include <omp.h>
 
 // #define DEBUG
@@ -31,9 +27,9 @@ const double epsilon = 1e-14;
 
 const double peanoA = 0.0, peanoB = 1.0, peanoRandom = 0.5;
 
-inline int insertInSorted(vector<TrialConstrained> &trials, TrialConstrained trial) {
-    vector<TrialConstrained>::iterator iter = trials.begin();
-    vector<TrialConstrained>::iterator iterEnd = trials.end();
+inline int insertInSorted(std::vector<opt::IndexTrial> &trials, opt::IndexTrial trial) {
+    std::vector<opt::IndexTrial>::iterator iter = trials.begin();
+    std::vector<opt::IndexTrial>::iterator iterEnd = trials.end();
     int pos = 0;
     while(true) {
         if (iter == iterEnd || iter->x > trial.x) break;
@@ -43,8 +39,8 @@ inline int insertInSorted(vector<TrialConstrained> &trials, TrialConstrained tri
     return pos;
 }
 
-inline double searchMin(vector<TrialConstrained> &trials, int numberConstraints) {
-    double z = numeric_limits<double>::infinity(), x = 0.0;
+inline double searchMin(std::vector<opt::IndexTrial> &trials, int numberConstraints) {
+    double z = std::numeric_limits<double>::infinity(), x = 0.0;
     size_t sizeTrials = trials.size();
     for (int i = 0; i < sizeTrials; i++) {
         if (trials[i].nu == numberConstraints + 1 && trials[i].z < z) {
@@ -55,15 +51,15 @@ inline double searchMin(vector<TrialConstrained> &trials, int numberConstraints)
     return x;
 }
 
-TrialConstrained MggsaMethod::newTrial(double x) {
-    TrialConstrained trial(x);
-    vector<double> X(n);
+opt::IndexTrial MggsaMethod::newTrial(double x) {
+    opt::IndexTrial trial(x);
+    std::vector<double> X(dimension);
     y(x, X);
-    for (int j = 1; j <= numberConstraints + 1; j++) {
+    for (int j = 0; j <= numberConstraints; ++j) {
         numberFevals++;
-        if ((f(X, j) > 0) || (j == numberConstraints + 1)) {
+        if ((f(X, j) > 0) || (j == numberConstraints)) {
             trial.z = f(X, j);
-            trial.nu = j;
+            trial.nu = j + 1;
             break;
         }
     }
@@ -88,12 +84,12 @@ double MggsaMethod::newPoint(int t) {
     } else {
         return (trialPoints[t].x + trialPoints[(size_t)t - 1].x) / 2.0 -
                sgn(trialPoints[t].z - trialPoints[(size_t)t - 1].z) / (2.0 * r) *
-               pow(abs(trialPoints[t].z - trialPoints[(size_t)t - 1].z) / mu[(size_t)trialPoints[t].nu - 1], n);
+               std::pow(std::abs(trialPoints[t].z - trialPoints[(size_t)t - 1].z) / mu[(size_t)trialPoints[t].nu - 1], dimension);
     }
 }
 
 double MggsaMethod::calcH(double xNew) {
-    double d = 1.0 / (pow(2.0, den * n) * (pow(2.0, n) - 1.0));
+    double d = 1.0 / (std::pow(2.0, den * dimension) * (std::pow(2.0, dimension - 1.0)));
     double h = floor(xNew / d) * d;
     return h;
 }
@@ -101,14 +97,14 @@ double MggsaMethod::calcH(double xNew) {
 bool MggsaMethod::checkDensity(double h) {
     size_t sizeTrialPoints = trialPoints.size();
     for (int i = 0; i < sizeTrialPoints; i++) {
-        if (abs(h - trialPoints[i].x) <= epsilon) return false; 
+        if (std::abs(h - trialPoints[i].x) <= epsilon) return false; 
     }
     return true;
 }
 
-void MggsaMethod::y(double x, vector<double> &X) {
+void MggsaMethod::y(double x, std::vector<double> &X) {
     int d = (key != 3) ? den : den + 1;
-    mapd(x, d, X.data(), n, key);
+    mapd(x, d, X.data(), dimension, key);
 
 #if defined(DEBUG)
     cout << "X = (";
@@ -118,20 +114,20 @@ void MggsaMethod::y(double x, vector<double> &X) {
     cout << X[n - 1] << ")" << endl;
 #endif
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < dimension; i++) {
         X[i] = X[i] * (B[i] - A[i]) + (A[i] + B[i]) / 2.0;
     }
 }
 
-void MggsaMethod::x(const vector<double> &P, vector<double> &X) {
-    vector<double> pCorrect(n);
+void MggsaMethod::x(const std::vector<double> &P, std::vector<double> &X) {
+    std::vector<double> pCorrect(dimension);
     int sizeX;
-    X.resize((size_t)pow(2, n));
-    for (int i = 0; i < n; i++) {
+    X.resize((size_t)pow(2, dimension));
+    for (int i = 0; i < dimension; i++) {
         pCorrect[i] = (P[i] - (A[i] + B[i]) / 2.0) / (B[i] - A[i]);
     }
 
-    invmad(den + 1, X.data(), (int)pow(2, n), &sizeX, pCorrect.data(), n, incr);
+    invmad(den + 1, X.data(), (int)pow(2, dimension), &sizeX, pCorrect.data(), dimension, incr);
     X.resize(sizeX);
 }
 
@@ -188,17 +184,17 @@ double MggsaMethod::selectNewPoint(int &t) {
     for (int i = 0; i < sizeLastTrials; i++) {
         for (int j = 0; j < sizeI; j++) {
             if (I[nuLastTrials][j].x != lastTrials[i].x) {
-                muTmp = abs(I[nuLastTrials][j].z - lastTrials[i].z) /
-                        pow(abs(I[nuLastTrials][j].x - lastTrials[i].x), 1.0 / n);
+                muTmp = std::abs(I[nuLastTrials][j].z - lastTrials[i].z) /
+                        std::pow(std::abs(I[nuLastTrials][j].x - lastTrials[i].x), 1.0 / dimension);
                 if (muTmp > mu[nuLastTrials]) {
                     mu[nuLastTrials] = muTmp;
-                    if (abs(mu[nuLastTrials]) > epsilon) calcI[nuLastTrials] = true;
+                    if (std::abs(mu[nuLastTrials]) > epsilon) calcI[nuLastTrials] = true;
                 }
             }
         }
     }
     for (int nu = 0; nu < numberConstraints + 1; nu++) {
-        if (abs(mu[nu]) <= epsilon) mu[nu] = 1.0;
+        if (std::abs(mu[nu]) <= epsilon) mu[nu] = 1.0;
     }
 
     // without optimization
@@ -209,13 +205,13 @@ double MggsaMethod::selectNewPoint(int &t) {
     //     sizeI = I[nu].size();
     //     for (int i = 1; i < sizeI; i++) { // при i = 0 - нет j
     //         for (int j = 0; j < i; j++) {
-    //             muTmp = abs(I[nu][i].z - I[nu][j].z) / pow(I[nu][i].x - I[nu][j].x, 1.0 / n);
+    //             muTmp = std::abs(I[nu][i].z - I[nu][j].z) / pow(I[nu][i].x - I[nu][j].x, 1.0 / dimension);
     //             if (muTmp > mu[nu]) {
     //                 mu[nu] = muTmp;
     //             }
     //         }
     //     }
-    //     if (abs(mu[nu]) <= epsilon) {
+    //     if (std::abs(mu[nu]) <= epsilon) {
     //         mu[nu] = 1.0;
     //     };
     // }
@@ -272,30 +268,33 @@ double MggsaMethod::selectNewPoint(int &t) {
 #endif
 
     // Steps 5, 6
-    double R = -numeric_limits<double>::infinity(), Rtmp;
+    double R = -std::numeric_limits<double>::infinity(), Rtmp;
     double muV, zStarV, dx;
 
     size_t sizeTrialPoints = trialPoints.size();
+    opt::IndexTrial lastTrial = trialPoints[0], nextTrial;
     for (size_t i = 1; i < sizeTrialPoints; i++) {
-        dx = pow(trialPoints[i].x - trialPoints[i - 1].x, 1.0 / n);
-        if (trialPoints[i].nu == trialPoints[i - 1].nu) {
-            muV = mu[(size_t)trialPoints[i].nu - 1];
-            zStarV = zStar[(size_t)trialPoints[i].nu - 1];
-            Rtmp = dx + pow(trialPoints[i].z - trialPoints[i - 1].z, 2) / (r * r * muV * muV * dx) -
-                   2.0 * (trialPoints[i].z + trialPoints[i - 1].z - 2.0 * zStarV) / (r * muV);
-        } else if (trialPoints[i - 1].nu < trialPoints[i].nu) {
-            muV = mu[(size_t)trialPoints[i].nu - 1];
-            zStarV = zStar[(size_t)trialPoints[i].nu - 1];
-            Rtmp = 2.0 * dx - 4.0 * (trialPoints[i].z - zStarV) / (r * muV);
+        nextTrial = trialPoints[i];
+        dx = std::pow(nextTrial.x - lastTrial.x, 1.0 / dimension);
+        if (nextTrial.nu == lastTrial.nu) {
+            muV = mu[(size_t)nextTrial.nu - 1];
+            zStarV = zStar[(size_t)nextTrial.nu - 1];
+            Rtmp = dx + (nextTrial.z - lastTrial.z) * (nextTrial.z - lastTrial.z) /
+                   (r * r * muV * muV * dx) - 2.0 * (nextTrial.z + lastTrial.z - 2.0 * zStarV) / (r * muV);
+        } else if (lastTrial.nu < nextTrial.nu) {
+            muV = mu[(size_t)nextTrial.nu - 1];
+            zStarV = zStar[(size_t)nextTrial.nu - 1];
+            Rtmp = 2.0 * dx - 4.0 * (nextTrial.z - zStarV) / (r * muV);
         } else  {
-            muV = mu[(size_t)trialPoints[i - 1].nu - 1];
-            zStarV = zStar[(size_t)trialPoints[i - 1].nu - 1];
-            Rtmp = 2.0 * dx - 4.0 * (trialPoints[i - 1].z - zStarV) / (r * muV);
+            muV = mu[(size_t)lastTrial.nu - 1];
+            zStarV = zStar[(size_t)lastTrial.nu - 1];
+            Rtmp = 2.0 * dx - 4.0 * (lastTrial.z - zStarV) / (r * muV);
         }
         if (Rtmp > R) {
             R = Rtmp;
             t = (int)i;
         }
+        lastTrial = nextTrial;
 
 #if defined(DEBUG)
     cout << "R[" << trialPoints[i - 1].x << ", " << trialPoints[i].x << "] = " << Rtmp << endl;
@@ -313,14 +312,14 @@ double MggsaMethod::selectNewPoint(int &t) {
 }
 
 void MggsaMethod::setNumberConstraints(int _numberConstraints) {
-    OptimizationMethodConstrained::setNumberConstraints(_numberConstraints);
+    numberConstraints = _numberConstraints;
     I.resize((size_t)numberConstraints + 1);
     calcI.resize((size_t)numberConstraints + 1);
     mu.resize((size_t)numberConstraints + 1);
     zStar.resize((size_t)numberConstraints + 1);
 }
 
-void MggsaMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X, TypeSolve type) {
+void MggsaMethod::solve(int &numberTrials, int &numberFevals, std::vector<double> &X, TypeSolve type) {
 #if defined(TIME_TEST)
     ofstrTimeTest.open("output_data/mggsa_test_time.txt");
     if (!ofstrTimeTest.is_open()) cerr << "File opening error\n";
@@ -347,11 +346,11 @@ void MggsaMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X,
         lastTrialsPos.resize(1);
         this->numberFevals = 0;
     }
-    X.resize(n);
+    X.resize(dimension);
     coincideX = false;
 
     if (type == TypeSolve::SOLVE) {
-        lastTrials[0] = TrialConstrained{peanoA, -1.0, 0};
+        lastTrials[0] = opt::IndexTrial{peanoA, -1.0, 0};
         trialPoints.push_back(lastTrials[0]);
         lastTrials[0].x = peanoB;
         trialPoints.push_back(lastTrials[0]);
@@ -420,8 +419,8 @@ void MggsaMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X,
 
     double xNew, h, deltaT;
     int t;
-    TrialConstrained trial;
-    vector<double> P(n), point;
+    opt::IndexTrial trial;
+    std::vector<double> P(dimension), point;
     while(true) {
     #if defined(TIME_TEST)
         numberTimeStamp.push_back(numberTrials);
@@ -461,7 +460,7 @@ void MggsaMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X,
         #endif
         }
 
-        deltaT = pow(trialPoints[t].x - trialPoints[(size_t)t - 1].x, 1.0 / n);
+        deltaT = pow(trialPoints[t].x - trialPoints[(size_t)t - 1].x, 1.0 / dimension);
 
     #if defined(TIME_TEST)
         startTime = omp_get_wtime();
@@ -568,11 +567,11 @@ void MggsaMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X,
 #endif
 }
 
-void MggsaMethod::solve(int &numberTrials, int &numberFevals, vector<double> &X) {
+void MggsaMethod::solve(int &numberTrials, int &numberFevals, std::vector<double> &X) {
     solve(numberTrials, numberFevals, X, TypeSolve::SOLVE);
 }
 
-bool MggsaMethod::solveTest(vector<double> XOpt, int &numberTrials, int &numberFevals, TypeSolve type) {
+bool MggsaMethod::solveTest(std::vector<double> XOpt, int &numberTrials, int &numberFevals, TypeSolve type) {
     if (type == TypeSolve::SOLVE) {
         for (int nu = 0; nu < numberConstraints + 1; nu++) {
             I[nu].clear();
@@ -583,7 +582,7 @@ bool MggsaMethod::solveTest(vector<double> XOpt, int &numberTrials, int &numberF
         lastTrialsPos.resize(1);
         this->numberFevals = 0;
 
-        lastTrials[0] = TrialConstrained{peanoA, -1.0, 0};
+        lastTrials[0] = opt::IndexTrial{peanoA, -1.0, 0};
         trialPoints.push_back(lastTrials[0]);
         lastTrials[0].x = peanoB;
         trialPoints.push_back(lastTrials[0]);
@@ -600,7 +599,7 @@ bool MggsaMethod::solveTest(vector<double> XOpt, int &numberTrials, int &numberF
 
     double xNew, h;
     int t;
-    vector<double> P(n), X(n);
+    std::vector<double> P(dimension), X(dimension);
     while (true) {
         // Steps 3, 4, 5, 6, Pre-7
         xNew = selectNewPoint(t);
@@ -620,7 +619,7 @@ bool MggsaMethod::solveTest(vector<double> XOpt, int &numberTrials, int &numberF
                 return false;
             }
             lastTrials.clear();
-            TrialConstrained trial = newTrial(hNu[0]);
+            opt::IndexTrial trial = newTrial(hNu[0]);
             for (int i = 0; i < hNu.size(); i++) {
                 trial.x = hNu[i];
                 lastTrials.push_back(trial);
@@ -661,7 +660,71 @@ bool MggsaMethod::solveTest(vector<double> XOpt, int &numberTrials, int &numberF
     }
 }
 
-bool MggsaMethod::solveTest(vector<double> XOpt, int &numberTrials, int &numberFevals) {
+bool MggsaMethod::solveTest(std::vector<double> XOpt, int &numberTrials, int &numberFevals) {
     return solveTest(XOpt, numberTrials, numberFevals, TypeSolve::SOLVE);
 }
- */
+
+void printResultMggsa(std::string taskName, int dimension, int numberConstraints, const std::vector<double> &A, const std::vector<double> &B,
+                      const std::vector<double> &lipschitzConst, const std::vector<double> &xOpt, double optimalF, int maxTrials, int maxFevals,
+                      double eps, double r, double d, int den, int key, int incr, int numberTrials, int numberFevals,
+                      const std::vector<double> &estLipschitzConst, const std::vector<double> &X, double f) {
+    const auto defaultPrecision = std::cout.precision();
+    std::cout << std::setprecision(8);
+
+    std::cout << "Function: " << taskName << "\n";
+    std::cout << "Dimension = " << dimension << "\n";
+    std::cout << "Number of constraints = " << numberConstraints << "\n";
+    std::cout << "[A; B] = [(";
+    for (int i = 0; i < dimension - 1; i++) {
+        std::cout << A[i] << ", ";
+    }
+    std::cout << A[dimension - 1] << "); (";
+    for (int i = 0; i < dimension - 1; i++) {
+        std::cout << B[i] << ", ";
+    }
+    std::cout << B[dimension - 1] << ")]" << "\n";
+    if (!lipschitzConst.empty()) {
+        std::cout << "Lipschitz constant:" << "\n";
+        std::cout << "L*(f) = " << lipschitzConst[numberConstraints] << "\n";
+        for (int j = 0; j < numberConstraints; j++) {
+            std::cout << "L*(g" << j + 1 << ") = " << lipschitzConst[j] << "\n";
+        }
+    }
+    std::cout << "X* = (";
+    for (int i = 0; i < dimension - 1; i++) {
+        std::cout << xOpt[i] << ", ";
+    }
+    std::cout << xOpt[dimension - 1] << ")" << "\n";
+    std::cout << "f(X*) = " << optimalF << "\n";
+    std::cout << "Parameters for method:" << "\n";
+    std::cout << "Maximum of trials = " << maxTrials << "\n";
+    std::cout << "Maximum of fevals = " << maxFevals << "\n";
+    std::cout << "eps = " << eps << " r = " << r << " d = " << d << "\n";
+    std::cout << "Parameters for constructing the Peano curve:" << "\n";
+    std::cout << "m = " << den << " key = " << key;
+    if (incr >= 0) std::cout << " incr = " << incr << "\n";
+        else std::cout << "\n";
+    std::cout << "Trials result:" << "\n";
+    std::cout << "Number of trials = " << numberTrials << "\n";
+    std::cout << "Number of fevals = " << numberFevals << "\n";
+    std::cout << "Estimation of the Lipschitz constant:" << "\n";
+    std::cout << "L(f) = " << estLipschitzConst[numberConstraints] << "\n";
+    for (int j = 0; j < numberConstraints; j++) {
+        std::cout << "L(g" << j + 1 << ") = " << estLipschitzConst[j] << "\n";
+    }
+    std::cout << "X = (";
+    for (int i = 0; i < dimension - 1; i++) {
+        std::cout << X[i] << ", ";
+    }
+    std::cout << X[dimension - 1] << ")" << "\n";
+    std::cout << "f(X) = " << f << "\n";
+    double sum = 0.0;
+    for (int i = 0; i < dimension; i++) {
+        sum += (xOpt[i] - X[i]) * (xOpt[i] - X[i]);
+    }
+    std::cout << "||X* - X|| = " << std::sqrt(sum) << "\n";
+    std::cout << "|f(X*) - f(X)| = " << std::abs(optimalF - f) << "\n";
+    std::cout << std::endl;
+
+    std::cout << std::setprecision(defaultPrecision);
+}

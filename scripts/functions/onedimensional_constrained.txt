@@ -6,9 +6,9 @@ array blockNames[numberBlocks]
 blockNames[1] = "sample"
 blockNames[2] = "test"
 
-########################
-## SAMPLE CONSTRAINED ##
-########################
+############
+## SAMPLE ##
+############
 
 array ASample[numberFunctions[1]]
 array BSample[numberFunctions[1]]
@@ -36,9 +36,9 @@ fSample(i, x, index) = i == 1 ? f1Sample(x, index) : \
                        i == 2 ? f2Sample(x, index) : \
                        i == 3 ? f3Sample(x, index) : 1/0
 
-######################
-## TEST CONSTRAINED ##
-######################
+##########
+## TEST ##
+##########
 
 array ATest[numberFunctions[2]]
 array BTest[numberFunctions[2]]

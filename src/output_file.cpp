@@ -54,17 +54,23 @@ void output_file::add_points(const std::vector<double> &x, double f, bool space)
     stream << str_points.str();
 }
 
-/*
-
-void addPointGnuplot(ofstream &ofstr, const vector<double> &X) {
-    size_t dimensionX = X.size();
-    for (int i = 0; i < dimensionX - 1; i++) {
-        ofstr << X[i] << " ";
+void output_file::add_points(const std::vector<std::vector<double>> &x, bool space) {
+    std::stringstream str_points;
+    size_t numberPoints = x.size();
+    if (numberPoints != 0) {
+        size_t dimensionPoint = x[0].size();
+        for (size_t i = 0; i < numberPoints; ++i) {
+            for (size_t j = 0; j < dimensionPoint; ++j) {
+                str_points << x[i][j] << " ";
+            }
+            str_points << "\n";
+        }
+        if (space) str_points << "\n\n";
+        stream << str_points.str();
     }
-    ofstr << X[dimensionX - 1] << "\n";
-    ofstr << "\n" << endl;
 }
 
+/*
 void addPointGnuplot(ofstream &ofstr, Trial trial) {
     ofstr << trial.x << " " << trial.z << "\n";
     ofstr << "\n" << endl;

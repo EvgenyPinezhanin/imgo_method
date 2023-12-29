@@ -1,64 +1,36 @@
+#ifndef FAMILY_PROBLEM_H_
+#define FAMILY_PROBLEM_H_
+
 #include <vector>
 #include <string>
+#include <limits>
 
-// #include <tasks/Task.h>
-// #include <opt_problems/OneDimensionalConstrainedProblem.h>
-
-using std::vector;
-using std::string;
-
-
-#ifndef STRONGIN_TASK_H_
-#define STRONGIN_TASK_H_
-
-// #include <base_structures/tasks/GeneralNumericalTask.h>
-
-/* template <typename OptimizationProblemType>
-struct StronginTask : public GeneralNumericalTask<OptimizationProblemType> {
-    double r, constantEstimation;
-
-    StronginTask(string _name, const OptimizationProblemType &_optTask, double _r, double _constantEstimation,
-                 double _accuracy, int _maxTrials, int _maxFevals, bool _use)
-                 : GeneralNumericalTask<OptimizationProblemType>(_name, _optTask, _accuracy, _maxTrials, _maxFevals, _use),
-                 r(_r), constantEstimation(_constantEstimation) {};
-}; */
-
-#endif // STRONGIN_TASK_H_
-
-/*
-
-struct TaskMggsa : public Task {
-    double (*f)(vector<double>, int);
-    int numberConstraints;
-    double r, d;
-    int den, key, incr;
-
-    TaskMggsa(double (*_f)(vector<double>, int), string _name, int _n, int _numberConstraints, vector<double> _A,
-              vector<double> _B, vector<double> _XOpt, vector<double> _L, double _eps, int _maxTrials, int _maxFevals,
-              double _r, double _d, int _den, int _key, int _incr, bool _used = true) : Task(_name, _n, _A, _B, _XOpt, _L, _eps,
-              _maxTrials, _maxFevals, _used), f(_f), numberConstraints(_numberConstraints), r(_r), d(_d), den(_den),
-              key(_key), incr(_incr) {};
-};
-
-enum class TypeConstraints { Constraints, NoConstraints };
+#include <IConstrainedOptProblemFamily.hpp>
 
 struct Problem {
     string name;
-    TypeConstraints type;
     string shortName;
 
     bool used;
 
-    Problem(string _name, TypeConstraints _type, string _shortName = "", bool _used = true) 
-            : name(_name), shortName(_shortName), type(_type), used(_used) {};
+    Problem(string _name = "", string _shortName = "", bool _used = true) 
+            : name(_name), shortName(_shortName), used(_used) {};
 };
 
-struct ProblemSingle : public Problem {
+struct FamilyProblem : public Problem {
+    IConstrainedOptProblemFamily *optProblemFamily;
+
+    FamilyProblem(string _name = "", IConstrainedOptProblemFamily *_optProblemFamily = nullptr,
+                  string _shortName = "", bool _used = true) 
+        : Problem(_name, _shortName, _used), optProblemFamily(_optProblemFamily) {};
+};
+
+/* struct ProblemSingle : public Problem {
     IGeneralOptProblem *optProblem;
 
     ProblemSingle(string _name, IGeneralOptProblem *_optProblem, TypeConstraints _type, string _shortName = "", bool _used = true) 
                   : Problem(_name, _type, _shortName, used), optProblem(_optProblem) {};
-};
+}; */
 
 class Functor {
 public:
@@ -68,7 +40,7 @@ public:
     virtual double operator() (vector<double> x, int j) = 0; 
 };
 
-class FunctorSingle : public Functor {
+/* class FunctorSingle : public Functor {
 public:
     IOptProblem *optProblem;
 
@@ -87,9 +59,9 @@ public:
             default: return numeric_limits<double>::quiet_NaN();
         }
     }
-};
+}; */
 
-class FunctorSingleConstrained : public Functor {
+/* class FunctorSingleConstrained : public Functor {
 public:
     IConstrainedOptProblem *constrainedOptProblem;
 
@@ -117,9 +89,9 @@ public:
             return numeric_limits<double>::quiet_NaN();
         }
     }
-};
+}; */
 
-class FunctorFamily : public Functor {
+/* class FunctorFamily : public Functor {
 public:
     IOptProblemFamily *optProblemFamily;
     int currentFunction;
@@ -140,7 +112,7 @@ public:
             default: return numeric_limits<double>::quiet_NaN();
         }
     }
-};
+}; */
 
 class FunctorFamilyConstrained : public Functor {
 public:
@@ -152,27 +124,28 @@ public:
 
     double operator() (double x, int j) {
         int numberConstraints = (*constrainedOptProblemFamily)[currentFunction]->GetConstraintsNumber();
-        if (j >= 1 && j <= numberConstraints) {
-            return (*constrainedOptProblemFamily)[currentFunction]->ComputeConstraint(j - 1, vector<double>{ x });
-        } else if (j == numberConstraints + 1) {
+        if (j >= 0 && j < numberConstraints) {
+            return (*constrainedOptProblemFamily)[currentFunction]->ComputeConstraint(j, vector<double>{ x });
+        } else if (j == numberConstraints) {
             return (*constrainedOptProblemFamily)[currentFunction]->ComputeFunction(vector<double>{ x });
         } else {
-            return numeric_limits<double>::quiet_NaN();
+            return std::numeric_limits<double>::quiet_NaN();
         }
     }
 
-    double operator() (vector<double> x, int j) {
+    double operator() (vector<double> x, int j) override {
         int numberConstraints = (*constrainedOptProblemFamily)[currentFunction]->GetConstraintsNumber();
-        if (j >= 1 && j <= numberConstraints) {
-            return (*constrainedOptProblemFamily)[currentFunction]->ComputeConstraint(j - 1, x);
-        } else if (j == numberConstraints + 1) {
+        if (j >= 0 && j < numberConstraints) {
+            return (*constrainedOptProblemFamily)[currentFunction]->ComputeConstraint(j, x);
+        } else if (j == numberConstraints) {
             return (*constrainedOptProblemFamily)[currentFunction]->ComputeFunction(x);
         } else {
-            return numeric_limits<double>::quiet_NaN();
+            return std::numeric_limits<double>::quiet_NaN();
         }
     }
 };
 
+/*
 struct DataDirect {
     int numberFevals;
     vector<vector<double>> points;
@@ -215,3 +188,6 @@ struct TaskDirect {
                sigmaReltol(_sigmaReltol), logfile(_logfile), algorithm(_algorithm), used(_used) {};
 }; 
 */
+
+
+#endif // FAMILY_PROBLEM_H_

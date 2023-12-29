@@ -1,0 +1,153 @@
+numberBlocks = 2
+array numberFunctions[numberBlocks]
+numberFunctions[1] = 4
+numberFunctions[2] = 2
+array blockNames[numberBlocks]
+blockNames[1] = "sample"
+blockNames[2] = "test"
+
+############
+## SAMPLE ##
+############
+
+array A1Sample[numberFunctions[1]]
+array A2Sample[numberFunctions[1]]
+array B1Sample[numberFunctions[1]]
+array B2Sample[numberFunctions[1]]
+array numberConstraintsSample[numberFunctions[1]]
+
+f1Sample(x, y, index) = index == 0 ? 1.0 - x - y : 1/0
+A1Sample[1] = -4.0
+A2Sample[1] = -4.0
+B1Sample[1] =  4.0
+B2Sample[1] =  4.0
+numberConstraintsSample[1] = 0
+
+f2Sample(x, y, index) = index == 0 ? (x - 1.0) ** 2 / 5.0 + (y - 1.0) ** 2 / 5.0 : 1/0
+A1Sample[2] = -4.0
+A2Sample[2] = -4.0
+B1Sample[2] =  1.0
+B2Sample[2] =  1.0
+numberConstraintsSample[2] = 0
+
+g3Sample1(x, y) = 1.0 - x - y
+g3Sample(x, y) = g3Sample1(x, y) <= 0.0 ? g3Sample1(x, y) : 1/0
+f3Sample(x, y, index) = index == 0 ? x ** 2 / 5.0 + y ** 2 / 5.0 : \
+                        index == 1 ? g3Sample(x, y) : 1/0
+A1Sample[3] = -1.0
+A2Sample[3] = -1.0
+B1Sample[3] =  1.0
+B2Sample[3] =  1.0
+numberConstraintsSample[3] = 1
+
+g4Sample1(x, y) = (x - 2.0) ** 2 + (y - 2.0) ** 2 - 2.0
+g4Sample(x, y) = g4Sample1(x, y) <= 0.0 ? g4Sample1(x, y) : 1/0
+f4Sample(x, y, index) = index == 0 ? x ** 2 / 5.0 + y ** 2 / 5.0 : \
+                        index == 1 ? g4Sample(x, y) : 1/0
+A1Sample[4] = 0.0
+A2Sample[4] = 0.0
+B1Sample[4] = 3.0
+B2Sample[4] = 3.0
+numberConstraintsSample[4] = 1
+
+fSample(i, x, y, index) = i == 1 ? f1Sample(x, y, index) : \
+                          i == 2 ? f2Sample(x, y, index) : \
+                          i == 3 ? f3Sample(x, y, index) : \
+                          i == 4 ? f4Sample(x, y, index) : 1/0
+ASample(j, k) = k == 1 ? A1Sample[j] : \
+                k == 2 ? A2Sample[j] : 1/0
+BSample(j, k) = k == 1 ? B1Sample[j] : \
+                k == 2 ? B2Sample[j] : 1/0
+
+##########
+## TEST ##
+##########
+
+array A1Test[numberFunctions[2]]
+array A2Test[numberFunctions[2]]
+array B1Test[numberFunctions[2]]
+array B2Test[numberFunctions[2]]
+array numberConstraintsTest[numberFunctions[2]]
+
+g1Test1(x, y) = 0.01 * ((x - 2.2) ** 2 + (y - 1.2) ** 2 - 2.25)
+g1Test2(x, y) = 100.0 * (1.0 - ((x - 2.0) ** 2) / 1.44 - (0.5 * y) ** 2)
+g1Test3(x, y) = 10.0 * (y - 1.5 - 1.5 * sin(6.283 * (x - 1.75)))
+g1Test(x, y) = g1Test1(x, y) <= 0.0 ? \
+               g1Test2(x, y) <= 0.0 ? \
+               g1Test3(x, y) <= 0.0 ? \
+               g1Test3(x, y) : 1/0 : 1/0 : 1/0
+f1Test(x, y, index) = index == 0 ? -1.5 * x ** 2 * exp(1 - x ** 2 - 20.25 * (x - y) ** 2) - (0.5 * (x - 1) * (y - 1)) ** 4 * \
+                                    exp(2.0 - (0.5 * (x - 1)) ** 4 - (y - 1.0) ** 4) : \
+                      index == 1 ? g1Test(x, y) : 1/0
+A1Test[1] =  0.0
+A2Test[1] = -1.0
+B1Test[1] =  4.0
+B2Test[1] =  3.0
+numberConstraintsTest[1] = 3
+
+array C[20]
+C[1] =   75.1963666677
+C[2] =   -3.8112755343
+C[3] =    0.1269366345
+C[4] =   -0.0020567665
+C[5] =    0.0000103450
+C[6] =   -6.8306567631
+C[7] =    0.0302344793
+C[8] =   -0.0012813448
+C[9] =    0.0000352559
+C[10] =  -0.0000002266
+C[11] =   0.2564581253
+C[12] =  -0.0034604030
+C[13] =   0.0000135139
+C[14] = -28.1064434908
+C[15] =  -0.0000052375
+C[16] =  -0.0000000063
+C[17] =   0.0000000007
+C[18] =   0.0003405462
+C[19] =  -0.0000016638
+C[20] =  -2.8673112392
+
+g2Test1(x, y) = 450.0 - x * y
+g2Test2(x, y) = (0.1 * x - 1.0) ** 2 - y
+g2Test3(x, y) = 8.0 * (x - 40.0) - (y - 30.0) * (y - 55.0)
+g2Test4(x, y) = y + (x - 35.0) * (x - 30.0) / 125.0 - 80.0
+g2Test(x, y) = g2Test1(x, y) <= 0.0 ? \
+               g2Test2(x, y) <= 0.0 ? \
+               g2Test3(x, y) <= 0.0 ? \
+               g2Test4(x, y) <= 0.0 ? \
+               g2Test4(x, y) : 1/0 : 1/0 : 1/0 : 1/0
+f2Test(x, y, index) = index == 0 ? -(C[1] + C[2] * x + C[3] * x ** 2 + C[4] * x ** 3 + C[5] * x ** 4 + C[6] * y + C[7] * x * y + \
+                                     C[8] * x ** 2 * y + C[9] * x ** 3 * y + C[10] * x ** 4 * y + C[11] * y ** 2 + C[12] * y ** 3 + \
+                                     C[13] * y ** 4 + C[14] / (y + 1) + C[15] * x ** 2 * y ** 2 + C[16] * x ** 3 * y ** 2 + \
+                                     C[17] * x ** 3 * y ** 3 + C[18] * x * y ** 2 + C[19] * x * y ** 3 + C[20] * exp(0.0005 * x * y)) : \
+                      index == 1 ? g2Test(x, y) : 1/0
+A1Test[2] =  0.0
+A2Test[2] =  0.0
+B1Test[2] = 80.0
+B2Test[2] = 80.0
+numberConstraintsTest[2] = 4
+
+fTest(i, x, y, index) = i == 1 ? f1Test(x, y, index) : \
+                        i == 2 ? f2Test(x, y, index) : \
+                        i == 3 ? f3Test(x, y, index) : \
+                        i == 4 ? f4Test(x, y, index) : \
+                        i == 5 ? f5Test(x, y, index) : \
+                        i == 6 ? f6Test(x, y, index) : \
+                        i == 7 ? f7Test(x, y, index) : \
+                        i == 8 ? f8Test(x, y, index) : \
+                        i == 9 ? f9Test(x, y, index) : \
+                        i == 10 ? f10Test(x, y, index) : 1/0
+ATest(j, k) = k == 1 ? A1Test[j] : \
+              k == 2 ? A2Test[j] : 1/0
+BTest(j, k) = k == 1 ? B1Test[j] : \
+              k == 2 ? B2Test[j] : 1/0
+
+
+f(i, j, x, y, index) = i == 1 ? fSample(j, x, y, index) : \
+                       i == 2 ? fTest(j, x, y, index) : 1/0
+A(i, j, k) = i == 1 ? ASample(j, k) : \
+             i == 2 ? ATest(j, k) : 1/0
+B(i, j, k) = i == 1 ? BSample(j, k) : \
+          i == 2 ? BTest(j, k) : 1/0
+numberConstraints(i, j) = i == 1 ? numberConstraintsSample[j] : \
+                          i == 2 ? numberConstraintsTest[j] : 1/0

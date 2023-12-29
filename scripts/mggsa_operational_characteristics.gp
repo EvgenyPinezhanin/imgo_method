@@ -1,8 +1,8 @@
 #! /usr/bin/gnuplot
 
-taskName = "mggsa_operational_characteristics_test"
-datafile = "output_data/".taskName.".txt"
-load "output_data/".taskName."_opt.txt"
+taskName = "mggsa_operational_characteristics"
+datafile = "output_data/".taskName."/operational_characteristics.txt"
+load "output_data/".taskName."/vars.txt"
 
 set linetype 1 lc rgb "red" lw 2
 set linetype 2 lc rgb "green" lw 2
@@ -35,21 +35,21 @@ if (ARG1 == 0) {
     bind all "alt-End" "exit gnuplot"
     pause mouse close
 } else {
-    set terminal pngcairo size 1440, 600 font "Helvetica, 16"
-    system "mkdir -p output_graph/".taskName
-
-    set key width -3
-
-    set lmargin 10
-    set rmargin 24
-    set tmargin 3
-    set bmargin 3
-
-    do for [i = 1 : 4] {
-        set output "output_graph/".taskName."/".familyName[i].".png"
-
-        ind = numberKey * (i - 1)
-        set title titlePng(familyName[i]) font "Helvetica, 16"
-        plot for [j = 1 : numberKey] datafile index ind + j - 1 using 1:2 with lines lt j title "r = ".r[ind + j].", key = ".key[j]
-    }
+    // set terminal pngcairo size 1440, 600 font "Helvetica, 16"
+    // system "mkdir -p output_graph/".taskName
+// 
+    // set key width -3
+// 
+    // set lmargin 10
+    // set rmargin 24
+    // set tmargin 3
+    // set bmargin 3
+// 
+    // do for [i = 1 : 4] {
+    //     set output "output_graph/".taskName."/".familyName[i].".png"
+// 
+    //     ind = numberKey * (i - 1)
+    //     set title titlePng(familyName[i]) font "Helvetica, 16"
+    //     plot for [j = 1 : numberKey] datafile index ind + j - 1 using 1:2 with lines lt j title "r = ".r[ind + j].", key = ".key[j]
+    // }
 }

@@ -60,10 +60,6 @@ int main() {
     solver.solveTasks(tasks, "output_data/" + methodName + "_test/");
 #endif
 
-#include <iomanip>
-std::cout.precision(10);
-std::cout << tasks[11].problem.computeObjFunction(4.0);
-
 #if defined( DRAW )
     Script script("scripts/onedimensional_constrained_test.gp");
     script.addArg(methodName);

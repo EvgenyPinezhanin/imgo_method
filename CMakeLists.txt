@@ -45,6 +45,7 @@ add_custom_command(
   ${OUT_DIR}/output_data/piyavsky_test
   ${OUT_DIR}/output_data/gsa_test
   ${OUT_DIR}/output_data/imgo_test
+  ${OUT_DIR}/output_data/mggsa_test
 
   ${OUT_DIR}/output_data/onedimensional_operational_characteristics
   ${OUT_DIR}/output_data/onedimensional_operational_characteristics/scanning
@@ -52,6 +53,9 @@ add_custom_command(
   ${OUT_DIR}/output_data/onedimensional_operational_characteristics/gsa
 
   ${OUT_DIR}/output_data/sample_test_problem
+  ${OUT_DIR}/output_data/sample_test_problem_family
+
+  ${OUT_DIR}/output_data/mggsa_operational_characteristics
 )
 
 # GPROF
