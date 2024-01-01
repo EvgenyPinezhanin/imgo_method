@@ -5,7 +5,7 @@ namespace opt {
     template<typename TrialType>
     class ICharacteristicOptMethod {
     protected:
-        int t;
+        size_t t;
 
         virtual void insertInSorted(const TrialType &trial) = 0;
         virtual void calcCharacteristic() = 0;

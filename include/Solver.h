@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-#include <gnuplot/output_file.h>
+#include <gnuplot/OutputFile.h>
 #include <omp.h>
 
 template <typename OptMethodType>
@@ -16,7 +16,7 @@ protected:
     typename OptMethodType::Result result;
     typename OptMethodType::Report report;
 
-    output_file trials_file;
+    OutputFile trialsFile;
 
     std::vector<typename OptMethodType::Trial> trials;
     std::vector<typename OptMethodType::OptProblem::Point> optimalPoints;
@@ -27,13 +27,13 @@ public:
         optMethod(_optMethod),
         result(),
         report(),
-        trials_file()
+        trialsFile()
     {};
 
     void solveTask(const typename OptMethodType::Task &task, const std::string &saveDirectory) {
         if (task.use) {
-            trials_file.open(saveDirectory + task.blockName + "_" + std::to_string(task.functionNumber));
-            if (!trials_file.is_open()) std::cerr << "trials_file opening error\n";
+            trialsFile.open(saveDirectory + task.blockName + "_" + std::to_string(task.functionNumber));
+            if (!trialsFile.isOpen()) std::cerr << "trials_file opening error\n";
 
             optMethod.setProblem(task.problem);
             optMethod.setParameters(task.parameters);
@@ -46,22 +46,22 @@ public:
             report.print(std::cout, task, result, workTime);
 
             task.problem.getOptimalPoints(optimalPoints);
-            trials_file.add_points(optimalPoints, task.problem.getOptimalValue());
+            trialsFile.addPoints(optimalPoints, task.problem.getOptimalValue());
 
-            trials_file.add_point(result.point, result.value);
+            trialsFile.addPoint(result.point, result.value);
 
             optMethod.getTrialPoints(trials);
-            trials_file.add_points(trials);
+            trialsFile.addPoints(trials);
 
-            trials_file.close();
+            trialsFile.close();
         }
     }
 
     void solveTasks(const std::vector<typename OptMethodType::Task> &tasks, const std::string &saveDirectory) {
-        int numberTasks = (int)tasks.size();
+        size_t numberTasks = tasks.size();
 
         double totalStartTime = omp_get_wtime();
-        for (int i = 0; i < numberTasks; i++) {
+        for (size_t i = 0; i < numberTasks; ++i) {
             solveTask(tasks[i], saveDirectory);
             std::cout << "\n\n";
         }
@@ -72,8 +72,8 @@ public:
 
     void solveTestTask(const typename OptMethodType::Task &task, const std::string &saveDirectory) {
         if (task.use) {
-            trials_file.open(saveDirectory + task.blockName + "_" + std::to_string(task.functionNumber));
-            if (!trials_file.is_open()) std::cerr << "trials_file opening error\n";
+            trialsFile.open(saveDirectory + task.blockName + "_" + std::to_string(task.functionNumber));
+            if (!trialsFile.isOpen()) std::cerr << "trials_file opening error\n";
 
             optMethod.setProblem(task.problem);
             optMethod.setParameters(task.parameters);
@@ -86,22 +86,22 @@ public:
             report.print(std::cout, task, result, workTime);
 
             task.problem.getOptimalPoints(optimalPoints);
-            trials_file.add_points(optimalPoints, task.problem.getOptimalValue());
+            trialsFile.addPoints(optimalPoints, task.problem.getOptimalValue());
 
-            trials_file.add_point(result.point, result.value);
+            trialsFile.addPoint(result.point, result.value);
 
             optMethod.getTrialPoints(trials);
-            trials_file.add_points(trials);
+            trialsFile.addPoints(trials);
 
-            trials_file.close();
+            trialsFile.close();
         }
     }
 
     void solveTestTasks(const std::vector<typename OptMethodType::Task> &tasks, const std::string &saveDirectory) {
-        int numberTasks = (int)tasks.size();
+        size_t numberTasks = tasks.size();
 
         double totalStartTime = omp_get_wtime();
-        for (int i = 0; i < numberTasks; i++) {
+        for (size_t i = 0; i < numberTasks; ++i) {
             solveTestTask(tasks[i], saveDirectory);
             std::cout << "\n\n";
         }

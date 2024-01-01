@@ -1,5 +1,5 @@
-#ifndef ONE_DIM_CONSTRAINED_PROBLEM_H_
-#define ONE_DIM_CONSTRAINED_PROBLEM_H_
+#ifndef ONE_DIMENSIONAL_CONSTRAINED_PROBLEM_H_
+#define ONE_DIMENSIONAL_CONSTRAINED_PROBLEM_H_
 
 #include <vector>
 #include <functional>
@@ -7,7 +7,7 @@
 #include <base_classes/opt_problems/IGeneralConstrainedOptProblem.h>
 #include <base_structures/search_areas/OneDimensionalSearchArea.h>
 
-class OneDimConstrainedProblem:
+class OneDimensionalConstrainedProblem:
     public opt::IGeneralConstrainedOptProblem<std::function<double(double, int)>,
                                               opt::OneDimensionalSearchArea, double>
 {
@@ -15,12 +15,12 @@ private:
     std::vector<double> lipschitzConstants;
 
 public:
-    OneDimConstrainedProblem(const std::function<double(double, int)> &_object = nullptr,
-                             const opt::OneDimensionalSearchArea &_area = opt::OneDimensionalSearchArea(),
-                             int _numberConstraints = 0,
-                             const std::vector<double> &_optimalPoints = std::vector<double>{},
-                             double _optimalValue = 0.0,
-                             const std::vector<double> _lipschitzConstants = std::vector<double>{})
+    OneDimensionalConstrainedProblem(const std::function<double(double, int)> &_object = nullptr,
+                                     const opt::OneDimensionalSearchArea &_area = opt::OneDimensionalSearchArea(),
+                                     int _numberConstraints = 0,
+                                     const std::vector<double> &_optimalPoints = std::vector<double>{},
+                                     double _optimalValue = 0.0,
+                                     const std::vector<double> _lipschitzConstants = std::vector<double>{})
         : opt::IGeneralConstrainedOptProblem<std::function<double(double, int)>, opt::OneDimensionalSearchArea, double>(
           _object, _area, _numberConstraints, _optimalPoints, _optimalValue), lipschitzConstants(_lipschitzConstants) {};
 
@@ -35,4 +35,4 @@ public:
     double computeConstraint(const double &x, int index) const override { return object(x, index); };
 };
 
-#endif // ONE_DIM_CONSTRAINED_PROBLEM_H_
+#endif // ONE_DIMENSIONAL_CONSTRAINED_PROBLEM_H_

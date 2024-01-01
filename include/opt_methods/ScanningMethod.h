@@ -9,41 +9,43 @@
 #include <base_classes/opt_methods/ICharacteristicOptMethod.h>
 #include <opt_problems/OneDimensionalProblem.h>
 #include <trials/Trial.h>
-#include <my_math.h>
+#include <MyMath.h>
 
 template <typename OptProblemType>
 class ScanningMethod : public opt::ICharacteristicOptMethod<Trial>,
     public opt::IGeneralNumericalOptMethod<Trial, OptProblemType>
 {
 public:
-    using GeneralNumMethod = opt::IGeneralNumericalOptMethod<Trial, OptProblemType>;
-    using typename GeneralNumMethod::GeneralMethod;
+    using GeneralNumericalMethod = opt::IGeneralNumericalOptMethod<Trial, OptProblemType>;
+    using typename GeneralNumericalMethod::GeneralMethod;
 
-    using typename GeneralNumMethod::Parameters;
-    using typename GeneralNumMethod::StoppingConditions;
-    using typename GeneralNumMethod::Result;
+    using typename GeneralNumericalMethod::Parameters;
+    using typename GeneralNumericalMethod::StoppingCondition;
+    using typename GeneralNumericalMethod::StoppingConditions;
+    using typename GeneralNumericalMethod::Result;
 
-    struct Task : public GeneralNumMethod::Task {
+    struct Task : public GeneralNumericalMethod::Task {
         std::string blockName;
         int functionNumber;
 
         Task(const std::string &_name, std::string _blockName, int _functionNumber,
-             const OptProblemType &_problem, Parameters &_parameters, bool _use = true):
-            GeneralNumMethod::Task(_name, _problem, _parameters, _use),
-            blockName(_blockName),
-            functionNumber(_functionNumber)
-        {};
+             const OptProblemType &_problem, Parameters &_parameters, bool _use = true)
+            : GeneralNumericalMethod::Task(_name, _problem, _parameters, _use), blockName(_blockName),
+              functionNumber(_functionNumber) {};
     };
 
-    class Report : public GeneralNumMethod::IReport {
+    class Report : public GeneralNumericalMethod::IReport {
     protected:
+        void printPoint(std::ostream &stream, const typename OptProblemType::Point &point) const override;
+        void printPoints(std::ostream &stream,
+                         const std::vector<typename OptProblemType::Point> &point) const override;
         void printOptProblem(std::ostream &stream, const OptProblemType &optProblem) const override;
         void printErrorEstimate(std::ostream &stream, const OptProblemType &optProblem,
                                 const typename GeneralMethod::Result &result) const override;
 
     public:
         Report():
-            GeneralNumMethod::IReport()
+            GeneralNumericalMethod::IReport()
         {};
     };
 private:
@@ -51,32 +53,28 @@ private:
 
 protected:
     void insertInSorted(const Trial &trial) override;
-
     void calcCharacteristic() override;
 
     Trial newTrial(const typename OptProblemType::Point &x) override;
     typename OptProblemType::Point selectNewPoint() override;
-
     double estimateSolution(typename OptProblemType::Point &x) const override;
 
     bool stopConditions() override;
     bool stopConditionsTest() override;
 
-    using GeneralNumMethod::setResult;
+    using GeneralNumericalMethod::setResult;
 
 public:
     ScanningMethod(const OptProblemType &_problem = OptProblemType(),
-                   const Parameters &parameters = Parameters()):
-        opt::ICharacteristicOptMethod<Trial>(),
-        GeneralNumMethod(_problem, parameters),
-        cycleBoundary(0)
-    {};
+                   const Parameters &parameters = Parameters())
+        : opt::ICharacteristicOptMethod<Trial>(), GeneralNumericalMethod(_problem, parameters),
+          cycleBoundary(0) {};
 
     void setParameters(const typename GeneralMethod::Parameters &parameters) override {
-        GeneralNumMethod::setParameters(parameters);
+        GeneralNumericalMethod::setParameters(parameters);
     };
     void getParameters(typename GeneralMethod::Parameters &parameters) const override {
-        GeneralNumMethod::getParameters(parameters);
+        GeneralNumericalMethod::getParameters(parameters);
     };
 
     void solve(typename GeneralMethod::Result &result) override;
@@ -84,21 +82,38 @@ public:
 };
 
 template <typename OptProblemType>
+void ScanningMethod<OptProblemType>::Report::printPoint(
+    std::ostream &stream, const typename OptProblemType::Point &point) const
+{
+    stream << "(" << point << ")";
+}
+
+template <typename OptProblemType>
+void ScanningMethod<OptProblemType>::Report::printPoints(
+    std::ostream &stream, const std::vector<typename OptProblemType::Point> &points) const
+{
+    stream << "[";
+    printPoint(stream, points[0]);
+    size_t numberPoints = points.size();
+    for (size_t i = 1; i < numberPoints; ++i) {
+        stream << "; ";
+        printPoint(stream, points[i]);
+    }
+    stream << "]";
+}
+
+template <typename OptProblemType>
 void ScanningMethod<OptProblemType>::Report::printOptProblem(
-    std::ostream &stream,
-    const OptProblemType &optProblem) const
+    std::ostream &stream, const OptProblemType &optProblem) const
 {
     stream << "[a; b] = [" << optProblem.getSearchArea().lowerBound << "; " <<
                               optProblem.getSearchArea().upBound << "]"<< "\n";
     std::vector<double> optimalPoints;
     optProblem.getOptimalPoints(optimalPoints);
     if (!optimalPoints.empty()) {
-        stream << "X* = (" << optimalPoints[0];
-        int numberOptimalPoints = optimalPoints.size();
-        for (int i = 1; i < numberOptimalPoints; i++) {
-            stream << "; " << optimalPoints[i];
-        }
-        stream << ")\n";
+        stream << "X* = ";
+        printPoints(stream, optimalPoints);
+        stream << "\n";
         stream << "f(X*) = " << optProblem.getOptimalValue() << "\n";
     }
 }
@@ -133,11 +148,12 @@ void ScanningMethod<OptProblemType>::insertInSorted(const Trial &trial) {
 
 template <typename OptProblemType>
 void ScanningMethod<OptProblemType>::calcCharacteristic() {
+    // Constant complexity
     t += 2;
     if (this->numberTrials - 2 == cycleBoundary) {
         t = 1;
         cycleBoundary <<= 1;
-        cycleBoundary++; // TODO: check priority of operations
+        cycleBoundary++;
     }
 
     // Linear complexity
@@ -164,14 +180,14 @@ Trial ScanningMethod<OptProblemType>::newTrial(const typename OptProblemType::Po
 template <typename OptProblemType>
 typename OptProblemType::Point ScanningMethod<OptProblemType>::selectNewPoint() {
     calcCharacteristic();
-    return 0.5 * (this->trialPoints[t].x + this->trialPoints[(size_t)t - 1].x);
+    return 0.5 * (this->trialPoints[t].x + this->trialPoints[t - 1].x);
 }
 
 template <typename OptProblemType>
 double ScanningMethod<OptProblemType>::estimateSolution(typename OptProblemType::Point &x) const {
     auto iter = min_element(this->trialPoints.begin(), this->trialPoints.end(),
-        [] (const Trial &trial1, const Trial &trial2) {
-            return trial1.z < trial2.z;
+        [] (const Trial &trialFirst, const Trial &trialSecond) {
+            return trialFirst.z < trialSecond.z;
         });
     x = iter->x;
 
@@ -180,7 +196,7 @@ double ScanningMethod<OptProblemType>::estimateSolution(typename OptProblemType:
 
 template <typename OptProblemType>
 bool ScanningMethod<OptProblemType>::stopConditions() {
-    if (std::abs(this->trialPoints[t].x - this->trialPoints[(size_t)t - 1].x) <= this->accuracy) {
+    if (std::abs(this->trialPoints[t].x - this->trialPoints[t - 1].x) <= this->accuracy) {
         this->stoppingCondition = StoppingConditions::ACCURACY;
         return true;
     }
@@ -199,8 +215,8 @@ template <typename OptProblemType>
 bool ScanningMethod<OptProblemType>::stopConditionsTest() {
     std::vector<double> optimalPoints;
     this->problem.getOptimalPoints(optimalPoints);
-    int numberOptimalPoints = (int)optimalPoints.size();
-    for (int i = 0; i < numberOptimalPoints; i++) {
+    size_t numberOptimalPoints = optimalPoints.size();
+    for (size_t i = 0; i < numberOptimalPoints; ++i) {
         if (std::abs(this->trialPoints[t].x - optimalPoints[i]) <= this->error) {
             this->stoppingCondition = StoppingConditions::ERROR;
             return true;
@@ -262,6 +278,5 @@ bool ScanningMethod<OptProblemType>::solveTest(typename GeneralMethod::Result &r
 
     return static_cast<Result&>(result).stoppingCondition == StoppingConditions::ERROR;
 }
-
 
 #endif // SCANNING_METHOD_H_

@@ -5,7 +5,7 @@
 #include <cmath>
 
 #include <direct_method.h>
-#include <gnuplot/output_file.h>
+#include <gnuplot/OutputFile.h>
 #include <gnuplot/Script.h>
 
 using namespace std;

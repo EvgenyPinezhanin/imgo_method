@@ -16,7 +16,7 @@
 #include <GKLS/GKLSConstrainedProblemFamily.hpp>
 #include <opt_methods/MggsaMethod.h>
 #include <opt_problems/FamilyProblem.h>
-#include <gnuplot/output_file.h>
+#include <gnuplot/OutputFile.h>
 #include <gnuplot/Script.h>
 #include <omp.h>
 
@@ -29,8 +29,8 @@ const int familyNumber = 0; // 0 - Grishagin(with constraints), 2 - GKLS(with co
 const int displayType = 0; // 0 - application, 1 - png, 2 - png(notitle)
 
 int main() {
-    output_file vars_file("output_data/mggsa_operational_characteristics/vars.txt");
-    if (!vars_file.is_open()) std::cerr << "vars_file opening error\n";
+    OutputFile vars_file("output_data/mggsa_operational_characteristics/vars.txt");
+    if (!vars_file.isOpen()) std::cerr << "vars_file opening error\n";
 
     const int chunk = 1;
 
@@ -136,18 +136,18 @@ int main() {
 #endif
 
     int sizeKey = key.size();
-    vars_file.set_variable("numberKey", sizeKey, false);
-    vars_file.init_array("familyName", numberFamily);
-    vars_file.init_array("r", sizeKey * numberFamily);
-    vars_file.init_array("key", sizeKey);
+    vars_file.setVariable("numberKey", sizeKey, false);
+    vars_file.initArray("familyName", numberFamily);
+    vars_file.initArray("r", sizeKey * numberFamily);
+    vars_file.initArray("key", sizeKey);
     for (int i = 0; i < numberFamily; i++) {
-        vars_file.set_value_in_array("familyName", i + 1, problems[i].shortName);
+        vars_file.setValueInArray("familyName", i + 1, problems[i].shortName);
         for (int j = 0; j < r[i].size(); j++) {
-            vars_file.set_value_in_array("r", (i * sizeKey) + j + 1, r[i][j]);
+            vars_file.setValueInArray("r", (i * sizeKey) + j + 1, r[i][j]);
         }
     }
     for (int i = 0; i < sizeKey; i++) {
-        vars_file.set_value_in_array("key", i + 1, key[i]);
+        vars_file.setValueInArray("key", i + 1, key[i]);
     }
     vars_file.close();
 

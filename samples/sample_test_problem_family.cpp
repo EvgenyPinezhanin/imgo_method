@@ -8,9 +8,9 @@
 #include <opt_methods/GsaMethod.h>
 #include <opt_problems/MultiDimensionalConstrainedProblem.h>
 #include <opt_problems/OneDimensionalProblem.h>
-#include <gnuplot/output_file.h>
+#include <gnuplot/OutputFile.h>
 #include <gnuplot/Script.h>
-#include <my_math.h>
+#include <MyMath.h>
 #include <omp.h>
 
 #define CALC
@@ -146,21 +146,21 @@ int main() {
 
     double total_start_time = omp_get_wtime();
 #if defined( CALC )
-    output_file vars_file("output_data/sample_test_problem_family/vars.txt");
-    if (!vars_file.is_open()) std::cerr << "vars_file opening error\n";
+    OutputFile vars_file("output_data/sample_test_problem_family/vars.txt");
+    if (!vars_file.isOpen()) std::cerr << "vars_file opening error\n";
 
     size_t number_methods = 1;
     MggsaMethod mggsa;
 
-    vars_file.set_variable("number_methods", number_methods, false);
-    vars_file.set_variable("A", a, false);
-    vars_file.set_variable("B", b, false);
-    vars_file.set_variable("delta", delta, false);
-    vars_file.set_variable("number_coefficients", number_coefficients, false);
-    vars_file.init_array("method_names", number_methods);
+    vars_file.setVariable("number_methods", number_methods, false);
+    vars_file.setVariable("A", a, false);
+    vars_file.setVariable("B", b, false);
+    vars_file.setVariable("delta", delta, false);
+    vars_file.setVariable("number_coefficients", number_coefficients, false);
+    vars_file.initArray("method_names", number_methods);
     // vars_file.init_array("x_opt", number_methods);
 
-    // output_file trials_file;
+    // output_file trialsFile;
     std::vector<double> optimal_points;
     std::vector<Trial> trials;
     double start_time, end_time, work_time;
@@ -168,8 +168,8 @@ int main() {
     int numberTrials, numberFevals;
     std::vector<double> X, L;
 
-    // trials_file.open("output_data/sample_test_problem_family/" + method_name + "_trials.txt");
-    // if (!trials_file.is_open()) std::cerr << "trials_file opening error\n";
+    // trialsFile.open("output_data/sample_test_problem_family/" + method_name + "_trials.txt");
+    // if (!trialsFile.is_open()) std::cerr << "trialsFile opening error\n";
 
     mggsa.setF(problem);
     mggsa.setN(N + 1);
@@ -192,7 +192,7 @@ int main() {
     work_time = end_time - start_time;
 
     std::cout << "Method name: " << method_name << '\n';
-    printResultMggsa("sample_test_problem_family", N + 1, 2 * N + 1, A, B, L, vector<double>{0, 0, 0, 0}, -1,
+    printResultMggsa("sample_test_problem_family", N + 1, 2 * N + 1, A, B, L, std::vector<double>{0, 0, 0, 0}, -1,
                      maxTrials, maxFevals, accuracy, reliability, d, den, key, incr, numberTrials, numberFevals, L, X,
                      problem(X, 2 * N + 1));
     std::cout << "max |u_der| = " << std::abs(problem(X, 2 * N + 1)) << std::endl; 
@@ -205,40 +205,40 @@ int main() {
     std::cout << ")\n\n";
 
 // 
-            // trials_file.add_point(taskArray[i].X_opt, taskArray[i].f(taskArray[i].X_opt, taskArray[i].numberConstraints));
-            // trials_file.add_point(X, taskArray[i].f(X, taskArray[i].numberConstraints));
+            // trialsFile.add_point(taskArray[i].X_opt, taskArray[i].f(taskArray[i].X_opt, taskArray[i].numberConstraints));
+            // trialsFile.add_point(X, taskArray[i].f(X, taskArray[i].numberConstraints));
 // 
             // mggsa.getPoints(points);
-            // trials_file.add_points(points);
+            // trialsFile.add_points(points);
 // 
-            // trials_file.close();
+            // trialsFile.close();
 
-    vars_file.set_value_in_array("method_names", 1, method_name);
-    vars_file.init_array("x_opt", X, false);
-    vars_file.init_array("c", coefficients, false);
-    vars_file.init_array("T", 3);
-    vars_file.init_array("Q", 3);
+    vars_file.setValueInArray("method_names", 1, method_name);
+    vars_file.initArray("x_opt", X, false);
+    vars_file.initArray("c", coefficients, false);
+    vars_file.initArray("T", 3);
+    vars_file.initArray("Q", 3);
     for (int i = 0; i < 3; ++i) {
-        vars_file.set_value_in_array("T", i + 1, q[i + 6].x, false);
-        vars_file.set_value_in_array("Q", i + 1, q[i + 6].y[0], false);
+        vars_file.setValueInArray("T", i + 1, q[i + 6].x, false);
+        vars_file.setValueInArray("Q", i + 1, q[i + 6].y[0], false);
     }
 
     // sample_test_problem.getOptimalPoints(optimal_points);
-    // trials_file.add_points(optimal_points, sample_test_problem.getOptimalValue());
-    // trials_file.add_point(result.point, result.value);
+    // trialsFile.add_points(optimal_points, sample_test_problem.getOptimalValue());
+    // trialsFile.add_point(result.point, result.value);
 
     // methods[i]->getTrialPoints(trials);
-    // trials_file.add_points(trials);
+    // trialsFile.add_points(trials);
 
-    // trials_file.close();
+    // trialsFile.close();
 
     vars_file.close();
 
-    output_file test_points_file("output_data/sample_test_problem_family/test_points.txt");
-    if (!test_points_file.is_open()) std::cerr << "test_points_file opening error\n";
+    OutputFile test_points_file("output_data/sample_test_problem_family/test_points.txt");
+    if (!test_points_file.isOpen()) std::cerr << "test_points_file opening error\n";
 
     for (int i = 0; i < number_window_points; ++i) {
-        test_points_file.add_point(q[i].x, q[i].y[0], false);
+        test_points_file.addPoint(q[i].x, q[i].y[0], false);
     }
 
     test_points_file.close();

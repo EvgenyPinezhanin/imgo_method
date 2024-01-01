@@ -3,16 +3,14 @@
 
 #include <vector>
 
-using std::vector;
-
 namespace opt {
     struct MultiDimensionalSearchArea {
         int dimension;
-        vector<double> lowerBound, upBound;
+        std::vector<double> lowerBound, upBound;
 
-        MultiDimensionalSearchArea(int _dimension = 2, const vector<double> &_lowerBound = vector<double>(),
-                                   const vector<double> &_upBound = vector<double>())
-                                  : dimension(_dimension), lowerBound(_lowerBound), upBound(_upBound) {};
+        MultiDimensionalSearchArea(int _dimension = 2, const std::vector<double> &_lowerBound = std::vector<double>(),
+                                   const std::vector<double> &_upBound = std::vector<double>())
+            : dimension(_dimension), lowerBound(_lowerBound), upBound(_upBound) {};
     };
 }
 

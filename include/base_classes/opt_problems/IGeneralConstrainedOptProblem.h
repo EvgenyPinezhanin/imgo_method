@@ -7,16 +7,16 @@ namespace opt {
     template <typename ObjectiveFunctionType, typename SearchAreaType, typename PointType>
     class IGeneralConstrainedOptProblem : public IGeneralOptProblem<ObjectiveFunctionType, SearchAreaType, PointType> {
     protected:
-        int numberConstraints;
+        size_t numberConstraints;
 
     public:
         IGeneralConstrainedOptProblem(const ObjectiveFunctionType &_objFunction, const SearchAreaType &_area,
-                                      int _numberConstraints, const std::vector<PointType> &_optPoint,  double _optimalValue)
+                                      size_t _numberConstraints, const std::vector<PointType> &_optPoint,  double _optimalValue)
             : IGeneralOptProblem<ObjectiveFunctionType, SearchAreaType, PointType>(_objFunction,
               _area, _optPoint, _optimalValue), numberConstraints(_numberConstraints) {};
 
-        void setNumberConstraints(double _numberConstraints) { numberConstraints = _numberConstraints; };
-        int getNumberConstraints() const { return numberConstraints; };
+        void setNumberConstraints(size_t _numberConstraints) { numberConstraints = _numberConstraints; };
+        size_t getNumberConstraints() const { return numberConstraints; };
 
         virtual double computeConstraint(const PointType &x, int index) const = 0;
     };

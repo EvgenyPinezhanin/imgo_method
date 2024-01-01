@@ -4,15 +4,15 @@
 
 #include <Solver.h>
 #include <opt_methods/ImgoMethod.h>
-#include <opt_problems/OneDimConstrainedProblem.h>
-#include <test_opt_problems/OneDimConstrainedTestProblems.h>
+#include <opt_problems/OneDimensionalConstrainedProblem.h>
+#include <test_opt_problems/OneDimensionalConstrainedTestProblems.h>
 #include <gnuplot/Script.h>
 
 #define CALC
 #define DRAW
 
-using Task = ImgoMethod<OneDimConstrainedProblem>::Task;
-using Parameters = ImgoMethod<OneDimConstrainedProblem>::Parameters;
+using Task = ImgoMethod<OneDimensionalConstrainedProblem>::Task;
+using Parameters = ImgoMethod<OneDimensionalConstrainedProblem>::Parameters;
 
 const std::string methodName = "imgo";
 const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
@@ -55,7 +55,7 @@ int main() {
                                 Task( "Test Task №10", blockNames[1], 10,   testTasks[9], parameters[12]) };
 
 #if defined( CALC )
-    ImgoMethod<OneDimConstrainedProblem> method;
+    ImgoMethod<OneDimensionalConstrainedProblem> method;
     Solver solver(method);
     solver.solveTasks(tasks, "output_data/" + methodName + "_test/");
 #endif

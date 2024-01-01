@@ -1,4 +1,4 @@
-#include <my_math.h>
+#include <MyMath.h>
 
 void mnk::solve(std::vector<double> &x) {
     std::vector<std::vector<double>> A_tmp(A);

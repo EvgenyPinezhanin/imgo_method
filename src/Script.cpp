@@ -1,7 +1,7 @@
 #include <gnuplot/Script.h>
 
 void Script::start() {
-    string inputString;
+    std::string inputString;
     error = 0;
 
 #if defined(__linux__)

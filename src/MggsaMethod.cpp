@@ -6,7 +6,7 @@
 #include <limits>
 #include <algorithm>
 #include <iomanip>
-#include <my_math.h>
+#include <MyMath.h>
 
 #include <map.h>
 // #include <output_results.h>

@@ -14,8 +14,6 @@ namespace opt {
 
         void setReliability(double _reliability) { reliability = _reliability; };
         double getReliability() const { return reliability; };
-
-        double getConstantEstimation() const { return constantEstimation; };
     };
 }
 

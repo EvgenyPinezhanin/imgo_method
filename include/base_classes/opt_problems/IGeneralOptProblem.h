@@ -16,12 +16,8 @@ namespace opt {
         using Point = PointType;
 
         IGeneralOptProblem(const ObjectType &_object, const SearchAreaType &_area,
-                           const std::vector<PointType> &_optimalPoints, double _optimalValue):
-            object(_object),
-            area(_area),
-            optimalPoints(_optimalPoints),
-            optimalValue(_optimalValue)
-        {};
+                           const std::vector<PointType> &_optimalPoints, double _optimalValue)
+            : object(_object), area(_area), optimalPoints(_optimalPoints), optimalValue(_optimalValue) {};
 
         void setObject(const ObjectType &_object) { object = _object; };
         ObjectType getObject() const { return object; };

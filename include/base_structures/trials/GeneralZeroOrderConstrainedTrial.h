@@ -5,14 +5,13 @@
 
 #include <base_structures/trials/GeneralZeroOrderTrial.h>
 
-using std::vector;
-
 namespace opt {
     struct GeneralZeroOrderConstrainedTrial : public GeneralZeroOrderTrial {
-        vector<double> g;
+        std::vector<double> g;
 
-        GeneralZeroOrderConstrainedTrial(double _x = 0.0, double _z = 0.0, const vector<double> &_g)
-                                        : GeneralZeroOrderTrial(_x, _z), g(_g) {};
+        GeneralZeroOrderConstrainedTrial(double _x = 0.0, double _z = 0.0,
+                                         const std::vector<double> &_g = std::vector<double>{})
+            : GeneralZeroOrderTrial(_x, _z), g(_g) {};
     };
 }
 

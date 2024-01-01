@@ -19,10 +19,8 @@ namespace opt {
             double value;
 
             Result(const typename OptProblemType::Point _point = typename OptProblemType::Point(),
-                   double _value = 0.0):
-                point(_point),
-                value(_value)
-            {};
+                   double _value = 0.0)
+                : point(_point), value(_value) {};
         };
 
         struct Task {
@@ -31,17 +29,17 @@ namespace opt {
             Parameters &parameters;
             bool use;
 
-            Task(const std::string &_name, const OptProblemType &_problem,
-                  Parameters& _parameters, bool _use = true):
-                name(_name),
-                problem(_problem),
-                parameters(_parameters),
-                use(_use)
-            {};
+            Task(const std::string &_name, const OptProblemType _problem,
+                 Parameters &_parameters, bool _use = true)
+                : name(_name), problem(_problem), parameters(_parameters), use(_use) {};
         };
 
         class IReport {
         protected:
+            virtual void printPoint(std::ostream &stream,
+                                    const typename OptProblemType::Point &point) const = 0;
+            virtual void printPoints(std::ostream &stream,
+                                     const std::vector<typename OptProblemType::Point> &points) const = 0;
             virtual void printOptProblem(std::ostream &stream, const OptProblemType &optProblem) const = 0;
             virtual void printMethodParameters(std::ostream &stream, const Parameters &parameters) const = 0;
             virtual void printResultMethod(std::ostream &stream, const Result &result) const = 0;
@@ -72,9 +70,8 @@ namespace opt {
         virtual void setResult(Result &result) const = 0;
 
     public:
-        IGeneralOptMethod(const OptProblemType &_problem):
-            problem(_problem)
-        {};
+        IGeneralOptMethod(const OptProblemType &_problem)
+            : problem(_problem) {};
 
         void setProblem(const OptProblemType &_problem) { problem = _problem; };
         OptProblemType getProblem() const { return problem; };
@@ -82,8 +79,8 @@ namespace opt {
         virtual void setParameters(const Parameters &parameters) = 0;
         virtual void getParameters(Parameters &parameters) const = 0;
 
-        virtual void solve(Result &_result) = 0;
-        virtual bool solveTest(Result &_result) = 0;
+        virtual void solve(Result &result) = 0;
+        virtual bool solveTest(Result &result) = 0;
     };
 }
 

@@ -5,9 +5,9 @@
 #include <limits>
 
 #include <opt_methods/MggsaMethod.h>
-#include <gnuplot/output_file.h>
+#include <gnuplot/OutputFile.h>
 #include <gnuplot/Script.h>
-#include <my_math.h>
+#include <MyMath.h>
 
 #define CALC
 #define DRAW
@@ -21,21 +21,21 @@ const int numberBlocks = 2;
 const int numberFunctions[2] = { 4, 2 };
 const std::vector<std::string> functionBlockName{ "sample", "test" };
 
-double f1Sample(vector<double> x, int j) {
+double f1Sample(std::vector<double> x, int j) {
     switch (j) {
         case 0: return 1.0 - x[0] - x[1];
         default: return std::numeric_limits<double>::quiet_NaN();
     }
 }
 
-double f2Sample(vector<double> x, int j) {
+double f2Sample(std::vector<double> x, int j) {
     switch (j) {
         case 0: return (x[0] - 1.0) * (x[0] - 1.0) / 5.0 + (x[1] - 1.0) * (x[1] - 1.0) / 5.0;
         default: return std::numeric_limits<double>::quiet_NaN();
     }
 }
 
-double f3Sample(vector<double> x, int j) {
+double f3Sample(std::vector<double> x, int j) {
     switch (j) {
         case 0: return 1.0 - x[0] - x[1];
         case 1: return x[0] * x[0] / 5.0 + x[1] * x[1] / 5.0;
@@ -43,7 +43,7 @@ double f3Sample(vector<double> x, int j) {
     }
 }
 
-double f4Sample(vector<double> x, int j) {
+double f4Sample(std::vector<double> x, int j) {
     switch (j) {
         case 0: return (x[0] - 2.0) * (x[0] - 2.0) + (x[1] - 2.0) * (x[1] - 2.0) - 2.0;
         case 1: return x[0] * x[0] / 5.0 + x[1] * x[1] / 5.0;
@@ -51,7 +51,7 @@ double f4Sample(vector<double> x, int j) {
     }
 }
 
-double f1Test(vector<double> x, int j) {
+double f1Test(std::vector<double> x, int j) {
     switch (j) {
         case 0: return 0.01 * (std::pow((x[0] - 2.2), 2) + std::pow((x[1] - 1.2), 2) - 2.25);
         case 1: return 100.0 * (1.0 - std::pow((x[0] - 2.0), 2) / 1.44 - std::pow(0.5 * x[1], 2));
@@ -68,7 +68,7 @@ const double C[20] = { 75.1963666677, -3.8112755343, 0.1269366345, -0.0020567665
                        0.2564581253, -0.0034604030, 0.0000135139, -28.1064434908, -0.0000052375,
                       -0.0000000063, 0.0000000007, 0.0003405462, -0.0000016638, -2.8673112392 };
 
-double f2Test(vector<double> x, int j) {
+double f2Test(std::vector<double> x, int j) {
     switch (j) {
         case 0: return 450.0 - x[0] * x[1];
         case 1: return (0.1 * x[0] - 1.0) * (0.1 * x[0] - 1.0) - x[1];
@@ -85,44 +85,48 @@ double f2Test(vector<double> x, int j) {
 }
 
 int main() {
-    output_file trials_file;
+    OutputFile trialsFile;
 
     double eps = 0.01, r = 2, d = 0.0;
     int n = 2, den = 10, key = 3;
     int maxTrials = 100000, maxFevals = 100000;
 
-    vector<TaskMggsa> taskArray = { TaskMggsa(f1Sample, "f1(x, y) sample", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
-                                              vector<double>{4.0, 4.0}, vector<double>{}, eps, maxTrials, maxFevals, r, d, den, key, -1),
-                                    TaskMggsa(f2Sample, "f2(x, y) sample", n, 0, vector<double>{-4.0, -4.0}, vector<double>{4.0, 4.0},
-                                              vector<double>{1.0, 1.0}, vector<double>{}, eps, maxTrials, maxFevals, r, d, den, key, -1),
-                                    TaskMggsa(f3Sample, "f3(x, y) sample", n, 1, vector<double>{-1.0, -1.0}, vector<double>{1.0, 1.0},
-                                              vector<double>{0.5, 0.5}, vector<double>{}, eps, maxTrials, maxFevals, r, d, den, key, -1),
-                                    TaskMggsa(f4Sample, "f4(x, y) sample", n, 1, vector<double>{0.0, 0.0}, vector<double>{3.0, 3.0},
-                                              vector<double>{1.0, 1.0}, vector<double>{}, eps, maxTrials, maxFevals, r, d, den, key, -1),
+    std::vector<TaskMggsa> taskArray = { TaskMggsa(f1Sample, "f1(x, y) sample", n, 0, std::vector<double>{-4.0, -4.0},
+                                                  std::vector<double>{4.0, 4.0}, std::vector<double>{4.0, 4.0},
+                                                  std::vector<double>{}, eps, maxTrials, maxFevals, r, d, den, key, -1),
+                                         TaskMggsa(f2Sample, "f2(x, y) sample", n, 0, std::vector<double>{-4.0, -4.0},
+                                                   std::vector<double>{4.0, 4.0}, std::vector<double>{1.0, 1.0},
+                                                   std::vector<double>{}, eps, maxTrials, maxFevals, r, d, den, key, -1),
+                                         TaskMggsa(f3Sample, "f3(x, y) sample", n, 1, std::vector<double>{-1.0, -1.0},
+                                                   std::vector<double>{1.0, 1.0}, std::vector<double>{0.5, 0.5},
+                                                   std::vector<double>{}, eps, maxTrials, maxFevals, r, d, den, key, -1),
+                                         TaskMggsa(f4Sample, "f4(x, y) sample", n, 1, std::vector<double>{0.0, 0.0},
+                                                   std::vector<double>{3.0, 3.0}, std::vector<double>{1.0, 1.0},
+                                                   std::vector<double>{}, eps, maxTrials, maxFevals, r, d, den, key, -1),
 
-                                    TaskMggsa(f1Test, "f1(x, y) test", n, 3, vector<double>{ 0.0, -1.0 }, vector<double>{ 4.0, 3.0 },
-                                              vector<double>{ 0.942, 0.944 }, vector<double>{}, eps, maxTrials, maxFevals, r, d, den,
-                                              key, -1),
-                                    TaskMggsa(f2Test, "f2(x, y) test", n, 4, vector<double>{ 0.0, 0.0 }, vector<double>{ 80.0, 80.0 },
-                                              vector<double>{ 77.489, 63.858 }, vector<double>{}, eps, maxTrials, maxFevals, 3.3, 0.01,
-                                              den, key, -1) };
+                                         TaskMggsa(f1Test, "f1(x, y) test", n, 3, std::vector<double>{ 0.0, -1.0 },
+                                                   std::vector<double>{ 4.0, 3.0 }, std::vector<double>{ 0.942, 0.944 },
+                                                   std::vector<double>{}, eps, maxTrials, maxFevals, r, d, den, key, -1),
+                                         TaskMggsa(f2Test, "f2(x, y) test", n, 4, std::vector<double>{ 0.0, 0.0 },
+                                                   std::vector<double>{ 80.0, 80.0 }, std::vector<double>{ 77.489, 63.858 },
+                                                   std::vector<double>{}, eps, maxTrials, maxFevals, 3.3, 0.01, den, key, -1) };
 
     MggsaMethod mggsa;
 
-    vector<double> X, L;
-    vector<vector<double>> points;
-    vector<opt::IndexTrial> trials;
+    std::vector<double> X, L;
+    std::vector<std::vector<double>> points;
+    std::vector<opt::IndexTrial> trials;
     int numberTrials, numberFevals;
 
     int taskArraySize = taskArray.size();
     for (int i = 0; i < taskArraySize; i++) {
         if (taskArray[i].used) {
             if (i < 4) {
-                trials_file.open("output_data/" + methodName + "_test/" + functionBlockName[0] + "_" + std::to_string(i + 1));
+                trialsFile.open("output_data/" + methodName + "_test/" + functionBlockName[0] + "_" + std::to_string(i + 1));
             } else {
-                trials_file.open("output_data/" + methodName + "_test/" + functionBlockName[1] + "_" + std::to_string(i - 3));
+                trialsFile.open("output_data/" + methodName + "_test/" + functionBlockName[1] + "_" + std::to_string(i - 3));
             }
-            if (!trials_file.is_open()) std::cerr << "trials_file opening error\n";
+            if (!trialsFile.isOpen()) std::cerr << "trialsFile opening error\n";
 
             mggsa.setF(taskArray[i].f);
             mggsa.setN(taskArray[i].n);
@@ -145,13 +149,13 @@ int main() {
                              taskArray[i].den, taskArray[i].key, taskArray[i].incr, numberTrials, numberFevals, L, X,
                              taskArray[i].f(X, taskArray[i].numberConstraints));
 
-            trials_file.add_point(taskArray[i].X_opt, taskArray[i].f(taskArray[i].X_opt, taskArray[i].numberConstraints));
-            trials_file.add_point(X, taskArray[i].f(X, taskArray[i].numberConstraints));
+            trialsFile.addPoint(taskArray[i].X_opt, taskArray[i].f(taskArray[i].X_opt, taskArray[i].numberConstraints));
+            trialsFile.addPoint(X, taskArray[i].f(X, taskArray[i].numberConstraints));
 
             mggsa.getPoints(points);
-            trials_file.add_points(points);
+            trialsFile.addPoints(points);
 
-            trials_file.close();
+            trialsFile.close();
         }
     }
 

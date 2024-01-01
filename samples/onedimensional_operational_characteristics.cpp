@@ -9,7 +9,7 @@
 #include <opt_methods/GsaMethod.h>
 #include <opt_methods/PiyavskyMethod.h>
 #include <opt_methods/ScanningMethod.h>
-#include <gnuplot/output_file.h>
+#include <gnuplot/OutputFile.h>
 #include <gnuplot/Script.h>
 #include <omp.h>
 

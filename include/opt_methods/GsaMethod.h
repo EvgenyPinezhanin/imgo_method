@@ -4,15 +4,22 @@
 #include <limits>
 
 #include <opt_methods/PiyavskyMethod.h>
-#include <my_math.h>
+#include <MyMath.h>
 
 template <typename OptProblemType>
 class GsaMethod : public PiyavskyMethod<OptProblemType> {
 public:
-    using Parameters = typename PiyavskyMethod<OptProblemType>::Parameters;
+    using typename PiyavskyMethod<OptProblemType>::Parameters;
+    using typename PiyavskyMethod<OptProblemType>::StoppingCondition;
+    using typename PiyavskyMethod<OptProblemType>::StoppingConditions;
+    using typename PiyavskyMethod<OptProblemType>::Result;
+    using typename PiyavskyMethod<OptProblemType>::Task;
+    using typename PiyavskyMethod<OptProblemType>::Report;
 
 protected:
     void calcCharacteristic() override;
+
+    using PiyavskyMethod<OptProblemType>::setResult;
 
 public:
     GsaMethod(const OneDimensionalProblem &_problem = OneDimensionalProblem(),
@@ -26,8 +33,8 @@ void GsaMethod<OptProblemType>::calcCharacteristic() {
     double R = -std::numeric_limits<double>::infinity(), Rtmp;
     Trial trialPrev = this->trialPoints[0], trialNext;
 
-    int trialPointsSize = (int)this->trialPoints.size();
-    for (int i = 1; i < trialPointsSize; i++) {
+    size_t trialPointsSize = this->trialPoints.size();
+    for (size_t i = 1; i < trialPointsSize; ++i) {
         trialNext = this->trialPoints[i];
         Rtmp = this->constantEstimation * (trialNext.x - trialPrev.x) + (trialNext.z - trialPrev.z) *
                (trialNext.z - trialPrev.z) / (this->constantEstimation * (trialNext.x - trialPrev.x)) -

@@ -10,7 +10,7 @@ namespace opt {
 
     template <typename TrialType, typename OptProblemType>
     class IGeneralNumericalOptMethod : public IGeneralOptMethod<OptProblemType> {
-    public: 
+    public:
         using GeneralMethod = IGeneralOptMethod<OptProblemType>;
         using Trial = TrialType;
 
@@ -19,11 +19,7 @@ namespace opt {
             int maxTrials, maxFevals;
 
             Parameters(double _accuracy = 0.001, double _error = 0.001, int _maxTrials = 1000, int _maxFevals = 1000):
-                accuracy(_accuracy),
-                error(_error),
-                maxTrials(_maxTrials),
-                maxFevals(_maxFevals)
-            {};
+                accuracy(_accuracy), error(_error), maxTrials(_maxTrials), maxFevals(_maxFevals) {};
         };
 
         using StoppingCondition = int;
@@ -43,12 +39,11 @@ namespace opt {
             Result(const typename OptProblemType::Point &_point = typename OptProblemType::Point(),
                    double _value = 0.0, int _numberTrials = 0, int _numberFevals = 0,
                    StoppingCondition _stoppingCondition = StoppingConditions::ACCURACY):
-                GeneralMethod::Result(_point, _value),
-                numberTrials(_numberTrials),
-                numberFevals(_numberFevals),
-                stoppingCondition(_stoppingCondition)
-            {};
+                GeneralMethod::Result(_point, _value), numberTrials(_numberTrials),
+                numberFevals(_numberFevals), stoppingCondition(_stoppingCondition) {};
         };
+
+        using GeneralMethod::Task;
 
         class IReport : public GeneralMethod::IReport {
         protected:
@@ -66,7 +61,9 @@ namespace opt {
                 stream << "Result of method:" << "\n";
                 stream << "Number of trials = " << resultCast.numberTrials << "\n";
                 stream << "Number of fevals = " << resultCast.numberFevals << "\n";
-                stream << "X = " << resultCast.point << "\n";
+                stream << "X = ";
+                this->printPoint(stream, resultCast.point);
+                stream << "\n";
                 stream << "f(X) = " << resultCast.value << "\n";
             }
 
@@ -99,32 +96,24 @@ namespace opt {
             result.value = estimateSolution(x);
             result.point = x;
 
-            Result& resultNum = static_cast<Result&>(result);
-            resultNum.numberTrials = numberTrials;
-            resultNum.numberFevals = numberFevals;
-            resultNum.stoppingCondition = stoppingCondition;
+            auto& resultCast = static_cast<Result&>(result);
+            resultCast.numberTrials = numberTrials;
+            resultCast.numberFevals = numberFevals;
+            resultCast.stoppingCondition = stoppingCondition;
         }
 
     public:
-        IGeneralNumericalOptMethod(const OptProblemType &_problem,
-                                   const Parameters &parameters):
-            GeneralMethod(_problem),
-            trialPoints(initTrialPointsSize),
-            accuracy(parameters.accuracy),
-            error(parameters.error),
-            numberTrials(0),
-            maxTrials(parameters.maxTrials),
-            numberFevals(0),
-            maxFevals(parameters.maxFevals),
-            stoppingCondition(StoppingConditions::ACCURACY)
-        {};
+        IGeneralNumericalOptMethod(const OptProblemType &_problem, const Parameters &parameters)
+            : GeneralMethod(_problem), trialPoints(initTrialPointsSize), accuracy(parameters.accuracy),
+              error(parameters.error), numberTrials(0), maxTrials(parameters.maxTrials), numberFevals(0),
+              maxFevals(parameters.maxFevals), stoppingCondition(StoppingConditions::ACCURACY) {};
 
         void setParameters(const typename GeneralMethod::Parameters &parameters) override {
-            auto parametersTmp = static_cast<const Parameters&>(parameters);
-            accuracy = parametersTmp.accuracy;
-            error = parametersTmp.error;
-            maxTrials = parametersTmp.maxTrials;
-            maxFevals = parametersTmp.maxFevals;
+            auto parametersCast = static_cast<const Parameters&>(parameters);
+            accuracy = parametersCast.accuracy;
+            error = parametersCast.error;
+            maxTrials = parametersCast.maxTrials;
+            maxFevals = parametersCast.maxFevals;
         }
         void getParameters(typename GeneralMethod::Parameters &parameters) const override {
             parameters = Parameters(accuracy, error, maxTrials, maxFevals);

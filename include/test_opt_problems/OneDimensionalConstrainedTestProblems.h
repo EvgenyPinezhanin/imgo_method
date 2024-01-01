@@ -5,16 +5,16 @@
 #include <string>
 #include <limits>
 
-#include <opt_problems/OneDimConstrainedProblem.h>
+#include <opt_problems/OneDimensionalConstrainedProblem.h>
 #include <base_structures/search_areas/OneDimensionalSearchArea.h>
-#include <my_math.h>
+#include <MyMath.h>
 
 const int numberBlocks = 2;
 const int numberFunctions[2] = { 3, 10 };
 const std::vector<std::string> blockNames = { "sample", "test" };
 
-const std::vector<OneDimConstrainedProblem> sampleTasks{
-    OneDimConstrainedProblem(
+const std::vector<OneDimensionalConstrainedProblem> sampleTasks{
+    OneDimensionalConstrainedProblem(
         [] (double x, int j) {
             switch (j) {
                 case 0: return std::sin(x);
@@ -22,7 +22,7 @@ const std::vector<OneDimConstrainedProblem> sampleTasks{
             }
         }, opt::OneDimensionalSearchArea(-4.0, 4.0), 0, std::vector<double>{ -M_PI / 2.0 }, -1.0, std::vector<double>{ 1.0 }),
 
-    OneDimConstrainedProblem(
+    OneDimensionalConstrainedProblem(
         [] (double x, int j) {
             switch (j) {
                 case 0: return std::sin(x);
@@ -31,7 +31,7 @@ const std::vector<OneDimConstrainedProblem> sampleTasks{
             }
         }, opt::OneDimensionalSearchArea(2.0, 8.0), 1, std::vector<double>{ 2.0 * M_PI }, -9.566371, std::vector<double>{ 1.0, 2.0 }),
 
-    OneDimConstrainedProblem(
+    OneDimensionalConstrainedProblem(
         [] (double x, int j) {
             switch (j) {
                 case 0: return x * x - 0.05;
@@ -42,8 +42,8 @@ const std::vector<OneDimConstrainedProblem> sampleTasks{
         }, opt::OneDimensionalSearchArea(-2.0, 2.0), 2, std::vector<double>{ 0.1 }, -0.65, std::vector<double>{ 4.0, 1.0, 23.0 })
 };
 
-const std::vector<OneDimConstrainedProblem> testTasks{
-    OneDimConstrainedProblem(
+const std::vector<OneDimensionalConstrainedProblem> testTasks{
+    OneDimensionalConstrainedProblem(
         [] (double x, int j) {
             switch (j) {
                 case 0: return std::exp(-std::sin(3.0 * x)) - 1.0 / 10.0 * std::pow(x - 1.0 / 2.0, 2) - 1.0;
@@ -52,7 +52,7 @@ const std::vector<OneDimConstrainedProblem> testTasks{
             }
         }, opt::OneDimensionalSearchArea(-2.5, 1.5), 1, std::vector<double>{ 1.05738 }, -7.61284448, std::vector<double>{ 4.640837, 8.666667 }),
 
-    OneDimConstrainedProblem(
+    OneDimensionalConstrainedProblem(
         [] (double x, int j) {
             switch (j) {
                 case 0: return 1.0 / 20.0 - std::exp(-2.0 / 5.0 * (x + 5.0)) * std::sin(4.0 / 5.0 * M_PI * (x + 5.0));
@@ -61,7 +61,7 @@ const std::vector<OneDimConstrainedProblem> testTasks{
             }
         }, opt::OneDimensionalSearchArea(-5.0, 5.0), 1, std::vector<double>{ 1.016 }, 5.46063488, std::vector<double>{ 2.513269, 6.372595 }),
 
-    OneDimConstrainedProblem(
+    OneDimensionalConstrainedProblem(
         [] (double x, int j) {
             double sum = 0.0;
             switch (j) {
@@ -76,7 +76,7 @@ const std::vector<OneDimConstrainedProblem> testTasks{
             }
         }, opt::OneDimensionalSearchArea(-10.0, 10.0), 1, std::vector<double>{ -5.9921 }, -2.94600839, std::vector<double>{ 3.124504, 13.201241 }),
 
-    OneDimConstrainedProblem(
+    OneDimensionalConstrainedProblem(
         [] (double x, int j) {
             double sum = 0.0;
             switch (j) {
@@ -94,7 +94,7 @@ const std::vector<OneDimConstrainedProblem> testTasks{
             }
         }, opt::OneDimensionalSearchArea(0.0, 4.0), 2, std::vector<double>{ 2.45956 }, 1.8408089, std::vector<double>{ 29.731102, 35.390605, 12.893183 }),
 
-    OneDimConstrainedProblem(
+    OneDimensionalConstrainedProblem(
         [] (double x, int j) {
             double sum = 0.0;
             switch (j) {
@@ -108,7 +108,7 @@ const std::vector<OneDimConstrainedProblem> testTasks{
             }
         }, opt::OneDimensionalSearchArea(-1.5, 11.0), 2, std::vector<double>{ 9.28491 }, -1.27299809, std::vector<double>{ 5.654617, 0.931981, 2.021595 }),
 
-    OneDimConstrainedProblem(
+    OneDimensionalConstrainedProblem(
         [] (double x, int j) {
             double sum = 0.0;
             switch (j) {
@@ -119,7 +119,7 @@ const std::vector<OneDimConstrainedProblem> testTasks{
             }
         }, opt::OneDimensionalSearchArea(-4.0, 4.0), 2, std::vector<double>{ 2.32396 }, -1.6851399, std::vector<double>{ 2.48, 25.108154, 8.835339 }),
 
-    OneDimConstrainedProblem(
+    OneDimensionalConstrainedProblem(
         [] (double x, int j) {
             double sum = 0.0;
             switch (j) {
@@ -130,7 +130,7 @@ const std::vector<OneDimConstrainedProblem> testTasks{
             }
         }, opt::OneDimensionalSearchArea(-3.0, 2.0), 2, std::vector<double>{ -0.774575 }, -0.47704013, std::vector<double>{ 8.332010, 5.359309, 6.387862 }),
 
-    OneDimConstrainedProblem(
+    OneDimensionalConstrainedProblem(
         [] (double x, int j) {
             double sum = 0.0;
             switch (j) {
@@ -146,7 +146,7 @@ const std::vector<OneDimConstrainedProblem> testTasks{
             }
         }, opt::OneDimensionalSearchArea(-2.5, 1.5), 3, std::vector<double>{ -1.12724 }, -6.60059665, std::vector<double>{ 20.184982, 90.598898, 6.372137, 10.415012 }),
 
-    OneDimConstrainedProblem(
+    OneDimensionalConstrainedProblem(
         [] (double x, int j) {
             double sum = 0.0;
             switch (j) {
@@ -165,7 +165,7 @@ const std::vector<OneDimConstrainedProblem> testTasks{
             }
         }, opt::OneDimensionalSearchArea(0.0, 14.0), 3, std::vector<double>{ 4.0 }, 9.92218867, std::vector<double>{ 0.873861, 1.682731, 1.254588, 3.843648 }),
 
-    OneDimConstrainedProblem(
+    OneDimensionalConstrainedProblem(
         [] (double x, int j) {
             double sum = 0.0, a, b;
             switch (j) {

@@ -1,12 +1,12 @@
-#ifndef ONE_DIM_TEST_PROBLEMS_H_
-#define ONE_DIM_TEST_PROBLEMS_H_
+#ifndef ONE_DIMENSIONAL_TEST_PROBLEMS_H_
+#define ONE_DIMENSIONAL_TEST_PROBLEMS_H_
 
 #include <vector>
 #include <string>
 
 #include <opt_problems/OneDimensionalProblem.h>
 #include <base_structures/search_areas/OneDimensionalSearchArea.h>
-#include <my_math.h>
+#include <MyMath.h>
 
 const int numberBlocks = 2;
 const std::vector<int> numberFunctions = { 4, 20 };
@@ -106,4 +106,4 @@ const std::vector<OneDimensionalProblem> testTasks{
                           opt::OneDimensionalSearchArea(-10.0, 10.0), std::vector<double>{ 1.195137 }, -0.063490529, 1.3)
 };
 
-#endif // ONE_DIM_TEST_PROBLEMS_H_
+#endif // ONE_DIMENSIONAL_TEST_PROBLEMS_H_
