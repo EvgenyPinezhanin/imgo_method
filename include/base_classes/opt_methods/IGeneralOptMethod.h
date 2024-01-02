@@ -40,6 +40,7 @@ namespace opt {
                                     const typename OptProblemType::Point &point) const = 0;
             virtual void printPoints(std::ostream &stream,
                                      const std::vector<typename OptProblemType::Point> &points) const = 0;
+
             virtual void printOptProblem(std::ostream &stream, const OptProblemType &optProblem) const = 0;
             virtual void printMethodParameters(std::ostream &stream, const Parameters &parameters) const = 0;
             virtual void printResultMethod(std::ostream &stream, const Result &result) const = 0;
@@ -49,19 +50,7 @@ namespace opt {
         public:
             IReport() = default;
 
-            void print(std::ostream &stream, const Task &task, const Result &result, double workTime) const {
-                const auto defaultPrecision = stream.precision();
-                stream << std::setprecision(10);
-
-                stream << "Task: " << task.name << "\n";
-                printOptProblem(stream, task.problem);
-                printMethodParameters(stream, task.parameters);
-                printResultMethod(stream, result);
-                printErrorEstimate(stream, task.problem, result);
-                stream << "Time: " << workTime << std::endl;
-
-                stream << std::setprecision(defaultPrecision);
-            }
+            void print(std::ostream &stream, const Task &task, const Result &result, double workTime) const;
         };
 
     protected:
@@ -82,6 +71,23 @@ namespace opt {
         virtual void solve(Result &result) = 0;
         virtual bool solveTest(Result &result) = 0;
     };
+
+    template <typename OptProblemType>
+    void IGeneralOptMethod<OptProblemType>::IReport::print(
+        std::ostream &stream, const Task &task, const Result &result, double workTime) const
+    {
+        const auto defaultPrecision = stream.precision();
+        stream << std::setprecision(10);
+
+        stream << "Task: " << task.name << "\n";
+        printOptProblem(stream, task.problem);
+        printMethodParameters(stream, task.parameters);
+        printResultMethod(stream, result);
+        printErrorEstimate(stream, task.problem, result);
+        stream << "Time: " << workTime << std::endl;
+
+        stream << std::setprecision(defaultPrecision);
+    }
 }
 
 #endif // I_GENERAL_OPT_METHOD_H_

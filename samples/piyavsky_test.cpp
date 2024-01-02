@@ -17,7 +17,7 @@ using Parameters = PiyavskyMethod<OneDimensionalProblem>::Parameters;
 const std::string methodName = "piyavsky";
 const int displayType = 0; // 0 - application, 1 - png, 2 - png(notitle)
 const int problemBlock = 1; // 0 - sample, 1 - test
-const int problemNumber = 5; // 0 - f1, 1 - f2, ...
+const int problemNumber = 19; // 0, 1, 2, ...
 
 int main() {
     double reliability = 2.0, accuracy = 0.001;

@@ -196,7 +196,8 @@ double ScanningMethod<OptProblemType>::estimateSolution(typename OptProblemType:
 
 template <typename OptProblemType>
 bool ScanningMethod<OptProblemType>::stopConditions() {
-    if (std::abs(this->trialPoints[t].x - this->trialPoints[t - 1].x) <= this->accuracy) {
+    this->resultingAccuracy = std::abs(this->trialPoints[t].x - this->trialPoints[t - 1].x); 
+    if (this->resultingAccuracy <= this->accuracy) {
         this->stoppingCondition = StoppingConditions::ACCURACY;
         return true;
     }
