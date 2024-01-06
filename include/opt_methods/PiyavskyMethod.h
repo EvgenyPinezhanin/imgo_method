@@ -39,8 +39,6 @@ public:
               constantEstimation(_constantEstimation) {};
     };
 
-    using typename ScanningMethod<OptProblemType>::Task;
-
     class Report : public ScanningMethod<OptProblemType>::Report {
     protected:
         void printOptProblem(std::ostream &stream, const OptProblemType &optProblem) const override;

@@ -6,6 +6,23 @@
 
 namespace opt {
     template <typename OptProblemType>
+    class IGeneralOptMethod;
+
+    template <typename OptProblemType>
+    struct Task {
+        using Parameters = typename IGeneralOptMethod<OptProblemType>::Parameters;
+
+        std::string name;
+        OptProblemType problem;
+        Parameters &parameters;
+        bool use;
+
+        Task(const std::string &_name, const OptProblemType _problem,
+             Parameters &_parameters, bool _use = true)
+            : name(_name), problem(_problem), parameters(_parameters), use(_use) {};
+    };
+
+    template <typename OptProblemType>
     class IGeneralOptMethod {
     public:
         using OptProblem = OptProblemType;
@@ -21,17 +38,6 @@ namespace opt {
             Result(const typename OptProblemType::Point _point = typename OptProblemType::Point(),
                    double _value = 0.0)
                 : point(_point), value(_value) {};
-        };
-
-        struct Task {
-            std::string name;
-            OptProblemType problem;
-            Parameters &parameters;
-            bool use;
-
-            Task(const std::string &_name, const OptProblemType _problem,
-                 Parameters &_parameters, bool _use = true)
-                : name(_name), problem(_problem), parameters(_parameters), use(_use) {};
         };
 
         class IReport {
@@ -50,7 +56,7 @@ namespace opt {
         public:
             IReport() = default;
 
-            void print(std::ostream &stream, const Task &task, const Result &result, double workTime) const;
+            void print(std::ostream &stream, const Task<OptProblemType> &task, const Result &result, double workTime) const;
         };
 
     protected:
@@ -74,7 +80,7 @@ namespace opt {
 
     template <typename OptProblemType>
     void IGeneralOptMethod<OptProblemType>::IReport::print(
-        std::ostream &stream, const Task &task, const Result &result, double workTime) const
+        std::ostream &stream, const Task<OptProblemType> &task, const Result &result, double workTime) const
     {
         const auto defaultPrecision = stream.precision();
         stream << std::setprecision(10);

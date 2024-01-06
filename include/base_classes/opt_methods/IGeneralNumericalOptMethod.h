@@ -44,8 +44,6 @@ namespace opt {
                 resultingAccuracy(_resultingAccuracy), stoppingCondition(_stoppingCondition) {};
         };
 
-        using GeneralMethod::Task;
-
         class IReport : public GeneralMethod::IReport {
         protected:
             virtual void printStopCondition(std::ostream &stream, StoppingCondition stoppingCondition) const;

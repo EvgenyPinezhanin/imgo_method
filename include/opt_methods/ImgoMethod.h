@@ -48,16 +48,6 @@ public:
               constantsEstimation(_constantsEstimation) {};
     };
 
-    struct Task : public GeneralNumericalMethod::Task {
-        std::string blockName;
-        int functionNumber;
-
-        Task(const std::string &_name, std::string _blockName, int _functionNumber,
-             const OptProblemType &_problem, Parameters &_parameters, bool _use = true)
-            : GeneralNumericalMethod::Task(_name, _problem, _parameters, _use),
-              blockName(_blockName), functionNumber(_functionNumber) {};
-    };
-
     class Report : public GeneralNumericalMethod::IReport {
     protected:
         void printPoint(std::ostream &stream, const typename OptProblemType::Point &point) const override;

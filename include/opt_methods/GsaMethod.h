@@ -13,7 +13,6 @@ public:
     using typename PiyavskyMethod<OptProblemType>::StoppingCondition;
     using typename PiyavskyMethod<OptProblemType>::StoppingConditions;
     using typename PiyavskyMethod<OptProblemType>::Result;
-    using typename PiyavskyMethod<OptProblemType>::Task;
     using typename PiyavskyMethod<OptProblemType>::Report;
 
 protected:
