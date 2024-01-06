@@ -15,8 +15,7 @@ namespace opt {
             : IGeneralOptProblem<ObjectiveFunctionType, SearchAreaType, PointType>(_objFunction,
               _area, _optPoint, _optimalValue), numberConstraints(_numberConstraints) {};
 
-        void setNumberConstraints(size_t _numberConstraints) { numberConstraints = _numberConstraints; };
-        size_t getNumberConstraints() const { return numberConstraints; };
+        virtual size_t getNumberConstraints() const { return numberConstraints; };
 
         virtual double computeConstraint(const PointType &x, int index) const = 0;
     };

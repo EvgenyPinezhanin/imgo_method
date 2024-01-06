@@ -6,24 +6,37 @@
 #include <IOptProblemFamily.hpp>
 
 class OneDimensionalFamilyProblem:
-    public opt::IGeneralOptProblem<IOptProblemFamily>, opt::OneDimensionalSearchArea, double>
+    public opt::IGeneralOptProblem<IOptProblemFamily&, opt::OneDimensionalSearchArea, double>
 {
 private:
-    double lipschitzConstant;
-    int currentProblem;
+    size_t currentProblem;
 
 public:
-    OneDimensionalFamilyProblem(const function<double(double)> &_objFunction = nullptr,
-                          const opt::OneDimensionalSearchArea &_area = opt::OneDimensionalSearchArea(0.0, 1.0),
-                          vector<double> _optimalPoints = vector<double>{}, double _optimalValue = 0.0,
-                          double _lipschitzConstant = -1.0)
-                         : opt::IGeneralOptProblem<function<double(double)>, opt::OneDimensionalSearchArea, double>(_objFunction,
-                         _area, _optimalPoints, _optimalValue), lipschitzConstant(_lipschitzConstant) {};
+    OneDimensionalFamilyProblem(IOptProblemFamily &_object)
+        : opt::IGeneralOptProblem<IOptProblemFamily&, opt::OneDimensionalSearchArea, double>(_object),
+          currentProblem(0) {};
 
-    void setLipschitzConstant(double _lipschitzConstant) { lipschitzConstant = _lipschitzConstant; };
-    double getLipschitzConstant() const { return lipschitzConstant; };
+    void setCurrentProblem(size_t _currentProblem) { currentProblem = _currentProblem; };
+    size_t getCurrentProblem() { return currentProblem; }
 
-    double computeObjFunction(const double &x) const override { return objFunction(x); };
+    size_t getFamilySize() { return object.GetFamilySize(); };
+
+    opt::OneDimensionalSearchArea getSearchArea() const override {
+        std::vector<double> A, B;
+        object[currentProblem]->GetBounds(A, B);
+        return opt::OneDimensionalSearchArea(A[0], B[0]);
+    };
+    void getOptimalPoints(std::vector<double> &_optimalPoints) const override {
+        _optimalPoints = object[currentProblem]->GetOptimumPoint();
+    };
+    double getOptimalValue() const override {
+        return object[currentProblem]->GetOptimumValue();
+    };
+    double getLipschitzConstant() const { return object[currentProblem]->GetLipschitzConstant(); };
+
+    double computeObjFunction(const double &x) const override {
+        return object[currentProblem]->ComputeFunction(std::vector<double>{x});
+    };
 };
 
 #endif // ONE_DIMENSIONAL_FAMILY_PROBLEM_H_
