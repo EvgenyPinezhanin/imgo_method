@@ -10,7 +10,7 @@
 #include <MyMath.h>
 
 const int numberBlocks = 2;
-const int numberFunctions[2] = { 3, 10 };
+const int numberProblems[2] = { 3, 10 };
 const std::vector<std::string> blockNames = { "sample", "test" };
 
 const std::vector<OneDimensionalConstrainedProblem> sampleTasks{
@@ -20,7 +20,10 @@ const std::vector<OneDimensionalConstrainedProblem> sampleTasks{
                 case 0: return std::sin(x);
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(-4.0, 4.0), 0, std::vector<double>{ -M_PI / 2.0 }, -1.0, std::vector<double>{ 1.0 }),
+        },
+        blockNames[0], 1,
+        opt::OneDimensionalSearchArea(-4.0, 4.0), 0, std::vector<double>{ -M_PI / 2.0 }, -1.0,
+        std::vector<double>{ 1.0 }),
 
     OneDimensionalConstrainedProblem(
         [] (double x, int j) {
@@ -29,7 +32,10 @@ const std::vector<OneDimensionalConstrainedProblem> sampleTasks{
                 case 1: return -2.0 * x + 3.0;
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(2.0, 8.0), 1, std::vector<double>{ 2.0 * M_PI }, -9.566371, std::vector<double>{ 1.0, 2.0 }),
+        },
+        blockNames[0], 2,
+        opt::OneDimensionalSearchArea(2.0, 8.0), 1, std::vector<double>{ 2.0 * M_PI }, -9.566371,
+        std::vector<double>{ 1.0, 2.0 }),
 
     OneDimensionalConstrainedProblem(
         [] (double x, int j) {
@@ -39,7 +45,10 @@ const std::vector<OneDimensionalConstrainedProblem> sampleTasks{
                 case 2: return 5.0 * x * x + 3.0 * x - 1.0;
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(-2.0, 2.0), 2, std::vector<double>{ 0.1 }, -0.65, std::vector<double>{ 4.0, 1.0, 23.0 })
+        },
+        blockNames[0], 3,
+        opt::OneDimensionalSearchArea(-2.0, 2.0), 2, std::vector<double>{ 0.1 }, -0.65,
+        std::vector<double>{ 4.0, 1.0, 23.0 })
 };
 
 const std::vector<OneDimensionalConstrainedProblem> testTasks{
@@ -50,7 +59,10 @@ const std::vector<OneDimensionalConstrainedProblem> testTasks{
                 case 1: return -13.0 / 6.0 * x + std::sin(13.0 / 4.0 * (2.0 * x + 5.0)) - 53.0 / 12.0;
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(-2.5, 1.5), 1, std::vector<double>{ 1.05738 }, -7.61284448, std::vector<double>{ 4.640837, 8.666667 }),
+        },
+        blockNames[1], 1,
+        opt::OneDimensionalSearchArea(-2.5, 1.5), 1, std::vector<double>{ 1.05738 }, -7.61284448,
+        std::vector<double>{ 4.640837, 8.666667 }),
 
     OneDimensionalConstrainedProblem(
         [] (double x, int j) {
@@ -59,7 +71,10 @@ const std::vector<OneDimensionalConstrainedProblem> testTasks{
                 case 1: return (11.0 * x * x - 10.0 * x + 21.0) / (2.0 * (x * x + 1.0));
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(-5.0, 5.0), 1, std::vector<double>{ 1.016 }, 5.46063488, std::vector<double>{ 2.513269, 6.372595 }),
+        },
+        blockNames[1], 2,
+        opt::OneDimensionalSearchArea(-5.0, 5.0), 1, std::vector<double>{ 1.016 }, 5.46063488,
+        std::vector<double>{ 2.513269, 6.372595 }),
 
     OneDimensionalConstrainedProblem(
         [] (double x, int j) {
@@ -74,7 +89,10 @@ const std::vector<OneDimensionalConstrainedProblem> testTasks{
                     return -sum;
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(-10.0, 10.0), 1, std::vector<double>{ -5.9921 }, -2.94600839, std::vector<double>{ 3.124504, 13.201241 }),
+        },
+        blockNames[1], 3,
+        opt::OneDimensionalSearchArea(-10.0, 10.0), 1, std::vector<double>{ -5.9921 }, -2.94600839,
+        std::vector<double>{ 3.124504, 13.201241 }),
 
     OneDimensionalConstrainedProblem(
         [] (double x, int j) {
@@ -92,7 +110,10 @@ const std::vector<OneDimensionalConstrainedProblem> testTasks{
                                std::pow(std::cos(M_PI / 2.0 * x + 1.0 / 10.0), 3.0), 2.0);
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(0.0, 4.0), 2, std::vector<double>{ 2.45956 }, 1.8408089, std::vector<double>{ 29.731102, 35.390605, 12.893183 }),
+        },
+        blockNames[1], 4,
+        opt::OneDimensionalSearchArea(0.0, 4.0), 2, std::vector<double>{ 2.45956 }, 1.8408089,
+        std::vector<double>{ 29.731102, 35.390605, 12.893183 }),
 
     OneDimensionalConstrainedProblem(
         [] (double x, int j) {
@@ -106,7 +127,10 @@ const std::vector<OneDimensionalConstrainedProblem> testTasks{
                                std::log(0.423531 * x + 3.13531) + 0.36634 - 0.355766 * x;
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(-1.5, 11.0), 2, std::vector<double>{ 9.28491 }, -1.27299809, std::vector<double>{ 5.654617, 0.931981, 2.021595 }),
+        },
+        blockNames[1], 5,
+        opt::OneDimensionalSearchArea(-1.5, 11.0), 2, std::vector<double>{ 9.28491 }, -1.27299809,
+        std::vector<double>{ 5.654617, 0.931981, 2.021595 }),
 
     OneDimensionalConstrainedProblem(
         [] (double x, int j) {
@@ -117,7 +141,10 @@ const std::vector<OneDimensionalConstrainedProblem> testTasks{
                 case 2: return -7.0 / 40.0 * (3.0 * x + 4.0) * std::sin(63.0 / 20.0 * (x + 4.0));
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(-4.0, 4.0), 2, std::vector<double>{ 2.32396 }, -1.6851399, std::vector<double>{ 2.48, 25.108154, 8.835339 }),
+        },
+        blockNames[1], 6,
+        opt::OneDimensionalSearchArea(-4.0, 4.0), 2, std::vector<double>{ 2.32396 }, -1.6851399,
+        std::vector<double>{ 2.48, 25.108154, 8.835339 }),
 
     OneDimensionalConstrainedProblem(
         [] (double x, int j) {
@@ -128,7 +155,10 @@ const std::vector<OneDimensionalConstrainedProblem> testTasks{
                 case 2: return std::exp(-std::cos(4.0 * x - 3.0)) + 1.0 / 250.0 * (4.0 * x - 3.0) * (4.0 * x - 3.0) - 1.0;
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(-3.0, 2.0), 2, std::vector<double>{ -0.774575 }, -0.47704013, std::vector<double>{ 8.332010, 5.359309, 6.387862 }),
+        },
+        blockNames[1], 7,
+        opt::OneDimensionalSearchArea(-3.0, 2.0), 2, std::vector<double>{ -0.774575 }, -0.47704013,
+        std::vector<double>{ 8.332010, 5.359309, 6.387862 }),
 
     OneDimensionalConstrainedProblem(
         [] (double x, int j) {
@@ -144,7 +174,10 @@ const std::vector<OneDimensionalConstrainedProblem> testTasks{
                 case 3: return std::cos(7.0 / 4.0 * x + 241.0 / 40.0) - std::sin(35.0 / 4.0 * x + 241.0 / 8.0) - 5.0;
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(-2.5, 1.5), 3, std::vector<double>{ -1.12724 }, -6.60059665, std::vector<double>{ 20.184982, 90.598898, 6.372137, 10.415012 }),
+        },
+        blockNames[1], 8,
+        opt::OneDimensionalSearchArea(-2.5, 1.5), 3, std::vector<double>{ -1.12724 }, -6.60059665,
+        std::vector<double>{ 20.184982, 90.598898, 6.372137, 10.415012 }),
 
     OneDimensionalConstrainedProblem(
         [] (double x, int j) {
@@ -163,7 +196,10 @@ const std::vector<OneDimensionalConstrainedProblem> testTasks{
                     return sum;
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(0.0, 14.0), 3, std::vector<double>{ 4.0 }, 9.92218867, std::vector<double>{ 0.873861, 1.682731, 1.254588, 3.843648 }),
+        },
+        blockNames[1], 9,
+        opt::OneDimensionalSearchArea(0.0, 14.0), 3, std::vector<double>{ 4.0 }, 9.92218867,
+        std::vector<double>{ 0.873861, 1.682731, 1.254588, 3.843648 }),
 
     OneDimensionalConstrainedProblem(
         [] (double x, int j) {
@@ -180,7 +216,10 @@ const std::vector<OneDimensionalConstrainedProblem> testTasks{
                            27.0 / 500.0 * b * b + 3.0 / 2.0;
                 default: return std::numeric_limits<double>::quiet_NaN();
             }
-        }, opt::OneDimensionalSearchArea(0.0, 2.0 * M_PI), 3, std::vector<double>{ 4.2250023 }, 1.474, std::vector<double>{ 3.170468, 4.329008, 7.999984, 12.442132 })
+        },
+        blockNames[1], 10,
+        opt::OneDimensionalSearchArea(0.0, 2.0 * M_PI), 3, std::vector<double>{ 4.2250023 }, 1.474,
+        std::vector<double>{ 3.170468, 4.329008, 7.999984, 12.442132 })
 };
 
 #endif // ONE_DIM_CONSTRAINED_TEST_PROBLEMS_H_

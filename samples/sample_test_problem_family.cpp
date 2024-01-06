@@ -53,7 +53,7 @@ const OneDimensionalProblem u(
 
         return is_min ? result : -result;
     },
-    opt::OneDimensionalSearchArea(a, b));
+    "Sample test problem family", 1, opt::OneDimensionalSearchArea(a, b));
 double accuracy_in = 0.01, reliability_in = 2.5;
 int maxTrials_in = 10000, maxFevals_in = 10000;
 GsaMethod<OneDimensionalProblem>::Parameters parameters(accuracy_in, 0.0, maxTrials_in, maxFevals_in, reliability_in);

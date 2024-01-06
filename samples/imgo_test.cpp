@@ -11,7 +11,7 @@
 #define CALC
 #define DRAW
 
-using Task = ImgoMethod<OneDimensionalConstrainedProblem>::Task;
+using Task = opt::Task<OneDimensionalConstrainedProblem>;
 using Parameters = ImgoMethod<OneDimensionalConstrainedProblem>::Parameters;
 
 const std::string methodName = "imgo";
@@ -39,20 +39,20 @@ int main() {
         Parameters(accuracy, 0.0, maxTrials, maxFevals, std::vector<double>{ reliability, reliability, reliability, reliability }, d)
     };
 
-    std::vector<Task> tasks = { Task("Sample Task №1", blockNames[0],  1, sampleTasks[0],  parameters[0]),
-                                Task("Sample Task №2", blockNames[0],  2, sampleTasks[1],  parameters[1]),
-                                Task("Sample Task №3", blockNames[0],  3, sampleTasks[2],  parameters[2]),
+    std::vector<Task> tasks = { Task("Sample Task №1", sampleTasks[0],  parameters[0]),
+                                Task("Sample Task №2", sampleTasks[1],  parameters[1]),
+                                Task("Sample Task №3", sampleTasks[2],  parameters[2]),
 
-                                Task(  "Test Task №1", blockNames[1],  1,   testTasks[0],  parameters[3]),
-                                Task(  "Test Task №2", blockNames[1],  2,   testTasks[1],  parameters[4]),
-                                Task(  "Test Task №3", blockNames[1],  3,   testTasks[2],  parameters[5]),
-                                Task(  "Test Task №4", blockNames[1],  4,   testTasks[3],  parameters[6]),
-                                Task(  "Test Task №5", blockNames[1],  5,   testTasks[4],  parameters[7]),
-                                Task(  "Test Task №6", blockNames[1],  6,   testTasks[5],  parameters[8]),
-                                Task(  "Test Task №7", blockNames[1],  7,   testTasks[6],  parameters[9]),
-                                Task(  "Test Task №8", blockNames[1],  8,   testTasks[7], parameters[10]),
-                                Task(  "Test Task №9", blockNames[1],  9,   testTasks[8], parameters[11]),
-                                Task( "Test Task №10", blockNames[1], 10,   testTasks[9], parameters[12]) };
+                                Task(  "Test Task №1", testTasks[0],  parameters[3]),
+                                Task(  "Test Task №2", testTasks[1],  parameters[4]),
+                                Task(  "Test Task №3", testTasks[2],  parameters[5]),
+                                Task(  "Test Task №4", testTasks[3],  parameters[6]),
+                                Task(  "Test Task №5", testTasks[4],  parameters[7]),
+                                Task(  "Test Task №6", testTasks[5],  parameters[8]),
+                                Task(  "Test Task №7", testTasks[6],  parameters[9]),
+                                Task(  "Test Task №8", testTasks[7], parameters[10]),
+                                Task(  "Test Task №9", testTasks[8], parameters[11]),
+                                Task( "Test Task №10", testTasks[9], parameters[12]) };
 
 #if defined( CALC )
     ImgoMethod<OneDimensionalConstrainedProblem> method;

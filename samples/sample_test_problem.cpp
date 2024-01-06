@@ -82,14 +82,14 @@ const OneDimensionalProblem sample_test_problem(
         }
 
         return result;
-    },
+    }, "Sample test problem", 1,
     opt::OneDimensionalSearchArea(0.5, 8.0), std::vector<double>{1.105}, 0.017, -1.0);
 
 int main() {
     double accuracy = 0.001, reliability = 2.0;
     int maxTrials = 100000, maxFevals = 100000;
     GsaMethod<OneDimensionalProblem>::Parameters parameters(accuracy, 0.0, maxTrials, maxFevals, reliability);
-    GsaMethod<OneDimensionalProblem>::Task task("Sample test task", 0, 0, sample_test_problem, parameters);
+    opt::Task task("Sample test task", sample_test_problem, parameters);
 
     size_t number_methods = 3;
     ScanningMethod<OneDimensionalProblem> scanning;
