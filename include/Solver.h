@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 
+#include <base_classes/opt_methods/IGeneralOptMethod.h>
 #include <gnuplot/OutputFile.h>
 #include <omp.h>
 
@@ -30,9 +31,11 @@ public:
         trialsFile()
     {};
 
-    void solveTask(const typename OptMethodType::Task &task, const std::string &saveDirectory) {
+    void solveTask(const opt::Task<typename OptMethodType::OptProblem> &task, const std::string &saveDirectory) {
         if (task.use) {
-            trialsFile.open(saveDirectory + task.blockName + "_" + std::to_string(task.functionNumber));
+            std::string blockName;
+            task.problem.getBlockName(blockName);
+            trialsFile.open(saveDirectory + blockName + "_" + std::to_string(task.problem.getProblemNumber()));
             if (!trialsFile.isOpen()) std::cerr << "trials_file opening error\n";
 
             optMethod.setProblem(task.problem);
@@ -57,7 +60,7 @@ public:
         }
     }
 
-    void solveTasks(const std::vector<typename OptMethodType::Task> &tasks, const std::string &saveDirectory) {
+    void solveTasks(const std::vector<opt::Task<typename OptMethodType::OptProblem>> &tasks, const std::string &saveDirectory) {
         size_t numberTasks = tasks.size();
 
         double totalStartTime = omp_get_wtime();
@@ -70,7 +73,7 @@ public:
         std::cout << "Total time: " << totalEndTime - totalStartTime << "\n";
     }
 
-    void solveTestTask(const typename OptMethodType::Task &task, const std::string &saveDirectory) {
+    void solveTestTask(const opt::Task<typename OptMethodType::OptProblem> &task, const std::string &saveDirectory) {
         if (task.use) {
             trialsFile.open(saveDirectory + task.blockName + "_" + std::to_string(task.functionNumber));
             if (!trialsFile.isOpen()) std::cerr << "trials_file opening error\n";
@@ -97,7 +100,7 @@ public:
         }
     }
 
-    void solveTestTasks(const std::vector<typename OptMethodType::Task> &tasks, const std::string &saveDirectory) {
+    void solveTestTasks(const std::vector<opt::Task<typename OptMethodType::OptProblem>> &tasks, const std::string &saveDirectory) {
         size_t numberTasks = tasks.size();
 
         double totalStartTime = omp_get_wtime();
@@ -108,6 +111,36 @@ public:
         double totalEndTime = omp_get_wtime();
 
         std::cout << "Total time: " << totalEndTime - totalStartTime << "\n";
+    }
+
+    void calcOperationalCharacteristics() {
+/*         cout << "r = " << r[i][j] << endl;
+            imgo.setR(r[i][j]);
+
+            double startTime = omp_get_wtime();
+            for (int k = 0; k < numberFunctions; k++) {
+                functor.currentFunction = k;
+                imgo.setF(function<double(double, int)>(functor));
+                imgo.setMaxTrials(Kmax);
+                (*functor.optProblemFamily)[k]->GetBounds(A, B);
+                imgo.setAB(A[0], B[0]);
+
+                if (imgo.solveTest((*functor.optProblemFamily)[k]->GetOptimumPoint()[0], numberTrials, numberFevals)) {
+                    numberTrialsArray[i][k] = numberTrials;
+                } else {
+                    numberTrialsArray[i][k] = Kmax + 1;
+                }
+            }
+            for (int k = K0; k <= Kmax; k += Kstep) {
+                numberSuccessful = (int)count_if(numberTrialsArray[i].begin(), numberTrialsArray[i].end(),
+                                                 [k] (double elem) { return elem <= k; });
+                cout << "K = " << k << " success rate = " << (double)numberSuccessful / numberFunctions << endl;
+                ofstr << k << " " << (double)numberSuccessful / numberFunctions << endl;
+            }
+            ofstr << endl << endl;
+            double endTime = omp_get_wtime();
+            double workTime = endTime - startTime;
+            cout << "Time: " << workTime << endl; */
     }
 };
 
