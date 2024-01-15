@@ -67,6 +67,9 @@ public:
         GeneralNumericalMethod::getParameters(parameters);
     };
 
+    using GeneralNumericalMethod::createResult;
+    typename GeneralNumericalMethod::IReport* createReport() const override { return new Report(); };
+
     void solve(typename GeneralMethod::Result &result) override;
     bool solveTest(typename GeneralMethod::Result &result) override;
 };

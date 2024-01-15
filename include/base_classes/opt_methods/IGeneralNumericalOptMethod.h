@@ -109,6 +109,9 @@ namespace opt {
 
         void getTrialPoints(std::vector<TrialType> &_trialPoints) const { _trialPoints = trialPoints; };
         int getNumberTrialPoints() const { return trialPoints.size(); };
+
+        typename GeneralMethod::Result* createResult() const override { return new Result(); };
+        using GeneralMethod::createReport;
     };
 
     template <typename TrialType, typename OptProblemType>

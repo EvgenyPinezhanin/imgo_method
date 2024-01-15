@@ -22,9 +22,11 @@ protected:
 
 public:
     GsaMethod(const OneDimensionalProblem &_problem = OneDimensionalProblem(),
-              const Parameters &parameters = Parameters()):
-        PiyavskyMethod<OptProblemType>(_problem, parameters)
-    {};
+              const Parameters &parameters = Parameters())
+        : PiyavskyMethod<OptProblemType>(_problem, parameters) {};
+
+    using PiyavskyMethod<OptProblemType>::createResult;
+    using PiyavskyMethod<OptProblemType>::createReport;
 };
 
 template <typename OptProblemType>

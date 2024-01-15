@@ -111,6 +111,9 @@ public:
     void setD(double _d) { d = _d; };
     double getD() const { return d; };
 
+    typename GeneralNumericalMethod::Result* createResult() const override { return new Result(); };
+    typename GeneralNumericalMethod::IReport* createReport() const override { return new Report(); };
+
     void solve(typename GeneralMethod::Result &result) override;
     bool solveTest(typename GeneralMethod::Result &result) override;
 };

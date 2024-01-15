@@ -40,7 +40,7 @@ int main() {
 
     size_t kStart = 0, kFinish = 500, kStep = 10;
 
-    // Solver solver;
+    Solver<OneDimensionalFamilyProblem> solver;
 
     double totalStartTime = omp_get_wtime();
 #if defined( CALC )

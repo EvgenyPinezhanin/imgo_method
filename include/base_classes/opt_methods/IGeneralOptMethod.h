@@ -74,6 +74,9 @@ namespace opt {
         virtual void setParameters(const Parameters &parameters) = 0;
         virtual void getParameters(Parameters &parameters) const = 0;
 
+        virtual Result* createResult() const { return new Result(); };
+        virtual IReport* createReport() const = 0;
+
         virtual void solve(Result &result) = 0;
         virtual bool solveTest(Result &result) = 0;
     };

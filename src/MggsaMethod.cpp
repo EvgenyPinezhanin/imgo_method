@@ -55,8 +55,8 @@ opt::IndexTrial MggsaMethod::newTrial(double x) {
     opt::IndexTrial trial(x);
     std::vector<double> X(dimension);
     y(x, X);
+    numberFevals++;
     for (int j = 0; j <= numberConstraints; ++j) {
-        numberFevals++;
         if ((f(X, j) > 0) || (j == numberConstraints)) {
             trial.z = f(X, j);
             trial.nu = j + 1;

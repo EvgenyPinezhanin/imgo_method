@@ -27,15 +27,15 @@ const double step = 0.01;
 size_t N = 3;
 size_t number_coefficients = 2 * N + 2;
 std::vector<double> coefficients(number_coefficients);
-// std::vector<double> coefficients{ 34.93, -2.151, -8.075, -7.936, 19.461, 1.048, -7.375, 5.411 };
 std::vector<double> omega(N + 1);
 double alpha = 0.05, delta = 0.3, a = 1.0, b = 10.0;
-size_t number_window_points = 9;
+size_t number_window_points = 10;
 const std::vector<point> q{ point( a,      0.0 ),
-                            point( 3.0,    0.0 ),
-                            point( 5.0,    0.0 ),
+                            point( 2.5,    0.0 ),
+                            point( 4.0,    0.0 ),
+                            point( 5.5,    0.0 ),
                             point( 7.0,    0.0 ),
-                            point( 9.0,    0.0 ),
+                            point( 8.5,    0.0 ),
                             point( b,      0.0 ),
                             point( 13.0,   7.65 ),
                             point( 16.65, -9.86 ),
@@ -140,9 +140,9 @@ std::vector<double> A{ 0.01, 0.01, 0.01, 0.01 };
 std::vector<double> B{ 2.0,  2.0,  2.0,  2.0 };
 
 int main() {
-    double accuracy = 0.01, reliability = 3.0, d = 0.0;
-    int maxTrials = 10000, maxFevals = 10000;
-    int den = 10, key = 3 , incr = 1;
+    double accuracy = 0.1, reliability = 3.0, d = 0.0;
+    int maxTrials = 100000, maxFevals = 100000;
+    int den = 11, key = 1 , incr = 1;
 
     double total_start_time = omp_get_wtime();
 #if defined( CALC )
@@ -219,8 +219,8 @@ int main() {
     vars_file.initArray("T", 3);
     vars_file.initArray("Q", 3);
     for (int i = 0; i < 3; ++i) {
-        vars_file.setValueInArray("T", i + 1, q[i + 6].x, false);
-        vars_file.setValueInArray("Q", i + 1, q[i + 6].y[0], false);
+        vars_file.setValueInArray("T", i + 1, q[i + 7].x, false);
+        vars_file.setValueInArray("Q", i + 1, q[i + 7].y[0], false);
     }
 
     // sample_test_problem.getOptimalPoints(optimal_points);

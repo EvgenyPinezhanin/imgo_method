@@ -71,6 +71,9 @@ public:
         ScanningMethod<OptProblemType>::getParameters(parameters);
         static_cast<Parameters&>(parameters).reliability = reliability;
     };
+
+    typename ScanningMethod<OptProblemType>::Result* createResult() const override { return new Result(); };
+    using ScanningMethod<OptProblemType>::createReport;
 };
 
 template <typename OptProblemType>
