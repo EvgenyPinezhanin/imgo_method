@@ -21,7 +21,7 @@ protected:
     using PiyavskyMethod<OptProblemType>::setResult;
 
 public:
-    GsaMethod(const OneDimensionalProblem &_problem = OneDimensionalProblem(),
+    GsaMethod(const OptProblemType &_problem = OptProblemType(),
               const Parameters &parameters = Parameters())
         : PiyavskyMethod<OptProblemType>(_problem, parameters) {};
 

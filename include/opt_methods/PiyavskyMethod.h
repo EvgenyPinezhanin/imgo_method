@@ -37,6 +37,7 @@ public:
                double _constantEstimation = 0.0)
             : ScanningMethod<OptProblemType>::Result(_point, _value, _numberTrials, _numberFevals, _stoppingCondition),
               constantEstimation(_constantEstimation) {};
+        ~Result() override {};
     };
 
     class Report : public ScanningMethod<OptProblemType>::Report {
@@ -48,6 +49,7 @@ public:
 
     public:
         Report() : ScanningMethod<OptProblemType>::Report() {};
+        ~Report() override {};
     };
 
 protected:
@@ -58,7 +60,7 @@ protected:
     void setResult(typename GeneralMethod::Result &result) const override;
 
 public:
-    PiyavskyMethod(const OneDimensionalProblem &_problem = OneDimensionalProblem(),
+    PiyavskyMethod(const OptProblemType &_problem = OptProblemType(),
                    const Parameters &parameters = Parameters())
         : ScanningMethod<OptProblemType>(_problem, parameters),
           opt::IConstantEstimationOptMethod(parameters.reliability) {};
