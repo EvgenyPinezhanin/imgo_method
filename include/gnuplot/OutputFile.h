@@ -57,6 +57,7 @@ public:
     }
 
     void addPoint(double x, double f, bool space = true);
+    void addPoint(size_t a, double b, bool space = true);
     void addPoint(const std::vector<double> &x, double f, bool space = true);
 
     // void addPoint(ofstream &ofstr, Trial trial, bool space = true);

@@ -13,6 +13,13 @@ void OutputFile::addPoint(double x, double f, bool space) {
     stream << strPoint.str();
 }
 
+void OutputFile::addPoint(size_t a, double b, bool space) {
+    std::stringstream strPoint;
+    strPoint << a << " " << b << "\n";
+    if (space) strPoint << "\n\n";
+    stream << strPoint.str();
+}
+
 void OutputFile::addPoint(const std::vector<double> &x, double f, bool space) {
     std::stringstream strPoint;
     size_t dimensionalX = x.size();
