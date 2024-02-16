@@ -38,6 +38,7 @@ namespace opt {
             Result(const typename OptProblemType::Point _point = typename OptProblemType::Point(),
                    double _value = 0.0)
                 : point(_point), value(_value) {};
+            virtual ~Result() {};
         };
 
         class IReport {
@@ -55,6 +56,7 @@ namespace opt {
 
         public:
             IReport() = default;
+            virtual ~IReport() {};
 
             void print(std::ostream &stream, const Task<OptProblemType> &task, const Result &result, double workTime) const;
         };

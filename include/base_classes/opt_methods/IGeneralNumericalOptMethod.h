@@ -16,9 +16,9 @@ namespace opt {
 
         struct Parameters : public GeneralMethod::Parameters {
             double accuracy, error;
-            int maxTrials, maxFevals;
+            size_t maxTrials, maxFevals;
 
-            Parameters(double _accuracy = 0.001, double _error = 0.001, int _maxTrials = 1000, int _maxFevals = 1000):
+            Parameters(double _accuracy = 0.001, double _error = 0.001, size_t _maxTrials = 1000, size_t _maxFevals = 1000):
                 accuracy(_accuracy), error(_error), maxTrials(_maxTrials), maxFevals(_maxFevals) {};
         };
 
@@ -32,16 +32,17 @@ namespace opt {
         };
 
         struct Result : public GeneralMethod::Result {
-            int numberTrials, numberFevals;
+            size_t numberTrials, numberFevals;
             double resultingAccuracy;
 
             StoppingCondition stoppingCondition;
 
             Result(const typename OptProblemType::Point &_point = typename OptProblemType::Point(),
-                   double _value = 0.0, int _numberTrials = 0, int _numberFevals = 0, double _resultingAccuracy = 0.0,
+                   double _value = 0.0, size_t _numberTrials = 0, size_t _numberFevals = 0, double _resultingAccuracy = 0.0,
                    StoppingCondition _stoppingCondition = StoppingConditions::ACCURACY):
                 GeneralMethod::Result(_point, _value), numberTrials(_numberTrials), numberFevals(_numberFevals),
                 resultingAccuracy(_resultingAccuracy), stoppingCondition(_stoppingCondition) {};
+            ~Result() override {};
         };
 
         class IReport : public GeneralMethod::IReport {
@@ -54,17 +55,16 @@ namespace opt {
                                    const typename GeneralMethod::Result &result) const override;
 
         public:
-            IReport():
-                GeneralMethod::IReport()
-            {};
+            IReport() : GeneralMethod::IReport() {};
+            ~IReport() override {};
         };
 
     protected:
         std::vector<TrialType> trialPoints;
 
         double accuracy, resultingAccuracy, error;
-        int numberTrials, maxTrials;
-        int numberFevals, maxFevals;
+        size_t numberTrials, maxTrials;
+        size_t numberFevals, maxFevals;
 
         StoppingCondition stoppingCondition;
         
@@ -101,14 +101,14 @@ namespace opt {
         void setError(double _error) { error = _error; };
         double getError() const { return error; };
 
-        void setMaxTrials(int _maxTrials) { maxTrials = _maxTrials; };
-        int getMaxTrials() const { return maxTrials; };
+        void setMaxTrials(size_t _maxTrials) { maxTrials = _maxTrials; };
+        size_t getMaxTrials() const { return maxTrials; };
 
-        void setMaxFevals(int _maxFevals) { maxFevals = _maxFevals; };
-        int getMaxFevals() const { return maxFevals; };
+        void setMaxFevals(size_t _maxFevals) { maxFevals = _maxFevals; };
+        size_t getMaxFevals() const { return maxFevals; };
 
         void getTrialPoints(std::vector<TrialType> &_trialPoints) const { _trialPoints = trialPoints; };
-        int getNumberTrialPoints() const { return trialPoints.size(); };
+        size_t getNumberTrialPoints() const { return trialPoints.size(); };
 
         typename GeneralMethod::Result* createResult() const override { return new Result(); };
         using GeneralMethod::createReport;
