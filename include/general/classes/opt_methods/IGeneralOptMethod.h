@@ -1,5 +1,5 @@
-#ifndef I_GENERAL_OPT_METHOD_H_
-#define I_GENERAL_OPT_METHOD_H_
+#ifndef _I_GENERAL_OPT_METHOD_H_
+#define _I_GENERAL_OPT_METHOD_H_
 
 #include <iostream>
 #include <iomanip>
@@ -101,4 +101,4 @@ namespace opt {
     }
 }
 
-#endif // I_GENERAL_OPT_METHOD_H_
+#endif // _I_GENERAL_OPT_METHOD_H_

@@ -2,12 +2,16 @@
 #define SOLVER_H_
 
 #include <iostream>
+#include <algorithm>
+#include <utility>
 #include <vector>
 #include <string>
 #include <memory>
 
-#include <base_classes/opt_methods/IGeneralOptMethod.h>
+#include <general/classes/opt_methods/IGeneralOptMethod.h>
+#include <general/classes/opt_methods/IGeneralNumericalOptMethod.h>
 #include <gnuplot/OutputFile.h>
+#include <MyMath.h>
 #include <omp.h>
 
 template <typename OptProblemType>
@@ -89,34 +93,40 @@ public:
         std::cout << "Total time: " << totalEndTime - totalStartTime << "\n";
     }
 
-    void calcOperationalCharacteristics() {
-/*         cout << "r = " << r[i][j] << endl;
-            imgo.setR(r[i][j]);
+    template <typename TrialType>
+    void calcOperationalCharacteristics(
+        opt::IGeneralNumericalOptMethod<TrialType, OptProblemType> &optMethod,
+        const opt::Task<OptProblemType> &task,
+        size_t kStart, size_t kFinish, size_t kStep,
+        std::vector<std::pair<size_t, double>> &operationalCharacteristics, double &workTime)
+    {
+        using Result = typename opt::IGeneralNumericalOptMethod<TrialType, OptProblemType>::Result;
 
-            double startTime = omp_get_wtime();
-            for (int k = 0; k < numberFunctions; k++) {
-                functor.currentFunction = k;
-                imgo.setF(function<double(double, int)>(functor));
-                imgo.setMaxTrials(Kmax);
-                (*functor.optProblemFamily)[k]->GetBounds(A, B);
-                imgo.setAB(A[0], B[0]);
+        size_t numberPoints = (kFinish - kStart) / kStep + 1;
+        operationalCharacteristics.resize(numberPoints);
 
-                if (imgo.solveTest((*functor.optProblemFamily)[k]->GetOptimumPoint()[0], numberTrials, numberFevals)) {
-                    numberTrialsArray[i][k] = numberTrials;
-                } else {
-                    numberTrialsArray[i][k] = Kmax + 1;
-                }
-            }
-            for (int k = K0; k <= Kmax; k += Kstep) {
-                numberSuccessful = (int)count_if(numberTrialsArray[i].begin(), numberTrialsArray[i].end(),
-                                                 [k] (double elem) { return elem <= k; });
-                cout << "K = " << k << " success rate = " << (double)numberSuccessful / numberFunctions << endl;
-                ofstr << k << " " << (double)numberSuccessful / numberFunctions << endl;
-            }
-            ofstr << endl << endl;
-            double endTime = omp_get_wtime();
-            double workTime = endTime - startTime;
-            cout << "Time: " << workTime << endl; */
+        size_t familySize = task.problem.getFamilySize();
+        std::unique_ptr<Result> result(static_cast<Result*>(optMethod.createResult()));
+        std::vector<size_t> numberTrials(familySize);
+
+        optMethod.setParameters(task.parameters);
+
+        double startTime = omp_get_wtime();
+        for (size_t i = 0; i < familySize; ++i) {
+            task.problem.setProblemNumber(i);
+            optMethod.setProblem(task.problem);
+
+            numberTrials[i] = optMethod.solveTest(*result) ? result->numberTrials : kFinish + 1;
+        }
+        double endTime = omp_get_wtime();
+        workTime = endTime - startTime;
+
+        size_t numberSuccessful, k;
+        for (size_t i = 0, k = kStart; k <= kFinish; ++i, k += kStep) {
+            numberSuccessful = std::count_if(numberTrials.begin(), numberTrials.end(),
+                                             [k] (double elem) { return elem <= k; });
+            operationalCharacteristics[i] = std::pair<size_t, double>(k, (double)numberSuccessful / familySize);
+        }
     }
 };
 

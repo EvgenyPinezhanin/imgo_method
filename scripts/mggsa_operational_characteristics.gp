@@ -1,8 +1,10 @@
 #! /usr/bin/gnuplot
 
 taskName = "mggsa_operational_characteristics"
-datafile = "output_data/".taskName."/operational_characteristics.txt"
+# datafile = "output_data/".taskName."/operational_characteristics.txt"
+datafile = "output_data/multidimensional_constrained_operational_characteristics/operational_characteristics.txt"
 load "output_data/".taskName."/vars.txt"
+
 
 set linetype 1 lc rgb "red" lw 2
 set linetype 2 lc rgb "green" lw 2

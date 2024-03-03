@@ -1,5 +1,5 @@
-#ifndef I_CHARACTERISTIC_OPT_METHOD_H_
-#define I_CHARACTERISTIC_OPT_METHOD_H_
+#ifndef _I_CHARACTERISTIC_OPT_METHOD_H_
+#define _I_CHARACTERISTIC_OPT_METHOD_H_
 
 namespace opt {
     template<typename TrialType>
@@ -15,4 +15,4 @@ namespace opt {
     };
 }
 
-#endif // I_CHARACTERISTIC_OPT_METHOD_H_
+#endif // _I_CHARACTERISTIC_OPT_METHOD_H_

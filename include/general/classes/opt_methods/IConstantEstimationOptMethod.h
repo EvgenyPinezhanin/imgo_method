@@ -1,5 +1,5 @@
-#ifndef I_CONSTANT_ESTIMATION_OPT_METHOD_H_
-#define I_CONSTANT_ESTIMATION_OPT_METHOD_H_
+#ifndef _I_CONSTANT_ESTIMATION_OPT_METHOD_H_
+#define _I_CONSTANT_ESTIMATION_OPT_METHOD_H_
 
 namespace opt {
     class IConstantEstimationOptMethod {
@@ -17,4 +17,4 @@ namespace opt {
     };
 }
 
-#endif // I_CONSTANT_ESTIMATION_OPT_METHOD_H_
+#endif // _I_CONSTANT_ESTIMATION_OPT_METHOD_H_

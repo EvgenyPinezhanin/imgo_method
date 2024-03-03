@@ -1,5 +1,5 @@
-#ifndef GENERAL_ZERO_ORDER_TRIAL_H_
-#define GENERAL_ZERO_ORDER_TRIAL_H_
+#ifndef _GENERAL_ZERO_ORDER_TRIAL_H_
+#define _GENERAL_ZERO_ORDER_TRIAL_H_
 
 namespace opt {
     struct GeneralZeroOrderTrial {
@@ -9,4 +9,4 @@ namespace opt {
     };
 }
 
-#endif // GENERAL_ZERO_ORDER_TRIAL_H_
+#endif // _GENERAL_ZERO_ORDER_TRIAL_H_

@@ -5,7 +5,7 @@
 #include <string>
 #include <functional>
 
-#include <base_structures/trials/IndexTrial.h>
+#include <general/structures/trials/IndexTrial.h>
 
 enum class StopCriteria { accuracy, error, maxTrials, maxFevals, coincidePoints };
 

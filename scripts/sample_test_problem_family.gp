@@ -47,21 +47,58 @@ if (ARG1 == 0) {
         set obj 2 rect from T[1]-delta,Q[1]-delta to T[1]+delta,Q[1]+delta front fs empty border rgb "red"
         set obj 3 rect from T[2]-delta,Q[2]-delta to T[2]+delta,Q[2]+delta front fs empty border rgb "red"
         set obj 4 rect from T[3]-delta,Q[3]-delta to T[3]+delta,Q[3]+delta front fs empty border rgb "red"
-    } else {
-        // set lmargin 11
-// 
-        // set key width -2
-// 
-        // set xrange [ARG6 : ARG7]
-// 
-        // plot function_points_file lc rgb "dark-violet" with lines title "f(x)", \
-        //      trials_file index 2 ls 4 lc rgb "green" lw 2 title "trial points", \
-        //      trials_file index 0 ls 7 lc rgb "red"   ps 2 title "X_{min}", \
-        //      trials_file index 1 ls 7 lc rgb "blue"  ps 1 title "X"
-    }
 
-    bind all "alt-End" "exit gnuplot"
+            bind all "alt-End" "exit gnuplot"
     pause mouse close
+    } else {
+taskName = "sample_test_problem_family"
+
+title(f, s) = sprintf("Graph of the function slice by variables x%d and x%d", f, s)
+function(taskName, f, s) = sprintf("output_data/%s/%d_%df.txt", taskName, f, s)
+constraints(taskName, f, s) = sprintf("output_data/%s/%d_%dg.txt", taskName, f, s)
+
+set grid
+
+set contour
+set view map
+set cntrparam bspline levels auto 14
+set cntrlabel onecolor
+set cntrlabel start 5 interval 150
+set cntrlabel font ",10"
+set contour base
+
+set key opaque
+set key spacing 1.3
+
+set isosamples 120
+
+    set terminal pngcairo size 950, 950 font "Helvetica, 18"
+    system "mkdir -p output_graph/".taskName
+
+    set lmargin 1
+    set rmargin 0
+    set tmargin 0
+    set bmargin 0
+
+    do for [f = 1 : 3] {
+        do for [s = f + 1 : 4] {
+            set output "output_graph/".taskName."/".f."_".s.".png"
+
+            set title title(f, s) font "Helvetica, 20"
+
+            set xlabel "X".f
+            set ylabel "Y".s
+
+            set xrange [0.01 : 2.0]
+            set yrange [0.01 : 2.0]
+            set zrange [minValue :]
+
+            splot function(taskName, f, s) matrix nonuniform title "f(x, y)" nosurface, \
+                  constraints(taskName, f, s) matrix nonuniform with lines lc rgb "orange" title "g(x, y)" nocontours, \
+                  function(taskName, f, s) matrix nonuniform with labels notitle nosurface
+        }
+    }
+}
 } else {
     // set terminal pngcairo size 1640, 950 font font_name
 // 
@@ -106,3 +143,14 @@ if (ARG1 == 0) {
     //     }
     // }
 }
+
+        # set lmargin 11
+# 
+        # set key width -2
+# 
+        # set xrange [ARG6 : ARG7]
+# 
+        # plot function_points_file lc rgb "dark-violet" with lines title "f(x)", \
+        #      trials_file index 2 ls 4 lc rgb "green" lw 2 title "trial points", \
+        #      trials_file index 0 ls 7 lc rgb "red"   ps 2 title "X_{min}", \
+        #      trials_file index 1 ls 7 lc rgb "blue"  ps 1 title "X"

@@ -1,9 +1,9 @@
-#ifndef I_INDEX_SCHEME_OPT_METHOD_H_
-#define I_INDEX_SCHEME_OPT_METHOD_H_
+#ifndef _I_INDEX_SCHEME_OPT_METHOD_H_
+#define _I_INDEX_SCHEME_OPT_METHOD_H_
 
 #include <vector>
 
-#include <base_structures/trials/IndexTrial.h>
+#include <general/structures/trials/IndexTrial.h>
 
 namespace opt {
     class IIndexSchemeOptMethod {
@@ -32,4 +32,4 @@ namespace opt {
     };
 }
 
-#endif // I_INDEX_SCHEME_OPT_METHOD_H_
+#endif // _I_INDEX_SCHEME_OPT_METHOD_H_

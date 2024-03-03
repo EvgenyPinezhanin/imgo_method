@@ -1,5 +1,5 @@
-#ifndef MULTI_DIMENSIONAL_SEARCH_AREA_H_
-#define MULTI_DIMENSIONAL_SEARCH_AREA_H_
+#ifndef _MULTI_DIMENSIONAL_SEARCH_AREA_H_
+#define _MULTI_DIMENSIONAL_SEARCH_AREA_H_
 
 #include <vector>
 
@@ -14,4 +14,4 @@ namespace opt {
     };
 }
 
-#endif // MULTI_DIMENSIONAL_SEARCH_AREA_H_
+#endif // _MULTI_DIMENSIONAL_SEARCH_AREA_H_

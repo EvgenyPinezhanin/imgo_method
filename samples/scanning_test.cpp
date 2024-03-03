@@ -5,16 +5,16 @@
 
 #include <Solver.h>
 #include <opt_methods/ScanningMethod.h>
-#include <opt_problems/OneDimensionalProblem.h>
-#include <test_opt_problems/OneDimensionalTestProblems.h>
+#include <opt_problems/OptProblem.h>
+#include <test_opt_problems/OneDimensionalTestOptProblems.h>
 #include <gnuplot/Script.h>
 
 #define CALC
 #define DRAW
 
-using Task = opt::Task<OneDimensionalProblem>;
-using Parameters = ScanningMethod<OneDimensionalProblem>::Parameters;
-using Result = opt::IGeneralOptMethod<OneDimensionalProblem>::Result;
+using Task = opt::Task<OneDimensionalOptProblem>;
+using Parameters = ScanningMethod<OneDimensionalOptProblem>::Parameters;
+using Result = opt::IGeneralOptMethod<OneDimensionalOptProblem>::Result;
 
 const std::string methodName = "scanning";
 const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
@@ -27,7 +27,7 @@ int main() {
     double accuracy = 0.001;
     int maxTrials = 100000, maxFevals = 100000;
     Parameters parameters(accuracy, 0.0, maxTrials, maxFevals);
-    ScanningMethod<OneDimensionalProblem> method;
+    ScanningMethod<OneDimensionalOptProblem> method;
 
     std::vector<Task> tasks = { Task("Sample Task №1", sampleTasks[0], parameters),
                                 Task("Sample Task №2", sampleTasks[1], parameters),
@@ -56,10 +56,10 @@ int main() {
                                 Task( "Test Task №20",  testTasks[19], parameters) };
     size_t numberTasks = tasks.size();
 
-    Solver<OneDimensionalProblem> solver;
+    Solver<OneDimensionalOptProblem> solver;
     std::unique_ptr<Result> result(method.createResult());
-    std::vector<OneDimensionalProblem::Point> optimalPoints;
-    std::vector<ScanningMethod<OneDimensionalProblem>::Trial> trials;
+    std::vector<OneDimensionalOptProblem::Point> optimalPoints;
+    std::vector<ScanningMethod<OneDimensionalOptProblem>::Trial> trials;
     std::string outputDirectory = "output_data/" + methodName + "_test/";
     std::string blockName, trialsFileName;
     OutputFile trialsFile;

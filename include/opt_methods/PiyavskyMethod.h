@@ -3,7 +3,7 @@
 
 #include <limits>
 
-#include <base_classes/opt_methods/IConstantEstimationOptMethod.h>
+#include <general/classes/opt_methods/IConstantEstimationOptMethod.h>
 #include <opt_methods/ScanningMethod.h>
 #include <MyMath.h>
 

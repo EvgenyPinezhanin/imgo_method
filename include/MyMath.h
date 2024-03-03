@@ -11,19 +11,14 @@
 #include <vector>
 
 struct point {
-    size_t dimension;
+    std::vector<double> x;
 
-    double x;
-    std::vector<double> y;
+    point(double _x) : x(_x) {};
+    point(double _x, double _y) : x({ _x, _y }) {};
+    point(std::vector<double> _x) : x(_x) {};
+    point(std::vector<double> _x, double _y) : x(_x) { x.push_back(_y); };
 
-    point(double _x)
-        : dimension(1), x(_x), y() {};
-
-    point(double _x, double _y)
-        : dimension(2), x(_x), y(1, _y) {};
-
-    point(double _x, std::vector<double> _y)
-        : dimension(_y.size() + 1), x(_x), y(_y) {};
+    size_t getDimension() const { return x.size(); };
 };
 
 class mnk {

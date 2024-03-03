@@ -4,16 +4,16 @@
 
 #include <Solver.h>
 #include <opt_methods/ImgoMethod.h>
-#include <opt_problems/OneDimensionalConstrainedProblem.h>
-#include <test_opt_problems/OneDimensionalConstrainedTestProblems.h>
+#include <opt_problems/ConstrainedOptProblem.h>
+#include <test_opt_problems/OneDimensionalConstrainedTestOptProblems.h>
 #include <gnuplot/Script.h>
 
 #define CALC
 #define DRAW
 
-using Task = opt::Task<OneDimensionalConstrainedProblem>;
-using Parameters = ImgoMethod<OneDimensionalConstrainedProblem>::Parameters;
-using Result = opt::IGeneralOptMethod<OneDimensionalConstrainedProblem>::Result;
+using Task = opt::Task<OneDimensionalConstrainedOptProblem>;
+using Parameters = ImgoMethod<OneDimensionalConstrainedOptProblem>::Parameters;
+using Result = opt::IGeneralOptMethod<OneDimensionalConstrainedOptProblem>::Result;
 
 const std::string methodName = "imgo";
 const int displayType = 1; // 0 - application, 1 - png, 2 - png(notitle)
@@ -41,7 +41,7 @@ int main() {
         Parameters(accuracy, 0.0, maxTrials, maxFevals, std::vector<double>{ reliability, reliability, reliability, reliability }, d),
         Parameters(accuracy, 0.0, maxTrials, maxFevals, std::vector<double>{ reliability, reliability, reliability, reliability }, d)
     };
-    ImgoMethod<OneDimensionalConstrainedProblem> method;
+    ImgoMethod<OneDimensionalConstrainedOptProblem> method;
 
     std::vector<Task> tasks = { Task("Sample Task №1", sampleTasks[0],  parameters[0]),
                                 Task("Sample Task №2", sampleTasks[1],  parameters[1]),
@@ -59,10 +59,10 @@ int main() {
                                 Task( "Test Task №10", testTasks[9], parameters[12]) };
     size_t numberTasks = tasks.size();
 
-    Solver<OneDimensionalConstrainedProblem> solver;
+    Solver<OneDimensionalConstrainedOptProblem> solver;
     std::unique_ptr<Result> result(method.createResult());
-    std::vector<OneDimensionalConstrainedProblem::Point> optimalPoints;
-    std::vector<ImgoMethod<OneDimensionalConstrainedProblem>::Trial> trials;
+    std::vector<OneDimensionalConstrainedOptProblem::Point> optimalPoints;
+    std::vector<ImgoMethod<OneDimensionalConstrainedOptProblem>::Trial> trials;
     std::string outputDirectory = "output_data/" + methodName + "_test/";
     std::string blockName, trialsFileName;
     OutputFile trialsFile;

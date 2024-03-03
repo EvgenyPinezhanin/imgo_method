@@ -1,7 +1,7 @@
-#ifndef INDEX_TRIAL_H_
-#define INDEX_TRIAL_H_
+#ifndef _INDEX_TRIAL_H_
+#define _INDEX_TRIAL_H_
 
-#include <base_structures/trials/GeneralZeroOrderTrial.h>
+#include <general/structures/trials/GeneralZeroOrderTrial.h>
 
 namespace opt {
     struct IndexTrial : public GeneralZeroOrderTrial {
@@ -11,4 +11,4 @@ namespace opt {
     };
 }
 
-#endif // INDEX_TRIAL_H_
+#endif // _INDEX_TRIAL_H_

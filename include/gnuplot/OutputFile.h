@@ -7,7 +7,7 @@
 #include <sstream>
 
 #include <trials/Trial.h>
-#include <base_structures/trials/IndexTrial.h>
+#include <general/structures/trials/IndexTrial.h>
 
 class OutputFile {
 private:

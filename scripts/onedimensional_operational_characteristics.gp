@@ -1,31 +1,40 @@
 #! /usr/bin/gnuplot
 
-taskName = "imgo_operational_characteristics"
-datafile = "output_data/".taskName.".txt"
-load "output_data/".taskName."_opt.txt"
+sampleName = "onedimensional_operational_characteristics"
 
-set linetype 1 lc rgb "red" lw 2
-set linetype 2 lc rgb "green" lw 2
-set linetype 3 lc rgb "blue" lw 2
+load "output_data/".sampleName."/vars.txt"
 
-set linetype cycle 3
+set linetype 1  lc rgb "red"         lw 2
+set linetype 2  lc rgb "green"       lw 2
+set linetype 3  lc rgb "blue"        lw 2
+set linetype 4  lc rgb "orange"      lw 2
+set linetype 5  lc rgb "brown"       lw 2
+set linetype 6  lc rgb "dark-yellow" lw 2
+set linetype 7  lc rgb "dark-violet" lw 2
+
+set linetype cycle 7
+
+fontName = "Helvetica, 16"
 
 set grid
 
-set tics font "Helvetica, 16"
+set xlabel "K" font fontName
+set ylabel "P_s(K)" font fontName offset -1
 
-set xlabel "K" font "Helvetica, 16"
-set ylabel "P_s(K)" font "Helvetica, 16" offset -1
+set tics font fontName
 
 set key box outside right top
-set key font "Helvetica, 16" spacing 1.3
+set key font fontName spacing 1.3
 
-title(familyName) = sprintf("Operational characteristics of the imgo method on the family %s functions", familyName)
+title(familyName) = sprintf("Operational characteristics on the %s", familyName)
 titlePng(familyName) = ARG1 == 1 ? title(familyName) : sprintf("")
+dataFile(number) = number == 1 ? sprintf("output_data/%s/%s/%s", sampleName, methodNames[1], familyName[ARG2 + 1]) : \
+                   number <= 4 ? sprintf("output_data/%s/%s/%s_%s", sampleName, methodNames[2], familyName[ARG2 + 1], r[number - 1]) : \
+                                 sprintf("output_data/%s/%s/%s_%s", sampleName, methodNames[3], familyName[ARG2 + 1], r[number - 1])
 
 if (ARG1 == 0) {
-    set title title(familyName[ARG2 + 1]) font "Helvetica, 16"
-    plot for [i = 1 : 3] datafile index (ARG2 - 1) * 3 + i - 1 using 1:2 with lines lt i title "r = ".r[(ARG2 - 1) * 3 + i]
+    set title title(familyName[ARG2 + 1]) font fontName
+    plot for [i = 1 : 7] dataFile(i) using 1:2 with lines lt i title "r = "
 
     bind all "alt-End" "exit gnuplot"
     pause mouse close

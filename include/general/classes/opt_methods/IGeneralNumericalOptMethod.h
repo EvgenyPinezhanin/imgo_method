@@ -1,9 +1,9 @@
-#ifndef I_GENERAL_NUMERICAL_OPT_METHOD_H_
-#define I_GENERAL_NUMERICAL_OPT_METHOD_H_
+#ifndef _I_GENERAL_NUMERICAL_OPT_METHOD_H_
+#define _I_GENERAL_NUMERICAL_OPT_METHOD_H_
 
 #include <vector>
 
-#include <base_classes/opt_methods/IGeneralOptMethod.h>
+#include <general/classes/opt_methods/IGeneralOptMethod.h>
 
 namespace opt {
     static size_t initTrialPointsSize = 100;
@@ -184,4 +184,4 @@ namespace opt {
     }
 }
 
-#endif // I_GENERAL_NUMERICAL_OPT_METHOD_H_
+#endif // _I_GENERAL_NUMERICAL_OPT_METHOD_H_

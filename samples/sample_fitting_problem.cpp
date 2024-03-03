@@ -2,11 +2,12 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include <memory>
 
 #include <opt_methods/ScanningMethod.h>
 #include <opt_methods/PiyavskyMethod.h>
 #include <opt_methods/GsaMethod.h>
-#include <opt_problems/OneDimensionalProblem.h>
+#include <opt_problems/OptProblem.h>
 #include <gnuplot/OutputFile.h>
 #include <gnuplot/Script.h>
 #include <MyMath.h>
@@ -14,6 +15,9 @@
 
 #define CALC
 #define DRAW
+
+using Result = ScanningMethod<OneDimensionalOptProblem>::GeneralNumericalMethod::Result;
+using Report = ScanningMethod<OneDimensionalOptProblem>::GeneralNumericalMethod::IReport;
 
 const std::vector<std::string> method_names{ "scanning", "piyavsky", "gsa" };
 
@@ -44,7 +48,7 @@ const std::vector<point> q{ point( 0.0, 0.74),
 
 size_t number_coefficients = 5;
 std::vector<double> coefficients(number_coefficients);
-const OneDimensionalProblem sample_test_problem(
+const OneDimensionalOptProblem sample_test_problem(
     [] (double x) -> double {
         std::vector<std::function<double(double, double)>> functions{
             [] (double t, double x) -> double { return 1.0; },
@@ -61,11 +65,11 @@ const OneDimensionalProblem sample_test_problem(
         for (size_t i = 0; i < number_coefficients; ++i) {
             for (size_t j = 0; j < number_coefficients; ++j) {
                 for (size_t k = 0; k < number_test_points; ++k) {
-                    A[i][j] += functions[j](q[k].x, x) * functions[i](q[k].x, x);
+                    A[i][j] += functions[j](q[k].x[0], x) * functions[i](q[k].x[0], x);
                 }
             }
             for (size_t j = 0; j < number_test_points; ++j) {
-                b[i] += q[j].y[0] * functions[i](q[j].x, x);
+                b[i] += q[j].x[1] * functions[i](q[j].x[0], x);
             }
         }
 
@@ -76,53 +80,37 @@ const OneDimensionalProblem sample_test_problem(
         for (size_t i = 0; i < number_test_points; ++i) {
             sum = 0.0;
             for (size_t j = 0; j < number_coefficients; ++j) {
-                sum += coefficients[j] * functions[j](q[i].x, x);
+                sum += coefficients[j] * functions[j](q[i].x[0], x);
             }
-            result += (sum - q[i].y[0]) * (sum - q[i].y[0]);
+            result += (sum - q[i].x[1]) * (sum - q[i].x[1]);
         }
 
         return result;
-    }, "Sample test problem", 1,
+    }, "Sample fitting problem", 1,
     opt::OneDimensionalSearchArea(0.5, 8.0), std::vector<double>{1.105}, 0.017, -1.0);
 
 int main() {
     double accuracy = 0.001, reliability = 2.0;
     int maxTrials = 100000, maxFevals = 100000;
-    GsaMethod<OneDimensionalProblem>::Parameters parameters(accuracy, 0.0, maxTrials, maxFevals, reliability);
-    opt::Task task("Sample test task", sample_test_problem, parameters);
+    GsaMethod<OneDimensionalOptProblem>::Parameters parameters(accuracy, 0.0, maxTrials, maxFevals, reliability);
+    opt::Task task("Sample fitting task", sample_test_problem, parameters);
 
     size_t number_methods = 3;
-    ScanningMethod<OneDimensionalProblem> scanning;
-    PiyavskyMethod<OneDimensionalProblem> piyavsky;
-    GsaMethod<OneDimensionalProblem> gsa;
+    ScanningMethod<OneDimensionalOptProblem> scanning;
+    PiyavskyMethod<OneDimensionalOptProblem> piyavsky;
+    GsaMethod<OneDimensionalOptProblem> gsa;
 
-    std::vector<ScanningMethod<OneDimensionalProblem>::GeneralNumericalMethod*> methods{ &scanning, &piyavsky, &gsa };
-
-    ScanningMethod<OneDimensionalProblem>::Result scanning_result;
-    PiyavskyMethod<OneDimensionalProblem>::Result piyavsky_result;
-    GsaMethod<OneDimensionalProblem>::Result gsa_result;
-
-    std::vector<ScanningMethod<OneDimensionalProblem>::GeneralNumericalMethod::Result*> method_results{ &scanning_result,
-                                                                                                        &piyavsky_result,
-                                                                                                        &gsa_result };
-
-    ScanningMethod<OneDimensionalProblem>::Report scanning_report;
-    PiyavskyMethod<OneDimensionalProblem>::Report piyavsky_report;
-    GsaMethod<OneDimensionalProblem>::Report gsa_report;
-
-    std::vector<ScanningMethod<OneDimensionalProblem>::GeneralNumericalMethod::IReport*> method_reports{ &scanning_report,
-                                                                                                   &piyavsky_report,
-                                                                                                   &gsa_report };
+    std::vector<ScanningMethod<OneDimensionalOptProblem>::GeneralNumericalMethod*> methods{ &scanning, &piyavsky, &gsa };
 
     double total_start_time = omp_get_wtime();
 #if defined( CALC )
-    OutputFile vars_file("output_data/sample_test_problem/vars.txt");
+    OutputFile vars_file("output_data/sample_fitting_problem/vars.txt");
     if (!vars_file.isOpen()) std::cerr << "vars_file opening error\n";
 
-    vars_file.setVariable("number_methods", number_methods, false);
-    vars_file.setVariable("number_coefficients", number_coefficients, false);
-    vars_file.initArray("method_names", number_methods);
-    vars_file.initArray("x_opt", number_methods);
+    vars_file.setVariable("numberMethods", number_methods, false);
+    vars_file.setVariable("numberCoefficients", number_coefficients, false);
+    vars_file.initArray("methodNames", number_methods);
+    vars_file.initArray("xOpt", number_methods);
     vars_file.initArray("c", number_coefficients * number_methods);
 
     OutputFile trialsFile;
@@ -131,34 +119,37 @@ int main() {
     double start_time, end_time, work_time;
 
     for (size_t i = 0; i < number_methods; ++i) {
-        trialsFile.open("output_data/sample_test_problem/" + method_names[i] + "_trials.txt");
+        trialsFile.open("output_data/sample_fitting_problem/" + method_names[i] + "_trials.txt");
         if (!trialsFile.isOpen()) std::cerr << "trialsFile opening error\n";
 
         methods[i]->setParameters(parameters);
         methods[i]->setProblem(sample_test_problem);
 
+        std::unique_ptr<Result> result(static_cast<Result*>(methods[i]->createResult()));
+        std::unique_ptr<Report> report(static_cast<Report*>(methods[i]->createReport()));
+
         start_time = omp_get_wtime();
-        methods[i]->solve(*method_results[i]);
+        methods[i]->solve(*result);
         end_time = omp_get_wtime();
         work_time = end_time - start_time;
 
         std::cout << "Method name: " << method_names[i] << '\n';
-        method_reports[i]->print(std::cout, task, *method_results[i], work_time);
+        report->print(std::cout, task, *result, work_time);
 
-        sample_test_problem.computeObjFunction(method_results[i]->point);
+        sample_test_problem.computeObjectiveFunction(result->point);
         std::cout << "c = (" << coefficients[0];
         for (int i = 1; i < number_coefficients; ++i) {
             std::cout << "; " << coefficients[i];
         }
         std::cout << ")\n\n";
 
-        vars_file.setValueInArray("method_names", i + 1, method_names[i]);
-        vars_file.setValueInArray("x_opt", i + 1, method_results[i]->point, false);
+        vars_file.setValueInArray("methodNames", i + 1, method_names[i]);
+        vars_file.setValueInArray("xOpt", i + 1, result->point, false);
         vars_file.setValuesInArray("c", i * number_coefficients + 1, coefficients, false);
 
         sample_test_problem.getOptimalPoints(optimal_points);
         trialsFile.addPoints(optimal_points, sample_test_problem.getOptimalValue());
-        trialsFile.addPoint(method_results[i]->point, method_results[i]->value);
+        trialsFile.addPoint(result->point, result->value);
 
         methods[i]->getTrialPoints(trials);
         trialsFile.addPoints(trials);
@@ -168,22 +159,22 @@ int main() {
 
     vars_file.close();
 
-    OutputFile test_points_file("output_data/sample_test_problem/test_points.txt");
+    OutputFile test_points_file("output_data/sample_fitting_problem/test_points.txt");
     if (!test_points_file.isOpen()) std::cerr << "test_points_file opening error\n";
 
     for (int i = 0; i < number_test_points; ++i) {
-        test_points_file.addPoint(q[i].x, q[i].y[0], false);
+        test_points_file.addPoint(q[i].x, q[i].x[1], false);
     }
 
     test_points_file.close();
 
-    OutputFile function_points_file("output_data/sample_test_problem/function_points.txt");
+    OutputFile function_points_file("output_data/sample_fitting_problem/function_points.txt");
     if (!function_points_file.isOpen()) std::cerr << "function_points_file opening error\n";
 
     double a = sample_test_problem.getSearchArea().lowerBound;
     double b = sample_test_problem.getSearchArea().upBound;
     for (double i = a; i < b; i += step) {
-        function_points_file.addPoint(i, sample_test_problem.computeObjFunction(i), false);
+        function_points_file.addPoint(i, sample_test_problem.computeObjectiveFunction(i), false);
     }
 
     function_points_file.close();
@@ -192,9 +183,9 @@ int main() {
     std::cout << "Total time: " << total_end_time - total_start_time << "\n";
 
 #if defined( DRAW )
-    Script script("scripts/sample_test_problem.gp");
+    Script script("scripts/sample_fitting_problem.gp");
     script.addArgs(std::vector<int>{ display_type, graph_type, method_index });
-    script.addArgs(std::vector<double>{ q[0].x, q[number_test_points - 1].x,
+    script.addArgs(std::vector<double>{ q[0].x[0], q[number_test_points - 1].x[0],
                                         sample_test_problem.getSearchArea().lowerBound,
                                         sample_test_problem.getSearchArea().upBound });
     script.start();

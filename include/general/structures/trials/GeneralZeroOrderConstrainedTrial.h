@@ -1,9 +1,9 @@
-#ifndef GENERAL_ZERO_ORDER_CONSTRAINED_TRIAL_H_
-#define GENERAL_ZERO_ORDER_CONSTRAINED_TRIAL_H_
+#ifndef _GENERAL_ZERO_ORDER_CONSTRAINED_TRIAL_H_
+#define _GENERAL_ZERO_ORDER_CONSTRAINED_TRIAL_H_
 
 #include <vector>
 
-#include <base_structures/trials/GeneralZeroOrderTrial.h>
+#include <general/structures/trials/GeneralZeroOrderTrial.h>
 
 namespace opt {
     struct GeneralZeroOrderConstrainedTrial : public GeneralZeroOrderTrial {
@@ -15,4 +15,4 @@ namespace opt {
     };
 }
 
-#endif // GENERAL_ZERO_ORDER_CONSTRAINED_TRIAL_H_
+#endif // _GENERAL_ZERO_ORDER_CONSTRAINED_TRIAL_H_

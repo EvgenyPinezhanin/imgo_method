@@ -6,10 +6,10 @@
 #include <limits>
 #include <iterator>
 
-#include <base_classes/opt_methods/IGeneralNumericalOptMethod.h>
-#include <base_classes/opt_methods/ICharacteristicOptMethod.h>
-#include <base_classes/opt_methods/IIndexSchemeOptMethod.h>
-#include <base_structures/trials/IndexTrial.h>
+#include <general/classes/opt_methods/IGeneralNumericalOptMethod.h>
+#include <general/classes/opt_methods/ICharacteristicOptMethod.h>
+#include <general/classes/opt_methods/IIndexSchemeOptMethod.h>
+#include <general/structures/trials/IndexTrial.h>
 #include <MyMath.h>
 
 static const double epsilon = 1e-14;
@@ -154,14 +154,17 @@ void ImgoMethod<OptProblemType>::Report::printOptProblem(
         stream << "\n";
         stream << "f(X*) = " << optProblem.getOptimalValue() << "\n";
     }
-    stream << "Lipschitz constants:" << "\n";
-    std::vector<double> lipschitzConstants;
-    optProblem.getLipschitzConstants(lipschitzConstants);
-    size_t numberLipschitzConstants = lipschitzConstants.size();
-    if (numberLipschitzConstants > 0) {
-        stream << "L*(f) = " << lipschitzConstants[numberLipschitzConstants - 1] << "\n";
-        for (size_t j = 0; j < numberLipschitzConstants - 1; ++j) {
-            stream << "L*(g" << j + 1 << ") = " << lipschitzConstants[j] << "\n";
+    double objectiveLipschitzConstant = optProblem.getObjectiveLipschitzConstant();
+    if (objectiveLipschitzConstant != 0.0) {
+        stream << "Lipschitz constants:" << "\n";
+        stream << "L*(f) = " << objectiveLipschitzConstant << "\n";
+        std::vector<double> constraintLipschitzConstants;
+        optProblem.getConstraintLipschitzConstants(constraintLipschitzConstants);
+        if (!constraintLipschitzConstants.empty()) {
+            size_t numberLipschitzConstants = optProblem.getNumberConstraints();
+            for (size_t j = 0; j < numberLipschitzConstants; ++j) {
+                stream << "L*(g" << j + 1 << ") = " << constraintLipschitzConstants[j] << "\n";
+            }
         }
     }
 }
@@ -396,14 +399,14 @@ opt::IndexTrial ImgoMethod<OptProblemType>::newTrial(const typename OptProblemTy
     double fValue;
     size_t numberConstraints = this->problem.getNumberConstraints();
     for (size_t j = 0; j < numberConstraints; ++j) {
-        fValue = this->problem.computeConstraint(x, j);
+        fValue = this->problem.computeConstraintFunction(x, j);
         if (fValue > 0) {
             trial.z = fValue;
             trial.nu = j;
             return trial;
         }
     }
-    trial.z = this->problem.computeConstraint(x, numberConstraints);
+    trial.z = this->problem.computeObjectiveFunction(x);
     trial.nu = numberConstraints;
     return trial;
 }

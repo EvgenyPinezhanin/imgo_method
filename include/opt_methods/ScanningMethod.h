@@ -5,9 +5,9 @@
 #include <limits>
 #include <iterator>
 
-#include <base_classes/opt_methods/IGeneralNumericalOptMethod.h>
-#include <base_classes/opt_methods/ICharacteristicOptMethod.h>
-#include <opt_problems/OneDimensionalProblem.h>
+#include <general/classes/opt_methods/IGeneralNumericalOptMethod.h>
+#include <general/classes/opt_methods/ICharacteristicOptMethod.h>
+#include <opt_problems/OptProblem.h>
 #include <trials/Trial.h>
 #include <MyMath.h>
 
@@ -167,7 +167,7 @@ void ScanningMethod<OptProblemType>::calcCharacteristic() {
 template <typename OptProblemType>
 Trial ScanningMethod<OptProblemType>::newTrial(const typename OptProblemType::Point &x) {
     this->numberFevals++;
-    return Trial(x, this->problem.computeObjFunction(x));
+    return Trial(x, this->problem.computeObjectiveFunction(x));
 }
 
 template <typename OptProblemType>

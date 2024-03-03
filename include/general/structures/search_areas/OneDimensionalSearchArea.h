@@ -1,5 +1,5 @@
-#ifndef ONE_DIMENSIONAL_SEARCH_AREA_H_
-#define ONE_DIMENSIONAL_SEARCH_AREA_H_
+#ifndef _ONE_DIMENSIONAL_SEARCH_AREA_H_
+#define _ONE_DIMENSIONAL_SEARCH_AREA_H_
 
 namespace opt {
     struct OneDimensionalSearchArea {
@@ -10,4 +10,4 @@ namespace opt {
     };
 }
 
-#endif // ONE_DIMENSIONAL_SEARCH_AREA_H_
+#endif // _ONE_DIMENSIONAL_SEARCH_AREA_H_
