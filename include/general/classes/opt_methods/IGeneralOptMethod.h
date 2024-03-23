@@ -8,6 +8,7 @@ namespace opt {
     template <typename OptProblemType>
     class IGeneralOptMethod;
 
+    // TODO: make Parameters as template parameter
     template <typename OptProblemType>
     struct Task {
         using Parameters = typename IGeneralOptMethod<OptProblemType>::Parameters;
@@ -43,11 +44,6 @@ namespace opt {
 
         class IReport {
         protected:
-            virtual void printPoint(std::ostream &stream,
-                                    const typename OptProblemType::Point &point) const = 0;
-            virtual void printPoints(std::ostream &stream,
-                                     const std::vector<typename OptProblemType::Point> &points) const = 0;
-
             virtual void printOptProblem(std::ostream &stream, const OptProblemType &optProblem) const = 0;
             virtual void printMethodParameters(std::ostream &stream, const Parameters &parameters) const = 0;
             virtual void printResultMethod(std::ostream &stream, const Result &result) const = 0;
@@ -58,6 +54,11 @@ namespace opt {
             IReport() = default;
             virtual ~IReport() {};
 
+            virtual void printPoint(std::ostream &stream,
+                                    const typename OptProblemType::Point &point) const = 0;
+            virtual void printPoints(std::ostream &stream,
+                                     const std::vector<typename OptProblemType::Point> &points) const;
+
             void print(std::ostream &stream, const Task<OptProblemType> &task, const Result &result, double workTime) const;
         };
 
@@ -67,8 +68,7 @@ namespace opt {
         virtual void setResult(Result &result) const = 0;
 
     public:
-        IGeneralOptMethod(const OptProblemType &_problem)
-            : problem(_problem) {};
+        IGeneralOptMethod(const OptProblemType &_problem) : problem(_problem) {};
 
         void setProblem(const OptProblemType &_problem) { problem = _problem; };
         OptProblemType getProblem() const { return problem; };
@@ -82,6 +82,20 @@ namespace opt {
         virtual void solve(Result &result) = 0;
         virtual bool solveTest(Result &result) = 0;
     };
+
+    template <typename OptProblemType>
+    void IGeneralOptMethod<OptProblemType>::IReport::printPoints(
+        std::ostream &stream, const std::vector<typename OptProblemType::Point> &points) const
+    {
+        stream << "[";
+        printPoint(stream, points[0]);
+        size_t numberPoints = points.size();
+        for (size_t i = 1; i < numberPoints; ++i) {
+            stream << "; ";
+            printPoint(stream, points[i]);
+        }
+        stream << "]";
+    }
 
     template <typename OptProblemType>
     void IGeneralOptMethod<OptProblemType>::IReport::print(
