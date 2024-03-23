@@ -1,11 +1,6 @@
-#include <map.h>
+#include <Map.h>
 
-#if defined( _MSC_VER )
-    #define _USE_MATH_DEFINES
-    #include <math.h>
-#else
-    #include <cmath>
-#endif
+#include <MyMath.h>
 
 void node(int is, int& n1, int nexp, int& l, int& iq, int *iu, int *iv) {
     // calculate iu = u[s], iv = v[s], l = l[s] by is = s
