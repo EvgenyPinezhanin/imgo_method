@@ -30,7 +30,7 @@ public:
     void getFamilyName(std::string &_familyName) const { _familyName = familyName; };
     virtual size_t getFamilySize() const { return familySize; };
 
-    void setProblemNumber(size_t _problemNumber) const { problemNumber = _problemNumber; };
+    virtual void setProblemNumber(size_t _problemNumber) const { problemNumber = _problemNumber; };
     size_t getProblemNumber() const { return problemNumber; };
 
     virtual void getOptimalPoints(std::vector<PointType> &_optimalPoints) const override {

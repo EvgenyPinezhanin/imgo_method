@@ -2,6 +2,7 @@
 #define _I_BASE_OPT_PROBLEM_H_
 
 #include <vector>
+#include <string>
 
 #include <general/classes/opt_problems/IGeneralOptProblem.h>
 

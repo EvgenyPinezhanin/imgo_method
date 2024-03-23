@@ -20,7 +20,7 @@ public:
                           const SearchAreaType &_area = SearchAreaType(),
                           const std::vector<PointType> &_optimalPoints = std::vector<PointType>{},
                           double _optimalValue = 0.0, double _objectiveLipschitzConstant = 0.0,
-                          const std::vector<PointType> _constraintLipschitzConstants = std::vector<PointType>{})
+                          const std::vector<double> _constraintLipschitzConstants = std::vector<double>{})
         : IBaseConstrainedOptProblem<SearchAreaType, PointType>(_blockName, _problemNumber, _numberConstraints,
           _area, _optimalPoints, _optimalValue, _objectiveLipschitzConstant, _constraintLipschitzConstants),
           opt::IObjOptProblem<std::function<double(PointType, size_t)>>(_object) {};
