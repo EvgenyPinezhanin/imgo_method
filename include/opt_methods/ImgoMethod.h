@@ -42,10 +42,11 @@ public:
 
         Result(const typename OptProblemType::Point &_point = typename OptProblemType::Point(),
                double _value = 0.0, int _numberTrials = 0, int _numberFevals = 0,
+               double _resultingAccuracy = 0.0,
                StoppingCondition _stoppingCondition = StoppingConditions::ACCURACY,
                std::vector<double> _constantsEstimation = std::vector<double>{})
-            : GeneralNumericalMethod::Result(_point, _value, _numberTrials, _numberFevals, _stoppingCondition),
-              constantsEstimation(_constantsEstimation) {};
+            : GeneralNumericalMethod::Result(_point, _value, _numberTrials, _numberFevals,
+              _resultingAccuracy,  _stoppingCondition), constantsEstimation(_constantsEstimation) {};
     };
 
     class Report : public GeneralNumericalMethod::IReport {
@@ -69,6 +70,7 @@ public:
 
 protected:
     double d;
+    // TODO: Replace with size_t
     int lastI, lastTrialPosI;
     std::vector<bool> IIsCalc;
 
@@ -266,7 +268,7 @@ void ImgoMethod<OptProblemType>::insertInSorted(const opt::IndexTrial &trial) {
     iter = this->I[trial.nu].begin();
     auto iterEnd = this->I[trial.nu].end();
 
-    while(true) {
+    while (true) {
         if (iter == iterEnd || iter->x > trial.x) break;
         iter++;
     }
@@ -333,6 +335,7 @@ void ImgoMethod<OptProblemType>::estimatingConstants() {
         if (std::abs(constantsEstimation[nu]) <= epsilon) constantsEstimation[nu] = 1.0;
     }
 
+    // TODO: recheck this code
     // with optimization(linear)
     // size_t nuLastTrial = lastTrial.nu;
     // size_t numberFunctions = this->problem.getNumberConstraints() + 1;
@@ -521,9 +524,10 @@ bool ImgoMethod<OptProblemType>::solveTest(typename GeneralMethod::Result &resul
     this->trialPoints.clear();
     this->numberFevals = 0;
 
+    t = 0;
     insertInSorted(newTrial(this->problem.getSearchArea().lowerBound));
-    insertInSorted(newTrial(this->problem.getSearchArea().upBound));
     t = 1;
+    insertInSorted(newTrial(this->problem.getSearchArea().upBound));
     
     this->numberTrials = 2;
 
