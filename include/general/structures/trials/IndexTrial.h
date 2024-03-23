@@ -5,9 +5,9 @@
 
 namespace opt {
     struct IndexTrial : public GeneralZeroOrderTrial {
-        size_t nu;
+        int nu;
 
-        IndexTrial(double _x = 0.0, double _z = 0.0, size_t _nu = 0) : GeneralZeroOrderTrial(_x, _z), nu(_nu) {}
+        IndexTrial(double _x = 0.0, double _z = 0.0, int _nu = 0) : GeneralZeroOrderTrial(_x, _z), nu(_nu) {}
     };
 }
 
