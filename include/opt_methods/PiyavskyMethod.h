@@ -7,8 +7,6 @@
 #include <opt_methods/ScanningMethod.h>
 #include <MyMath.h>
 
-static const double epsilon = 1e-14;
-
 template <typename OptProblemType>
 class PiyavskyMethod : public ScanningMethod<OptProblemType>,
                        public opt::IConstantEstimationOptMethod
@@ -53,6 +51,8 @@ public:
     };
 
 protected:
+    double M;
+
     void estimatingConstant() override;
     void calcCharacteristic() override;
     double selectNewPoint() override;
@@ -63,7 +63,7 @@ public:
     PiyavskyMethod(const OptProblemType &_problem = OptProblemType(),
                    const Parameters &parameters = Parameters())
         : ScanningMethod<OptProblemType>(_problem, parameters),
-          opt::IConstantEstimationOptMethod(parameters.reliability) {};
+          opt::IConstantEstimationOptMethod(parameters.reliability), M(0.0) {};
 
     void setParameters(const typename GeneralMethod::Parameters &parameters) override {
         ScanningMethod<OptProblemType>::setParameters(parameters);
@@ -112,7 +112,6 @@ void PiyavskyMethod<OptProblemType>::Report::printResultMethod(
 
 template <typename OptProblemType>
 void PiyavskyMethod<OptProblemType>::estimatingConstant() {
-    static double M = 0.0;
     Trial trialPointT;
 
     // Constant complexity
@@ -137,7 +136,7 @@ void PiyavskyMethod<OptProblemType>::estimatingConstant() {
     //     if (Mtmp > M) M = Mtmp;
     // }
 
-    constantEstimation = (M <= epsilon) ? 1.0 : reliability * M;
+    constantEstimation = (M <= this->epsilon) ? 1.0 : reliability * M;
 }
 
 template <typename OptProblemType>
