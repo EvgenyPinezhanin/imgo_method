@@ -22,7 +22,7 @@ namespace opt {
                 accuracy(_accuracy), error(_error), maxTrials(_maxTrials), maxFevals(_maxFevals) {};
         };
 
-        using StoppingCondition = int;
+        using StoppingCondition = size_t;
 
         struct StoppingConditions {
             static const StoppingCondition ACCURACY = 0;
@@ -48,6 +48,7 @@ namespace opt {
         class IReport : public GeneralMethod::IReport {
         protected:
             virtual void printStopCondition(std::ostream &stream, StoppingCondition stoppingCondition) const;
+            // TODO: add function for printing bounds
 
             void printMethodParameters(std::ostream &stream,
                                        const typename GeneralMethod::Parameters &parameters) const override;
@@ -67,7 +68,9 @@ namespace opt {
         size_t numberFevals, maxFevals;
 
         StoppingCondition stoppingCondition;
-        
+
+        static constexpr double epsilon = 1e-14;
+
         virtual TrialType newTrial(const typename OptProblemType::Point &x) = 0;
         virtual typename OptProblemType::Point selectNewPoint() = 0;
 
