@@ -476,7 +476,7 @@ typename OptProblemType::Point MggsaMethod<OptProblemType>::selectNewPoint() {
 
 template <typename OptProblemType>
 double MggsaMethod<OptProblemType>::estimateSolution(typename OptProblemType::Point &x) const {
-    double z = std::numeric_limits<double>::infinity(), oneDimensionX;
+    double z = std::numeric_limits<double>::infinity(), oneDimensionX = 0.0;
 
     size_t sizeTrials = this->trialPoints.size();
     size_t numberConstraints = this->problem.getNumberConstraints();
