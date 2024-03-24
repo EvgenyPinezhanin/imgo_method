@@ -1,5 +1,5 @@
-#ifndef ONE_DIMENSIONAL_CONSTRAINED_TEST_OPT_PROBLEMS_H_
-#define ONE_DIMENSIONAL_CONSTRAINED_TEST_OPT_PROBLEMS_H_
+#ifndef _ONE_DIMENSIONAL_CONSTRAINED_TEST_OPT_PROBLEMS_H_
+#define _ONE_DIMENSIONAL_CONSTRAINED_TEST_OPT_PROBLEMS_H_
 
 #include <vector>
 #include <string>
@@ -221,4 +221,4 @@ const std::vector<OneDimensionalConstrainedOptProblem> testTasks{
         std::vector<double>{ 3.170468, 4.329008, 7.999984 })
 };
 
-#endif // ONE_DIM_CONSTRAINED_TEST_PROBLEMS_H_
+#endif // _ONE_DIM_CONSTRAINED_TEST_PROBLEMS_H_
