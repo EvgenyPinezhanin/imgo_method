@@ -39,6 +39,7 @@ public:
 };
 
 double euclideanDistance(const std::vector<double> &firstValue, const std::vector<double> &secondValue);
+double euclideanDistance(double firstValue, double secondValue);
 
 template<typename T>
 int sgn(T val) {

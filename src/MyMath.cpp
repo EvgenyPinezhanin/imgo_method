@@ -45,3 +45,7 @@ double euclideanDistance(const std::vector<double> &firstValue, const std::vecto
     }
     return sqrt(res);
 }
+
+double euclideanDistance(double firstValue, double secondValue) {
+    return std::abs(firstValue - secondValue);
+}
