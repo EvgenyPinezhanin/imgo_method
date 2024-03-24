@@ -10,7 +10,7 @@
 #include <iostream>
 #include <algorithm>
 
-#include <Grishagin/GrishaginProblemFamily.hpp>
+/* #include <Grishagin/GrishaginProblemFamily.hpp>
 #include <Grishagin/GrishaginConstrainedProblemFamily.hpp>
 #include <GKLS/GKLSProblemFamily.hpp>
 #include <GKLS/GKLSConstrainedProblemFamily.hpp>
@@ -26,10 +26,10 @@ using namespace std;
 // #define DRAW
 
 const int familyNumber = 0; // 0 - Grishagin(with constraints), 2 - GKLS(with constraints)
-const int displayType = 0; // 0 - application, 1 - png, 2 - png(notitle)
+const int displayType = 0; // 0 - application, 1 - png, 2 - png(notitle) */
 
 int main() {
-    OutputFile vars_file("output_data/mggsa_operational_characteristics/vars.txt");
+/*     OutputFile vars_file("output_data/mggsa_operational_characteristics/vars.txt");
     if (!vars_file.isOpen()) std::cerr << "vars_file opening error\n";
 
     const int chunk = 1;
@@ -161,7 +161,7 @@ int main() {
 
 #if defined( _MSC_VER )
     cin.get();
-#endif
+#endif */
 
 	return 0;
 }
