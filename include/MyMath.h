@@ -1,5 +1,5 @@
-#ifndef MY_MATH_H_
-#define MY_MATH_H_
+#ifndef _MY_MATH_H_
+#define _MY_MATH_H_
 
 #if defined( _MSC_VER )
     #define _USE_MATH_DEFINES
@@ -13,6 +13,7 @@
 struct point {
     std::vector<double> x;
 
+    point() : x() {};
     point(double _x) : x(_x) {};
     point(double _x, double _y) : x({ _x, _y }) {};
     point(std::vector<double> _x) : x(_x) {};
@@ -24,24 +25,24 @@ struct point {
 class mnk {
 private:
     std::vector<std::vector<double>> A;
-    std::vector<double> b;
+    std::vector<double> B;
 
 public:
-    mnk() : A(), b() {};
-    mnk(const std::vector<std::vector<double>>& _A, const std::vector<double>& _b)
-        : A(_A), b(_b) {};
+    mnk() : A(), B() {};
+    mnk(const std::vector<std::vector<double>>& _A, const std::vector<double>& _B)
+        : A(_A), B(_B) {};
 
-    void set_A(const std::vector<std::vector<double>>& _A) { A = _A; };
-    void set_b(const std::vector<double>& _b) { b = _b; };
+    void setA(const std::vector<std::vector<double>>& _A) { A = _A; };
+    void setB(const std::vector<double>& _B) { B = _B; };
 
-    void solve(std::vector<double> &x);
+    void solve(std::vector<double> &x) const;
 };
 
-double euclideanDistance(const std::vector<double> &val1, const std::vector<double> &val2);
+double euclideanDistance(const std::vector<double> &firstValue, const std::vector<double> &secondValue);
 
 template<typename T>
 int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
-#endif // MY_MATH_H_
+#endif // _MY_MATH_H_

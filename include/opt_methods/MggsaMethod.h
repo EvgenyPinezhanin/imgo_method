@@ -177,7 +177,7 @@ void MggsaMethod<OptProblemType>::Report::printOptProblem(
     optProblem.getOptimalPoints(optimalPoints);
     if (!optimalPoints.empty()) {
         stream << "X* = ";
-        printPoints(stream, optimalPoints);
+        this->printPoints(stream, optimalPoints);
         stream << "\n";
         stream << "f(X*) = " << optProblem.getOptimalValue() << "\n";
     }
