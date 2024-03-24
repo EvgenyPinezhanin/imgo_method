@@ -21,9 +21,9 @@ using Report = ScanningMethod<OneDimensionalOptProblem>::GeneralNumericalMethod:
 
 const std::vector<std::string> method_names{ "scanning", "piyavsky", "gsa" };
 
-const int display_type = 2; // 0 - application, 1 - png, 2 - png(notitle)
-const int graph_type = 1; // 0 - u(t), 1 - trial points
-const int method_index = 2; // 0 - scanning, 1 - piyavsky, 2 - gsa
+const int displayType = 2; // 0 - application, 1 - png, 2 - png(notitle)
+const int graphType = 1; // 0 - u(t), 1 - trial points
+const int methodIndex = 2; // 0 - scanning, 1 - piyavsky, 2 - gsa
 
 const double step = 0.01;
 
@@ -184,7 +184,7 @@ int main() {
 
 #if defined( DRAW )
     Script script("scripts/sample_fitting_problem.gp");
-    script.addArgs(std::vector<int>{ display_type, graph_type, method_index });
+    script.addArgs(std::vector<int>{ displayType, graphType, methodIndex });
     script.addArgs(std::vector<double>{ q[0].x[0], q[number_test_points - 1].x[0],
                                         sample_test_problem.getSearchArea().lowerBound,
                                         sample_test_problem.getSearchArea().upBound });
