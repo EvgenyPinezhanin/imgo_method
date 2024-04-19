@@ -49,12 +49,11 @@ protected:
     size_t numberCoefficients;
     mutable std::vector<double> coefficients;
 
-    mutable std::vector<double> lastX;
-    mutable bool isCalcCoefficients;
-
     // TODO: think about mutable
     mutable GsaMethod<OneDimensionalSupportiveOptProblem> gsa;
     mutable OneDimensionalSupportiveOptProblem u;
+
+    bool isSortX;
 
     double uDerivative(const std::vector<double> &x) const;
 
@@ -70,7 +69,7 @@ public:
         double firstPoint = 0.0, const std::vector<double> &_firstValues = std::vector<double>{},
         double secondPoint = 0.0, const std::vector<double> &_secondValues = std::vector<double>{}, double lastPoint = 0.0,
         const std::vector<double> &windowPoints = std::vector<double>{},
-        const GsaMethod<OneDimensionalSupportiveOptProblem> &_gsa = GsaMethod<OneDimensionalSupportiveOptProblem>(),
+        const GsaMethod<OneDimensionalSupportiveOptProblem> &_gsa = GsaMethod<OneDimensionalSupportiveOptProblem>(), bool _isSortX = false,
         const std::vector<std::vector<std::vector<double>>> &_optimalPoints = std::vector<std::vector<std::vector<double>>>{},
         const std::vector<double> &_optimalValue = std::vector<double>{},
         const std::vector<double> &_objectiveLipschitzConstant = std::vector<double>{},
@@ -80,8 +79,8 @@ public:
           _constraintLipschitzConstants), dimension(_dimension), alpha(_alpha), delta(_delta),
           leftBoundWindow(_leftBoundWindow), rightBoundWindow(_rightBoundWindow), firstValues(_firstValues),
           secondValues(_secondValues), numberWindowPoints(windowPoints.size() + 2), numberTestPoints(numberWindowPoints + 3),
-          testPoints(numberTestPoints), numberCoefficients(2 * dimension), coefficients(numberCoefficients), lastX(dimension),
-          isCalcCoefficients(false), gsa(_gsa), u(opt::OneDimensionalSearchArea(leftBoundWindow, rightBoundWindow))
+          testPoints(numberTestPoints), numberCoefficients(2 * dimension), coefficients(numberCoefficients), gsa(_gsa),
+          u(opt::OneDimensionalSearchArea(leftBoundWindow, rightBoundWindow)), isSortX(_isSortX)
     {
         testPoints[0] = point(leftBoundWindow, 0.0);
         for (size_t i = 0; i < numberWindowPoints - 2; ++i) {
@@ -91,10 +90,6 @@ public:
         testPoints[numberTestPoints - 3] = point(firstPoint, firstValues[0]);
         testPoints[numberTestPoints - 2] = point(secondPoint, secondValues[0]);
         testPoints[numberTestPoints - 1] = point(lastPoint, 0.0);
-
-        for (size_t i = 0; i < dimension; ++i) {
-            lastX[i] = area.lowerBound[i] - 1;
-        }
     };
 
     void setProblemNumber(size_t _problemNumber) const override {
@@ -122,6 +117,10 @@ public:
     void getCoefficients(std::vector<double> &_coefficients) const { _coefficients = coefficients; };
 
     void setGsaMethod(const GsaMethod<OneDimensionalSupportiveOptProblem> &_gsa) { gsa = _gsa; };
+
+    void setIsSortX(bool _isSortX) { isSortX = _isSortX; };
+
+    void getOptimalPoints(std::vector<std::vector<double>> &_optimalPoints) const override;
 
     double computeObjectiveFunction(const std::vector<double> &x) const override;
     double computeConstraintFunction(const std::vector<double> &x, size_t index) const override;

@@ -7,7 +7,8 @@
 class FittingFamilyOptProblems : public BaseFittingFamilyOptProblems {
 public:
     FittingFamilyOptProblems(
-        const GsaMethod<OneDimensionalSupportiveOptProblem> &_gsa = GsaMethod<OneDimensionalSupportiveOptProblem>());
+        const GsaMethod<OneDimensionalSupportiveOptProblem> &_gsa = GsaMethod<OneDimensionalSupportiveOptProblem>(),
+        bool _isSortX = false);
 };
 
 #endif // _FITTING_TEST_FAMILY_OPT_PROBLEMS_H_

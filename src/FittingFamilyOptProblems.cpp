@@ -3,19 +3,19 @@
 const size_t familySizeFitting = 100;
 const size_t dimensionFitting = 4;
 
-const std::vector<double> lowBound{ 0.01, 0.01, 0.01, 0.01 };
-const std::vector<double> upBound{ 2.0, 2.0, 2.0, 2.0 };
-const opt::MultiDimensionalSearchArea searchAreaFitting(dimensionFitting, lowBound, upBound);
+const std::vector<double> lowerBound{ 0.01, 0.01, 0.01, 0.01 };
+const std::vector<double> upperBound{ 2.0, 2.0, 2.0, 2.0 };
+const opt::MultiDimensionalSearchArea searchAreaFitting(dimensionFitting, lowerBound, upperBound);
 
 const double alphaFitting = 0.03, deltaFitting = 0.3,
              leftBoundWindowFitting = 1.0, rightBoundWindowFitting = 10.0;
 
 // std::mt19937_64 gen(30032001);
-// std::vector<double> point1(100), point2(100);
+// std::vector<double> firstValuesFitting(100), secondValuesFitting(100);
 // 
 // for (size_t i = 0; i < 100; ++i) {
-//     point1[i] = ((double)(gen() - gen.min()) / (gen.max() - gen.min()) - 0.5) * 20.0;
-//     point2[i] = ((double)(gen() - gen.min()) / (gen.max() - gen.min()) - 0.5) * 20.0;
+//     firstValuesFitting[i] = ((double)(gen() - gen.min()) / (gen.max() - gen.min()) - 0.5) * 20.0;
+//     secondValuesFitting[i] = ((double)(gen() - gen.min()) / (gen.max() - gen.min()) - 0.5) * 20.0;
 // }
 
 const double firstPointFitting = 13.0, secondPointFitting = 16.65,
@@ -65,33 +65,31 @@ const std::vector<double> secondValuesFitting{
      5.69401, -1.28251, -9.38067, -0.45331, -6.41473
 };
 
-const std::vector<double> windowPointsFitting{ 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0 };
+const std::vector<double> windowPointsFitting{ 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0,
+                                               5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5 };
 
 const std::vector<std::vector<std::vector<double>>> optimalPointsFitting {
-    std::vector<std::vector<double>>{ std::vector<double>{ 1.14055, 0.0143726, 0.629446, 1.0735 } }, // 0
-    std::vector<std::vector<double>>{ std::vector<double>{ 1.44177, 0.404016, 0.369036, 1.33197 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 1.25035, 1.99757, 1.03464, 1.1182 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 0.0143726, 0.0124292, 0.263123, 0.130974 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 0.0687866, 0.0124292, 0.0134009, 1.20468 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 0.112512, 0.0930786, 1.1833, 0.0396362 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 1.82558, 1.70995, 1.59238, 1.95385 },
-                                      std::vector<double>{ 1.87805, 1.99466, 1.571, 1.70121 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 0.365149, 1.29893, 0.394299, 1.42622 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 0.371951, 1.28144, 1.37764, 0.427336 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 1.87611, 1.99951, 1.19108, 0.943298 },
-                                      std::vector<double>{ 1.12695, 1.9966, 1.0016, 1.87903 } },
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.0238464, 0.633575, 1.06063, 1.17043 } }, // 0
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.7861, 1.3433, 1.6617, 1.8209 } }, // 1
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.0299, 0.0498, 0.0896, 0.1294 } }, // 2
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.01, 0.0299, 0.0498, 0.1095 } }, // 3
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.9055, 1.5025, 1.602, 1.7413 } }, // 4
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.01, 0.0498, 0.0896, 1.1642 } }, // 5
+    std::vector<std::vector<double>>{ std::vector<double>{ 1.6219, 1.7413, 1.8607, 1.9801 } }, // 6
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.2886, 0.4876, 1.3035, 1.403 } }, // 7
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.3085, 0.5075, 1.2836, 1.3831 } }, // 8
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.01, 0.0299, 0.0498, 0.1493 } }, // 9
 
-    std::vector<std::vector<double>>{ std::vector<double>{ 0.0134009, 0.0143726, 0.385554, 0.130002 } }, // 1
-    std::vector<std::vector<double>>{ std::vector<double>{ 0.975364, 1.83724, 1.70607, 1.59141 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 1.84696, 1.59627, 1.99077, 1.70315 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 1.41359, 1.31934, 0.285471, 0.455515 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 0.133889, 0.0104858, 0.196077, 0.0726733 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 1.12889, 1.00549, 0.196077, 0.943298 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 1.01909, 0.769368, 0.0134009, 1.13472 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 0.0726733, 0.196077, 0.133889, 0.0104858 },
-                                      std::vector<double>{ 0.0726733, 0.134861, 0.0104858, 0.197048 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 0.133889, 0.0104858, 0.196077, 0.0726733 } },
-    std::vector<std::vector<double>>{ std::vector<double>{ 1.94024, 1.82558, 1.71093, 1.21828 } },
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.01, 0.0299, 0.0498, 0.1692 } }, // 10
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.9851, 1.602, 1.7214, 1.9005 } }, // 11
+    std::vector<std::vector<double>>{ std::vector<double>{ 1.6219, 1.7413, 1.8607, 1.9801 } }, // 12
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.3483, 0.3881, 1.2836, 1.3632 } }, // 13
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.01, 0.0299, 0.0697, 0.1294 } }, // 14
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.01, 0.8259, 0.9055, 0.9851 } }, // 15
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.01, 0.7463, 1.0647, 1.1642 } }, // 16
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.01, 0.0299, 0.0697, 0.1294 } }, // 17
+    std::vector<std::vector<double>>{ std::vector<double>{ 0.01, 0.0299, 0.0498, 0.1692 } }, // 18
+    std::vector<std::vector<double>>{ std::vector<double>{ 1.94024, 1.82558, 1.71093, 1.21828 } }, // 19
 
     std::vector<std::vector<double>>{ std::vector<double>{ 1.25132, 0.747019, 1.83044, 1.69246 } }, // 2
     std::vector<std::vector<double>>{ std::vector<double>{ 0.133889, 0.0104858, 0.196077, 0.0726733 } },
@@ -188,11 +186,27 @@ const std::vector<std::vector<std::vector<double>>> optimalPointsFitting {
 };
 
 const std::vector<double> optimalValuesFitting {
-     -5.11877,  -5.77019, -14.0882,   -9.18095, -10.3195, // 0
-    -11.8162,  -17.2099,   -7.6189,   -6.43766,  -3.3912,
+     -5.15377, // 0
+    -11.163,   // 1
+    -21.2391,  // 2
+     -9.76801, // 3
+    -20.2529,  // 4
+    -11.8459,  // 5
+    -18.1032,  // 6
+     -7.69223, // 7
+     -6.46851, // 8
+     -4.13564, // 9
 
-    -17.6577,   -7.35867, -17.1535,   -8.50832,  -8.42136, // 1
-    -12.4695,   -6.87875,  -7.08501, -16.2055,  -15.6066,
+    -19.046,   // 10
+     -7.59954, // 11
+    -17.9313,  // 12
+     -8.90044, // 13
+     -9.06334, // 14
+    -11.5544,  // 15
+     -7.24347, // 16
+     -7.70992, // 17
+    -17.7382,  // 18
+    -15.6066,  // 19
 
      -7.30814, -15.3084, - 13.0607,   -3.12091, -14.5826, // 2
      -5.95241,  -6.00309,  -9.77678, -20.4846,   -7.81804,
@@ -220,8 +234,8 @@ const std::vector<double> optimalValuesFitting {
 };
 
 FittingFamilyOptProblems::FittingFamilyOptProblems(
-    const GsaMethod<OneDimensionalSupportiveOptProblem> &_gsa)
+    const GsaMethod<OneDimensionalSupportiveOptProblem> &_gsa, bool _isSortX)
     : BaseFittingFamilyOptProblems(familySizeFitting, dimensionFitting, searchAreaFitting,
       alphaFitting, deltaFitting, leftBoundWindowFitting, rightBoundWindowFitting,
       firstPointFitting, firstValuesFitting, secondPointFitting, secondValuesFitting,
-      lastPointFitting, windowPointsFitting, _gsa, optimalPointsFitting, optimalValuesFitting) {};
+      lastPointFitting, windowPointsFitting, _gsa, _isSortX, optimalPointsFitting, optimalValuesFitting) {};

@@ -30,7 +30,7 @@ double BaseFittingFamilyOptProblems::uDerivative(const std::vector<double> &x) c
 
 void BaseFittingFamilyOptProblems::calcCoefficients(const std::vector<double> &x) const {
     std::vector<std::vector<double>> A(numberCoefficients, std::vector<double>(numberCoefficients, 0));
-    std::vector<double> B(numberCoefficients, 0), sortX;
+    std::vector<double> B(numberCoefficients, 0);
 
     std::vector<std::function<double(double, double)>> functions{
         [] (double t, double x) -> double { return std::sin(x * t); },
@@ -53,8 +53,6 @@ void BaseFittingFamilyOptProblems::calcCoefficients(const std::vector<double> &x
     minimizer.setA(A);
     minimizer.setB(B);
     minimizer.solve(coefficients);
-
-    isCalcCoefficients = true;
 }
 
 bool BaseFittingFamilyOptProblems::equalPoints(
@@ -68,61 +66,89 @@ bool BaseFittingFamilyOptProblems::equalPoints(
     return true;
 }
 
-double BaseFittingFamilyOptProblems::computeObjectiveFunction(const std::vector<double> &x) const {
-    if (!equalPoints(x, lastX)) {
-        lastX = x;
-        calcCoefficients(x);
+void BaseFittingFamilyOptProblems::getOptimalPoints(std::vector<std::vector<double>> &_optimalPoints) const {
+    if (!isSortX) {
+        _optimalPoints = optimalPoints[problemNumber];
+    } else {
+        std::vector<size_t> indexes{ 0, 1, 2, 3 };
+        _optimalPoints.resize(factorial(dimension));
+        size_t index = 0;
+
+        _optimalPoints[index] = optimalPoints[problemNumber][0];
+        while (std::next_permutation(indexes.begin(), indexes.end())) {
+            ++index;
+            _optimalPoints[index] = std::vector<double>{ optimalPoints[problemNumber][0][indexes[0]],
+                                                         optimalPoints[problemNumber][0][indexes[1]],
+                                                         optimalPoints[problemNumber][0][indexes[2]],
+                                                         optimalPoints[problemNumber][0][indexes[3]] };
+        }
     }
+}
+
+double BaseFittingFamilyOptProblems::computeObjectiveFunction(const std::vector<double> &x) const {
+    calcCoefficients(x);
     return -std::abs(uDerivative(x));
 }
 
 double BaseFittingFamilyOptProblems::computeConstraintFunction(const std::vector<double> &x, size_t index) const {
-    std::vector<double> sortX;
-    double minValue, maxValue;
-
-    if (!equalPoints(x, lastX)) {
-        lastX = x;
-        isCalcCoefficients = false;
-    }
+    double minValue, maxValue, value;
 
     if (index >= 0 && index < dimension - 1) {
+        if (isSortX) {
+            std::vector<double> sortX = x;
+            std::sort(sortX.begin(), sortX.end());
+            return sortX[index] * (1.0 + alpha) - sortX[index + 1] * (1.0 - alpha);
+        }
         return x[index] * (1.0 + alpha) - x[index + 1] * (1.0 - alpha);
     } else if (index >= dimension - 1 && index < dimension + 2) {
-        if (!isCalcCoefficients) {
-            calcCoefficients(x);
-        }
+        calcCoefficients(x);
 
         u.setOmega(x);
         u.setCoefficients(coefficients);
         u.setTypeProblem(OneDimensionalSupportiveOptProblem::TypeProblem::MIN);
+
         return std::abs(u.computeObjectiveFunction(testPoints[numberWindowPoints + index - dimension + 1].x[0]) -
                         testPoints[numberWindowPoints + index - dimension + 1].x[1]) - delta;
     } else if (index == dimension + 2) {
-        if (!isCalcCoefficients) {
-            calcCoefficients(x);
-        }
+        calcCoefficients(x);
 
         u.setOmega(x);
         u.setCoefficients(coefficients);
-
-        using Result = typename GsaMethod<OneDimensionalSupportiveOptProblem>::Result;
-        std::unique_ptr<Result> result(static_cast<Result*>(gsa.createResult()));
-
+        
         u.setTypeProblem(OneDimensionalSupportiveOptProblem::TypeProblem::MIN);
-        gsa.setProblem(u);
-        gsa.solve(*result);
-        minValue = result->value;
 
-        u.setTypeProblem(OneDimensionalSupportiveOptProblem::TypeProblem::MAX);
-        gsa.setProblem(u);
-        gsa.solve(*result);
-        maxValue = -result->value;
+        minValue = u.computeObjectiveFunction(leftBoundWindow);
+        for (double i = leftBoundWindow; i <= rightBoundWindow; i += 0.0005) {
+            value = u.computeObjectiveFunction(i);
+            if (value < minValue) {
+                minValue = value;
+            }
+        }
+
+        maxValue = u.computeObjectiveFunction(leftBoundWindow);
+        for (double i = leftBoundWindow; i <= rightBoundWindow; i += 0.0005) {
+            value = u.computeObjectiveFunction(i);
+            if (value > maxValue) {
+                maxValue = value;
+            }
+        }
+
+        // using Result = typename GsaMethod<OneDimensionalSupportiveOptProblem>::Result;
+        // std::unique_ptr<Result> result(static_cast<Result*>(gsa.createResult()));
+        // 
+        // u.setTypeProblem(OneDimensionalSupportiveOptProblem::TypeProblem::MIN);
+        // gsa.setProblem(u);
+        // gsa.solve(*result);
+        // minValue = result->value;
+        // 
+        // u.setTypeProblem(OneDimensionalSupportiveOptProblem::TypeProblem::MAX);
+        // gsa.setProblem(u);
+        // gsa.solve(*result);
+        // maxValue = -result->value;
 
         return maxValue - minValue - 2 * delta;
     } else if (index == dimension + 3) {
-        if (!isCalcCoefficients) {
-            calcCoefficients(x);
-        }
+        calcCoefficients(x);
         return -std::abs(uDerivative(x));
     }
     return std::numeric_limits<double>::quiet_NaN();
