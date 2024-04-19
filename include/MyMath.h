@@ -41,9 +41,14 @@ public:
 double euclideanDistance(const std::vector<double> &firstValue, const std::vector<double> &secondValue);
 double euclideanDistance(double firstValue, double secondValue);
 
+double chebishevDistance(const std::vector<double> &firstValue, const std::vector<double> &secondValue);
+double chebishevDistance(double firstValue, double secondValue);
+
 template<typename T>
 int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
+
+size_t factorial(size_t num);
 
 #endif // _MY_MATH_H_

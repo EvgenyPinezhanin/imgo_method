@@ -49,3 +49,27 @@ double euclideanDistance(const std::vector<double> &firstValue, const std::vecto
 double euclideanDistance(double firstValue, double secondValue) {
     return std::abs(firstValue - secondValue);
 }
+
+double chebishevDistance(const std::vector<double> &firstValue, const std::vector<double> &secondValue) {
+    double res = std::abs(firstValue[0] - secondValue[0]), resTmp;
+    size_t size = firstValue.size();
+    for (int i = 1; i < size; i++) {
+        resTmp = std::abs(firstValue[i] - secondValue[i]);
+        if (resTmp > res) {
+            res = resTmp;
+        }
+    }
+    return res;
+}
+
+double chebishevDistance(double firstValue, double secondValue) {
+    return std::abs(firstValue - secondValue);
+}
+
+size_t factorial(size_t num) {
+    size_t res = 1;
+    for (size_t i = 1; i <= num; ++i) {
+        res *= i;
+    }
+    return res;
+}
