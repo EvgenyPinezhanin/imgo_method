@@ -566,10 +566,14 @@ bool MggsaMethod<OptProblemType>::stopConditionsTest() {
 
     size_t numberOptimalPoints = optimalPoints.size();
     for (size_t i = 0; i < numberOptimalPoints; ++i) {
-        if (euclideanDistance(X, optimalPoints[i]) <= this->error) {
+        if (chebishevDistance(X, optimalPoints[i]) <= this->error) {
             this->stoppingCondition = StoppingConditions::ERROR;
             return true;
         }
+        // if (euclideanDistance(X, optimalPoints[i]) <= this->error) {
+        //     this->stoppingCondition = StoppingConditions::ERROR;
+        //     return true;
+        // }
     }
     return stopConditions();
 }
