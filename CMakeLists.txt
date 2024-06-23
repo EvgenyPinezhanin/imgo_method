@@ -54,9 +54,11 @@ add_custom_command(
 
   ${OUT_DIR}/output_data/multidimensional_constrained_operational_characteristics
   ${OUT_DIR}/output_data/multidimensional_constrained_operational_characteristics/mggsa
-s
+
   ${OUT_DIR}/output_data/sample_fitting_problem
   ${OUT_DIR}/output_data/fitting_family_problems
+  ${OUT_DIR}/output_data/fitting_family_problems/slices
+  ${OUT_DIR}/output_data/fitting_family_problems/experiment
 
   ${OUT_DIR}/output_data/mggsa_operational_characteristics
 )
