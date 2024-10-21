@@ -41,15 +41,15 @@ class BaseFittingFamilyOptProblems :
 protected:
     size_t dimension;
 
-    double alpha, delta, leftBoundWindow, rightBoundWindow;
-    std::vector<double> firstValues, secondValues;
-    size_t numberWindowPoints, numberTestPoints;
+    double alpha, delta;
+    double leftBoundWideWindow, rightBoundWideWindow;
+    std::vector<double> firstShortWindowValues, secondShortWindowValues;
+    size_t numberWideWindowPoints, numberTestPoints;
     mutable std::vector<point> testPoints;
 
     size_t numberCoefficients;
     mutable std::vector<double> coefficients;
 
-    // TODO: think about mutable
     mutable GsaMethod<OneDimensionalSupportiveOptProblem> gsa;
     mutable OneDimensionalSupportiveOptProblem u;
 
@@ -65,37 +65,50 @@ public:
     BaseFittingFamilyOptProblems(
         size_t _familySize = 0, size_t _dimension = 1,
         const opt::MultiDimensionalSearchArea &_area = opt::MultiDimensionalSearchArea(),
-        double _alpha = 0.0, double _delta = 0.0, double _leftBoundWindow = 0.0, double _rightBoundWindow = 0.0,
-        double firstPoint = 0.0, const std::vector<double> &_firstValues = std::vector<double>{},
-        double secondPoint = 0.0, const std::vector<double> &_secondValues = std::vector<double>{}, double lastPoint = 0.0,
-        const std::vector<double> &windowPoints = std::vector<double>{},
-        const GsaMethod<OneDimensionalSupportiveOptProblem> &_gsa = GsaMethod<OneDimensionalSupportiveOptProblem>(), bool _isSortX = false,
+        double _alpha = 0.0, double _delta = 0.0,
+        double _leftBoundWideWindow = 0.0, double _rightBoundWideWindow = 0.0,
+        const std::vector<double> &insideWideWindowPoints = std::vector<double>{},
+        double firstShortWindowPoint = 0.0, const std::vector<double> &_firstShortWindowValues = std::vector<double>{},
+        double secondShortWindowPoint = 0.0, const std::vector<double> &_secondShortWindowValues = std::vector<double>{},
+        double lastShortWindowPoint = 0.0,
+        const GsaMethod<OneDimensionalSupportiveOptProblem> &_gsa = GsaMethod<OneDimensionalSupportiveOptProblem>(),
+        bool _isSortX = false,
         const std::vector<std::vector<std::vector<double>>> &_optimalPoints = std::vector<std::vector<std::vector<double>>>{},
         const std::vector<double> &_optimalValue = std::vector<double>{},
         const std::vector<double> &_objectiveLipschitzConstant = std::vector<double>{},
         const std::vector<std::vector<double>> &_constraintLipschitzConstants = std::vector<std::vector<double>>{})
         : IBaseConstrainedFamilyOptProblems<opt::MultiDimensionalSearchArea, std::vector<double>>("Fitting Family",
           _familySize, _dimension + 3, _area, _optimalPoints, _optimalValue, _objectiveLipschitzConstant,
-          _constraintLipschitzConstants), dimension(_dimension), alpha(_alpha), delta(_delta),
-          leftBoundWindow(_leftBoundWindow), rightBoundWindow(_rightBoundWindow), firstValues(_firstValues),
-          secondValues(_secondValues), numberWindowPoints(windowPoints.size() + 2), numberTestPoints(numberWindowPoints + 3),
-          testPoints(numberTestPoints), numberCoefficients(2 * dimension), coefficients(numberCoefficients), gsa(_gsa),
-          u(opt::OneDimensionalSearchArea(leftBoundWindow, rightBoundWindow)), isSortX(_isSortX)
+          _constraintLipschitzConstants),
+          dimension(_dimension),
+          alpha(_alpha), delta(_delta),
+          leftBoundWideWindow(_leftBoundWideWindow), rightBoundWideWindow(_rightBoundWideWindow),
+          firstShortWindowValues(_firstShortWindowValues), secondShortWindowValues(_secondShortWindowValues),
+          numberWideWindowPoints(insideWideWindowPoints.size() + 2),
+          numberTestPoints(numberWideWindowPoints + 3),
+          testPoints(numberTestPoints),
+          numberCoefficients(2 * dimension),
+          coefficients(numberCoefficients),
+          gsa(_gsa),
+          u(opt::OneDimensionalSearchArea(leftBoundWideWindow, rightBoundWideWindow)),
+          isSortX(_isSortX)
     {
-        testPoints[0] = point(leftBoundWindow, 0.0);
-        for (size_t i = 0; i < numberWindowPoints - 2; ++i) {
-            testPoints[i + 1] = point(windowPoints[i], 0.0);
+        testPoints[0] = point(leftBoundWideWindow, 0.0);
+        for (size_t i = 0; i < numberWideWindowPoints - 2; ++i) {
+            testPoints[i + 1] = point(insideWideWindowPoints[i], 0.0);
         }
-        testPoints[numberTestPoints - 4] = point(rightBoundWindow, 0.0);
-        testPoints[numberTestPoints - 3] = point(firstPoint, firstValues[0]);
-        testPoints[numberTestPoints - 2] = point(secondPoint, secondValues[0]);
-        testPoints[numberTestPoints - 1] = point(lastPoint, 0.0);
+        testPoints[numberTestPoints - 4] = point(rightBoundWideWindow, 0.0);
+
+        testPoints[numberTestPoints - 3] = point(firstShortWindowPoint, firstShortWindowValues[0]);
+        testPoints[numberTestPoints - 2] = point(secondShortWindowPoint, secondShortWindowValues[0]);
+
+        testPoints[numberTestPoints - 1] = point(lastShortWindowPoint, 0.0);
     };
 
     void setProblemNumber(size_t _problemNumber) const override {
         problemNumber = _problemNumber;
-        testPoints[numberTestPoints - 3].x[1] = firstValues[problemNumber];
-        testPoints[numberTestPoints - 2].x[1] = secondValues[problemNumber];
+        testPoints[numberTestPoints - 3].x[1] = firstShortWindowValues[problemNumber];
+        testPoints[numberTestPoints - 2].x[1] = secondShortWindowValues[problemNumber];
     };
 
     size_t getDimension() const { return dimension; };
@@ -103,19 +116,20 @@ public:
     double getAlpha() const { return alpha; };
     double getDelta() const { return delta; };
 
-    double getLeftBoundWindow() const { return leftBoundWindow; };
-    double getRightBoundWindow() const { return rightBoundWindow; };
+    double getLeftBoundWideWindow() const { return leftBoundWideWindow; };
+    double getRightBoundWideWindow() const { return rightBoundWideWindow; };
+    size_t getNumberWideWindowPoints() const { return numberWideWindowPoints; };
 
-    void getFirstValues(std::vector<double> &_firstValues) const { _firstValues = firstValues; };
-    void getSecondValues(std::vector<double> &_secondValues) const { _secondValues = secondValues; };
+    void getFirstShortWindowValues(std::vector<double> &_firstValues) const { _firstValues = firstShortWindowValues; };
+    void getSecondShortWindowValues(std::vector<double> &_secondValues) const { _secondValues = secondShortWindowValues; };
 
-    size_t getNumberWindowPoints() const { return numberWindowPoints; };
     size_t getNumberTestPoints() const { return numberTestPoints; };
     void getTestPoints(std::vector<point> &_testPoints) const { _testPoints = testPoints; };
 
     size_t getNumberCoefficients() const { return numberCoefficients; };
     void getCoefficients(std::vector<double> &_coefficients) const { _coefficients = coefficients; };
 
+    // TODO: implement any one-dimension opt method
     void setGsaMethod(const GsaMethod<OneDimensionalSupportiveOptProblem> &_gsa) { gsa = _gsa; };
 
     void setIsSortX(bool _isSortX) { isSortX = _isSortX; };

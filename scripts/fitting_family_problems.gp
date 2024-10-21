@@ -106,7 +106,7 @@ optValues[98] = -10.9576
 optValues[99] = -6.19937
 optValues[100] = -8.9841
 
-fontName = "Helvetica, 20"
+fontName = "Helvetica, 26"
 
 set sample 500
 
@@ -128,6 +128,8 @@ u(t, i) = coeffs[8 * i + 1] * sin(x_opt[4 * i + 1] * t) + coeffs[8 * i + 2] * co
           coeffs[8 * i + 7] * sin(x_opt[4 * i + 4] * t) + coeffs[8 * i + 8] * cos(x_opt[4 * i + 4] * t)
 
 array num[4]
+# num[1] = 500
+# num[2] = 1000
 num[1] = 50
 num[2] = 500
 num[3] = 5000
@@ -161,33 +163,59 @@ if (ARG1 == 0) {
     # } else {}
 } else {
     if (ARG2 == 0) {
-        set terminal pngcairo size 1900, 800 font fontName
-
+        set terminal pngcairo size 1800, 1000 font fontName
+        
         system "mkdir -p output_graph/".sampleName
-
-        set lmargin 6
-        set rmargin 30
+        
+        set lmargin 5
+        set rmargin 5
         set tmargin 2
         set bmargin 2
 
-        # set nokey
-        set key width -2
-
+        set key width -11
+        set key inside left bottom
+        
         set title title(ARG1, ARG2) font fontName
-
+        
         set xrange [A - 1 : T[3] + 1]
-        set yrange [-14.0 : 4.0]
-
+        set yrange [-14.0 : 5.0]
+        
         set output "output_graph/".sampleName."/u(t).png"
-
+        
         set obj 1 rect from A,-delta to B,delta back lw 4 dt 1 fs empty border rgb "red"
         set obj 2 rect from T[1]-delta,Q[1]-delta to T[1]+delta,Q[1]+delta back lw 4 dt 1 fs empty border rgb "red"
         set obj 3 rect from T[2]-delta,Q[2]-delta to T[2]+delta,Q[2]+delta back lw 4 dt 1 fs empty border rgb "red"
         set obj 4 rect from T[3]-delta,Q[3]-delta to T[3]+delta,Q[3]+delta back lw 4 dt 1 fs empty border rgb "red"
+        
+        plot for [i = 0 : 3] u(x, i) lw 3 title "u(t) (".num[i + 1]." испытаний)" 
 
-        plot for [i = 0 : 3] u(x, i) lw 3 title "number of trials = ".num[i + 1]
+        # set terminal pngcairo size 1800, 850 font fontName
+        # 
+        # system "mkdir -p output_graph/".sampleName
+        # 
+        # set lmargin 6
+        # set rmargin 6
+        # set tmargin 2
+        # set bmargin 2
+        # 
+        # set key width -1
+        # set key inside left top
+        # 
+        # set title title(ARG1, ARG2) font fontName
+        # 
+        # set xrange [A - 1 : T[3] + 1]
+        # set yrange [-9.0 : 6.0]
+        # 
+        # set output "output_graph/".sampleName."/u(t).png"
+        # 
+        # set obj 1 rect from A,-delta to B,delta back lw 4 dt 1 fs empty border rgb "red"
+        # set obj 2 rect from T[1]-delta,Q[1]-delta to T[1]+delta,Q[1]+delta back lw 4 dt 1 fs empty border rgb "red"
+        # set obj 3 rect from T[2]-delta,Q[2]-delta to T[2]+delta,Q[2]+delta back lw 4 dt 1 fs empty border rgb "red"
+        # set obj 4 rect from T[3]-delta,Q[3]-delta to T[3]+delta,Q[3]+delta back lw 4 dt 1 fs empty border rgb "red"
+        # 
+        # plot u(x, 0) lw 3 title "u(t)"
     } else {
-        title(f, s, number) = sprintf("Graph of the function slice by variables x%d and x%d, №%d", f, s, number)
+        # title(f, s, number) = sprintf("Graph of the function slice by variables x%d and x%d, №%d", f, s, number)
         function(sampleName, number, f, s) = sprintf("output_data/%s/slices/%d_%d_%df.txt", sampleName, number, f, s)
         constraints(sampleName, number, f, s) = sprintf("output_data/%s/slices/%d_%d_%dg.txt", sampleName, number, f, s)
 
@@ -200,6 +228,7 @@ if (ARG1 == 0) {
         set contour base
 
         set key opaque
+        set key inside top left
 
         set isosamples 120
 
@@ -211,14 +240,14 @@ if (ARG1 == 0) {
         set tmargin 0
         set bmargin 0
 
-        do for [number = 1 : 100] {
+        do for [number = 1 : 1] {
             system "mkdir -p output_graph/".sampleName."/".number
 
             do for [f = 1 : 3] {
                 do for [s = f + 1 : 4] {
                     set output "output_graph/".sampleName."/".number."/".f."_".s.".png"
 
-                    set title title(f, s, number) font "Helvetica, 20"
+                    # set title title(f, s, number) font "Helvetica, 20"
 
                     set xlabel "X".f
                     set ylabel "Y".s

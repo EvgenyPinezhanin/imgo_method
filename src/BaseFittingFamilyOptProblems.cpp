@@ -107,26 +107,30 @@ double BaseFittingFamilyOptProblems::computeConstraintFunction(const std::vector
         u.setCoefficients(coefficients);
         u.setTypeProblem(OneDimensionalSupportiveOptProblem::TypeProblem::MIN);
 
-        return std::abs(u.computeObjectiveFunction(testPoints[numberWindowPoints + index - dimension + 1].x[0]) -
-                        testPoints[numberWindowPoints + index - dimension + 1].x[1]) - delta;
+        return std::abs(u.computeObjectiveFunction(testPoints[numberWideWindowPoints + index - dimension + 1].x[0]) -
+                        testPoints[numberWideWindowPoints + index - dimension + 1].x[1]) - delta;
     } else if (index == dimension + 2) {
         calcCoefficients(x);
 
         u.setOmega(x);
         u.setCoefficients(coefficients);
+
+        // std::cout << x[0] << ", " << x[1] << ", " << x[2] << ", " << x[3] << "\n";
+        // std::cout << coefficients[0] << ", " << coefficients[1] << ", " << coefficients[2] << ", " << coefficients[3]
+        //           << coefficients[4] << ", " << coefficients[5] << ", " << coefficients[6] << ", " << coefficients[7] << "\n";
         
         u.setTypeProblem(OneDimensionalSupportiveOptProblem::TypeProblem::MIN);
 
-        minValue = u.computeObjectiveFunction(leftBoundWindow);
-        for (double i = leftBoundWindow; i <= rightBoundWindow; i += 0.0005) {
+        minValue = u.computeObjectiveFunction(leftBoundWideWindow);
+        for (double i = leftBoundWideWindow; i <= rightBoundWideWindow; i += 0.00005) {
             value = u.computeObjectiveFunction(i);
             if (value < minValue) {
                 minValue = value;
             }
         }
 
-        maxValue = u.computeObjectiveFunction(leftBoundWindow);
-        for (double i = leftBoundWindow; i <= rightBoundWindow; i += 0.0005) {
+        maxValue = u.computeObjectiveFunction(leftBoundWideWindow);
+        for (double i = leftBoundWideWindow; i <= rightBoundWideWindow; i += 0.00005) {
             value = u.computeObjectiveFunction(i);
             if (value > maxValue) {
                 maxValue = value;
@@ -145,6 +149,8 @@ double BaseFittingFamilyOptProblems::computeConstraintFunction(const std::vector
         // gsa.setProblem(u);
         // gsa.solve(*result);
         // maxValue = -result->value;
+
+        // std::cout << maxValue - minValue - 2 * delta << "\n";
 
         return maxValue - minValue - 2 * delta;
     } else if (index == dimension + 3) {

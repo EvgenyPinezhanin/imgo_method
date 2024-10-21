@@ -236,6 +236,6 @@ const std::vector<double> optimalValuesFitting {
 FittingFamilyOptProblems::FittingFamilyOptProblems(
     const GsaMethod<OneDimensionalSupportiveOptProblem> &_gsa, bool _isSortX)
     : BaseFittingFamilyOptProblems(familySizeFitting, dimensionFitting, searchAreaFitting,
-      alphaFitting, deltaFitting, leftBoundWindowFitting, rightBoundWindowFitting,
+      alphaFitting, deltaFitting, leftBoundWindowFitting, rightBoundWindowFitting, windowPointsFitting,
       firstPointFitting, firstValuesFitting, secondPointFitting, secondValuesFitting,
-      lastPointFitting, windowPointsFitting, _gsa, _isSortX, optimalPointsFitting, optimalValuesFitting) {};
+      lastPointFitting, _gsa, _isSortX, optimalPointsFitting, optimalValuesFitting) {};
