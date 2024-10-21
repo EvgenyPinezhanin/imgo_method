@@ -22,15 +22,16 @@
 #include <MyMath.h>
 #include <omp.h>
 
-#define SEARCH_OPTIMUM_MGGSA
-#define SEARCH_OPTIMUM_SCAN
-#define SLICES
-#define CALC_EXPERIMENT
+// #define SEARCH_OPTIMUM_MGGSA
+// #define SEARCH_OPTIMUM_SCAN
+// #define SLICES
+// #define CALC_EXPERIMENT
 #define CALC_COEFFICIENTS
+// #define EXAMPLE
 #define DRAW
 
 using MggsaParameters = MggsaMethod<FittingFamilyOptProblems>::Parameters;
-using Result = MggsaMethod<FittingFamilyOptProblems>::Result;
+using Result = MggsaMethod<FittingFamilyOptProblems>::GeneralNumericalMethod::Result;
 using Report = MggsaMethod<FittingFamilyOptProblems>::Report;
 using GsaParameters = GsaMethod<OneDimensionalSupportiveOptProblem>::Parameters;
 using TypeSolve = MggsaMethod<FittingFamilyOptProblems>::TypeSolve;
@@ -230,6 +231,8 @@ int main() {
     double eps = step / 2.0;
     size_t numberConstraints = fittingFamilyOptProblems.getNumberConstraints();
 
+    familySize = 1;
+
     for (size_t i = 0; i < familySize; ++i) {
         fittingFamilyOptProblems.setProblemNumber(i);
         for (size_t first = 0; first < 3; ++first) {
@@ -365,8 +368,8 @@ int main() {
     size_t problemNumber = 0;
     fittingFamilyOptProblems.setProblemNumber(problemNumber);
 
-    varsFile.setVariable("A", fittingFamilyOptProblems.getLeftBoundWindow(), false);
-    varsFile.setVariable("B", fittingFamilyOptProblems.getRightBoundWindow(), false);
+    varsFile.setVariable("A", fittingFamilyOptProblems.getLeftBoundWideWindow(), false);
+    varsFile.setVariable("B", fittingFamilyOptProblems.getRightBoundWideWindow(), false);
     varsFile.setVariable("delta", fittingFamilyOptProblems.getDelta(), false);
     varsFile.setVariable("numberCoefficients", fittingFamilyOptProblems.getNumberCoefficients(), false);
 
@@ -392,14 +395,71 @@ int main() {
     }
 
     std::vector<point> testPoints;
-    size_t numberWindowPoints = fittingFamilyOptProblems.getNumberWindowPoints();
+    size_t numberWideWindowPoints = fittingFamilyOptProblems.getNumberWideWindowPoints();
     fittingFamilyOptProblems.getTestPoints(testPoints);
 
     varsFile.initArray("T", 3);
     varsFile.initArray("Q", 3);
     for (size_t i = 0; i < 3; ++i) {
-        varsFile.setValueInArray("T", i + 1, testPoints[numberWindowPoints + i].x[0], false);
-        varsFile.setValueInArray("Q", i + 1, testPoints[numberWindowPoints + i].x[1], false);
+        varsFile.setValueInArray("T", i + 1, testPoints[numberWideWindowPoints + i].x[0], false);
+        varsFile.setValueInArray("Q", i + 1, testPoints[numberWideWindowPoints + i].x[1], false);
+    }
+
+    varsFile.close();
+#endif
+
+#if defined( EXAMPLE )
+    OutputFile varsFile("output_data/fitting_family_problems/vars.txt");
+    if (!varsFile.isOpen()) std::cerr << "vars.txt opening error\n";
+
+    size_t numberCurves = 4;
+    std::vector<size_t> vectorMaxTrials{ 500, 1000, 5000, 10000 };
+
+    size_t problemNumber = 6;
+    // TODO: think about set problem as const ref
+    fittingFamilyOptProblems.setProblemNumber(problemNumber);
+    mggsa.setProblem(fittingFamilyOptProblems);
+
+    std::vector<double> coefficients;
+
+    size_t numberCoefficients = fittingFamilyOptProblems.getNumberCoefficients();
+
+    varsFile.setVariable("A", fittingFamilyOptProblems.getLeftBoundWideWindow(), false);
+    varsFile.setVariable("B", fittingFamilyOptProblems.getRightBoundWideWindow(), false);
+    varsFile.setVariable("delta", fittingFamilyOptProblems.getDelta(), false);
+    varsFile.setVariable("numberCoefficients", numberCoefficients, false);
+
+    varsFile.initArray("coeffs", numberCoefficients * numberCurves);
+    varsFile.initArray("x_opt", dimension * numberCurves);
+
+    std::unique_ptr<Result> result(mggsa.createResult());
+
+    for (size_t i = 0; i < numberCurves; ++i) {
+        mggsa.setMaxTrials(vectorMaxTrials[i]);
+
+        mggsa.solve(*result);
+
+        fittingFamilyOptProblems.computeObjectiveFunction(result->point);
+        fittingFamilyOptProblems.getCoefficients(coefficients);
+
+        for (size_t i = 0; i < fittingFamilyOptProblems.getNumberConstraints() + 1; ++i) {
+            std::cout << i << " " << fittingFamilyOptProblems.computeConstraintFunction(result->point, i) << "\n";
+        }
+        std::cout << "\n";
+
+        varsFile.setValuesInArray("coeffs", i * numberCoefficients + 1, coefficients, false);
+        varsFile.setValuesInArray("x_opt", i * dimension + 1, result->point, false);
+    }
+
+    std::vector<point> testPoints;
+    size_t numberWideWindowPoints = fittingFamilyOptProblems.getNumberWideWindowPoints();
+    fittingFamilyOptProblems.getTestPoints(testPoints);
+
+    varsFile.initArray("T", 3);
+    varsFile.initArray("Q", 3);
+    for (size_t i = 0; i < 3; ++i) {
+        varsFile.setValueInArray("T", i + 1, testPoints[numberWideWindowPoints + i].x[0], false);
+        varsFile.setValueInArray("Q", i + 1, testPoints[numberWideWindowPoints + i].x[1], false);
     }
 
     varsFile.close();
