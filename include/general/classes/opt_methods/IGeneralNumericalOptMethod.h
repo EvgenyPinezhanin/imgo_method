@@ -47,9 +47,7 @@ namespace opt {
 
         class IReport : public GeneralMethod::IReport {
         protected:
-            virtual void printStopCondition(std::ostream &stream, StoppingCondition stoppingCondition) const;
             // TODO: add function for printing bounds
-
             void printMethodParameters(std::ostream &stream,
                                        const typename GeneralMethod::Parameters &parameters) const override;
             void printResultMethod(std::ostream &stream,
@@ -58,6 +56,8 @@ namespace opt {
         public:
             IReport() : GeneralMethod::IReport() {};
             ~IReport() override {};
+
+            virtual void printStopCondition(std::ostream &stream, StoppingCondition stoppingCondition) const;
         };
 
     protected:
@@ -118,27 +118,6 @@ namespace opt {
     };
 
     template <typename TrialType, typename OptProblemType>
-    void IGeneralNumericalOptMethod<TrialType, OptProblemType>::IReport::printStopCondition(
-        std::ostream &stream, StoppingCondition stoppingCondition) const
-    {
-        switch (stoppingCondition) {
-            case StoppingConditions::ACCURACY:
-                stream << "Accuracy";
-                break;
-            case StoppingConditions::ERROR:
-                stream << "Error";
-                break;
-            case StoppingConditions::MAXTRIALS:
-                stream << "Max trials";
-                break;
-            case StoppingConditions::MAXFEVALS:
-                stream << "Max fevals";
-                break;
-            default: break;
-        }
-    }
-
-    template <typename TrialType, typename OptProblemType>
     void IGeneralNumericalOptMethod<TrialType, OptProblemType>::IReport::printMethodParameters(
         std::ostream &stream, const typename GeneralMethod::Parameters &parameters) const
     {
@@ -167,6 +146,27 @@ namespace opt {
         this->printPoint(stream, resultCast.point);
         stream << "\n";
         stream << "f(X) = " << resultCast.value << "\n";
+    }
+
+    template <typename TrialType, typename OptProblemType>
+    void IGeneralNumericalOptMethod<TrialType, OptProblemType>::IReport::printStopCondition(
+        std::ostream &stream, StoppingCondition stoppingCondition) const
+    {
+        switch (stoppingCondition) {
+            case StoppingConditions::ACCURACY:
+                stream << "Accuracy";
+                break;
+            case StoppingConditions::ERROR:
+                stream << "Error";
+                break;
+            case StoppingConditions::MAXTRIALS:
+                stream << "Max trials";
+                break;
+            case StoppingConditions::MAXFEVALS:
+                stream << "Max fevals";
+                break;
+            default: break;
+        }
     }
 
 
