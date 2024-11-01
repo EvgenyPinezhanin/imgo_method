@@ -74,6 +74,7 @@ public:
         Report() : GeneralNumericalMethod::IReport() {};
 
         void printPoint(std::ostream &stream, const typename OptProblemType::Point &point) const override;
+        void printStopCondition(std::ostream &stream, StoppingCondition stoppingCondition) const override;
     };
 
 protected:
@@ -261,6 +262,30 @@ void MggsaMethod<OptProblemType>::Report::printPoint(
         stream << ", " << point[i];
     }
     stream << ")";
+}
+
+template <typename OptProblemType>
+void MggsaMethod<OptProblemType>::Report::printStopCondition(
+    std::ostream &stream, StoppingCondition stoppingCondition) const
+{
+    switch (stoppingCondition) {
+        case StoppingConditions::ACCURACY:
+            stream << "Accuracy";
+            break;
+        case StoppingConditions::ERROR:
+            stream << "Error";
+            break;
+        case StoppingConditions::MAXTRIALS:
+            stream << "Max trials";
+            break;
+        case StoppingConditions::MAXFEVALS:
+            stream << "Max fevals";
+            break;
+        case StoppingConditions::COINCIDENCE:
+            stream << "Coincidence";
+            break;
+        default: break;
+    }
 }
 
 
@@ -476,8 +501,14 @@ typename OptProblemType::Point MggsaMethod<OptProblemType>::selectNewPoint() {
 
 template <typename OptProblemType>
 double MggsaMethod<OptProblemType>::estimateSolution(typename OptProblemType::Point &x) const {
-    double z = std::numeric_limits<double>::infinity(), oneDimensionX = 0.0;
+    if (GeneralNumericalMethod::stoppingCondition == StoppingConditions::ERROR) {
+        y(this->trialPoints[t].x, x);
 
+        return this->trialPoints[t].z;
+    }
+
+    double z = std::numeric_limits<double>::infinity(), oneDimensionX = 0.0;
+    
     size_t sizeTrials = this->trialPoints.size();
     size_t numberConstraints = this->problem.getNumberConstraints();
     for (size_t i = 0; i < sizeTrials; ++i) {
@@ -566,14 +597,15 @@ bool MggsaMethod<OptProblemType>::stopConditionsTest() {
 
     size_t numberOptimalPoints = optimalPoints.size();
     for (size_t i = 0; i < numberOptimalPoints; ++i) {
-        if (chebishevDistance(X, optimalPoints[i]) <= this->error) {
-            this->stoppingCondition = StoppingConditions::ERROR;
-            return true;
-        }
-        // if (euclideanDistance(X, optimalPoints[i]) <= this->error) {
+        // TODO: to add ability of distance choosing
+        // if (chebishevDistance(X, optimalPoints[i]) <= this->error) {
         //     this->stoppingCondition = StoppingConditions::ERROR;
         //     return true;
         // }
+        if (euclideanDistance(X, optimalPoints[i]) <= this->error) {
+            this->stoppingCondition = StoppingConditions::ERROR;
+            return true;
+        }
     }
     return stopConditions();
 }
