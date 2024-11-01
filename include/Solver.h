@@ -120,30 +120,28 @@ public:
             task.problem.setProblemNumber(i);
             optMethod.setProblem(task.problem);
 
-            // numberTrials[i] = optMethod.solveTest(*result) ? result->numberTrials : kFinish + 1;
-            if (optMethod.solveTest(*result)) {
-                numberTrials[i] = result->numberTrials;
-            } else {
-                numberTrials[i] = kFinish + 1;
-                if (isReport) {
-                    std::vector<typename OptProblemType::Point> optimalPoints;
-                    task.problem.getOptimalPoints(optimalPoints);
-                    auto iter = std::min_element(optimalPoints.begin(), optimalPoints.end(),
-                        [&result] (const typename OptProblemType::Point &firstPoint,
-                                   const typename OptProblemType::Point &secondPoint)
-                        {
-                            return euclideanDistance(firstPoint, result->point) < euclideanDistance(secondPoint, result->point);
-                        });
+            numberTrials[i] = optMethod.solveTest(*result) ? result->numberTrials : kFinish + 1;
 
-                    std::ostringstream output;
-                    output << "Problem number = " << i << ", number trials = " << result->numberTrials
-                           << ", f(X*) - f(X) = " << task.problem.getOptimalValue() - result->value
-                           << ", f(X) = " << result->value << ", ||X* - X|| = " << euclideanDistance(*iter, result->point)
-                           << ", X = ";
-                    report->printPoint(output, result->point);
-                    output << "\n";
-                    std::cout << output.str();
-                }
+            if (isReport) {
+                std::vector<typename OptProblemType::Point> optimalPoints;
+                task.problem.getOptimalPoints(optimalPoints);
+                auto iter = std::min_element(optimalPoints.begin(), optimalPoints.end(),
+                    [&result] (const typename OptProblemType::Point &firstPoint,
+                               const typename OptProblemType::Point &secondPoint)
+                    {
+                        return euclideanDistance(firstPoint, result->point) < euclideanDistance(secondPoint, result->point);
+                    });
+            
+                std::ostringstream output;
+                output << "Problem number = " << i << ", number trials = " << result->numberTrials
+                       << ", f(X*) - f(X) = " << task.problem.getOptimalValue() - result->value
+                       << ", f(X) = " << result->value << ", ||X* - X|| = " << euclideanDistance(*iter, result->point)
+                       << ", X = ";
+                report->printPoint(output, result->point);
+                output << ", Stopping conditions: ";
+                report->printStopCondition(output, result->stoppingCondition);
+                output << "\n";
+                std::cout << output.str();
             }
         }
         double endTime = omp_get_wtime();
