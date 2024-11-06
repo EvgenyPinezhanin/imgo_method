@@ -22,6 +22,8 @@ struct point {
     size_t getDimension() const { return x.size(); };
 };
 
+void jordanGaussMethod(const std::vector<std::vector<double>> &A, const std::vector<double> &B, std::vector<double> &X);
+
 class mnk {
 private:
     std::vector<std::vector<double>> A;
@@ -35,7 +37,7 @@ public:
     void setA(const std::vector<std::vector<double>>& _A) { A = _A; };
     void setB(const std::vector<double>& _B) { B = _B; };
 
-    void solve(std::vector<double> &x) const;
+    void solve(std::vector<double> &X) const;
 };
 
 double euclideanDistance(const std::vector<double> &firstValue, const std::vector<double> &secondValue);

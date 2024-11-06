@@ -1,29 +1,62 @@
 #include <MyMath.h>
 
-void mnk::solve(std::vector<double> &x) const {
+void jordanGaussMethod(const std::vector<std::vector<double>> &A, const std::vector<double> &B, std::vector<double> &X) {
     std::vector<std::vector<double>> ATmp(A);
     std::vector<double> BTmp(B);
-    size_t size =  ATmp.size(), length;
-    double coeff;
+    size_t size = ATmp.size();
+    std::vector<double> order(size);
+    double coeff, max_elem;
+    size_t max_index_row, max_index_column;
 
-    for (size_t i = 0; i < size; ++i) { 
-        for (size_t j = i; j < size; ++j) {
-            if (ATmp[j][i] != 0) {
-                length = ATmp[j].size();
+    for (size_t i = 0; i < size; ++i) {
+        max_elem = std::abs(ATmp[i][0]);
+        for (size_t j = 1; j < size; ++j) {
+            if (std::abs(ATmp[i][j]) > max_elem) max_elem = std::abs(ATmp[i][j]);
+        }
+        if (std::abs(BTmp[i]) > max_elem) max_elem = std::abs(BTmp[i]);
+        for (size_t j = 0; j < size; ++j) {
+            ATmp[i][j] /= max_elem;
+        }
+        BTmp[i] /= max_elem;
+    }
+
+    for (size_t i = 0; i < size; ++i) {
+        order[i] = i;
+    }
+
+    for (size_t i = 0; i < size; ++i) {
+        max_elem = std::abs(ATmp[i][i]);
+        max_index_row = i;
+        max_index_column = i;
+        for (size_t j = i + 1; j < size; ++j) {
+            for (size_t k = i + 1; k < size; ++k) {
+                if (std::abs(ATmp[j][k]) > max_elem) {
+                    max_elem = std::abs(ATmp[j][k]);
+                    max_index_row = j;
+                    max_index_column = k;
+                }
+            }
+        }
+        std::swap(ATmp[i], ATmp[max_index_row]);
+        std::swap(BTmp[i], BTmp[max_index_row]);
+
+        for (size_t j = 0; j < size; ++j) {
+            std::swap(ATmp[j][i], ATmp[j][max_index_column]);
+        }
+        std::swap(order[i], order[max_index_column]);
+
+        if (ATmp[i][i] != 0.0) {
+            coeff = ATmp[i][i];
+            for (size_t k = i; k < size; ++k) {
+                ATmp[i][k] /= coeff;
+            }
+            BTmp[i] /= coeff;
+            for (size_t j = i + 1; j < size; ++j) {
                 coeff = ATmp[j][i];
-                for (size_t k = i; k < length; ++k) {
-                    ATmp[j][k] /= coeff;
+                for (size_t k = i; k < size; ++k) {
+                    ATmp[j][k] -= coeff * ATmp[i][k];
                 }
-                BTmp[j] /= coeff;
-                for (size_t k = j + 1; k < size; ++k) {
-                    coeff = ATmp[k][i];
-                    for (size_t l = i; l < size; ++l) {
-                        ATmp[k][l] -= coeff * ATmp[j][l];
-                    }
-                    BTmp[k] -= coeff * BTmp[j];
-                }
-                swap(ATmp[j], ATmp[i]);
-                break;
+                BTmp[j] -= coeff * BTmp[i];
             }
         }
     }
@@ -34,7 +67,14 @@ void mnk::solve(std::vector<double> &x) const {
             ATmp[j][i] = 0.0;
         }
     }
-    x = BTmp;
+
+    for (size_t i = 0; i < size; ++i) {
+        X[order[i]] = BTmp[i];
+    }
+}
+
+void mnk::solve(std::vector<double> &X) const {
+    jordanGaussMethod(A, B, X);
 }
 
 double euclideanDistance(const std::vector<double> &firstValue, const std::vector<double> &secondValue) {
