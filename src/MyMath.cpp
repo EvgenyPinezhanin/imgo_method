@@ -1,5 +1,13 @@
 #include <MyMath.h>
 
+// #define EIGEN
+
+#if defined( EIGEN )
+    #include <Eigen/Dense>
+#endif
+
+#include <iostream>
+
 void jordanGaussMethod(const std::vector<std::vector<double>> &A, const std::vector<double> &B, std::vector<double> &X) {
     std::vector<std::vector<double>> ATmp(A);
     std::vector<double> BTmp(B);
@@ -19,6 +27,14 @@ void jordanGaussMethod(const std::vector<std::vector<double>> &A, const std::vec
         }
         BTmp[i] /= max_elem;
     }
+
+    for (size_t i = 0; i < size; ++i) {
+        for (size_t j = 0; j < size; ++j) {
+            std::cout << ATmp[i][j] << " ";
+        }
+        std::cout << BTmp[i] << "\n";
+    }
+    std::cout << "\n";
 
     for (size_t i = 0; i < size; ++i) {
         order[i] = i;
@@ -59,6 +75,14 @@ void jordanGaussMethod(const std::vector<std::vector<double>> &A, const std::vec
                 BTmp[j] -= coeff * BTmp[i];
             }
         }
+
+        for (size_t i = 0; i < size; ++i) {
+            for (size_t j = 0; j < size; ++j) {
+                std::cout << ATmp[i][j] << " ";
+            }
+            std::cout << BTmp[i] << "\n";
+        }
+        std::cout << "\n";
     }
 
     for (size_t i = size - 1; i > 0; --i) {
@@ -74,7 +98,26 @@ void jordanGaussMethod(const std::vector<std::vector<double>> &A, const std::vec
 }
 
 void mnk::solve(std::vector<double> &X) const {
+#if defined( EIGEN )
+    size_t size = A.size();
+    Eigen::MatrixXd AEigen(size, size);
+    Eigen::VectorXd BEigen(size), XEigen(size);
+
+    for (size_t i = 0; i < size; ++i) {
+        for (size_t j = 0; j < size; ++j) {
+            AEigen(i, j) = A[i][j];
+        }
+        BEigen(i) = B[i];
+    }
+
+    XEigen = AEigen.colPivHouseholderQr().solve(BEigen);
+
+    for (size_t i = 0; i < size; ++i) {
+        X[i] = XEigen(i);
+    }
+#else
     jordanGaussMethod(A, B, X);
+#endif
 }
 
 double euclideanDistance(const std::vector<double> &firstValue, const std::vector<double> &secondValue) {
@@ -83,7 +126,7 @@ double euclideanDistance(const std::vector<double> &firstValue, const std::vecto
     for (int i = 0; i < size; i++) {
         res += (firstValue[i] - secondValue[i]) * (firstValue[i] - secondValue[i]);
     }
-    return sqrt(res);
+    return std::sqrt(res);
 }
 
 double euclideanDistance(double firstValue, double secondValue) {
