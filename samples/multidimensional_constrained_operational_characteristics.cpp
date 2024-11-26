@@ -23,10 +23,11 @@
 // #define CALC
 #define DRAW
 
-using MggsaParameters = MggsaMethod<FittingFamilyOptProblems>::Parameters;
+using OptMethod = GsaMethod<OneDimensionalSupportiveOptProblem>;
+using MggsaParameters = MggsaMethod<FittingFamilyOptProblems<OptMethod>>::Parameters;
 using GsaParameters = GsaMethod<OneDimensionalSupportiveOptProblem>::Parameters;
-using TypeSolve = MggsaMethod<FittingFamilyOptProblems>::TypeSolve;
-using Task = opt::Task<FittingFamilyOptProblems>;
+using TypeSolve = MggsaMethod<FittingFamilyOptProblems<OptMethod>>::TypeSolve;
+using Task = opt::Task<FittingFamilyOptProblems<OptMethod>>;
 
 const std::vector<std::string> methodNames{ "mggsa" };
 const int familyNumber = 0; // 0 - Fitting
@@ -81,11 +82,11 @@ int main() {
     MggsaParameters parameters(0.0, error, 0, maxFevals, std::vector<double>{},
                                0.0, density, 0, increment, typeSolve);
 
-    MggsaMethod<FittingFamilyOptProblems> mggsa;
+    MggsaMethod<FittingFamilyOptProblems<OptMethod>> mggsa;
 
     std::vector<Task> tasks{ Task( "FittingFamily", fittingFamilyOptProblems, parameters) };
 
-    Solver<FittingFamilyOptProblems> solver;
+    Solver<FittingFamilyOptProblems<OptMethod>> solver;
     std::vector<std::pair<size_t, double>> operationalCharacteristics;
     std::stringstream strReport, fileName;
     OutputFile operationalCharacteristicsFile;
