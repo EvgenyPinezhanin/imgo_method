@@ -138,7 +138,7 @@ public:
                        << ", f(X) = " << result->value << ", ||X* - X|| = " << euclideanDistance(*iter, result->point)
                        << ", X = ";
                 report->printPoint(output, result->point);
-                output << ", Stopping conditions: ";
+                output << ", Stopping condition: ";
                 report->printStopCondition(output, result->stoppingCondition);
                 output << "\n";
                 std::cout << output.str();
